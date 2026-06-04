@@ -1,0 +1,18 @@
+/* You can add global styles to this file, and also import other style files */
+.glass-card {
+    background: rgba(45, 52, 73, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ai-insight-border {
+    position: relative;
+    background: linear-gradient(to right, #0b1326, #0b1326) padding-box,
+                linear-gradient(45deg, #d0bcff, #4cd7f6) border-box;
+    border: 1px solid transparent;
+}
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.custom-scrollbar::-webkit-scrollbar {
+    display: none;
+}

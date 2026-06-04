@@ -1,0 +1,15 @@
+/* Autofill styling override for dark mode */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px #222a3d inset !important;
+    -webkit-text-fill-color: #dae2fd !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.glass-card {
+    background: rgba(45, 52, 73, 0.4);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}

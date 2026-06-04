@@ -1,0 +1,158 @@
+<app-user-header></app-user-header>
+<!-- Main Content Canvas -->
+ 
+<main class="pt-24 pb-32 px-md max-w-container-max mx-auto space-y-lg">
+    <!-- Summary Card -->
+    <section>
+        <div
+            class="relative w-full h-48 rounded-xl overflow-hidden p-md flex flex-col justify-between shadow-2xl shadow-primary/10 group">
+            <div
+                class="absolute inset-0 bg-gradient-to-br from-primary-container via-primary-container to-secondary opacity-90">
+            </div>
+            <!-- Abstract patterns -->
+            <div class="absolute top-[-50%] right-[-10%] w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse">
+            </div>
+            <div class="relative z-10">
+                <p class="text-label-md font-label-md text-white/80 uppercase tracking-wider">Total Spent This Month</p>
+                <h2 class="text-display-lg font-display-lg text-white mt-xs">$350.00</h2>
+            </div>
+            <div class="relative z-10 flex justify-between items-center">
+                <span
+                    class="text-label-sm font-label-sm px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-white">Budget:
+                    $2,500.00</span>
+                <span class="material-symbols-outlined text-white/50" data-icon="trending_up">trending_up</span>
+            </div>
+        </div>
+    </section>
+    <!-- Quick Actions -->
+    <section class="grid grid-cols-2 gap-sm">
+        <button
+            class="flex flex-col items-center justify-center p-md rounded-xl glass-card text-on-surface active:scale-95 transition-transform group">
+            <div
+                class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-xs group-hover:bg-primary/20 transition-colors">
+                <span class="material-symbols-outlined text-primary" data-icon="photo_camera">photo_camera</span>
+            </div>
+            <span class="text-label-md font-label-md">Scan Receipt</span>
+        </button>
+        <button
+            class="flex flex-col items-center justify-center p-md rounded-xl glass-card text-on-surface active:scale-95 transition-transform group">
+            <div
+                class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mb-xs group-hover:bg-secondary/20 transition-colors">
+                <span class="material-symbols-outlined text-secondary" data-icon="fastfood">fastfood</span>
+            </div>
+            <span class="text-label-md font-label-md">Snap Item</span>
+        </button>
+    </section>
+    <!-- Alerts/Reminders -->
+    <section class="space-y-sm">
+        <!-- Warning Banner -->
+        @if (showWarningBanner) {
+        <div
+            class="flex items-start gap-sm p-sm rounded-lg bg-surface-container-high border-l-4 border-yellow-500 relative animate-in fade-in slide-in-from-right-4 duration-500">
+            <span class="material-symbols-outlined text-yellow-500 mt-0.5" data-icon="warning">warning</span>
+            <div class="flex-1 pr-6">
+                <p class="text-label-md font-label-md text-on-surface">3 items are missing prices from today. Click to
+                    update.</p>
+            </div>
+            <button class="material-symbols-outlined text-on-surface-variant text-sm absolute top-2 right-2"
+                data-icon="close" (click)="showWarningBanner = false">close</button>
+        </div>
+        }
+        <!-- Insight Banner -->
+        @if (showInsightBanner) {
+        <div
+            class="flex items-start gap-sm p-sm rounded-lg bg-surface-container-low border-l-4 border-secondary relative animate-in fade-in slide-in-from-left-4 duration-700">
+            <span class="material-symbols-outlined text-secondary mt-0.5" data-icon="lightbulb">lightbulb</span>
+            <div class="flex-1 pr-6">
+                <p class="text-label-md font-label-md text-on-surface">Usage Review: Have you used your 'Running Shoes'
+                    lately?</p>
+            </div>
+            <button class="material-symbols-outlined text-on-surface-variant text-sm absolute top-2 right-2"
+                data-icon="close" (click)="showInsightBanner = false">close</button>
+        </div>
+        }
+    </section>
+    <!-- Recent Transactions -->
+    <section class="space-y-sm">
+        <div class="flex justify-between items-center px-xs">
+            <h3 class="text-headline-md font-headline-md">Recent Transactions</h3>
+            <button class="text-primary text-label-md font-label-md">See All</button>
+        </div>
+        <div class="space-y-xs">
+            <!-- Transaction Item 1 -->
+            <div
+                class="flex items-center gap-md p-md glass-card rounded-xl hover:bg-surface-variant/20 transition-colors">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary" data-icon="local_cafe">local_cafe</span>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-xs">
+                        <span class="text-body-md font-body-md font-bold">Starbucks Coffee</span>
+                        <span
+                            class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter bg-surface-bright text-on-surface-variant rounded-full">Drink</span>
+                    </div>
+                    <p class="text-label-sm font-label-sm text-on-surface-variant">Today, 8:45 AM</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-body-md font-body-md font-bold">-$5.00</span>
+                </div>
+            </div>
+            <!-- Transaction Item 2 -->
+            <div
+                class="flex items-center gap-md p-md glass-card rounded-xl hover:bg-surface-variant/20 transition-colors">
+                <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-secondary" data-icon="shopping_bag">shopping_bag</span>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-xs">
+                        <span class="text-body-md font-body-md font-bold">Nike Shoes</span>
+                        <span
+                            class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter bg-surface-bright text-on-surface-variant rounded-full">Shopping</span>
+                    </div>
+                    <p class="text-label-sm font-label-sm text-on-surface-variant">Yesterday, 4:12 PM</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-body-md font-body-md font-bold">-$120.00</span>
+                </div>
+            </div>
+            <!-- Transaction Item 3 - AI INSIGHT -->
+            <div
+                class="flex items-center gap-md p-md ai-insight-border rounded-xl hover:bg-surface-variant/10 transition-colors relative">
+                <div class="w-12 h-12 rounded-xl bg-tertiary-container/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-tertiary" data-icon="grocery">grocery</span>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-xs">
+                        <span class="text-body-md font-body-md font-bold">Local Market</span>
+                        <span
+                            class="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter bg-primary-container text-white rounded-full">
+                            <span class="material-symbols-outlined text-[12px]" data-icon="auto_awesome"
+                                style="font-variation-settings: 'FILL' 1">auto_awesome</span>
+                            AI-Generated
+                        </span>
+                    </div>
+                    <p class="text-label-sm font-label-sm text-on-surface-variant">2 days ago</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-body-md font-body-md font-bold">-$42.30</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Bento Grid Insights Placeholder -->
+    <section class="grid grid-cols-2 gap-sm pb-8">
+        <div class="col-span-1 p-md rounded-xl glass-card flex flex-col gap-sm">
+            <span class="material-symbols-outlined text-secondary" data-icon="query_stats">query_stats</span>
+            <p class="text-label-sm font-label-sm text-on-surface-variant">Saving Rate</p>
+            <p class="text-headline-md font-headline-md">+12.5%</p>
+        </div>
+        <div class="col-span-1 p-md rounded-xl glass-card flex flex-col gap-sm">
+            <span class="material-symbols-outlined text-primary"
+                data-icon="account_balance_wallet">account_balance_wallet</span>
+            <p class="text-label-sm font-label-sm text-on-surface-variant">Net Worth</p>
+            <p class="text-headline-md font-headline-md">$15.2k</p>
+        </div>
+    </section>
+</main>
+
+<app-nav></app-nav>
