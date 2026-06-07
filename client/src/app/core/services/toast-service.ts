@@ -1,12 +1,18 @@
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 
+// Dịch vụ này sẽ tạo ra các toast thông báo nhỏ
+//injectable để có thể inject vào bất kỳ component nào muốn dùng toast
+//providedIn: 'root' để Angular tự động tạo instance và chia sẻ cho toàn app
 @Injectable({
   providedIn: 'root'
 })
+
+// Class này sẽ chứa logic để tạo và hiển thị toast
 export class ToastService {
   private router = inject(Router);
 
+  //constructor sẽ chạy khi instance ToastService được tạo ra lần đầu tiên
   constructor() {
     this.createToastContainer();
     this.injectToastStyles();
@@ -70,7 +76,7 @@ export class ToastService {
     document.head.appendChild(style);
   }
 
-  // 🔥 Tạo toast
+  // Tạo toast
   private createToastElement(
     message: string,
     alertClass: string,
