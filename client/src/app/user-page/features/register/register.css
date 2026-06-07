@@ -62,9 +62,73 @@
   transition: 0.2s;
 }
 
+.password-input-wrapper {
+  position: relative;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 48px;
+  color: #0f172a;
+  font-weight: 700;
+  caret-color: #0f172a;
+  -webkit-text-fill-color: #0f172a;
+}
+
+.form-group input[type='password'] {
+  color: #0f172a;
+  font-weight: 700;
+  -webkit-text-fill-color: #0f172a;
+}
+
+.password-input-wrapper input::placeholder,
+.form-group input[type='password']::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+  -webkit-text-fill-color: #94a3b8;
+}
+
 .form-group input:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.password-toggle:hover {
+  background: rgba(148, 163, 184, 0.16);
+}
+
+.password-toggle:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.password-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 button {
