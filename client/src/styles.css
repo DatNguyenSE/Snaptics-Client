@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* You can add global styles to this file, and also import other style files */
 .glass-card {
     background: rgba(45, 52, 73, 0.4);
