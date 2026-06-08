@@ -1,12 +1,9 @@
 import { Routes } from '@angular/router';
 import { UserPage } from './user-page/user-page';
 import { authGuard } from './core/_guard/auth-guard';
-<<<<<<< HEAD
-import { Login } from './features/login/login';
-=======
-import { Login } from './user-page/features/login/login';
-import { Register } from './user-page/features/register/register';
->>>>>>> 52ccd6669ea9528fcdbd99556303f4a3e2f9d281
+import { Register } from './features/account/register/register';
+import { Login } from './features/account/login/login';
+
 
 // Đây là file định nghĩa các route trong ứng dụng, mỗi route sẽ ánh xạ đến một component tương ứng
 // Các route được chia thành 2 nhóm: route cần auth (đăng nhập) và route public (đăng nhập, đăng ký)
@@ -23,12 +20,7 @@ export const routes: Routes = [
         runGuardsAndResolvers: 'always',
         canActivate: [authGuard],
         children: [
-<<<<<<< HEAD
             
-=======
-            {   path: 'trang-chu', redirectTo: 'UserPage', pathMatch: 'full' },  
-            { path: 'UserPage', component: UserPage   },
->>>>>>> 52ccd6669ea9528fcdbd99556303f4a3e2f9d281
         ]
     },
     

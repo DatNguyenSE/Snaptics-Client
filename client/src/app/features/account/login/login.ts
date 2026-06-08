@@ -1,13 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-<<<<<<< HEAD:client/src/app/features/login/login.ts
-import { Router } from '@angular/router';
-import { AccountService } from '../../core/services/account-service';
-=======
 import { Router, RouterLink } from '@angular/router';
 import { AccountService } from '../../../core/services/account-service';
->>>>>>> 52ccd6669ea9528fcdbd99556303f4a3e2f9d281:client/src/app/user-page/features/login/login.ts
 
 //các component: selector là 'app-login' nên trong HTML nếu muốn dùng component này thì viết <app-login></app-login>
 //Template và style được tách riêng thành file login.html và login.css

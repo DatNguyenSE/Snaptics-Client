@@ -4,7 +4,7 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AccountService } from '../../../core/services/account-service';
-import { RegisterCreds } from '../../models/user';
+import { RegisterCreds } from '../../../models/user';
 
 // Đây là component đăng ký tài khoản mới,
 // selector là 'app-register' nên trong HTML nếu muốn dùng component
