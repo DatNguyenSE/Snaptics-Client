@@ -40,12 +40,11 @@ export class AccountService {
             // Kích hoạt bộ đếm thời gian tự động xin cấp lại token mới
             this.startTokenRefreshInterval();   
 
-          }
-          return user;
-        })
-      )
-    }
+  register(creds: RegisterCreds) {
+    return this.http.post<void>(this.baseUrl + 'account/register', creds); //.pipe(...): Cho phép bạn xử lý dữ liệu trả về trước khi gửi ra ngoài.
+  }
 
+<<<<<<< HEAD
     register(creds: any) {
       return this.http.post<User>(this.baseUrl+'account/register',creds) //.pipe(...): Cho phép bạn xử lý dữ liệu trả về trước khi gửi ra ngoài.
     }
@@ -85,7 +84,11 @@ export class AccountService {
           }
         })
     }, 14 * 24 * 60 * 60 * 1000) // 14 days
+=======
+  logout() {
+    localStorage.removeItem('SnapticsUser');
+    this.currentUser.set(null);
+    window.location.href = '/';
+>>>>>>> 52ccd6669ea9528fcdbd99556303f4a3e2f9d281
   }
-
-  
 }

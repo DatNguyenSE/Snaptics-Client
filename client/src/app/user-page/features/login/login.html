@@ -1,0 +1,55 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>Welcome To Snaptics AI</h1>
+      <p>Sign in to continue using Snaptics AI</p>
+    </div>
+
+    <form class="login-form" (ngSubmit)="login()" #loginForm="ngForm">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="model.email"
+          required
+          placeholder="Enter your email"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="model.password"
+          required
+          placeholder="Enter your password"
+        />
+      </div>
+
+      @if (errorMessage) {
+        <p class="error-message">{{ errorMessage }}</p>
+      }
+
+      <div class="login-options">
+        <label class="remember-me">
+          <input type="checkbox" />
+          <span>Remember me</span>
+        </label>
+        <a href="#">Forgot Password?</a>
+      </div>
+
+      <button type="submit" [disabled]="!loginForm.valid || isLoading">
+        {{ isLoading ? 'Signing in...' : 'Sign In' }}
+      </button>
+
+      <div class="register-link">
+        Don't have an account?
+        <a routerLink="/dang-ky">Sign Up</a>
+      </div>
+    </form>
+  </div>
+</div>
