@@ -1,16 +1,10 @@
-<header
-    class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-surface-variant/10 flex justify-between items-center px-sm py-xs">
-    <div class="flex items-center gap-sm">
-        <div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border border-outline/20">
-            <img alt="User Profile" class="w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrHXQEL7rBCAhAEQqIMJlM2jcaMeCPmCaHUSrlImgdfOtxs14_GGMdh45C7AdwRzaG1OH51VIeF_ynP5wE43fsQZqC6Qg8XeZKIPNihdMZ1UN2dTJuwEzx_r9JGk8yqlC4HnpIP2g5ru0MX-GTBmwzG6PgVi53bk9biaRBKgPiiou0TEqaYBxJlWvc0WHcobyjgEFpDK3Vx4rfzlxLyevA1Vhs455Y-LdJ7uSLeUGBwYMP6_h6cKH8p2_MJq9gcwcraaEiiTLpRFAH">
-        </div>
-        <div class="flex flex-col">
-            <h1 class="text-headline-md-mobile font-headline-md-mobile text-primary font-bold">Hello, Dat!</h1>
-            <p class="text-label-sm font-label-sm text-on-surface-variant">Welcome back to SpendWise AI</p>
-        </div>
-    </div>
-    <button
-        class="material-symbols-outlined text-primary p-xs hover:opacity-80 transition-opacity active:scale-95 transition-transform"
-        data-icon="settings">settings</button>
+<header class="user-header">
+  <div class="user-header__copy">
+    <h1>{{ greeting }}</h1>
+    <p>{{ subtitle }}</p>
+  </div>
+
+  <div class="user-header__avatar" [attr.aria-label]="greeting" role="img">
+    {{ initials }}
+  </div>
 </header>

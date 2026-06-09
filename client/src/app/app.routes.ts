@@ -4,6 +4,7 @@ import { authGuard } from './core/_guard/auth-guard';
 import { Register } from './features/account/register/register';
 import { Login } from './features/account/login/login';
 import { ForgotPassword } from './features/account/forgot-password/forgot-password';
+import { SettingsPage } from './settings-page/settings-page';
 
 // Đây là file định nghĩa các route trong ứng dụng, mỗi route sẽ ánh xạ đến một component tương ứng
 // Các route được chia thành 2 nhóm: route cần auth (đăng nhập) và route public (đăng nhập, đăng ký)
@@ -67,6 +68,12 @@ export const routes: Routes = [
         children: [
             
         ]
+    },
+    {
+        path: 'settings',
+        component: SettingsPage,
+        runGuardsAndResolvers: 'always',
+        canActivate: [authGuard],
     },
     
     { path: 'login', component: Login },
