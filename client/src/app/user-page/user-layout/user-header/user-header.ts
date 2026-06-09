@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { LanguageService } from '../../../core/services/language-service';
 
 @Component({
   selector: 'app-user-header',
@@ -7,7 +8,7 @@ import { Component } from '@angular/core';
   styleUrl: './user-header.css',
 })
 export class UserHeader {
-  readonly greeting = 'Hello, Minh';
-  readonly subtitle = 'How much have you spent today?';
+  protected readonly language = inject(LanguageService);
+  readonly userName = 'Minh';
   readonly initials = 'M';
 }

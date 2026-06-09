@@ -1,10 +1,11 @@
 import { Component, ElementRef, HostListener, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountService } from '../../../core/services/account-service';
+import { AppLanguage, LanguageService } from '../../../core/services/language-service';
 
 interface NavItem {
   id: string;
-  label: string;
+  labelKey: string;
   icon: string;
 }
 
@@ -12,6 +13,11 @@ interface AccountSummary {
   fullName: string;
   username: string;
   initials: string;
+}
+
+interface LanguageOption {
+  code: AppLanguage;
+  label: string;
 }
 
 @Component({
@@ -25,12 +31,18 @@ export class Nav {
   private readonly router = inject(Router);
   private readonly accountService = inject(AccountService);
 
+  protected readonly language = inject(LanguageService);
+
   readonly activeId = 'dashboard';
   readonly navItems: NavItem[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-    { id: 'scan', label: 'Scan', icon: 'photo_camera' },
-    { id: 'transactions', label: 'Transactions', icon: 'receipt_long' },
-    { id: 'reminder', label: 'Reminders', icon: 'notifications' },
+    { id: 'dashboard', labelKey: 'nav.dashboard', icon: 'dashboard' },
+    { id: 'scan', labelKey: 'nav.scan', icon: 'photo_camera' },
+    { id: 'transactions', labelKey: 'nav.transactions', icon: 'receipt_long' },
+    { id: 'reminder', labelKey: 'nav.reminders', icon: 'notifications' },
+  ];
+  readonly languages: LanguageOption[] = [
+    { code: 'vi', label: 'VI' },
+    { code: 'en', label: 'EN' },
   ];
   readonly account: AccountSummary = {
     fullName: 'Minh Truong Tran Anh',
@@ -47,6 +59,10 @@ export class Nav {
 
   closeAccountMenu(): void {
     this.isAccountMenuOpen = false;
+  }
+
+  setLanguage(lang: AppLanguage): void {
+    this.language.setLanguage(lang);
   }
 
   openSettings(): void {

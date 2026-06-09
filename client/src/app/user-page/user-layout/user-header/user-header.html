@@ -1,10 +1,14 @@
 <header class="user-header">
   <div class="user-header__copy">
-    <h1>{{ greeting }}</h1>
-    <p>{{ subtitle }}</p>
+    <h1>{{ language.t('header.greeting', { name: userName }) }}</h1>
+    <p>{{ language.t('header.subtitle') }}</p>
   </div>
 
-  <div class="user-header__avatar" [attr.aria-label]="greeting" role="img">
+  <div
+    class="user-header__avatar"
+    [attr.aria-label]="language.t('header.greeting', { name: userName })"
+    role="img"
+  >
     {{ initials }}
   </div>
 </header>

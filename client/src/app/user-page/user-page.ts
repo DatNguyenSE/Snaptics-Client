@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { LanguageService } from '../core/services/language-service';
 import { UserHeader } from './user-layout/user-header/user-header';
 import { Nav } from './user-layout/nav/nav';
 
 interface QuickAction {
   id: string;
-  label: string;
+  labelKey: string;
   icon: string;
   iconClass: string;
 }
@@ -12,7 +13,7 @@ interface QuickAction {
 interface Transaction {
   id: number;
   name: string;
-  category: string;
+  categoryKey: string;
   time: string;
   amount: number;
   icon: string;
@@ -30,7 +31,7 @@ interface Transaction {
   styleUrl: './user-page.css',
 })
 export class UserPage {
-  private readonly currencyFormatter = new Intl.NumberFormat('vi-VN');
+  protected readonly language = inject(LanguageService);
 
   readonly totalBudget = 500000;
   readonly totalSpent = 185000;
@@ -40,19 +41,19 @@ export class UserPage {
   readonly quickActions: QuickAction[] = [
     {
       id: 'scan',
-      label: 'Scan hóa đơn',
+      labelKey: 'dashboard.quickAction.scan',
       icon: 'receipt_long',
       iconClass: 'quick-action__icon--blue',
     },
     {
       id: 'capture',
-      label: 'Chụp món đồ',
+      labelKey: 'dashboard.quickAction.capture',
       icon: 'photo_camera',
       iconClass: 'quick-action__icon--violet',
     },
     {
       id: 'manual',
-      label: 'Nhập thủ công',
+      labelKey: 'dashboard.quickAction.manual',
       icon: 'edit_square',
       iconClass: 'quick-action__icon--amber',
     },
@@ -62,7 +63,7 @@ export class UserPage {
     {
       id: 1,
       name: 'Ly cafe Catinat',
-      category: 'Đồ uống',
+      categoryKey: 'dashboard.category.drinks',
       time: '08:30',
       amount: 45000,
       icon: 'local_cafe',
@@ -75,7 +76,7 @@ export class UserPage {
     {
       id: 2,
       name: 'Bún bò Huế',
-      category: 'Đồ ăn',
+      categoryKey: 'dashboard.category.food',
       time: '12:15',
       amount: 65000,
       icon: 'lunch_dining',
@@ -88,7 +89,7 @@ export class UserPage {
     {
       id: 3,
       name: 'Grab đến trường',
-      category: 'Di chuyển',
+      categoryKey: 'dashboard.category.travel',
       time: '07:45',
       amount: 32000,
       icon: 'directions_car',
@@ -100,7 +101,7 @@ export class UserPage {
     {
       id: 4,
       name: 'Trà sữa Gong Cha',
-      category: 'Đồ uống',
+      categoryKey: 'dashboard.category.drinks',
       time: '15:20',
       amount: 43000,
       icon: 'local_cafe',
@@ -113,6 +114,6 @@ export class UserPage {
   ];
 
   formatCurrency(value: number): string {
-    return `${this.currencyFormatter.format(value)}đ`;
+    return `${new Intl.NumberFormat(this.language.locale()).format(value)}đ`;
   }
 }

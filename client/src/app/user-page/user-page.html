@@ -7,23 +7,25 @@
 
       <section class="dashboard-summary-grid">
         <article class="stat-card stat-card--primary">
-          <p class="stat-card__label stat-card__label--light">Total Payment</p>
+          <p class="stat-card__label stat-card__label--light">
+            {{ language.t('dashboard.totalPayment') }}
+          </p>
           <h2 class="stat-card__amount">{{ formatCurrency(totalSpent) }}</h2>
           <div class="stat-card__trend">
             <span class="material-symbols-outlined">trending_down</span>
-            <span>+12% compared to yesterday</span>
+            <span>{{ language.t('dashboard.comparedToYesterday') }}</span>
           </div>
         </article>
 
         <article class="stat-card">
-          <p class="stat-card__label">Remaining Budget</p>
+          <p class="stat-card__label">{{ language.t('dashboard.remainingBudget') }}</p>
           <h2 class="stat-card__amount stat-card__amount--accent">
             {{ formatCurrency(remainingBudget) }}
           </h2>
 
           <div class="budget-progress">
             <div class="budget-progress__row">
-              <span>Used {{ spentPercentage }}%</span>
+              <span>{{ language.t('dashboard.used') }} {{ spentPercentage }}%</span>
               <span>{{ formatCurrency(totalBudget) }}</span>
             </div>
 
@@ -35,7 +37,7 @@
       </section>
 
       <section class="quick-actions">
-        <p class="section-eyebrow">Quick Actions</p>
+        <p class="section-eyebrow">{{ language.t('dashboard.quickActions') }}</p>
 
         <div class="quick-actions__grid">
           @for (action of quickActions; track action.id) {
@@ -43,7 +45,7 @@
               <span class="quick-action__icon" [class]="action.iconClass">
                 <span class="material-symbols-outlined">{{ action.icon }}</span>
               </span>
-              <span class="quick-action__label">{{ action.label }}</span>
+              <span class="quick-action__label">{{ language.t(action.labelKey) }}</span>
             </button>
           }
         </div>
@@ -55,10 +57,11 @@
         </div>
 
         <div class="ai-insight-card__content">
-          <p class="ai-insight-card__eyebrow">AI Insights</p>
+          <p class="ai-insight-card__eyebrow">{{ language.t('dashboard.aiInsights') }}</p>
           <p class="ai-insight-card__copy">
-            AI noticed that today you spent more on <strong>Drinks</strong> than usual.
-            Consider reducing your spending in this category.
+            {{ language.t('dashboard.aiInsightPrefix') }}
+            <strong>{{ language.t('dashboard.category.drinks') }}</strong>
+            {{ language.t('dashboard.aiInsightSuffix') }}
           </p>
         </div>
       </section>
@@ -69,8 +72,8 @@
         </div>
 
         <div class="usage-review-card__copy">
-          <p>Rate Purchased Items</p>
-          <span>1 item needs to be rated based on usage level</span>
+          <p>{{ language.t('dashboard.usageTitle') }}</p>
+          <span>{{ language.t('dashboard.usageHint') }}</span>
         </div>
 
         <span class="material-symbols-outlined usage-review-card__chevron">chevron_right</span>
@@ -78,9 +81,9 @@
 
       <section class="transactions-section">
         <div class="transactions-section__header">
-          <h3>Recent Transactions</h3>
+          <h3>{{ language.t('dashboard.recentTransactions') }}</h3>
           <button type="button">
-            View All
+            {{ language.t('dashboard.viewAll') }}
             <span class="material-symbols-outlined">chevron_right</span>
           </button>
         </div>
@@ -103,7 +106,7 @@
                   @if (transaction.isAiGenerated) {
                     <span class="ai-badge">
                       <span class="material-symbols-outlined">smart_toy</span>
-                      AI GEN
+                      {{ language.t('dashboard.aiGen') }}
                     </span>
                   }
                 </div>
@@ -111,7 +114,7 @@
                 <div class="transaction-meta">
                   <span class="category-pill" [class]="transaction.categoryClass">
                     <span class="material-symbols-outlined">{{ transaction.icon }}</span>
-                    {{ transaction.category }}
+                    {{ language.t(transaction.categoryKey) }}
                   </span>
                   <span class="transaction-time">{{ transaction.time }}</span>
                 </div>

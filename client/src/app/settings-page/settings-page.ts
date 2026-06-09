@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { LanguageService } from '../core/services/language-service';
 import { Nav } from '../user-page/user-layout/nav/nav';
 
 @Component({
@@ -11,13 +12,9 @@ import { Nav } from '../user-page/user-layout/nav/nav';
 
       <main class="settings-page">
         <section class="settings-card">
-          <p class="settings-card__eyebrow">Account</p>
-          <h1 class="settings-card__title">Settings</h1>
-          <p class="settings-card__copy">
-            Đây là trang settings tạm thời để dropdown account điều hướng đúng tới
-            <code>/settings</code>. Mình giữ giao diện đồng bộ với dashboard để bạn có thể thay
-            bằng form cài đặt thật ở bước tiếp theo.
-          </p>
+          <p class="settings-card__eyebrow">{{ language.t('settings.eyebrow') }}</p>
+          <h1 class="settings-card__title">{{ language.t('settings.title') }}</h1>
+          <p class="settings-card__copy">{{ language.t('settings.copy') }}</p>
         </section>
       </main>
     </div>
@@ -73,12 +70,6 @@ import { Nav } from '../user-page/user-layout/nav/nav';
       color: #4a5578;
     }
 
-    code {
-      font-family: 'DM Mono', monospace;
-      font-size: 0.9em;
-      color: #5b7bfa;
-    }
-
     @media (min-width: 1024px) {
       .settings-page {
         padding: 32px 32px 32px 272px;
@@ -86,4 +77,6 @@ import { Nav } from '../user-page/user-layout/nav/nav';
     }
   `,
 })
-export class SettingsPage {}
+export class SettingsPage {
+  protected readonly language = inject(LanguageService);
+}
