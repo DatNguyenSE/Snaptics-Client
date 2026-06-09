@@ -97,7 +97,7 @@ export class Register {
 
         // Sau 1 giây thì chuyển sang trang đăng nhập
         setTimeout(() => {
-          this.router.navigate(['/dang-nhap']);
+          this.router.navigate(['/login']);
         }, 1000);
       },
 

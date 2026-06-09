@@ -36,7 +36,7 @@ export class Login {
       next: (res) => {
         console.log('Login successful:', res,this.model);
         this.isLoading = false;
-        this.router.navigate(['/trang-chu']); // Redirect to dashboard or homepage
+        this.router.navigate(['/home']); // Redirect to dashboard or homepage
       },
       error: (error) => {
         console.error('Login failed:', error, this.model);
