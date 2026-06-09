@@ -1,0 +1,232 @@
+:host {
+  display: block;
+}
+
+.transaction-page {
+  min-height: 100vh;
+  padding: 16px 16px calc(112px + env(safe-area-inset-bottom));
+}
+
+.transaction-page__content {
+  max-width: 42rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.transactions-section__header,
+.transactions-section__header h2,
+.transaction-title,
+.transaction-time,
+.transaction-price,
+.category-pill,
+.ai-badge,
+.section-eyebrow {
+  margin: 0;
+}
+
+.transactions-section__header {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-eyebrow {
+  margin-bottom: 8px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sw-muted-foreground);
+}
+
+.transactions-section__header h2 {
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--sw-foreground);
+}
+
+.transaction-count {
+  min-width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: rgba(91, 123, 250, 0.1);
+  color: var(--sw-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.transaction-card {
+  border: 1px solid var(--sw-border);
+  border-radius: 24px;
+  background: var(--sw-card);
+  box-shadow: var(--sw-shadow-sm);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.transaction-media {
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.transaction-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.transaction-media .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.transaction-media--blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.transaction-media--amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.transaction-media--emerald {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.transaction-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.transaction-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.transaction-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--sw-foreground);
+}
+
+.transaction-meta {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.category-pill {
+  padding: 4px 8px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.category-pill .material-symbols-outlined {
+  font-size: 0.875rem;
+}
+
+.category-pill--blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.category-pill--amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.category-pill--emerald {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.transaction-time {
+  font-size: 0.75rem;
+  color: var(--sw-muted-foreground);
+}
+
+.ai-badge {
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: #e0e7ff;
+  color: #4338ca;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.03em;
+}
+
+.ai-badge .material-symbols-outlined {
+  font-size: 0.75rem;
+}
+
+.transaction-price {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--sw-foreground);
+  white-space: nowrap;
+}
+
+@media (min-width: 1024px) {
+  .transaction-page {
+    padding: 32px 32px 32px 272px;
+  }
+}
+
+@media (max-width: 639px) {
+  .transaction-page {
+    padding: 16px 16px calc(104px + env(safe-area-inset-bottom));
+  }
+
+  .transactions-section__header {
+    align-items: flex-start;
+  }
+
+  .transaction-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .transaction-media {
+    width: 42px;
+    height: 42px;
+  }
+}

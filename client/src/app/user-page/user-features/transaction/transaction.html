@@ -1,0 +1,53 @@
+<section class="transaction-page">
+  <div class="transaction-page__content">
+    <app-user-header></app-user-header>
+
+    <section class="transactions-section">
+      <div class="transactions-section__header">
+        <div>
+          <p class="section-eyebrow">{{ language.t('nav.transactions') }}</p>
+          <h2>{{ language.t('dashboard.recentTransactions') }}</h2>
+        </div>
+
+        <span class="transaction-count">{{ transactionHistory.length }}</span>
+      </div>
+
+      <div class="transaction-list">
+        @for (transaction of transactionHistory; track transaction.id) {
+          <article class="transaction-card">
+            <div class="transaction-media" [class]="transaction.mediaClass">
+              @if (transaction.imageUrl) {
+                <img [alt]="transaction.name" [src]="transaction.imageUrl" />
+              } @else {
+                <span class="material-symbols-outlined">{{ transaction.icon }}</span>
+              }
+            </div>
+
+            <div class="transaction-body">
+              <div class="transaction-title-row">
+                <p class="transaction-title">{{ transaction.name }}</p>
+
+                @if (transaction.isAiGenerated) {
+                  <span class="ai-badge">
+                    <span class="material-symbols-outlined">smart_toy</span>
+                    {{ language.t('dashboard.aiGen') }}
+                  </span>
+                }
+              </div>
+
+              <div class="transaction-meta">
+                <span class="category-pill" [class]="transaction.categoryClass">
+                  <span class="material-symbols-outlined">{{ transaction.icon }}</span>
+                  {{ language.t(transaction.categoryKey) }}
+                </span>
+                <span class="transaction-time">{{ transaction.time }}</span>
+              </div>
+            </div>
+
+            <p class="transaction-price">{{ formatCurrency(transaction.amount) }}</p>
+          </article>
+        }
+      </div>
+    </section>
+  </div>
+</section>
