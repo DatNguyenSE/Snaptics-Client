@@ -11,11 +11,56 @@ import { ForgotPassword } from './features/account/forgot-password/forgot-passwo
 export const routes: Routes = [
     {
         path: '',
-        redirectTo: 'Home-page',
+        redirectTo: 'home',
+        pathMatch: 'full'
+    },
+    {
+        path: 'Trang-chu',
+        redirectTo: 'home',
+        pathMatch: 'full'
+    },
+    {
+        path: 'trang-chu',
+        redirectTo: 'home',
         pathMatch: 'full'
     },
     {
         path: 'Home-page',
+        redirectTo: 'home',
+        pathMatch: 'full'
+    },
+    {
+        path: 'dang-nhap',
+        redirectTo: 'login',
+        pathMatch: 'full'
+    },
+    {
+        path: 'Login',
+        redirectTo: 'login',
+        pathMatch: 'full'
+    },
+    {
+        path: 'dang-ky',
+        redirectTo: 'register',
+        pathMatch: 'full'
+    },
+    {
+        path: 'Register',
+        redirectTo: 'register',
+        pathMatch: 'full'
+    },
+    {
+        path: 'quen-mat-khau',
+        redirectTo: 'forgot-password',
+        pathMatch: 'full'
+    },
+    {
+        path: 'ForgotPassword',
+        redirectTo: 'forgot-password',
+        pathMatch: 'full'
+    },
+    {
+        path: 'home',
         component: UserPage, 
         runGuardsAndResolvers: 'always',
         canActivate: [authGuard],
@@ -24,7 +69,7 @@ export const routes: Routes = [
         ]
     },
     
-    { path: 'Login', component: Login },
-    { path: 'Register', component: Register },
-    { path: 'ForgotPassword', component: ForgotPassword },
+    { path: 'login', component: Login },
+    { path: 'register', component: Register },
+    { path: 'forgot-password', component: ForgotPassword },
 ];
