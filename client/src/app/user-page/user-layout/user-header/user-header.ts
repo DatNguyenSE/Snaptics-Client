@@ -3,6 +3,7 @@ import { LanguageService } from '../../../core/services/language-service';
 
 @Component({
   selector: 'app-user-header',
+  standalone: true,
   imports: [],
   templateUrl: './user-header.html',
   styleUrl: './user-header.css',

@@ -1,12 +1,13 @@
 import { Component, ElementRef, HostListener, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AccountService } from '../../../core/services/account-service';
 import { AppLanguage, LanguageService } from '../../../core/services/language-service';
 
-interface NavItem {
+interface AppNavItem {
   id: string;
   labelKey: string;
   icon: string;
+  route?: string;
 }
 
 interface AccountSummary {
@@ -22,7 +23,8 @@ interface LanguageOption {
 
 @Component({
   selector: 'app-nav',
-  imports: [],
+  standalone: true,
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './nav.html',
   styleUrl: './nav.css',
 })
@@ -33,12 +35,29 @@ export class Nav {
 
   protected readonly language = inject(LanguageService);
 
-  readonly activeId = 'dashboard';
-  readonly navItems: NavItem[] = [
-    { id: 'dashboard', labelKey: 'nav.dashboard', icon: 'dashboard' },
-    { id: 'scan', labelKey: 'nav.scan', icon: 'photo_camera' },
-    { id: 'transactions', labelKey: 'nav.transactions', icon: 'receipt_long' },
-    { id: 'reminder', labelKey: 'nav.reminders', icon: 'notifications' },
+  readonly navItems: AppNavItem[] = [
+    {
+      id: 'dashboard',
+      labelKey: 'nav.dashboard',
+      icon: 'dashboard',
+      route: '/user/dashboard',
+    },
+    {
+      id: 'scan',
+      labelKey: 'nav.scan',
+      icon: 'photo_camera',
+    },
+    {
+      id: 'transactions',
+      labelKey: 'nav.transactions',
+      icon: 'receipt_long',
+      route: '/user/transactions',
+    },
+    {
+      id: 'reminders',
+      labelKey: 'nav.reminders',
+      icon: 'notifications',
+    },
   ];
   readonly languages: LanguageOption[] = [
     { code: 'vi', label: 'VI' },

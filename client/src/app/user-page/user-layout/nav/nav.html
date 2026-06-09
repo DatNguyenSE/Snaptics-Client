@@ -11,14 +11,22 @@
 
   <nav class="sidebar__nav">
     @for (item of navItems; track item.id) {
-      <button
-        class="sidebar__item"
-        type="button"
-        [class.sidebar__item--active]="item.id === activeId"
-      >
-        <span class="material-symbols-outlined">{{ item.icon }}</span>
-        <span>{{ language.t(item.labelKey) }}</span>
-      </button>
+      @if (item.route; as route) {
+        <a
+          class="sidebar__item"
+          [routerLink]="route"
+          routerLinkActive="sidebar__item--active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <span class="material-symbols-outlined">{{ item.icon }}</span>
+          <span>{{ language.t(item.labelKey) }}</span>
+        </a>
+      } @else {
+        <button class="sidebar__item" type="button">
+          <span class="material-symbols-outlined">{{ item.icon }}</span>
+          <span>{{ language.t(item.labelKey) }}</span>
+        </button>
+      }
     }
   </nav>
 
@@ -111,16 +119,26 @@
 <nav class="bottom-nav" aria-label="Bottom navigation">
   <div class="bottom-nav__inner">
     @for (item of navItems; track item.id) {
-      <button
-        class="bottom-nav__item"
-        type="button"
-        [class.bottom-nav__item--active]="item.id === activeId"
-      >
-        <span class="bottom-nav__icon-wrap">
-          <span class="material-symbols-outlined">{{ item.icon }}</span>
-        </span>
-        <span class="bottom-nav__label">{{ language.t(item.labelKey) }}</span>
-      </button>
+      @if (item.route; as route) {
+        <a
+          class="bottom-nav__item"
+          [routerLink]="route"
+          routerLinkActive="bottom-nav__item--active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <span class="bottom-nav__icon-wrap">
+            <span class="material-symbols-outlined">{{ item.icon }}</span>
+          </span>
+          <span class="bottom-nav__label">{{ language.t(item.labelKey) }}</span>
+        </a>
+      } @else {
+        <button class="bottom-nav__item" type="button">
+          <span class="bottom-nav__icon-wrap">
+            <span class="material-symbols-outlined">{{ item.icon }}</span>
+          </span>
+          <span class="bottom-nav__label">{{ language.t(item.labelKey) }}</span>
+        </button>
+      }
     }
 
     <div class="account-dropdown account-dropdown--mobile">
