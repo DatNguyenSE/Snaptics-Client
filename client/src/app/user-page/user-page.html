@@ -1,158 +1,127 @@
-<app-user-header></app-user-header>
-<!-- Main Content Canvas -->
- 
-<main class="pt-24 pb-32 px-6 max-w-7xl mx-auto space-y-8">
-    <!-- Summary Card -->
-    <section>
-        <div
-            class="relative w-full h-48 rounded-xl overflow-hidden p-6 flex flex-col justify-between shadow-2xl shadow-blue-600/10 group">
-            <div
-                class="absolute inset-0 bg-gradient-to-br from-blue-800 via-blue-700 to-purple-600 opacity-90">
-            </div>
-            <!-- Abstract patterns -->
-            <div class="absolute top-[-50%] right-[-10%] w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse">
-            </div>
-            <div class="relative z-10">
-                <p class="text-sm font-medium text-white/80 uppercase tracking-wider">Total Spent This Month</p>
-                <h2 class="text-4xl font-bold text-white mt-2">$350.00</h2>
-            </div>
-            <div class="relative z-10 flex justify-between items-center">
-                <span
-                    class="text-xs font-medium px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-white">Budget:
-                    $2,500.00</span>
-                <span class="material-symbols-outlined text-white/50" data-icon="trending_up">trending_up</span>
-            </div>
-        </div>
-    </section>
-    <!-- Quick Actions -->
-    <section class="grid grid-cols-2 gap-4">
-        <button
-            class="flex flex-col items-center justify-center p-6 rounded-xl glass-card text-slate-900 active:scale-95 transition-transform group">
-            <div
-                class="w-12 h-12 rounded-full bg-blue-600/10 flex items-center justify-center mb-2 group-hover:bg-blue-600/20 transition-colors">
-                <span class="material-symbols-outlined text-blue-600" data-icon="photo_camera">photo_camera</span>
-            </div>
-            <span class="text-sm font-medium">Scan Receipt</span>
-        </button>
-        <button
-            class="flex flex-col items-center justify-center p-6 rounded-xl glass-card text-slate-900 active:scale-95 transition-transform group">
-            <div
-                class="w-12 h-12 rounded-full bg-purple-600/10 flex items-center justify-center mb-2 group-hover:bg-purple-600/20 transition-colors">
-                <span class="material-symbols-outlined text-purple-600" data-icon="fastfood">fastfood</span>
-            </div>
-            <span class="text-sm font-medium">Snap Item</span>
-        </button>
-    </section>
-    <!-- Alerts/Reminders -->
-    <section class="space-y-4">
-        <!-- Warning Banner -->
-        @if (showWarningBanner) {
-        <div
-            class="flex items-start gap-4 p-4 rounded-lg bg-slate-100 border-l-4 border-yellow-500 relative animate-in fade-in slide-in-from-right-4 duration-500">
-            <span class="material-symbols-outlined text-yellow-500 mt-0.5" data-icon="warning">warning</span>
-            <div class="flex-1 pr-6">
-                <p class="text-sm font-medium text-slate-900">3 items are missing prices from today. Click to
-                    update.</p>
-            </div>
-            <button class="material-symbols-outlined text-slate-500 text-sm absolute top-2 right-2"
-                data-icon="close" (click)="showWarningBanner = false">close</button>
-        </div>
-        }
-        <!-- Insight Banner -->
-        @if (showInsightBanner) {
-        <div
-            class="flex items-start gap-4 p-4 rounded-lg bg-slate-50 border-l-4 border-purple-600 relative animate-in fade-in slide-in-from-left-4 duration-700">
-            <span class="material-symbols-outlined text-purple-600 mt-0.5" data-icon="lightbulb">lightbulb</span>
-            <div class="flex-1 pr-6">
-                <p class="text-sm font-medium text-slate-900">Usage Review: Have you used your 'Running Shoes'
-                    lately?</p>
-            </div>
-            <button class="material-symbols-outlined text-slate-500 text-sm absolute top-2 right-2"
-                data-icon="close" (click)="showInsightBanner = false">close</button>
-        </div>
-        }
-    </section>
-    <!-- Recent Transactions -->
-    <section class="space-y-4">
-        <div class="flex justify-between items-center px-2">
-            <h3 class="text-xl font-semibold">Recent Transactions</h3>
-            <button class="text-blue-600 text-sm font-medium">See All</button>
-        </div>
-        <div class="space-y-2">
-            <!-- Transaction Item 1 -->
-            <div
-                class="flex items-center gap-6 p-6 glass-card rounded-xl hover:bg-slate-200/50 transition-colors">
-                <div class="w-12 h-12 rounded-xl bg-blue-600/10 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-blue-600" data-icon="local_cafe">local_cafe</span>
-                </div>
-                <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                        <span class="text-base font-bold">Starbucks Coffee</span>
-                        <span
-                            class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter bg-white text-slate-500 rounded-full">Drink</span>
-                    </div>
-                    <p class="text-xs font-medium text-slate-500">Today, 8:45 AM</p>
-                </div>
-                <div class="text-right">
-                    <span class="text-base font-bold">-$5.00</span>
-                </div>
-            </div>
-            <!-- Transaction Item 2 -->
-            <div
-                class="flex items-center gap-6 p-6 glass-card rounded-xl hover:bg-slate-200/50 transition-colors">
-                <div class="w-12 h-12 rounded-xl bg-purple-600/10 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-purple-600" data-icon="shopping_bag">shopping_bag</span>
-                </div>
-                <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                        <span class="text-base font-bold">Nike Shoes</span>
-                        <span
-                            class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter bg-white text-slate-500 rounded-full">Shopping</span>
-                    </div>
-                    <p class="text-xs font-medium text-slate-500">Yesterday, 4:12 PM</p>
-                </div>
-                <div class="text-right">
-                    <span class="text-base font-bold">-$120.00</span>
-                </div>
-            </div>
-            <!-- Transaction Item 3 - AI INSIGHT -->
-            <div
-                class="flex items-center gap-6 p-6 ai-insight-border rounded-xl hover:bg-slate-200/10 transition-colors relative">
-                <div class="w-12 h-12 rounded-xl bg-emerald-100/20 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-emerald-600" data-icon="grocery">grocery</span>
-                </div>
-                <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                        <span class="text-base font-bold">Local Market</span>
-                        <span
-                            class="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-tighter bg-blue-600 text-white rounded-full">
-                            <span class="material-symbols-outlined text-[12px]" data-icon="auto_awesome"
-                                style="font-variation-settings: 'FILL' 1">auto_awesome</span>
-                            AI-Generated
-                        </span>
-                    </div>
-                    <p class="text-xs font-medium text-slate-500">2 days ago</p>
-                </div>
-                <div class="text-right">
-                    <span class="text-base font-bold">-$42.30</span>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Bento Grid Insights Placeholder -->
-    <section class="grid grid-cols-2 gap-4 pb-8">
-        <div class="col-span-1 p-6 rounded-xl glass-card flex flex-col gap-4">
-            <span class="material-symbols-outlined text-purple-600" data-icon="query_stats">query_stats</span>
-            <p class="text-xs font-medium text-slate-500">Saving Rate</p>
-            <p class="text-xl font-semibold">+12.5%</p>
-        </div>
-        <div class="col-span-1 p-6 rounded-xl glass-card flex flex-col gap-4">
-            <span class="material-symbols-outlined text-blue-600"
-                data-icon="account_balance_wallet">account_balance_wallet</span>
-            <p class="text-xs font-medium text-slate-500">Net Worth</p>
-            <p class="text-xl font-semibold">$15.2k</p>
-        </div>
-    </section>
-</main>
+<div class="spendwise-shell">
+  <app-nav></app-nav>
 
-<app-nav></app-nav>
+  <main class="user-dashboard">
+    <div class="user-dashboard__content">
+      <app-user-header></app-user-header>
+
+      <section class="dashboard-summary-grid">
+        <article class="stat-card stat-card--primary">
+          <p class="stat-card__label stat-card__label--light">Total Payment</p>
+          <h2 class="stat-card__amount">{{ formatCurrency(totalSpent) }}</h2>
+          <div class="stat-card__trend">
+            <span class="material-symbols-outlined">trending_down</span>
+            <span>+12% compared to yesterday</span>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <p class="stat-card__label">Remaining Budget</p>
+          <h2 class="stat-card__amount stat-card__amount--accent">
+            {{ formatCurrency(remainingBudget) }}
+          </h2>
+
+          <div class="budget-progress">
+            <div class="budget-progress__row">
+              <span>Used {{ spentPercentage }}%</span>
+              <span>{{ formatCurrency(totalBudget) }}</span>
+            </div>
+
+            <div class="budget-progress__track" aria-hidden="true">
+              <div class="budget-progress__value" [style.width.%]="spentPercentage"></div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="quick-actions">
+        <p class="section-eyebrow">Quick Actions</p>
+
+        <div class="quick-actions__grid">
+          @for (action of quickActions; track action.id) {
+            <button class="quick-action" type="button">
+              <span class="quick-action__icon" [class]="action.iconClass">
+                <span class="material-symbols-outlined">{{ action.icon }}</span>
+              </span>
+              <span class="quick-action__label">{{ action.label }}</span>
+            </button>
+          }
+        </div>
+      </section>
+
+      <section class="ai-insight-card">
+        <div class="ai-insight-card__icon">
+          <span class="material-symbols-outlined">auto_awesome</span>
+        </div>
+
+        <div class="ai-insight-card__content">
+          <p class="ai-insight-card__eyebrow">AI Insights</p>
+          <p class="ai-insight-card__copy">
+            AI noticed that today you spent more on <strong>Drinks</strong> than usual.
+            Consider reducing your spending in this category.
+          </p>
+        </div>
+      </section>
+
+      <button class="usage-review-card" type="button">
+        <div class="usage-review-card__icon">
+          <span class="material-symbols-outlined">grade</span>
+        </div>
+
+        <div class="usage-review-card__copy">
+          <p>Rate Purchased Items</p>
+          <span>1 item needs to be rated based on usage level</span>
+        </div>
+
+        <span class="material-symbols-outlined usage-review-card__chevron">chevron_right</span>
+      </button>
+
+      <section class="transactions-section">
+        <div class="transactions-section__header">
+          <h3>Recent Transactions</h3>
+          <button type="button">
+            View All
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+
+        <div class="transaction-list">
+          @for (transaction of transactions; track transaction.id) {
+            <article class="transaction-card">
+              <div class="transaction-media" [class]="transaction.mediaClass">
+                @if (transaction.imageUrl) {
+                  <img [alt]="transaction.name" [src]="transaction.imageUrl" />
+                } @else {
+                  <span class="material-symbols-outlined">{{ transaction.icon }}</span>
+                }
+              </div>
+
+              <div class="transaction-body">
+                <div class="transaction-title-row">
+                  <p class="transaction-title">{{ transaction.name }}</p>
+
+                  @if (transaction.isAiGenerated) {
+                    <span class="ai-badge">
+                      <span class="material-symbols-outlined">smart_toy</span>
+                      AI GEN
+                    </span>
+                  }
+                </div>
+
+                <div class="transaction-meta">
+                  <span class="category-pill" [class]="transaction.categoryClass">
+                    <span class="material-symbols-outlined">{{ transaction.icon }}</span>
+                    {{ transaction.category }}
+                  </span>
+                  <span class="transaction-time">{{ transaction.time }}</span>
+                </div>
+              </div>
+
+              <p class="transaction-price">{{ formatCurrency(transaction.amount) }}</p>
+            </article>
+          }
+        </div>
+      </section>
+    </div>
+  </main>
+</div>

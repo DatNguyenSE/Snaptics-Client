@@ -1,18 +1,163 @@
-<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface-container-low/90 backdrop-blur-xl border-t border-surface-variant/10 shadow-lg flex justify-around items-center h-16 px-md pb-safe">
-<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-transform duration-200" href="#">
-<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-<span class="text-label-sm font-label-sm">Dashboard</span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors active:scale-90 transition-transform duration-200" href="#">
-<span class="material-symbols-outlined" data-icon="insights">insights</span>
-<span class="text-label-sm font-label-sm">Analytics</span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors active:scale-90 transition-transform duration-200" href="#">
-<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
-<span class="text-label-sm font-label-sm">Receipts</span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors active:scale-90 transition-transform duration-200" href="#">
-<span class="material-symbols-outlined" data-icon="person">person</span>
-<span class="text-label-sm font-label-sm">Account</span>
-</a>
+<aside class="sidebar" aria-label="Primary navigation">
+  <div class="sidebar__brand">
+    <div class="sidebar__brand-mark">
+      <span class="material-symbols-outlined">bolt</span>
+    </div>
+    <span class="sidebar__brand-name">SpendWise</span>
+    <span class="sidebar__brand-badge">AI</span>
+  </div>
+
+  <nav class="sidebar__nav">
+    @for (item of navItems; track item.id) {
+      <button
+        class="sidebar__item"
+        type="button"
+        [class.sidebar__item--active]="item.id === activeId"
+      >
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </button>
+    }
+  </nav>
+
+  <div class="sidebar__footer">
+    <div class="sidebar__account">
+      <div class="account-dropdown account-dropdown--desktop">
+        <button
+          class="account-dropdown__avatar-button"
+          type="button"
+          aria-haspopup="menu"
+          [attr.aria-expanded]="isAccountMenuOpen"
+          (click)="toggleAccountMenu($event)"
+        >
+          <span class="account-dropdown__avatar">{{ account.initials }}</span>
+        </button>
+
+        @if (isAccountMenuOpen) {
+          <div
+            class="account-dropdown__panel account-dropdown__panel--desktop"
+            role="menu"
+            (click)="$event.stopPropagation()"
+          >
+            <div class="account-dropdown__header">
+              <div class="account-dropdown__avatar account-dropdown__avatar--large">
+                {{ account.initials }}
+              </div>
+              <div class="account-dropdown__details">
+                <p class="account-dropdown__name account-dropdown__name--panel">
+                  {{ account.fullName }}
+                </p>
+                <span class="account-dropdown__username">@{{ account.username }}</span>
+              </div>
+            </div>
+
+            <div class="account-dropdown__actions">
+              <button class="account-dropdown__item" type="button" (click)="openSettings()">
+                <span class="account-dropdown__item-main">
+                  <span class="material-symbols-outlined">settings</span>
+                  <span>Settings</span>
+                </span>
+                <span class="material-symbols-outlined account-dropdown__item-arrow">
+                  chevron_right
+                </span>
+              </button>
+
+              <button
+                class="account-dropdown__item account-dropdown__item--danger"
+                type="button"
+                (click)="logout()"
+              >
+                <span class="account-dropdown__item-main">
+                  <span class="material-symbols-outlined">logout</span>
+                  <span>Logout</span>
+                </span>
+                <span class="material-symbols-outlined account-dropdown__item-arrow">
+                  chevron_right
+                </span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+      <div class="sidebar__account-copy">
+        <p class="sidebar__account-name">{{ account.fullName }}</p>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<nav class="bottom-nav" aria-label="Bottom navigation">
+  <div class="bottom-nav__inner">
+    @for (item of navItems; track item.id) {
+      <button
+        class="bottom-nav__item"
+        type="button"
+        [class.bottom-nav__item--active]="item.id === activeId"
+      >
+        <span class="bottom-nav__icon-wrap">
+          <span class="material-symbols-outlined">{{ item.icon }}</span>
+        </span>
+        <span class="bottom-nav__label">{{ item.label }}</span>
+      </button>
+    }
+
+    <div class="account-dropdown account-dropdown--mobile">
+      <button
+        class="bottom-nav__item bottom-nav__item--account"
+        type="button"
+        aria-haspopup="menu"
+        [attr.aria-expanded]="isAccountMenuOpen"
+        (click)="toggleAccountMenu($event)"
+      >
+        <span class="bottom-nav__account-avatar">{{ account.initials }}</span>
+        <span class="bottom-nav__label">Account</span>
+      </button>
+
+      @if (isAccountMenuOpen) {
+        <div
+          class="account-dropdown__panel account-dropdown__panel--mobile"
+          role="menu"
+          (click)="$event.stopPropagation()"
+        >
+          <div class="account-dropdown__header">
+            <div class="account-dropdown__avatar account-dropdown__avatar--large">
+              {{ account.initials }}
+            </div>
+            <div class="account-dropdown__details">
+              <p class="account-dropdown__name account-dropdown__name--panel">
+                {{ account.fullName }}
+              </p>
+              <span class="account-dropdown__username">@{{ account.username }}</span>
+            </div>
+          </div>
+
+          <div class="account-dropdown__actions">
+            <button class="account-dropdown__item" type="button" (click)="openSettings()">
+              <span class="account-dropdown__item-main">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Settings</span>
+              </span>
+              <span class="material-symbols-outlined account-dropdown__item-arrow">
+                chevron_right
+              </span>
+            </button>
+
+            <button
+              class="account-dropdown__item account-dropdown__item--danger"
+              type="button"
+              (click)="logout()"
+            >
+              <span class="account-dropdown__item-main">
+                <span class="material-symbols-outlined">logout</span>
+                <span>Logout</span>
+              </span>
+              <span class="material-symbols-outlined account-dropdown__item-arrow">
+                chevron_right
+              </span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
 </nav>
