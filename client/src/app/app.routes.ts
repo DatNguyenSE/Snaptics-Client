@@ -3,7 +3,7 @@ import { UserPage } from './user-page/user-page';
 import { authGuard } from './core/_guard/auth-guard';
 import { Register } from './features/account/register/register';
 import { Login } from './features/account/login/login';
-
+import { ForgotPassword } from './features/account/forgot-password/forgot-password';
 
 // Đây là file định nghĩa các route trong ứng dụng, mỗi route sẽ ánh xạ đến một component tương ứng
 // Các route được chia thành 2 nhóm: route cần auth (đăng nhập) và route public (đăng nhập, đăng ký)
@@ -11,11 +11,11 @@ import { Login } from './features/account/login/login';
 export const routes: Routes = [
     {
         path: '',
-        redirectTo: 'trang-chu',
+        redirectTo: 'Home-page',
         pathMatch: 'full'
     },
     {
-        path: 'trang-chu',
+        path: 'Home-page',
         component: UserPage, 
         runGuardsAndResolvers: 'always',
         canActivate: [authGuard],
@@ -24,6 +24,7 @@ export const routes: Routes = [
         ]
     },
     
-    { path: 'dang-nhap', component: Login },
-    { path: 'dang-ky', component: Register },
+    { path: 'Login', component: Login },
+    { path: 'Register', component: Register },
+    { path: 'ForgotPassword', component: ForgotPassword },
 ];

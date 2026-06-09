@@ -29,7 +29,8 @@ export class AccountService {
     const jsonPayload = JSON.parse(decoded);
     return Array.isArray(jsonPayload.role) ? jsonPayload.role : [jsonPayload.role]
   }
-
+ 
+  //hàm đăng nhập
   login(creds: LoginCreds) {
       // Khi đăng nhập thành công, Server trả về dữ liệu 'user', ĐỒNG THỜI gửi kèm header "Set-Cookie" chứa Token bảo mật (HttpOnly).
       // BẮT BUỘC phải có { withCredentials: true } thì trình duyệt mới chịu NHẬN và LƯU cookie từ server khác port.
@@ -44,9 +45,26 @@ export class AccountService {
       )
   }
 
+
+//hàm đăng ký thêm người dùng
   register(creds: RegisterCreds) {
     return this.http.post(this.baseUrl + 'account/register', creds, { responseType: 'text' });
   }
+//hàm quản lý mật khẩu
+  forgotPassword(email: string) {
+    return this.http.post(
+      this.baseUrl + 'account/forgot-password', 
+      {email}, 
+      { responseType: 'text' });
+  }
+//hàm đặt lại password trong services
+  resetPassword(email: string, token: string, newPassword: string) {
+    return this.http.post(
+      this.baseUrl + 'account/reset-password', 
+      {email, token, newPassword}, 
+      { responseType: 'text' });
+  }
+
 
   logout() {
     // Gọi API logout, ĐẶC BIỆT chú ý tham số { withCredentials: true }
@@ -61,6 +79,7 @@ export class AccountService {
     })
 
   }
+
 
   refreshToken() {
     // Tham số { withCredentials: true } là CỐT LÕI của cơ chế này.
@@ -84,4 +103,5 @@ export class AccountService {
         })
     }, 14 * 24 * 60 * 60 * 1000) // 14 days
   }
+
 }
