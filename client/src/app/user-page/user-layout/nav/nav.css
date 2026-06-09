@@ -90,6 +90,44 @@
   box-shadow: 0 8px 20px rgba(91, 123, 250, 0.18);
 }
 
+.language-switch {
+  border: 1px solid rgba(91, 123, 250, 0.14);
+  border-radius: 999px;
+  background: rgba(240, 243, 254, 0.92);
+  padding: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.language-switch__button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  min-width: 42px;
+  padding: 7px 12px;
+  color: var(--sw-muted-foreground);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.language-switch__button--active {
+  background: #ffffff;
+  color: var(--sw-primary);
+  box-shadow: 0 8px 18px rgba(91, 123, 250, 0.12);
+}
+
+.language-switch--panel .language-switch__button {
+  min-width: 38px;
+  padding: 6px 10px;
+}
+
 .account-dropdown {
   position: relative;
 }
@@ -212,6 +250,22 @@
   gap: 4px;
 }
 
+.account-dropdown__language-row {
+  margin-bottom: 4px;
+  padding: 10px 12px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(91, 123, 250, 0.1);
+}
+
+.account-dropdown__language-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--sw-muted-foreground);
+}
+
 .account-dropdown__item {
   border: 0;
   border-radius: 16px;
@@ -292,8 +346,16 @@
     padding: 20px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
+    gap: 12px;
     border-bottom: 1px solid var(--sw-border);
+  }
+
+  .sidebar__brand-main {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   .sidebar__brand-mark {
@@ -438,6 +500,16 @@
 
   .bottom-nav__label {
     font-size: 0.5625rem;
+  }
+
+  .account-dropdown__language-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .language-switch--panel .language-switch__button {
+    min-width: 36px;
+    padding-inline: 9px;
   }
 
   .account-dropdown__panel--mobile {
