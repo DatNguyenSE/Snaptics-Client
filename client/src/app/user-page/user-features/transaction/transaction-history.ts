@@ -14,7 +14,7 @@ export interface TransactionHistoryItem {
 export const TRANSACTION_HISTORY: TransactionHistoryItem[] = [
   {
     id: 1,
-    name: 'Ly cafe Catinat',
+    name: 'Catinat Coffee',
     categoryKey: 'dashboard.category.drinks',
     time: '08:30',
     amount: 45000,
@@ -27,7 +27,7 @@ export const TRANSACTION_HISTORY: TransactionHistoryItem[] = [
   },
   {
     id: 2,
-    name: 'B\u00fan b\u00f2 Hu\u1ebf',
+    name: 'Hue Beef Noodles',
     categoryKey: 'dashboard.category.food',
     time: '12:15',
     amount: 65000,
@@ -40,7 +40,7 @@ export const TRANSACTION_HISTORY: TransactionHistoryItem[] = [
   },
   {
     id: 3,
-    name: 'Grab \u0111\u1ebfn tr\u01b0\u1eddng',
+    name: 'Grab Ride to Campus',
     categoryKey: 'dashboard.category.travel',
     time: '07:45',
     amount: 32000,
@@ -52,7 +52,7 @@ export const TRANSACTION_HISTORY: TransactionHistoryItem[] = [
   },
   {
     id: 4,
-    name: 'Tr\u00e0 s\u1eefa Gong Cha',
+    name: 'Gong Cha Milk Tea',
     categoryKey: 'dashboard.category.drinks',
     time: '15:20',
     amount: 43000,

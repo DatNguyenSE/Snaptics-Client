@@ -38,12 +38,21 @@
 
       <div class="quick-actions__grid">
         @for (action of quickActions; track action.id) {
-          <button class="quick-action" type="button">
-            <span class="quick-action__icon" [class]="action.iconClass">
-              <span class="material-symbols-outlined">{{ action.icon }}</span>
-            </span>
-            <span class="quick-action__label">{{ language.t(action.labelKey) }}</span>
-          </button>
+          @if (action.route; as route) {
+            <a class="quick-action" [routerLink]="route">
+              <span class="quick-action__icon" [class]="action.iconClass">
+                <span class="material-symbols-outlined">{{ action.icon }}</span>
+              </span>
+              <span class="quick-action__label">{{ language.t(action.labelKey) }}</span>
+            </a>
+          } @else {
+            <button class="quick-action" type="button">
+              <span class="quick-action__icon" [class]="action.iconClass">
+                <span class="material-symbols-outlined">{{ action.icon }}</span>
+              </span>
+              <span class="quick-action__label">{{ language.t(action.labelKey) }}</span>
+            </button>
+          }
         }
       </div>
     </section>

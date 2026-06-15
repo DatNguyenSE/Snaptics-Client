@@ -12,6 +12,7 @@ interface QuickAction {
   labelKey: string;
   icon: string;
   iconClass: string;
+  route?: string;
 }
 
 interface DashboardInsight {
@@ -39,6 +40,7 @@ export class Dashboard {
       labelKey: 'dashboard.quickAction.scan',
       icon: 'receipt_long',
       iconClass: 'quick-action__icon--blue',
+      route: '/user/scan',
     },
     {
       id: 'capture',
@@ -51,6 +53,7 @@ export class Dashboard {
       labelKey: 'dashboard.quickAction.manual',
       icon: 'edit_square',
       iconClass: 'quick-action__icon--amber',
+      route: '/user/transactions',
     },
   ];
 

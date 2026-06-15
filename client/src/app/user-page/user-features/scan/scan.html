@@ -1,0 +1,157 @@
+<section class="scan-page">
+  <div class="scan-page__content">
+    <div class="scan-header">
+      <div>
+        <p class="section-eyebrow">Scan</p>
+        <h2>Receipt Scan</h2>
+      </div>
+      <span class="scan-header__status">{{ stateLabel }}</span>
+    </div>
+
+    <div class="scan-steps" aria-label="Receipt scan progress">
+      @for (step of steps; track step; let index = $index) {
+        <div class="scan-step">
+          <div
+            class="scan-step__marker"
+            [class.scan-step__marker--complete]="index < stepIndex"
+            [class.scan-step__marker--active]="index === stepIndex"
+          >
+            @if (index < stepIndex) {
+              <span class="material-symbols-outlined">check</span>
+            } @else {
+              {{ index + 1 }}
+            }
+          </div>
+
+          <p class="scan-step__label" [class.scan-step__label--active]="index <= stepIndex">
+            {{ step }}
+          </p>
+
+          @if (index < steps.length - 1) {
+            <span
+              class="scan-step__line"
+              [class.scan-step__line--active]="index < stepIndex"
+              aria-hidden="true"
+            ></span>
+          }
+        </div>
+      }
+    </div>
+
+    @if (scanState === 'upload') {
+      <section class="scan-preview scan-preview--upload" aria-label="Upload preview area">
+        <div class="scan-preview__device">
+          <div class="scan-preview__sheet">
+            <span class="scan-preview__badge">Preview Area</span>
+            <h3>Drop a receipt to begin</h3>
+            <p>Upload a file or use the camera to generate a mock receipt preview.</p>
+
+            <div class="scan-preview__formats">
+              @for (format of supportedFormats; track format) {
+                <span>{{ format }}</span>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="scan-actions">
+        <button class="scan-button scan-button--primary" type="button" (click)="startScan()">
+          <span class="material-symbols-outlined">photo_camera</span>
+          Capture Receipt
+        </button>
+
+        <button class="scan-button scan-button--secondary" type="button" (click)="startScan()">
+          <span class="material-symbols-outlined">upload</span>
+          Upload Image
+        </button>
+      </div>
+    }
+
+    @if (scanState === 'scanning' || scanState === 'saving') {
+      <section class="scan-preview scan-preview--scanning" aria-label="Scanning preview">
+        <div class="scan-preview__pulse"></div>
+
+        <div class="scan-preview__loader">
+          <div class="scan-preview__loader-icon">
+            <span class="material-symbols-outlined">
+              {{ scanState === 'saving' ? 'check' : 'auto_awesome' }}
+            </span>
+          </div>
+
+          <div class="scan-preview__loader-copy">
+            <p>
+              {{ scanState === 'saving' ? 'Saving your receipt' : 'AI is reading your receipt' }}
+            </p>
+            <span>
+              {{
+                scanState === 'saving'
+                  ? 'Please wait while we add it to your transactions.'
+                  : 'Please wait while we build the preview.'
+              }}
+            </span>
+          </div>
+        </div>
+      </section>
+    }
+
+    @if (scanState === 'result') {
+      <article class="scan-note">
+        <span class="material-symbols-outlined">warning</span>
+        <p>You can adjust any line item before saving the receipt to your transaction list.</p>
+      </article>
+
+      <article class="receipt-card">
+        <div class="receipt-card__header">
+          <div>
+            <p class="receipt-card__store">{{ storeName }}</p>
+            <p class="receipt-card__meta">
+              <span class="material-symbols-outlined">schedule</span>
+              {{ receiptDate }}
+            </p>
+          </div>
+
+          <div class="receipt-card__total">
+            <span>Total</span>
+            <strong>{{ formatCurrency(totalAmount) }}</strong>
+          </div>
+        </div>
+
+        <div class="receipt-card__list">
+          @for (item of receiptItems; track item.id) {
+            <div class="receipt-item">
+              <div class="receipt-item__copy">
+                <p class="receipt-item__name">{{ item.name }}</p>
+                <span class="category-pill" [class]="item.categoryClass">
+                  {{ item.categoryLabel }}
+                </span>
+              </div>
+
+              <label class="receipt-item__price">
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  [value]="formatEditablePrice(item.price)"
+                  (input)="updatePrice(item.id, $event)"
+                />
+                <span>VND</span>
+              </label>
+            </div>
+          }
+        </div>
+      </article>
+
+      <div class="scan-actions scan-actions--result">
+        <button class="scan-button scan-button--ghost" type="button" (click)="resetScan()">
+          <span class="material-symbols-outlined">replay</span>
+          Retake
+        </button>
+
+        <button class="scan-button scan-button--primary" type="button" (click)="confirmScan()">
+          <span class="material-symbols-outlined">check</span>
+          Confirm &amp; Save
+        </button>
+      </div>
+    }
+  </div>
+</section>

@@ -1,11 +1,22 @@
 <section class="transaction-page">
   <div class="transaction-page__content">
-    <app-user-header></app-user-header>
+    <header class="transaction-page__hero">
+      <div class="transaction-page__hero-copy">
+        <p class="section-eyebrow">{{ language.t('nav.transactions') }}</p>
+        <h1>{{ language.t('nav.transactions') }}</h1>
+        <p class="transaction-page__hero-subtitle">
+          {{ language.t('transaction.subtitle') }}
+        </p>
+      </div>
+
+      <div class="transaction-page__hero-avatar" aria-label="Transactions" role="img">
+        {{ initials }}
+      </div>
+    </header>
 
     <section class="transactions-section">
       <div class="transactions-section__header">
         <div>
-          <p class="section-eyebrow">{{ language.t('nav.transactions') }}</p>
           <h2>{{ language.t('dashboard.recentTransactions') }}</h2>
         </div>
 

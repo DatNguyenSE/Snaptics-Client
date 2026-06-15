@@ -1,0 +1,97 @@
+<section class="reminder-page">
+  <div class="reminder-page__content">
+    <div class="reminder-header">
+      <div>
+        <p class="section-eyebrow">Reminders</p>
+        <h2>{{ allUpdated ? 'All reminders resolved' : pendingCount + ' price reminders' }}</h2>
+        <p>
+          {{
+            allUpdated
+              ? 'Your spending total is fully up to date.'
+              : 'Add the missing prices below to keep your daily total accurate.'
+          }}
+        </p>
+      </div>
+
+      <span class="reminder-header__count">{{ pendingCount }}</span>
+    </div>
+
+    @if (allUpdated) {
+      <article class="reminder-success">
+        <div class="reminder-success__icon">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+
+        <div class="reminder-success__copy">
+          <h3>Everything is up to date</h3>
+          <p>All reminder items now have a confirmed price and no follow-up is needed.</p>
+        </div>
+      </article>
+    } @else {
+      <article class="reminder-summary">
+        <span class="material-symbols-outlined">notifications_active</span>
+        <p>Finish these updates before the end of the day to keep the dashboard insights correct.</p>
+      </article>
+
+      <div class="reminder-list">
+        @for (item of reminderItems; track item.id) {
+          <article class="reminder-card" [class.reminder-card--updated]="isUpdated(item.id)">
+            <div class="reminder-card__top">
+              <div class="reminder-media" [class]="item.mediaClass">
+                @if (item.imageUrl) {
+                  <img [alt]="item.name" [src]="item.imageUrl" />
+                } @else {
+                  <span class="material-symbols-outlined">{{ item.icon }}</span>
+                }
+              </div>
+
+              <div class="reminder-card__copy">
+                <div class="reminder-card__title-row">
+                  <p class="reminder-card__name">{{ item.name }}</p>
+
+                  @if (isUpdated(item.id)) {
+                    <span class="status-badge status-badge--success">
+                      <span class="material-symbols-outlined">check</span>
+                      Updated
+                    </span>
+                  } @else {
+                    <span class="status-badge status-badge--warning">
+                      <span class="material-symbols-outlined">warning</span>
+                      Missing Price
+                    </span>
+                  }
+                </div>
+
+                <span class="category-pill" [class]="item.categoryClass">
+                  {{ item.categoryLabel }}
+                </span>
+              </div>
+            </div>
+
+            @if (!isUpdated(item.id)) {
+              <label class="reminder-input">
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="Enter price"
+                  [value]="priceInputs[item.id] || ''"
+                  (input)="updatePrice(item.id, $event)"
+                />
+                <span>VND</span>
+              </label>
+            } @else {
+              <p class="reminder-card__updated-copy">
+                Added {{ priceInputs[item.id] || '0' }} VND to the daily spending total.
+              </p>
+            }
+          </article>
+        }
+      </div>
+
+      <button class="reminder-button" type="button" (click)="submitUpdates()">
+        <span class="material-symbols-outlined">check</span>
+        Update Spending Total
+      </button>
+    }
+  </div>
+</section>

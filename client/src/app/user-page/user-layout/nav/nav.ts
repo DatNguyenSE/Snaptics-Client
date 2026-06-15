@@ -46,6 +46,7 @@ export class Nav {
       id: 'scan',
       labelKey: 'nav.scan',
       icon: 'photo_camera',
+      route: '/user/scan',
     },
     {
       id: 'transactions',
@@ -57,17 +58,25 @@ export class Nav {
       id: 'reminders',
       labelKey: 'nav.reminders',
       icon: 'notifications',
+      route: '/user/reminders',
     },
   ];
   readonly languages: LanguageOption[] = [
     { code: 'vi', label: 'VI' },
     { code: 'en', label: 'EN' },
   ];
-  readonly account: AccountSummary = {
-    fullName: 'Minh Truong Tran Anh',
-    username: 'minhtruong',
-    initials: 'MT',
-  };
+
+  get account(): AccountSummary {
+    const currentUser = this.accountService.currentUser();
+    const fullName = currentUser?.displayName?.trim() || 'Minh Nguyen';
+    const email = currentUser?.email?.trim() || 'minh@gmail.com';
+
+    return {
+      fullName,
+      username: this.extractUsername(email, fullName),
+      initials: this.buildInitials(fullName),
+    };
+  }
 
   isAccountMenuOpen = false;
 
@@ -106,5 +115,29 @@ export class Nav {
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     this.closeAccountMenu();
+  }
+
+  private buildInitials(fullName: string): string {
+    const parts = fullName
+      .split(/\s+/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+
+    if (parts.length === 0) {
+      return 'U';
+    }
+
+    return parts
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('');
+  }
+
+  private extractUsername(email: string, fullName: string): string {
+    if (email.includes('@')) {
+      return email.split('@')[0];
+    }
+
+    return fullName.toLowerCase().replace(/\s+/g, '');
   }
 }

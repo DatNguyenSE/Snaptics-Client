@@ -79,6 +79,21 @@ export const routes: Routes = [
           import('./user-page/user-features/transaction/transaction').then((m) => m.Transaction),
       },
       {
+        path: 'scan',
+        loadComponent: () =>
+          import('./user-page/user-features/scan/scan').then((m) => m.Scan),
+      },
+      {
+        path: 'reminders',
+        loadComponent: () =>
+          import('./user-page/user-features/reminder/reminder').then((m) => m.Reminder),
+      },
+      {
+        path: 'reminder',
+        redirectTo: 'reminders',
+        pathMatch: 'full',
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',

@@ -1,0 +1,147 @@
+<div class="settings-shell">
+  <app-nav></app-nav>
+
+  <main class="settings-page">
+    <div class="settings-page__content">
+      <header class="settings-header">
+        <div>
+          <p class="section-eyebrow">{{ language.t('nav.settings') }}</p>
+          <h1>{{ language.t('settingsPage.title') }}</h1>
+          <p>{{ language.t('settingsPage.subtitle') }}</p>
+        </div>
+      </header>
+
+      <article class="profile-card">
+        <div class="profile-card__avatar">{{ profile.initials }}</div>
+
+        <div class="profile-card__copy">
+          <p class="profile-card__name">{{ profile.fullName }}</p>
+          <span class="profile-card__email">{{ profile.email }}</span>
+        </div>
+
+        <button
+          class="profile-card__edit"
+          type="button"
+          [attr.aria-label]="language.t('settingsPage.profile.editAria')"
+          (click)="openProfileModal()"
+        >
+          <span class="material-symbols-outlined">edit</span>
+        </button>
+      </article>
+
+      <section>
+        <p class="settings-section-title settings-section-title--icon">
+          <span class="material-symbols-outlined">auto_awesome</span>
+          {{ language.t('settingsPage.aiTitle') }}
+        </p>
+
+        <div class="settings-panel">
+          @for (item of aiSettings; track item.key) {
+            <div class="settings-row">
+              <div class="settings-row__copy">
+                <p>{{ language.t(item.titleKey) }}</p>
+                <span>{{ language.t(item.descriptionKey) }}</span>
+              </div>
+
+              <button
+                class="settings-switch"
+                type="button"
+                role="switch"
+                [attr.aria-checked]="isSettingEnabled(item.key)"
+                [class.settings-switch--active]="isSettingEnabled(item.key)"
+                (click)="toggleSetting(item.key)"
+              >
+                <span class="settings-switch__thumb"></span>
+              </button>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section>
+        <p class="settings-section-title">{{ language.t('settingsPage.generalTitle') }}</p>
+
+        <div class="settings-panel settings-panel--menu">
+          @for (item of generalSettings; track item.key) {
+            <button class="settings-menu-item" type="button" (click)="handleGeneralSettingClick(item.key)">
+              <span class="settings-menu-item__main">
+                <span class="settings-menu-item__icon">
+                  <span class="material-symbols-outlined">{{ item.icon }}</span>
+                </span>
+
+                <span class="settings-menu-item__label">{{ language.t(item.labelKey) }}</span>
+              </span>
+
+              <span class="settings-menu-item__value">
+                {{ item.value }}
+                <span class="material-symbols-outlined">chevron_right</span>
+              </span>
+            </button>
+          }
+        </div>
+      </section>
+
+      <p class="settings-version">SpendWise AI v1.0.0</p>
+    </div>
+  </main>
+
+  @if (isProfileModalOpen) {
+    <div class="settings-modal-backdrop" (click)="closeProfileModal()">
+      <section
+        class="settings-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="profile-modal-title"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="settings-modal__header">
+          <div>
+            <p class="section-eyebrow">{{ language.t('nav.account') }}</p>
+            <h2 id="profile-modal-title">{{ language.t('settingsPage.profile.modalTitle') }}</h2>
+            <p>{{ language.t('settingsPage.profile.modalSubtitle') }}</p>
+          </div>
+
+          <button class="settings-modal__close" type="button" (click)="closeProfileModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <form class="settings-form" (ngSubmit)="saveProfile()">
+          <label class="settings-field">
+            <span>{{ language.t('settingsPage.profile.fullName') }}</span>
+            <input
+              type="text"
+              [(ngModel)]="profileForm.fullName"
+              name="fullName"
+              autocomplete="name"
+            />
+          </label>
+
+          <label class="settings-field">
+            <span>{{ language.t('settingsPage.profile.email') }}</span>
+            <input
+              type="email"
+              [(ngModel)]="profileForm.email"
+              name="email"
+              autocomplete="email"
+            />
+          </label>
+
+          <div class="settings-form__actions">
+            <button class="settings-form__button settings-form__button--ghost" type="button" (click)="closeProfileModal()">
+              {{ language.t('common.cancel') }}
+            </button>
+
+            <button
+              class="settings-form__button settings-form__button--primary"
+              type="submit"
+              [disabled]="!isProfileFormValid"
+            >
+              {{ language.t('common.save') }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+</div>

@@ -12,6 +12,13 @@ const STORAGE_KEY = 'SnapticsLanguage';
 
 const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
   vi: {
+    common: {
+      language: 'Ngôn ngữ',
+      english: 'English',
+      vietnamese: 'Tiếng Việt',
+      cancel: 'Hủy',
+      save: 'Lưu',
+    },
     nav: {
       dashboard: 'Tổng quan',
       scan: 'Scan',
@@ -33,15 +40,14 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       quickActions: 'Thao tác nhanh',
       aiInsights: 'Gợi ý AI',
       aiInsightPrefix: 'AI nhận thấy hôm nay bạn chi nhiều cho',
-      aiInsightSuffix:
-        'hơn bình thường. Hãy cân nhắc giảm chi tiêu ở danh mục này.',
+      aiInsightSuffix: 'hơn bình thường. Hãy cân nhắc giảm chi tiêu ở danh mục này.',
       usageTitle: 'Đánh giá món đồ đã mua',
       usageHint: '1 món cần được đánh giá theo mức độ sử dụng',
       recentTransactions: 'Giao dịch gần đây',
       viewAll: 'Xem tất cả',
       aiGen: 'AI GEN',
       quickAction: {
-        scan: 'Scan hóa đơn',
+        scan: 'Quét hóa đơn',
         capture: 'Chụp món đồ',
         manual: 'Nhập thủ công',
       },
@@ -51,14 +57,56 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         travel: 'Di chuyển',
       },
     },
+    transaction: {
+      subtitle: 'Xem lại toàn bộ khoản chi đã quét và lưu ở một nơi.',
+    },
     settings: {
       eyebrow: 'Tài khoản',
       title: 'Cài đặt',
       copy:
-        'Đây là trang settings tạm thời để dropdown account điều hướng đúng tới /settings. Bạn có thể thay bằng form cài đặt thật ở bước tiếp theo.',
+        'Đây là trang cài đặt tạm thời để dropdown tài khoản điều hướng đúng tới /settings.',
+    },
+    settingsPage: {
+      title: 'Tùy chọn ứng dụng',
+      subtitle: 'Quản lý tính năng AI, thông tin tài khoản và trải nghiệm chung của SpendWise.',
+      aiTitle: 'Cài đặt AI',
+      generalTitle: 'Chung',
+      profile: {
+        editAria: 'Sửa thông tin tài khoản',
+        modalTitle: 'Sửa thông tin',
+        modalSubtitle: 'Cập nhật tên hiển thị và email dùng trong ứng dụng.',
+        fullName: 'Họ và tên',
+        email: 'Email',
+        success: 'Cập nhật thông tin thành công.',
+      },
+      ai: {
+        caloriesTitle: 'Ước tính calo cho món ăn',
+        caloriesDescription: 'Dùng AI để ước tính lượng calo sau khi chụp món ăn hoặc quét hóa đơn.',
+        priceTitle: 'Xác nhận giá sau khi quét',
+        priceDescription: 'Hiển thị bước kiểm tra giá thủ công trước khi lưu hóa đơn mới.',
+        reminderTitle: 'Nhắc nhở hằng ngày',
+        reminderDescription:
+          'Nhắc bạn vào cuối ngày nếu vẫn còn món đã quét nhưng chưa nhập giá.',
+        usageTitle: 'Theo dõi mức độ sử dụng',
+        usageDescription: 'Hỏi lại xem món đồ đã mua còn được sử dụng sau 30 ngày hay không.',
+      },
+      general: {
+        language: 'Ngôn ngữ',
+        currency: 'Tiền tệ',
+        budget: 'Ngân sách mỗi ngày',
+        backup: 'Sao lưu đám mây',
+        enabled: 'Đã bật',
+      },
     },
   },
   en: {
+    common: {
+      language: 'Language',
+      english: 'English',
+      vietnamese: 'Vietnamese',
+      cancel: 'Cancel',
+      save: 'Save',
+    },
     nav: {
       dashboard: 'Dashboard',
       scan: 'Scan',
@@ -98,11 +146,47 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         travel: 'Travel',
       },
     },
+    transaction: {
+      subtitle: 'Review every scanned and saved expense in one place.',
+    },
     settings: {
       eyebrow: 'Account',
       title: 'Settings',
       copy:
-        'This is a temporary settings page so the account dropdown can navigate correctly to /settings. You can replace it with the real settings form in the next step.',
+        'This is a temporary settings page so the account dropdown can navigate correctly to /settings.',
+    },
+    settingsPage: {
+      title: 'App Preferences',
+      subtitle: 'Control AI features, account details, and the general SpendWise experience.',
+      aiTitle: 'AI Settings',
+      generalTitle: 'General',
+      profile: {
+        editAria: 'Edit account details',
+        modalTitle: 'Edit Profile',
+        modalSubtitle: 'Update the display name and email used inside the app.',
+        fullName: 'Full Name',
+        email: 'Email',
+        success: 'Profile updated successfully.',
+      },
+      ai: {
+        caloriesTitle: 'Calorie estimates for food',
+        caloriesDescription: 'Use AI to estimate calories after a food photo or receipt scan.',
+        priceTitle: 'Price confirmation after scans',
+        priceDescription: 'Prompt for a manual price review before a new receipt is saved.',
+        reminderTitle: 'Daily reminder',
+        reminderDescription:
+          'Send an end-of-day reminder when any scanned item is still missing a price.',
+        usageTitle: 'Usage review follow-up',
+        usageDescription:
+          'Ask whether a purchased item is still being used after 30 days.',
+      },
+      general: {
+        language: 'Language',
+        currency: 'Currency',
+        budget: 'Daily budget',
+        backup: 'Cloud backup',
+        enabled: 'Enabled',
+      },
     },
   },
 };
@@ -142,7 +226,7 @@ export class LanguageService {
 
   private getInitialLanguage(): AppLanguage {
     if (typeof window === 'undefined') {
-      return 'vi';
+      return 'en';
     }
 
     const savedLanguage = localStorage.getItem(STORAGE_KEY);

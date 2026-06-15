@@ -15,7 +15,10 @@
   gap: 20px;
 }
 
+.transaction-page__hero,
 .transactions-section__header,
+.transaction-page__hero h1,
+.transaction-page__hero-subtitle,
 .transactions-section__header h2,
 .transaction-title,
 .transaction-time,
@@ -24,6 +27,18 @@
 .ai-badge,
 .section-eyebrow {
   margin: 0;
+}
+
+.transaction-page__hero {
+  padding-top: 8px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.transaction-page__hero-copy {
+  min-width: 0;
 }
 
 .transactions-section__header {
@@ -41,6 +56,35 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--sw-muted-foreground);
+}
+
+.transaction-page__hero h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+  color: var(--sw-foreground);
+}
+
+.transaction-page__hero-subtitle {
+  margin-top: 2px;
+  font-size: 0.875rem;
+  color: var(--sw-muted-foreground);
+}
+
+.transaction-page__hero-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 800;
+  box-shadow: 0 10px 24px rgba(91, 123, 250, 0.18);
+  flex-shrink: 0;
 }
 
 .transactions-section__header h2 {
@@ -209,6 +253,10 @@
   .transaction-page {
     padding: 32px 32px 32px 272px;
   }
+
+  .transaction-page__hero {
+    padding-top: 0;
+  }
 }
 
 @media (max-width: 639px) {
@@ -216,8 +264,13 @@
     padding: 16px 16px calc(104px + env(safe-area-inset-bottom));
   }
 
+  .transaction-page__hero,
   .transactions-section__header {
     align-items: flex-start;
+  }
+
+  .transaction-page__hero {
+    flex-direction: column;
   }
 
   .transaction-card {
