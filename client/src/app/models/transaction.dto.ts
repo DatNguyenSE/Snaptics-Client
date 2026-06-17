@@ -5,6 +5,7 @@ export interface TransactionDetailDto {
   itemName: string;
   price: number;
   quantity: number;
+  unit?: string | null;
   estimatedCalories: number | null;
 }
 
