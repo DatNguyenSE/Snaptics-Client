@@ -55,6 +55,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         drinks: 'Đồ uống',
         food: 'Đồ ăn',
         travel: 'Di chuyển',
+        bill: 'Hóa đơn',
       },
     },
     transaction: {
@@ -144,6 +145,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         drinks: 'Drinks',
         food: 'Food',
         travel: 'Travel',
+        bill: 'Bill',
       },
     },
     transaction: {

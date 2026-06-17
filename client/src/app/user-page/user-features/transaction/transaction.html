@@ -25,12 +25,12 @@
 
       <div class="transaction-list">
         @for (transaction of transactionHistory; track transaction.id) {
-          <article class="transaction-card">
-            <div class="transaction-media" [class]="transaction.mediaClass">
+          <article class="transaction-card" (click)="openTransactionDetail(transaction)" style="cursor: pointer;">
+            <div class="transaction-media" [class]="getMediaClass(transaction)">
               @if (transaction.imageUrl) {
                 <img [alt]="transaction.name" [src]="transaction.imageUrl" />
               } @else {
-                <span class="material-symbols-outlined">{{ transaction.icon }}</span>
+                <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
               }
             </div>
 
@@ -38,7 +38,7 @@
               <div class="transaction-title-row">
                 <p class="transaction-title">{{ transaction.name }}</p>
 
-                @if (transaction.isAiGenerated) {
+                @if (transaction.isAiEstimated) {
                   <span class="ai-badge">
                     <span class="material-symbols-outlined">smart_toy</span>
                     {{ language.t('dashboard.aiGen') }}
@@ -47,18 +47,25 @@
               </div>
 
               <div class="transaction-meta">
-                <span class="category-pill" [class]="transaction.categoryClass">
-                  <span class="material-symbols-outlined">{{ transaction.icon }}</span>
-                  {{ language.t(transaction.categoryKey) }}
+                <span class="category-pill" [class]="getCategoryClass(transaction)">
+                  <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
+                  {{ language.t(getCategoryKey(transaction)) }}
                 </span>
-                <span class="transaction-time">{{ transaction.time }}</span>
+                <span class="transaction-time">{{ transaction.transactionDate | date:'HH:mm' }}</span>
               </div>
             </div>
 
-            <p class="transaction-price">{{ formatCurrency(transaction.amount) }}</p>
+            <p class="transaction-price">{{ formatCurrency(transaction.totalAmount) }}</p>
           </article>
         }
       </div>
     </section>
   </div>
 </section>
+
+@if (selectedTransaction) {
+  <app-transaction-detail-modal 
+    [transaction]="selectedTransaction" 
+    (closeModal)="closeTransactionDetail()">
+  </app-transaction-detail-modal>
+}

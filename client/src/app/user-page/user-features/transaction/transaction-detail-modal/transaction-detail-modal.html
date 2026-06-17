@@ -1,0 +1,57 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="stopPropagation($event)">
+    <div class="modal-decorative-glow"></div>
+    
+    <header class="modal-header">
+      <div class="modal-header__info">
+        <h2>{{ transaction.name || language.t('dashboard.category.bill') }}</h2>
+        <span class="modal-date">{{ transaction.transactionDate | date:'medium' }}</span>
+      </div>
+      <button class="close-button" (click)="onClose()" aria-label="Close">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </header>
+
+    <div class="modal-body">
+      @if (transaction.note) {
+        <p class="transaction-note">
+          <span class="material-symbols-outlined">notes</span>
+          {{ transaction.note }}
+        </p>
+      }
+
+      <div class="detail-section">
+        <h3>{{ language.t('nav.transactions') }}</h3>
+        <ul class="item-list">
+          @for (item of transaction.transactionDetails; track item.id) {
+            <li class="item-row">
+              <div class="item-info">
+                <span class="item-name">{{ item.itemName }}</span>
+                @if (item.estimatedCalories) {
+                  <span class="item-calories">🔥 {{ item.estimatedCalories }} kcal</span>
+                }
+              </div>
+              <div class="item-price-qty">
+                <span class="item-price">{{ formatCurrency(item.price * item.quantity) }}</span>
+                <span class="item-qty">x{{ item.quantity }}</span>
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+
+    <footer class="modal-footer">
+      <div class="total-row">
+        <span>{{ language.t('dashboard.totalPayment') }}</span>
+        <span class="total-amount">{{ formatCurrency(transaction.totalAmount) }}</span>
+      </div>
+      @if (transaction.isAiEstimated) {
+        <div class="ai-estimated-badge">
+          <span class="material-symbols-outlined">smart_toy</span>
+          <span>{{ language.t('dashboard.aiGen') }}</span>
+        </div>
+      }
+    </footer>
+  </div>
+</div>
