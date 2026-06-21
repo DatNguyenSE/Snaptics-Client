@@ -6,6 +6,7 @@ import { TransactionDto } from '../../../models/transaction.dto';
 import { UserHeader } from '../../user-layout/user-header/user-header';
 import { DatePipe } from '@angular/common';
 import { TransactionDetailModal } from '../transaction/transaction-detail-modal/transaction-detail-modal';
+import { environment } from '../../../environments/environment.development';
 
 interface QuickAction {
   id: string;
@@ -85,6 +86,14 @@ export class Dashboard implements OnInit {
 
   formatCurrency(value: number): string {
     return `${new Intl.NumberFormat(this.language.locale()).format(value)}\u0111`;
+  }
+
+  isAnalyzedImage(transaction: TransactionDto): boolean {
+    return !!(transaction.isAiEstimated && transaction.imageKey);
+  }
+
+  getImageUrl(imageKey: string): string {
+    return `${environment.apiUrl}s3/image?key=${encodeURIComponent(imageKey)}`;
   }
 
   getIcon(transaction: TransactionDto): string {

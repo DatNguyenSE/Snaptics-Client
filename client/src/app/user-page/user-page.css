@@ -2,7 +2,7 @@
   display: block;
 }
 
-.spendwise-shell {
+.snaptics-shell {
   --sw-background: #f4f7ff;
   --sw-foreground: #1b1d2e;
   --sw-card: #ffffff;
@@ -19,8 +19,8 @@
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-.spendwise-shell,
-.spendwise-shell * {
+.snaptics-shell,
+.snaptics-shell * {
   box-sizing: border-box;
 }
 

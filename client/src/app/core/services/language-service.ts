@@ -53,9 +53,12 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       },
       category: {
         drinks: 'Đồ uống',
+        drink: 'Đồ uống',
         food: 'Đồ ăn',
         travel: 'Di chuyển',
         bill: 'Hóa đơn',
+        animals: 'Thú cưng',
+        electronics: 'Điện tử',
       },
     },
     transaction: {
@@ -69,7 +72,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
     },
     settingsPage: {
       title: 'Tùy chọn ứng dụng',
-      subtitle: 'Quản lý tính năng AI, thông tin tài khoản và trải nghiệm chung của SpendWise.',
+      subtitle: 'Quản lý tính năng AI, thông tin tài khoản và trải nghiệm chung của Snaptics.',
       aiTitle: 'Cài đặt AI',
       generalTitle: 'Chung',
       profile: {
@@ -143,9 +146,12 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       },
       category: {
         drinks: 'Drinks',
+        drink: 'Drink',
         food: 'Food',
         travel: 'Travel',
         bill: 'Bill',
+        animals: 'Animals',
+        electronics: 'Electronics',
       },
     },
     transaction: {
@@ -159,7 +165,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
     },
     settingsPage: {
       title: 'App Preferences',
-      subtitle: 'Control AI features, account details, and the general SpendWise experience.',
+      subtitle: 'Control AI features, account details, and the general Snaptics experience.',
       aiTitle: 'AI Settings',
       generalTitle: 'General',
       profile: {

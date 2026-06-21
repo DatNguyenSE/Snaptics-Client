@@ -13,7 +13,7 @@ export interface TransactionDto {
   id: number;
   name: string | null;
   userId: string;
-  imageUrl: string | null;
+  imageKey: string | null;
   totalAmount: number;
   transactionDate: string;
   status: number;

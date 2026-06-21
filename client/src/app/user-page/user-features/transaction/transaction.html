@@ -27,8 +27,8 @@
         @for (transaction of transactionHistory; track transaction.id) {
           <article class="transaction-card" (click)="openTransactionDetail(transaction)" style="cursor: pointer;">
             <div class="transaction-media" [class]="getMediaClass(transaction)">
-              @if (transaction.imageUrl) {
-                <img [alt]="transaction.name" [src]="transaction.imageUrl" />
+              @if (isAnalyzedImage(transaction)) {
+                <img [src]="getImageUrl(transaction.imageKey!)" alt="transaction" />
               } @else {
                 <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
               }

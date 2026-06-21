@@ -56,14 +56,38 @@
       </section>
 
       <div class="scan-actions">
-        <button class="scan-button scan-button--primary" type="button" (click)="startScan()">
+        <!-- Hidden inputs for file selection -->
+        <input type="file" #uploadInput accept="image/*,.pdf" (change)="onFileSelected($event)" style="display: none;">
+
+        <button class="scan-button scan-button--primary" type="button" (click)="openCamera()">
           <span class="material-symbols-outlined">photo_camera</span>
           Capture Receipt
         </button>
 
-        <button class="scan-button scan-button--secondary" type="button" (click)="startScan()">
+        <button class="scan-button scan-button--secondary" type="button" (click)="uploadInput.click()">
           <span class="material-symbols-outlined">upload</span>
           Upload Image
+        </button>
+      </div>
+    }
+
+    @if (scanState === 'camera') {
+      <section class="scan-preview" aria-label="Camera preview area">
+        <div class="scan-preview__device" style="background: #000; border-radius: 12px; overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 300px;">
+          <video #videoElement autoplay playsinline muted style="width: 100%; max-height: 400px; object-fit: contain;"></video>
+          <canvas #canvasElement style="display: none;"></canvas>
+        </div>
+      </section>
+
+      <div class="scan-actions">
+        <button class="scan-button scan-button--primary" type="button" (click)="capturePhoto()">
+          <span class="material-symbols-outlined">camera</span>
+          Take Photo
+        </button>
+
+        <button class="scan-button scan-button--secondary" type="button" (click)="stopCamera()">
+          <span class="material-symbols-outlined">close</span>
+          Cancel
         </button>
       </div>
     }
@@ -95,6 +119,23 @@
       </section>
     }
 
+    @if (scanState === 'error') {
+      <section class="scan-preview" aria-label="Error area">
+        <div class="scan-preview__device" style="background: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; text-align: center; color: #991b1b; min-height: 300px;">
+          <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 1rem;">error_outline</span>
+          <h3 style="margin-bottom: 0.5rem; color: #991b1b;">Oops!</h3>
+          <p style="color: #b91c1c; font-size: 0.875rem;">{{ errorMessage }}</p>
+        </div>
+      </section>
+
+      <div class="scan-actions scan-actions--result">
+        <button class="scan-button scan-button--primary" type="button" (click)="resetScan()">
+          <span class="material-symbols-outlined">replay</span>
+          Retake
+        </button>
+      </div>
+    }
+
     @if (scanState === 'result') {
       <article class="scan-note">
         <span class="material-symbols-outlined">warning</span>
@@ -103,11 +144,18 @@
 
       <article class="receipt-card">
         <div class="receipt-card__header">
-          <div>
-            <p class="receipt-card__store">{{ storeName }}</p>
+          <div style="flex: 1;">
+            <input
+              type="text"
+              class="receipt-card__store"
+              [value]="storeName"
+              (input)="updateStoreName($event)"
+              placeholder="Store Name"
+              style="background: transparent; border: none; border-bottom: 1px dashed #ccc; font: inherit; color: inherit; width: 100%; outline: none;"
+            />
             <p class="receipt-card__meta">
               <span class="material-symbols-outlined">schedule</span>
-              {{ receiptDate }}
+              {{ receiptDate | date:'mediumDate' }}
             </p>
           </div>
 
@@ -122,9 +170,12 @@
             <div class="receipt-item">
               <div class="receipt-item__copy">
                 <p class="receipt-item__name">{{ item.name }}</p>
-                <span class="category-pill" [class]="item.categoryClass">
-                  {{ item.categoryLabel }}
-                </span>
+                <select class="category-pill" [class]="item.categoryClass" (change)="updateCategory(item.id, $event)">
+                  <option [value]="null" [selected]="!item.categoryId">{{ getCategoryName('Unknown') }}</option>
+                  @for (cat of categories; track cat.id) {
+                    <option [value]="cat.id" [selected]="cat.id === item.categoryId">{{ getCategoryName(cat.name) }}</option>
+                  }
+                </select>
               </div>
 
               <label class="receipt-item__price">

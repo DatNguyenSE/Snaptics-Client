@@ -20,6 +20,28 @@
         </p>
       }
 
+      @if (transaction.imageKey) {
+        <div class="transaction-image-container">
+          <button class="toggle-image-button" (click)="toggleImage()" type="button">
+            <span class="material-symbols-outlined">image</span>
+            {{ isImageExpanded ? (language.currentLang() === 'vi' ? 'Ẩn ảnh hoá đơn' : 'Hide Receipt Image') : (language.currentLang() === 'vi' ? 'Xem ảnh hoá đơn' : 'View Receipt Image') }}
+          </button>
+          
+          @if (isImageExpanded) {
+            <div class="image-preview-wrapper">
+              @if (isLoadingImage) {
+                <div class="image-loader">
+                  <span class="material-symbols-outlined loading-icon">progress_activity</span>
+                  <span>Loading...</span>
+                </div>
+              } @else if (imageUrl) {
+                <img [src]="imageUrl" alt="Receipt Image" class="receipt-image" />
+              }
+            </div>
+          }
+        </div>
+      }
+
       <div class="detail-section">
         <h3>{{ language.t('nav.transactions') }}</h3>
         <ul class="item-list">
