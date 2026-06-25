@@ -49,6 +49,18 @@ export class Nav {
       route: '/user/scan',
     },
     {
+      id: 'snap-item',
+      labelKey: 'nav.snapItem',
+      icon: 'image_search',
+      route: '/user/snap-item',
+    },
+    {
+      id: 'manual-entry',
+      labelKey: 'nav.manualEntry',
+      icon: 'edit_square',
+      route: '/user/manual-entry',
+    },
+    {
       id: 'transactions',
       labelKey: 'nav.transactions',
       icon: 'receipt_long',

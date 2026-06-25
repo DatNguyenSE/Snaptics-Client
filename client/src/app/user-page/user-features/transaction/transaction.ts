@@ -1,11 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
 import { AccountService } from '../../../core/services/account-service';
 import { LanguageService } from '../../../core/services/language-service';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { TransactionDto } from '../../../models/transaction.dto';
-import { DatePipe } from '@angular/common';
-import { TransactionDetailModal } from './transaction-detail-modal/transaction-detail-modal';
 import { environment } from '../../../environments/environment.development';
+import { TransactionDetailModal } from './transaction-detail-modal/transaction-detail-modal';
 
 @Component({
   selector: 'app-transaction',
@@ -27,7 +27,7 @@ export class Transaction implements OnInit {
       next: (data) => {
         this.transactionHistory = data;
       },
-      error: (err) => console.error('Failed to load transactions', err)
+      error: (err) => console.error('Failed to load transactions', err),
     });
   }
 
@@ -61,21 +61,34 @@ export class Transaction implements OnInit {
   }
 
   isAnalyzedImage(transaction: TransactionDto): boolean {
-    return !!(transaction.isAiEstimated && transaction.imageKey);
+    return !!this.getImageUrl(transaction);
   }
 
-  getImageUrl(imageKey: string): string {
-    return `${environment.apiUrl}s3/image?key=${encodeURIComponent(imageKey)}`;
+  getImageUrl(transaction: TransactionDto): string | null {
+    if (transaction.imagePreviewUrl) {
+      return transaction.imagePreviewUrl;
+    }
+
+    if (transaction.imageKey) {
+      return `${environment.apiUrl}s3/image?key=${encodeURIComponent(transaction.imageKey)}`;
+    }
+
+    return null;
   }
 
   getIcon(transaction: TransactionDto): string {
+    if (transaction.source === 'manual') return 'edit_square';
+    if (transaction.source === 'snap') return 'photo_camera';
+
     if (transaction.transactionDetails?.length > 1) {
-      return 'receipt_long'; // Icon for bill
-    } else if (transaction.transactionDetails?.length === 1) {
+      return 'receipt_long';
+    }
+
+    if (transaction.transactionDetails?.length === 1) {
       const name = transaction.transactionDetails[0].itemName?.toLowerCase() || '';
       if (name.includes('coffee') || name.includes('tea') || name.includes('drink')) return 'local_cafe';
       if (name.includes('noodle') || name.includes('food') || name.includes('rice')) return 'lunch_dining';
-      return 'photo_camera'; // Icon for generic scanned image item
+      return 'photo_camera';
     }
 
     if (transaction.name?.toLowerCase().includes('coffee')) return 'local_cafe';
@@ -105,9 +118,15 @@ export class Transaction implements OnInit {
 
   getCategoryKey(transaction: TransactionDto): string {
     if (transaction.transactionDetails?.length > 1) {
-      return 'dashboard.category.bill'; // Hiển thị "Hóa đơn"
-    } else if (transaction.transactionDetails?.length === 1) {
-      return transaction.transactionDetails[0].itemName || 'dashboard.category.other'; // Lấy thẳng tên item từ detail
+      return 'dashboard.category.bill';
+    }
+
+    if (transaction.transactionDetails?.length === 1) {
+      return (
+        transaction.transactionDetails[0].categoryName ||
+        transaction.transactionDetails[0].itemName ||
+        'dashboard.category.other'
+      );
     }
 
     if (transaction.name?.toLowerCase().includes('coffee') || transaction.name?.toLowerCase().includes('tea')) return 'dashboard.category.drinks';

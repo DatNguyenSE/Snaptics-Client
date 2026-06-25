@@ -154,6 +154,30 @@
   color: #0ea5e9; 
 }
 
+.transaction-meta-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.transaction-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.transaction-meta-chip .material-symbols-outlined {
+  font-size: 1rem;
+}
+
 /* Detail Section */
 .detail-section {
   position: relative;
@@ -214,6 +238,18 @@
   font-size: 1.05rem;
   font-weight: 600;
   color: #1e293b;
+}
+
+.item-category {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #4f46e5;
+  background: #eef2ff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  width: fit-content;
 }
 
 .item-calories {

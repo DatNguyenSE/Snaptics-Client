@@ -1,0 +1,82 @@
+<form class="entry-form" [formGroup]="form" (ngSubmit)="onSave()">
+  <div class="entry-form__grid">
+    <label class="entry-field">
+      <span class="entry-field__label">Item name</span>
+      <input class="entry-field__control" type="text" formControlName="title" placeholder="Ex: Matcha latte" />
+      @if (getErrorMessage('title'); as errorMessage) {
+        <span class="entry-field__error">{{ errorMessage }}</span>
+      }
+    </label>
+
+    <label class="entry-field">
+      <span class="entry-field__label">Amount</span>
+      <div class="entry-field__amount">
+        <input
+          class="entry-field__control"
+          type="number"
+          min="0"
+          step="1000"
+          formControlName="amount"
+          placeholder="0"
+        />
+        <span>VND</span>
+      </div>
+      @if (getErrorMessage('amount'); as errorMessage) {
+        <span class="entry-field__error">{{ errorMessage }}</span>
+      }
+    </label>
+
+    <label class="entry-field">
+      <span class="entry-field__label">Category</span>
+      <select class="entry-field__control" formControlName="category">
+        <option value="">Select a category</option>
+        @for (category of categories; track category.id) {
+          <option [value]="category.name">{{ category.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="entry-field">
+      <span class="entry-field__label">Date</span>
+      <input class="entry-field__control" type="date" formControlName="date" />
+      @if (getErrorMessage('date'); as errorMessage) {
+        <span class="entry-field__error">{{ errorMessage }}</span>
+      }
+    </label>
+
+    @if (showPaymentMethod) {
+      <label class="entry-field entry-field--full">
+        <span class="entry-field__label">Payment method</span>
+        <select class="entry-field__control" formControlName="paymentMethod">
+          @for (method of paymentMethods; track method) {
+            <option [value]="method">{{ method }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    <label class="entry-field entry-field--full">
+      <span class="entry-field__label">Note</span>
+      <textarea
+        class="entry-field__control entry-field__control--textarea"
+        rows="4"
+        formControlName="note"
+        placeholder="Add a note or context for this expense"
+      ></textarea>
+    </label>
+  </div>
+
+  <div class="entry-form__actions">
+    <button class="entry-form__button entry-form__button--ghost" type="button" (click)="onCancel()">
+      {{ cancelLabel }}
+    </button>
+
+    <button class="entry-form__button entry-form__button--primary" type="submit" [disabled]="isSaving">
+      @if (isSaving) {
+        Saving...
+      } @else {
+        {{ saveLabel }}
+      }
+    </button>
+  </div>
+</form>

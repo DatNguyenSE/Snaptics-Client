@@ -3,6 +3,7 @@ export interface TransactionDetailDto {
   transactionId: number;
   categoryId: number;
   itemName: string;
+  categoryName?: string | null;
   price: number;
   quantity: number;
   unit?: string | null;
@@ -20,5 +21,8 @@ export interface TransactionDto {
   isAiEstimated: boolean;
   createdAt: string;
   note: string | null;
+  paymentMethod?: string | null;
+  imagePreviewUrl?: string | null;
+  source?: 'receipt' | 'manual' | 'snap';
   transactionDetails: TransactionDetailDto[];
 }

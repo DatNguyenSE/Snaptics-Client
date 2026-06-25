@@ -28,7 +28,7 @@
           <article class="transaction-card" (click)="openTransactionDetail(transaction)" style="cursor: pointer;">
             <div class="transaction-media" [class]="getMediaClass(transaction)">
               @if (isAnalyzedImage(transaction)) {
-                <img [src]="getImageUrl(transaction.imageKey!)" alt="transaction" />
+                <img [src]="getImageUrl(transaction)!" alt="transaction" />
               } @else {
                 <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
               }

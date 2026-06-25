@@ -24,3 +24,41 @@ body {
 .custom-scrollbar::-webkit-scrollbar {
     display: none;
 }
+.section-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sw-muted-foreground);
+}
+.snap-button {
+    border-radius: 20px;
+    padding: 14px 16px;
+    border: 1px solid var(--sw-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #fff;
+    color: var(--sw-foreground);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+.snap-button:hover {
+    transform: translateY(-2px);
+}
+.snap-button:active {
+    transform: scale(0.98);
+}
+.snap-button--primary {
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--sw-primary), #7c3aed);
+    color: #fff;
+    box-shadow: 0 18px 34px rgba(91, 123, 250, 0.18);
+}
+.snap-button--ghost {
+    background: #f8faff;
+}

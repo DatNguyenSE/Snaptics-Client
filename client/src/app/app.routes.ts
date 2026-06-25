@@ -84,6 +84,18 @@ export const routes: Routes = [
           import('./user-page/user-features/scan/scan').then((m) => m.Scan),
       },
       {
+        path: 'snap-item',
+        loadComponent: () =>
+          import('./user-page/user-features/snap-item/snap-item').then((m) => m.SnapItem),
+      },
+      {
+        path: 'manual-entry',
+        loadComponent: () =>
+          import('./user-page/user-features/manual-entry/manual-entry').then(
+            (m) => m.ManualEntry,
+          ),
+      },
+      {
         path: 'reminders',
         loadComponent: () =>
           import('./user-page/user-features/reminder/reminder').then((m) => m.Reminder),

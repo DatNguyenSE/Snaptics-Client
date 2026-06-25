@@ -1,0 +1,124 @@
+<section class="snap-item-page">
+  <div class="snap-item-page__content">
+    <header class="snap-item-header">
+      <button class="snap-item-header__back" type="button" (click)="cancel()">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Back
+      </button>
+
+      <div>
+        <p class="section-eyebrow">Quick Action</p>
+        <h1>Snap Item</h1>
+        <p class="snap-item-header__copy">
+          Capture a product or upload an image, then confirm the extracted details before saving.
+        </p>
+      </div>
+    </header>
+
+    <section class="snap-preview" [class.snap-preview--interactive]="snapState === 'ready'">
+      @if (!hasPreview) {
+        <div class="snap-preview__empty">
+          <span class="material-symbols-outlined">photo_camera</span>
+          <h2>Capture or upload an item photo</h2>
+          <p>We will prepare an editable draft with item name, amount, category, date, and note.</p>
+        </div>
+      } @else {
+        <img [src]="previewUrl!" alt="Selected item preview" class="snap-preview__image" />
+      }
+
+      @if (snapState === 'extracting' || snapState === 'saving') {
+        <div class="snap-preview__overlay">
+          <div class="snap-preview__loader">
+            <span class="material-symbols-outlined">
+              {{ snapState === 'saving' ? 'check_circle' : 'auto_awesome' }}
+            </span>
+            <strong>{{ snapState === 'saving' ? 'Saving item' : 'Extracting item details' }}</strong>
+            <p>
+              {{
+                snapState === 'saving'
+                  ? 'Adding this item to your transaction timeline.'
+                  : 'Review the suggested values once they are ready.'
+              }}
+            </p>
+          </div>
+        </div>
+      }
+    </section>
+
+    @if (snapState === 'error') {
+      <article class="snap-feedback snap-feedback--error">
+        <span class="material-symbols-outlined">error</span>
+        <p>{{ errorMessage }}</p>
+      </article>
+    }
+
+    @if (snapState === 'ready') {
+      <article class="snap-feedback">
+        <span class="material-symbols-outlined">
+          {{ extractionSource === 'ai' ? 'smart_toy' : 'auto_fix_high' }}
+        </span>
+        <p>
+          {{
+            extractionSource === 'ai'
+              ? 'AI filled the draft for you. Double-check the details before saving.'
+              : 'A mock draft was prepared because a complete AI response was not available yet.'
+          }}
+        </p>
+      </article>
+    }
+
+    <div class="snap-actions">
+      <input
+        #captureInput
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        (change)="onCaptureSelected($event)"
+      />
+      <input #uploadInput type="file" accept="image/*" hidden (change)="onUploadSelected($event)" />
+
+      <button class="snap-button snap-button--primary" type="button" (click)="openCapture()">
+        <span class="material-symbols-outlined">photo_camera</span>
+        Take Photo
+      </button>
+
+      <button class="snap-button snap-button--secondary" type="button" (click)="openUpload()">
+        <span class="material-symbols-outlined">upload</span>
+        Upload Image
+      </button>
+
+      @if (hasPreview) {
+        <button class="snap-button snap-button--ghost" type="button" (click)="resetSnapFlow()">
+          <span class="material-symbols-outlined">replay</span>
+          Retake
+        </button>
+      }
+    </div>
+
+    @if (snapState === 'ready' || snapState === 'saving') {
+      <section class="snap-confirmation">
+        <div class="snap-confirmation__header">
+          <div>
+            <p class="section-eyebrow">Confirmation</p>
+            <h2>Review extracted details</h2>
+          </div>
+          <span class="snap-confirmation__badge">
+            <span class="material-symbols-outlined">bolt</span>
+            {{ extractionSource === 'ai' ? 'AI Assist' : 'Mock Assist' }}
+          </span>
+        </div>
+
+        <app-transaction-entry-form
+          [form]="form"
+          [categories]="categories"
+          [isSaving]="snapState === 'saving'"
+          saveLabel="Save Item"
+          cancelLabel="Cancel"
+          (save)="saveTransaction()"
+          (cancel)="cancel()"
+        ></app-transaction-entry-form>
+      </section>
+    }
+  </div>
+</section>
