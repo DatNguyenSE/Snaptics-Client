@@ -1,12 +1,12 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LanguageService } from '../../../core/services/language-service';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { TransactionDto } from '../../../models/transaction.dto';
-import { UserHeader } from '../../user-layout/user-header/user-header';
-import { DatePipe } from '@angular/common';
-import { TransactionDetailModal } from '../transaction/transaction-detail-modal/transaction-detail-modal';
 import { environment } from '../../../environments/environment.development';
+import { UserHeader } from '../../user-layout/user-header/user-header';
+import { TransactionDetailModal } from '../transaction/transaction-detail-modal/transaction-detail-modal';
 
 interface QuickAction {
   id: string;
@@ -49,13 +49,14 @@ export class Dashboard implements OnInit {
       labelKey: 'dashboard.quickAction.capture',
       icon: 'photo_camera',
       iconClass: 'quick-action__icon--violet',
+      route: '/user/snap-item',
     },
     {
       id: 'manual',
       labelKey: 'dashboard.quickAction.manual',
       icon: 'edit_square',
       iconClass: 'quick-action__icon--amber',
-      route: '/user/transactions',
+      route: '/user/manual-entry',
     },
   ];
 
@@ -69,10 +70,9 @@ export class Dashboard implements OnInit {
   ngOnInit(): void {
     this.transactionService.getTransactions().subscribe({
       next: (data) => {
-        // limit to 4 recent for dashboard
         this.recentTransactions = data.slice(0, 4);
       },
-      error: (err) => console.error('Failed to load transactions', err)
+      error: (err) => console.error('Failed to load transactions', err),
     });
   }
 
@@ -89,24 +89,36 @@ export class Dashboard implements OnInit {
   }
 
   isAnalyzedImage(transaction: TransactionDto): boolean {
-    return !!(transaction.isAiEstimated && transaction.imageKey);
+    return !!this.getImageUrl(transaction);
   }
 
-  getImageUrl(imageKey: string): string {
-    return `${environment.apiUrl}s3/image?key=${encodeURIComponent(imageKey)}`;
+  getImageUrl(transaction: TransactionDto): string | null {
+    if (transaction.imagePreviewUrl) {
+      return transaction.imagePreviewUrl;
+    }
+
+    if (transaction.imageKey) {
+      return `${environment.apiUrl}s3/image?key=${encodeURIComponent(transaction.imageKey)}`;
+    }
+
+    return null;
   }
 
   getIcon(transaction: TransactionDto): string {
+    if (transaction.source === 'manual') return 'edit_square';
+    if (transaction.source === 'snap') return 'photo_camera';
+
     if (transaction.transactionDetails?.length > 1) {
-      return 'receipt_long'; // Icon for bill
-    } else if (transaction.transactionDetails?.length === 1) {
+      return 'receipt_long';
+    }
+
+    if (transaction.transactionDetails?.length === 1) {
       const name = transaction.transactionDetails[0].itemName?.toLowerCase() || '';
       if (name.includes('coffee') || name.includes('tea') || name.includes('drink')) return 'local_cafe';
       if (name.includes('noodle') || name.includes('food') || name.includes('rice')) return 'lunch_dining';
-      return 'photo_camera'; // Icon for generic scanned image item
+      return 'photo_camera';
     }
 
-    // Fallbacks
     if (transaction.name?.toLowerCase().includes('coffee')) return 'local_cafe';
     if (transaction.name?.toLowerCase().includes('ride') || transaction.name?.toLowerCase().includes('grab')) return 'directions_car';
     return 'receipt_long';
@@ -115,7 +127,7 @@ export class Dashboard implements OnInit {
   getMediaClass(transaction: TransactionDto): string {
     if (transaction.transactionDetails?.length > 1) return 'transaction-media--amber';
     if (transaction.transactionDetails?.length === 1) return 'transaction-media--emerald';
-    
+
     if (transaction.name?.toLowerCase().includes('coffee') || transaction.name?.toLowerCase().includes('tea')) return 'transaction-media--blue';
     if (transaction.name?.toLowerCase().includes('noodle') || transaction.name?.toLowerCase().includes('food')) return 'transaction-media--amber';
     if (transaction.name?.toLowerCase().includes('ride') || transaction.name?.toLowerCase().includes('grab')) return 'transaction-media--emerald';
@@ -134,9 +146,15 @@ export class Dashboard implements OnInit {
 
   getCategoryKey(transaction: TransactionDto): string {
     if (transaction.transactionDetails?.length > 1) {
-      return 'dashboard.category.bill'; // Hiển thị "Hóa đơn"
-    } else if (transaction.transactionDetails?.length === 1) {
-      return transaction.transactionDetails[0].itemName || 'dashboard.category.other'; // Lấy thẳng tên item từ detail
+      return 'dashboard.category.bill';
+    }
+
+    if (transaction.transactionDetails?.length === 1) {
+      return (
+        transaction.transactionDetails[0].categoryName ||
+        transaction.transactionDetails[0].itemName ||
+        'dashboard.category.other'
+      );
     }
 
     if (transaction.name?.toLowerCase().includes('coffee') || transaction.name?.toLowerCase().includes('tea')) return 'dashboard.category.drinks';

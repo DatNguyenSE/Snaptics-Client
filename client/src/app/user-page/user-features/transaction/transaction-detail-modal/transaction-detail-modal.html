@@ -20,11 +20,20 @@
         </p>
       }
 
-      @if (transaction.imageKey) {
+      @if (transaction.paymentMethod) {
+        <div class="transaction-meta-row">
+          <span class="transaction-meta-chip">
+            <span class="material-symbols-outlined">credit_card</span>
+            {{ transaction.paymentMethod }}
+          </span>
+        </div>
+      }
+
+      @if (hasImage()) {
         <div class="transaction-image-container">
           <button class="toggle-image-button" (click)="toggleImage()" type="button">
             <span class="material-symbols-outlined">image</span>
-            {{ isImageExpanded ? (language.currentLang() === 'vi' ? 'Ẩn ảnh hoá đơn' : 'Hide Receipt Image') : (language.currentLang() === 'vi' ? 'Xem ảnh hoá đơn' : 'View Receipt Image') }}
+            {{ imageToggleLabel }}
           </button>
           
           @if (isImageExpanded) {
@@ -35,7 +44,7 @@
                   <span>Loading...</span>
                 </div>
               } @else if (imageUrl) {
-                <img [src]="imageUrl" alt="Receipt Image" class="receipt-image" />
+                <img [src]="imageUrl" alt="Transaction Image" class="receipt-image" />
               }
             </div>
           }
@@ -49,8 +58,11 @@
             <li class="item-row">
               <div class="item-info">
                 <span class="item-name">{{ item.itemName }}</span>
+                @if (item.categoryName) {
+                  <span class="item-category">{{ item.categoryName }}</span>
+                }
                 @if (item.estimatedCalories) {
-                  <span class="item-calories">🔥 {{ item.estimatedCalories }} kcal</span>
+                  <span class="item-calories">{{ item.estimatedCalories }} kcal</span>
                 }
               </div>
               <div class="item-price-qty">

@@ -21,9 +21,16 @@
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  gap: 2px;
-  padding: 8px 4px calc(20px + env(safe-area-inset-bottom));
+  justify-content: flex-start;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 8px 8px calc(20px + env(safe-area-inset-bottom));
+}
+
+.bottom-nav__inner::-webkit-scrollbar {
+  display: none;
 }
 
 .bottom-nav__item {
@@ -32,10 +39,10 @@
   background: transparent;
   color: var(--sw-muted-foreground);
   text-decoration: none;
-  min-width: 0;
-  padding: 4px 10px;
+  min-width: 74px;
+  padding: 6px 8px;
   display: flex;
-  flex: 1 1 0;
+  flex: 0 0 auto;
   flex-direction: column;
   align-items: center;
   gap: 4px;
@@ -67,7 +74,9 @@
 .bottom-nav__label {
   font-size: 0.625rem;
   font-weight: 700;
-  white-space: nowrap;
+  line-height: 1.15;
+  text-align: center;
+  white-space: normal;
 }
 
 .bottom-nav__item--active {
@@ -80,7 +89,7 @@
 
 .bottom-nav__item--account {
   position: relative;
-  width: 100%;
+  width: auto;
 }
 
 .bottom-nav__account-avatar {
@@ -135,7 +144,7 @@
 
 .account-dropdown--mobile {
   display: flex;
-  flex: 1 1 0;
+  flex: 0 0 auto;
 }
 
 .account-dropdown__avatar-button {
@@ -397,7 +406,7 @@
     padding: 12px;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
   }
 
   .sidebar__item {
@@ -492,12 +501,13 @@
 
 @media (max-width: 639px) {
   .bottom-nav__inner {
-    gap: 0;
-    padding-inline: 2px;
+    gap: 4px;
+    padding-inline: 6px;
   }
 
   .bottom-nav__item {
-    padding-inline: 6px;
+    min-width: 70px;
+    padding-inline: 7px;
   }
 
   .bottom-nav__label {

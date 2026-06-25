@@ -1,0 +1,46 @@
+<section class="manual-entry-page">
+  <div class="manual-entry-page__content">
+    <header class="manual-entry-hero">
+      <button class="manual-entry-hero__back" type="button" (click)="cancel()">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Back
+      </button>
+
+      <div class="manual-entry-hero__copy">
+        <p class="section-eyebrow">Quick Action</p>
+        <h1>Manual Entry</h1>
+        <p>
+          Add an expense manually when you already know the item, amount, category, and payment
+          details.
+        </p>
+      </div>
+
+      <div class="manual-entry-hero__badge">
+        <span class="material-symbols-outlined">edit_square</span>
+        Quick expense draft
+      </div>
+    </header>
+
+    <section class="manual-entry-intro">
+      <div>
+        <p class="section-eyebrow">Entry Details</p>
+        <h2>Save a transaction in one step</h2>
+      </div>
+      <p>
+        Required fields are title, amount, and date. Everything else is optional but helps keep
+        your timeline cleaner.
+      </p>
+    </section>
+
+    <app-transaction-entry-form
+      [form]="form"
+      [categories]="categories"
+      [showPaymentMethod]="true"
+      [isSaving]="isSaving"
+      saveLabel="Save Entry"
+      cancelLabel="Cancel"
+      (save)="saveTransaction()"
+      (cancel)="cancel()"
+    ></app-transaction-entry-form>
+  </div>
+</section>
