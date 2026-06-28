@@ -27,3 +27,18 @@
 .user-main {
   min-height: 100vh;
 }
+
+@media (max-width: 1023px) {
+  .snaptics-shell {
+    height: 100dvh;
+    height: 100vh; /* fallback */
+    overflow: hidden;
+  }
+  
+  .user-main {
+    height: calc(100dvh - 80px);
+    height: calc(100vh - 80px); /* fallback */
+    min-height: auto;
+    overflow-y: auto;
+  }
+}

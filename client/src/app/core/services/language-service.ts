@@ -21,9 +21,9 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
     },
     nav: {
       dashboard: 'Tổng quan',
-      scan: 'Scan',
-      snapItem: 'Chá»¥p mÃ³n Ä‘á»“',
-      manualEntry: 'Nháº­p thá»§ cÃ´ng',
+      scan: 'Quét',
+      snapItem: 'Chụp món đồ',
+      manualEntry: 'Nhập thủ công',
       transactions: 'Giao dịch',
       reminders: 'Nhắc nhở',
       account: 'Tài khoản',
