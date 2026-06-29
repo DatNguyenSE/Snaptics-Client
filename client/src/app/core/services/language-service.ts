@@ -48,6 +48,8 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       recentTransactions: 'Giao dịch gần đây',
       viewAll: 'Xem tất cả',
       aiGen: 'AI GEN',
+      weeklySpending: 'Chi tiêu tuần này',
+      byCategory: 'Theo danh mục',
       quickAction: {
         scan: 'Quét hóa đơn',
         capture: 'Chụp món đồ',
@@ -56,11 +58,12 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       category: {
         drinks: 'Đồ uống',
         drink: 'Đồ uống',
-        food: 'Đồ ăn',
+        food: 'Ăn uống',
         travel: 'Di chuyển',
         bill: 'Hóa đơn',
         animals: 'Thú cưng',
         electronics: 'Điện tử',
+        other: 'Khác',
       },
     },
     transaction: {
@@ -143,6 +146,8 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       recentTransactions: 'Recent Transactions',
       viewAll: 'View All',
       aiGen: 'AI GEN',
+      weeklySpending: 'Weekly Spending',
+      byCategory: 'By Category',
       quickAction: {
         scan: 'Scan Receipt',
         capture: 'Snap Item',
@@ -156,6 +161,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         bill: 'Bill',
         animals: 'Animals',
         electronics: 'Electronics',
+        other: 'Other',
       },
     },
     transaction: {

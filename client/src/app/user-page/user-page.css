@@ -19,6 +19,19 @@
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
+:host-context(html.dark-theme) .snaptics-shell,
+html.dark-theme .snaptics-shell {
+  --sw-background: #0f172a;
+  --sw-foreground: #f8fafc;
+  --sw-card: rgba(30, 41, 59, 0.6);
+  --sw-primary: #8b5cf6;
+  --sw-primary-soft: rgba(139, 92, 246, 0.1);
+  --sw-muted: #1e293b;
+  --sw-muted-foreground: #94a3b8;
+  --sw-border: rgba(255, 255, 255, 0.1);
+  --sw-shadow-sm: 0 14px 32px rgba(0, 0, 0, 0.4);
+}
+
 .snaptics-shell,
 .snaptics-shell * {
   box-sizing: border-box;
