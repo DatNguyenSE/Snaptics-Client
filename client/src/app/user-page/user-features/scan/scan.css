@@ -86,7 +86,7 @@
   width: 32px;
   height: 32px;
   border-radius: 999px;
-  background: #edf2ff;
+  background: var(--sw-muted);
   color: var(--sw-muted-foreground);
   display: inline-flex;
   align-items: center;
@@ -126,7 +126,7 @@
   width: calc(100% - 44px);
   height: 2px;
   border-radius: 999px;
-  background: #e8edff;
+  background: var(--sw-border);
 }
 
 .scan-step__line--active {
@@ -143,9 +143,7 @@
 
 .scan-preview--upload {
   min-height: 18rem;
-  background:
-    radial-gradient(circle at top left, rgba(91, 123, 250, 0.12), transparent 46%),
-    linear-gradient(180deg, #ffffff, #f8faff);
+  background: var(--sw-card);
   padding: 24px;
 }
 
@@ -156,13 +154,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(244, 247, 255, 0.72);
+  background: var(--sw-muted);
 }
 
 .scan-preview__sheet {
   width: min(280px, 100%);
   border-radius: 24px;
-  background: #ffffff;
+  background: var(--sw-background);
   padding: 24px;
   text-align: center;
   box-shadow:
@@ -214,7 +212,7 @@
 
 .scan-preview--scanning {
   min-height: 18rem;
-  background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+  background: var(--sw-card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -225,7 +223,7 @@
   width: 180px;
   height: 180px;
   border-radius: 999px;
-  background: rgba(99, 102, 241, 0.12);
+  background: var(--sw-primary-soft);
   animation: scanPulse 2s ease-in-out infinite;
 }
 
@@ -261,14 +259,14 @@
 .scan-preview__loader-copy p {
   font-size: 0.9375rem;
   font-weight: 800;
-  color: #312e81;
+  color: var(--sw-foreground);
 }
 
 .scan-preview__loader-copy span {
   display: block;
   margin-top: 4px;
   font-size: 0.75rem;
-  color: #6366f1;
+  color: var(--sw-primary);
 }
 
 .scan-actions {
@@ -316,7 +314,7 @@
 
 .scan-button--secondary,
 .scan-button--ghost {
-  background: #ffffff;
+  background: var(--sw-card);
   color: var(--sw-foreground);
 }
 
@@ -351,8 +349,8 @@
 
 .receipt-card__header {
   padding: 18px 20px;
-  background: rgba(248, 250, 255, 0.96);
-  border-bottom: 1px solid rgba(91, 123, 250, 0.1);
+  background: var(--sw-muted);
+  border-bottom: 1px solid var(--sw-border);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -429,14 +427,21 @@
 
 .receipt-item__price {
   min-width: 150px;
-  border: 1px solid rgba(91, 123, 250, 0.14);
+  border: 1px solid var(--sw-border);
   border-radius: 16px;
-  background: #f8faff;
+  background: var(--sw-muted);
   padding: 10px 12px;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.receipt-item__price:focus-within {
+  border-color: var(--sw-primary);
+  box-shadow: 0 0 0 4px var(--sw-primary-soft);
+  background: var(--sw-card);
 }
 
 .receipt-item__price input {

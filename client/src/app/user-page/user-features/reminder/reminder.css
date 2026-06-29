@@ -244,14 +244,21 @@
 }
 
 .reminder-input {
-  border: 1px solid rgba(91, 123, 250, 0.14);
+  border: 1px solid var(--sw-border);
   border-radius: 18px;
-  background: #f8faff;
+  background: var(--sw-muted);
   padding: 12px 14px;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reminder-input:focus-within {
+  border-color: var(--sw-primary);
+  box-shadow: 0 0 0 4px var(--sw-primary-soft);
+  background: var(--sw-card);
 }
 
 .reminder-input input {

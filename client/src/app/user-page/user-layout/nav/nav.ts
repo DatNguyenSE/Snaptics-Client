@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AccountService } from '../../../core/services/account-service';
 import { AppLanguage, LanguageService } from '../../../core/services/language-service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 interface AppNavItem {
   id: string;
@@ -36,7 +37,7 @@ export class Nav {
   private readonly accountService = inject(AccountService);
 
   protected readonly language = inject(LanguageService);
-
+  protected readonly theme = inject(ThemeService);
   readonly navItems: AppNavItem[] = [
     {
       id: 'dashboard',
