@@ -83,6 +83,12 @@ export class Nav {
       icon: 'notifications',
       route: '/user/reminders',
     },
+    {
+      id: 'settings',
+      labelKey: 'nav.settings',
+      icon: 'settings',
+      route: '/settings',
+    },
   ];
   readonly languages: LanguageOption[] = [
     { code: 'vi', label: 'VI' },
@@ -149,8 +155,8 @@ export class Nav {
   }
 
   logout(): void {
-    this.closeMenus();
-    this.accountService.logout('/dang-nhap');
+    this.closeAccountMenu();
+    this.accountService.logout('/landing');
   }
 
   @HostListener('document:click', ['$event'])

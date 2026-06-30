@@ -61,13 +61,23 @@
     <div class="sidebar__account">
       <div class="account-dropdown account-dropdown--desktop">
         <button
-          class="account-dropdown__avatar-button"
+          class="sidebar__account-trigger"
           type="button"
           aria-haspopup="menu"
           [attr.aria-expanded]="isAccountMenuOpen"
           (click)="toggleAccountMenu($event)"
         >
           <span class="account-dropdown__avatar">{{ account.initials }}</span>
+          <div class="sidebar__account-copy">
+            <p class="sidebar__account-name">{{ account.fullName }}</p>
+            <span class="sidebar__account-username">@{{ account.username }}</span>
+          </div>
+          <span
+            class="material-symbols-outlined sidebar__account-chevron"
+            [class.sidebar__account-chevron--open]="isAccountMenuOpen"
+          >
+            expand_more
+          </span>
         </button>
 
         @if (isAccountMenuOpen) {
@@ -76,20 +86,8 @@
             role="menu"
             (click)="$event.stopPropagation()"
           >
-            <div class="account-dropdown__header">
-              <div class="account-dropdown__avatar account-dropdown__avatar--large">
-                {{ account.initials }}
-              </div>
-              <div class="account-dropdown__details">
-                <p class="account-dropdown__name account-dropdown__name--panel">
-                  {{ account.fullName }}
-                </p>
-                <span class="account-dropdown__username">@{{ account.username }}</span>
-              </div>
-            </div>
-
-            <div class="account-dropdown__actions">
-              <div class="account-dropdown__language-row">
+            <div class="account-dropdown__actions account-dropdown__actions--compact">
+              <div class="account-dropdown__language-row account-dropdown__language-row--compact">
                 <span class="account-dropdown__language-label">{{ language.t('common.language') }}</span>
                 <div
                   class="language-switch language-switch--panel"
@@ -150,9 +148,6 @@
             </div>
           </div>
         }
-      </div>
-      <div class="sidebar__account-copy">
-        <p class="sidebar__account-name">{{ account.fullName }}</p>
       </div>
     </div>
   </div>
@@ -234,20 +229,8 @@
           [style.right.px]="accountMenuRight"
           (click)="$event.stopPropagation()"
         >
-          <div class="account-dropdown__header">
-            <div class="account-dropdown__avatar account-dropdown__avatar--large">
-              {{ account.initials }}
-            </div>
-            <div class="account-dropdown__details">
-              <p class="account-dropdown__name account-dropdown__name--panel">
-                {{ account.fullName }}
-              </p>
-              <span class="account-dropdown__username">@{{ account.username }}</span>
-            </div>
-          </div>
-
-          <div class="account-dropdown__actions">
-            <div class="account-dropdown__language-row">
+          <div class="account-dropdown__actions account-dropdown__actions--compact">
+            <div class="account-dropdown__language-row account-dropdown__language-row--compact">
               <span class="account-dropdown__language-label">{{ language.t('common.language') }}</span>
               <div
                 class="language-switch language-switch--panel"

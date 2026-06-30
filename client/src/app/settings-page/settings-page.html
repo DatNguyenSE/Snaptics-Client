@@ -81,6 +81,21 @@
         </div>
       </section>
 
+      <section>
+        <p class="settings-section-title">{{ language.t('nav.account') }}</p>
+
+        <button class="settings-logout" type="button" (click)="logoutToHome()">
+          <span class="settings-logout__main">
+            <span class="settings-logout__icon">
+              <span class="material-symbols-outlined">logout</span>
+            </span>
+            <span class="settings-logout__label">{{ language.t('nav.logout') }}</span>
+          </span>
+
+          <span class="material-symbols-outlined settings-logout__arrow">north_west</span>
+        </button>
+      </section>
+
       <p class="settings-version">Snaptics AI v1.0.0</p>
     </div>
   </main>

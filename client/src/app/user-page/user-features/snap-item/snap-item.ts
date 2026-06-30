@@ -5,6 +5,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { catchError, map, of } from 'rxjs';
 import { AiService } from '../../../core/services/ai.service';
 import { CategoryService } from '../../../core/services/category.service';
+import { LanguageService } from '../../../core/services/language-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { CategoryDto } from '../../../models/category.dto';
@@ -29,6 +30,7 @@ export class SnapItem implements OnInit, OnDestroy {
   private readonly toast = inject(ToastService);
   private readonly location = inject(Location);
   private readonly router = inject(Router);
+  readonly language = inject(LanguageService);
 
   @ViewChild('captureInput') captureInput?: ElementRef<HTMLInputElement>;
   @ViewChild('uploadInput') uploadInput?: ElementRef<HTMLInputElement>;
@@ -129,12 +131,12 @@ export class SnapItem implements OnInit, OnDestroy {
       })
       .subscribe({
         next: () => {
-          this.toast.success('Snap item saved to your transactions.');
+          this.toast.success(this.language.t('snapItem.toast.saved'));
           void this.router.navigateByUrl('/user/dashboard');
         },
         error: () => {
           this.snapState = 'ready';
-          this.toast.error('Unable to save this item right now.');
+          this.toast.error(this.language.t('snapItem.toast.saveFailed'));
         },
       });
   }
@@ -201,7 +203,7 @@ export class SnapItem implements OnInit, OnDestroy {
           this.snapState = 'ready';
         },
         error: () => {
-          this.errorMessage = 'We could not extract item details from this image.';
+          this.errorMessage = this.language.t('snapItem.error.extractFailed');
           this.snapState = 'error';
         },
       });

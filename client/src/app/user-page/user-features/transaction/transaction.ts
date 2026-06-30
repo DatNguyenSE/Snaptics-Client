@@ -134,4 +134,16 @@ export class Transaction implements OnInit {
     if (transaction.name?.toLowerCase().includes('ride') || transaction.name?.toLowerCase().includes('grab')) return 'dashboard.category.travel';
     return 'dashboard.category.other';
   }
+
+  getCategoryLabel(name: string | null | undefined): string {
+    if (!name) {
+      return this.language.t('dashboard.category.other');
+    }
+
+    const normalizedName = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const key = `dashboard.category.${normalizedName}`;
+    const translated = this.language.t(key);
+
+    return translated === key ? name : translated;
+  }
 }

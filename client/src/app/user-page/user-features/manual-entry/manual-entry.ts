@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { catchError, map, of } from 'rxjs';
 import { CategoryService } from '../../../core/services/category.service';
+import { LanguageService } from '../../../core/services/language-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { CategoryDto } from '../../../models/category.dto';
@@ -28,6 +29,7 @@ export class ManualEntry implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly location = inject(Location);
   private readonly router = inject(Router);
+  readonly language = inject(LanguageService);
 
   readonly form = new FormGroup<TransactionEntryFormControls>({
     title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -82,12 +84,12 @@ export class ManualEntry implements OnInit {
       })
       .subscribe({
         next: () => {
-          this.toast.success('Manual entry saved to your transactions.');
+          this.toast.success(this.language.t('manualEntry.toast.saved'));
           void this.router.navigateByUrl('/user/dashboard');
         },
         error: () => {
           this.isSaving = false;
-          this.toast.error('Unable to save this entry right now.');
+          this.toast.error(this.language.t('manualEntry.toast.saveFailed'));
         },
       });
   }

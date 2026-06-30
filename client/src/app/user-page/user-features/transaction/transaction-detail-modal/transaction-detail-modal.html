@@ -7,7 +7,7 @@
         <h2>{{ transaction.name || language.t('dashboard.category.bill') }}</h2>
         <span class="modal-date">{{ transaction.transactionDate | date:'medium' }}</span>
       </div>
-      <button class="close-button" (click)="onClose()" aria-label="Close">
+      <button class="close-button" (click)="onClose()" [attr.aria-label]="language.t('transaction.closeAria')">
         <span class="material-symbols-outlined">close</span>
       </button>
     </header>
@@ -24,7 +24,7 @@
         <div class="transaction-meta-row">
           <span class="transaction-meta-chip">
             <span class="material-symbols-outlined">credit_card</span>
-            {{ transaction.paymentMethod }}
+            {{ getPaymentMethodLabel(transaction.paymentMethod) }}
           </span>
         </div>
       }
@@ -41,10 +41,10 @@
               @if (isLoadingImage) {
                 <div class="image-loader">
                   <span class="material-symbols-outlined loading-icon">progress_activity</span>
-                  <span>Loading...</span>
+                  <span>{{ language.t('transaction.loadingImage') }}</span>
                 </div>
               } @else if (imageUrl) {
-                <img [src]="imageUrl" alt="Transaction Image" class="receipt-image" />
+                <img [src]="imageUrl" [alt]="language.t('transaction.imageAlt')" class="receipt-image" />
               }
             </div>
           }
@@ -59,7 +59,7 @@
               <div class="item-info">
                 <span class="item-name">{{ item.itemName }}</span>
                 @if (item.categoryName) {
-                  <span class="item-category">{{ item.categoryName }}</span>
+                  <span class="item-category">{{ getCategoryLabel(item.categoryName) }}</span>
                 }
                 @if (item.estimatedCalories) {
                   <span class="item-calories">{{ item.estimatedCalories }} kcal</span>
