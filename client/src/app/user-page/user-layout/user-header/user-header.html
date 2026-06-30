@@ -1,9 +1,38 @@
 <header class="user-header">
   <div class="user-header__avatar-wrapper">
-    <img src="/mascot/money.png" alt="Mascot Avatar" class="user-header__avatar-img">
+    <img src="/mascot/money.png" alt="Mascot Avatar" class="user-header__avatar-img" />
   </div>
+
   <div class="user-header__text">
     <h3>Xin chào, {{ userName }}!</h3>
     <p>Lưu giữ kỷ niệm, tính toán thu chi - Chúng tôi luôn đồng hành cùng bạn!</p>
+  </div>
+
+  <div class="user-header__actions">
+    <div class="user-header__notification-shell" #notificationShell>
+      <button
+        class="user-header__notification"
+        type="button"
+        aria-controls="user-notification-popover"
+        aria-haspopup="dialog"
+        [attr.aria-expanded]="isNotificationOpen()"
+        [attr.aria-label]="notificationLabel"
+        (click)="toggleNotifications()"
+      >
+        <span class="material-symbols-outlined">notifications</span>
+        @if (unreadNotificationCount() > 0) {
+          <span class="user-header__notification-badge" aria-hidden="true">
+            {{ unreadNotificationCount() }}
+          </span>
+        }
+      </button>
+
+      <app-user-notification-popover
+        [isOpen]="isNotificationOpen()"
+        [notifications]="notifications()"
+        (notificationRead)="markNotificationAsRead($event)"
+        (markAllRead)="markAllNotificationsAsRead()"
+      />
+    </div>
   </div>
 </header>

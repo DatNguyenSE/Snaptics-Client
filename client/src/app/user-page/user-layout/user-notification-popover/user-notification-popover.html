@@ -1,0 +1,73 @@
+<section
+  id="user-notification-popover"
+  class="notification-popover"
+  [class.notification-popover--open]="isOpen()"
+  [attr.aria-hidden]="isOpen() ? null : 'true'"
+  aria-labelledby="user-notification-popover-title"
+  role="dialog"
+>
+  <div class="notification-popover__header">
+    <div class="notification-popover__title-block">
+      <h2 id="user-notification-popover-title">{{ copy().title }}</h2>
+      <p>{{ copy().subtitle }}</p>
+    </div>
+
+    @if (unreadCount() > 0) {
+      <button
+        class="notification-popover__mark-all"
+        type="button"
+        (click)="handleMarkAllRead()"
+      >
+        {{ copy().markAllRead }}
+      </button>
+    }
+  </div>
+
+  @if (notifications().length > 0) {
+    <div class="notification-popover__list custom-scrollbar">
+      @for (notification of notifications(); track notification.id) {
+        <button
+          class="notification-item"
+          [attr.data-tone]="notificationMeta[notification.type].tone"
+          [class.notification-item--read]="notification.isRead"
+          type="button"
+          (click)="handleNotificationClick(notification)"
+        >
+          <span class="notification-item__icon" aria-hidden="true">
+            <span class="material-symbols-outlined">
+              {{ notificationMeta[notification.type].icon }}
+            </span>
+          </span>
+
+          <span class="notification-item__content">
+            <span class="notification-item__meta">
+              <span class="notification-item__type">
+                {{ labelForType(notification.type) }}
+              </span>
+              <span class="notification-item__time">
+                {{ notification.time }}
+              </span>
+            </span>
+
+            <span class="notification-item__title">
+              {{ notification.title }}
+            </span>
+
+            <span class="notification-item__description">
+              {{ notification.description }}
+            </span>
+          </span>
+
+          @if (!notification.isRead) {
+            <span class="notification-item__status" aria-hidden="true"></span>
+          }
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="notification-popover__empty">
+      <span class="material-symbols-outlined" aria-hidden="true">notifications_off</span>
+      <p>{{ copy().empty }}</p>
+    </div>
+  }
+</section>
