@@ -1,140 +1,229 @@
-<div class="register-page">
-  <div class="register-card">
-    <div class="register-header">
-      <h1>Create an Account</h1>
-      <p>Create a new account to use Snaptics</p>
+<div class="register-wrapper">
+  <div class="register-split-card">
+    
+    <!-- Left Side: Project Image/Promo -->
+    <div class="register-image-side">
+      <div class="image-content">
+        <div class="promo-text">
+          <h2>Join Snaptics AI</h2>
+          <p>Create an account to start scanning, tracking, and managing your expenses intelligently.</p>
+        </div>
+      </div>
+      <!-- Decorative background elements -->
+      <div class="dec-circle dec-1"></div>
+      <div class="dec-circle dec-2"></div>
     </div>
-    <form class="register-form" (ngSubmit)="onRegister()">
-      <div class="form-group">
-        <label>Full Name</label>
-        <input
-          type="text"
-          name="fullName"
-          [(ngModel)]="fullName"
-          placeholder="Enter your full name"
-        />
-      </div>
 
-      <div class="form-group">
-        <label>Email</label>
-        <input
-          type="email"
-          name="email"
-          [(ngModel)]="email"
-          placeholder="Enter your email"
-        />
-      </div>
-
-      <div class="form-group">
-        <label>Password</label>
-        <div class="password-input-wrapper">
-          <input
-            [type]="showPassword ? 'text' : 'password'"
-            name="password"
-            [(ngModel)]="password"
-            placeholder="Enter your password"
-          />
-          <button
-            type="button"
-            class="password-toggle"
-            (click)="showPassword = !showPassword"
-            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-          >
-            <svg
-              *ngIf="!showPassword"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                d="M1 12C2.73 7.61 6.99 4.5 12 4.5S21.27 7.61 23 12c-1.73 4.39-5.99 7.5-11 7.5S2.73 16.39 1 12Z"
-              />
-              <circle cx="12" cy="12" r="3.25" />
-            </svg>
-            <svg
-              *ngIf="showPassword"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                d="M3 3l18 18"
-              />
-              <path
-                d="M10.58 10.58A2 2 0 0 0 12 14a2 2 0 0 0 1.42-.58"
-              />
-              <path
-                d="M9.88 5.09A10.94 10.94 0 0 1 12 4.5c5.01 0 9.27 3.11 11 7.5a11.83 11.83 0 0 1-4.04 5.19"
-              />
-              <path
-                d="M6.61 6.61A11.86 11.86 0 0 0 1 12c1.73 4.39 5.99 7.5 11 7.5 1.55 0 3.03-.3 4.39-.84"
-              />
-            </svg>
-          </button>
+    <!-- Right Side: Register Form -->
+    <div class="register-form-side">
+      <div class="form-container">
+        <div class="register-header">
+          <div class="brand-text-container">
+            <span class="brand-text-logo">Snaptics</span>
+          </div>
+          <h1>Create an Account</h1>
+          <p>Fill in the details below to get started</p>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label>Confirm Password</label>
-        <div class="password-input-wrapper">
-          <input
-            [type]="showConfirmPassword ? 'text' : 'password'"
-            name="confirmPassword"
-            [(ngModel)]="confirmPassword"
-            placeholder="Re-enter your password"
-          />
-          <button
-            type="button"
-            class="password-toggle"
-            (click)="showConfirmPassword = !showConfirmPassword"
-            [attr.aria-label]="showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'"
+        @if (!isOtpStep) {
+        <form class="register-form" (ngSubmit)="onRegister()" #registerForm="ngForm">
+          <!-- Full Name -->
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <div class="input-icon-wrapper">
+              <span class="material-symbols-outlined input-icon">person</span>
+              <input
+                type="text"
+                id="fullName"
+                name="fullName"
+                [(ngModel)]="fullName"
+                required
+                placeholder="John Doe"
+                #nameInput="ngModel"
+                [class.invalid-field]="nameInput.invalid && nameInput.touched"
+              />
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <div class="input-icon-wrapper">
+              <span class="material-symbols-outlined input-icon">mail</span>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                [(ngModel)]="email"
+                required
+                email
+                placeholder="name@example.com"
+                #emailInput="ngModel"
+                [class.invalid-field]="emailInput.invalid && emailInput.touched"
+              />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-icon-wrapper">
+              <span class="material-symbols-outlined input-icon">lock</span>
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                id="password"
+                name="password"
+                [(ngModel)]="password"
+                required
+                placeholder="••••••••"
+                #passwordInput="ngModel"
+                [class.invalid-field]="passwordInput.invalid && passwordInput.touched"
+              />
+              <button 
+                type="button" 
+                class="password-toggle-btn" 
+                (click)="showPassword = !showPassword" 
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                tabindex="-1"
+              >
+                <span class="material-symbols-outlined">
+                  {{ showPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <div class="input-icon-wrapper">
+              <span class="material-symbols-outlined input-icon">lock_reset</span>
+              <input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                id="confirmPassword"
+                name="confirmPassword"
+                [(ngModel)]="confirmPassword"
+                required
+                placeholder="••••••••"
+                #confirmPasswordInput="ngModel"
+                [class.invalid-field]="confirmPasswordInput.invalid && confirmPasswordInput.touched"
+              />
+              <button 
+                type="button" 
+                class="password-toggle-btn" 
+                (click)="showConfirmPassword = !showConfirmPassword" 
+                [attr.aria-label]="showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'"
+                tabindex="-1"
+              >
+                <span class="material-symbols-outlined">
+                  {{ showConfirmPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Error / Success Messages -->
+          @if (errorMessage) {
+            <div class="error-banner">
+              <span class="material-symbols-outlined error-icon">error</span>
+              <p class="error-message">{{ errorMessage }}</p>
+            </div>
+          }
+          @if (successMessage) {
+            <div class="success-banner">
+              <span class="material-symbols-outlined success-icon">check_circle</span>
+              <p class="success-message">{{ successMessage }}</p>
+            </div>
+          }
+
+          <!-- Submit button -->
+          <button 
+            type="submit" 
+            [disabled]="!registerForm.valid || isLoading"
+            class="submit-btn"
           >
-            <svg
-              *ngIf="!showConfirmPassword"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                d="M1 12C2.73 7.61 6.99 4.5 12 4.5S21.27 7.61 23 12c-1.73 4.39-5.99 7.5-11 7.5S2.73 16.39 1 12Z"
-              />
-              <circle cx="12" cy="12" r="3.25" />
-            </svg>
-            <svg
-              *ngIf="showConfirmPassword"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                d="M3 3l18 18"
-              />
-              <path
-                d="M10.58 10.58A2 2 0 0 0 12 14a2 2 0 0 0 1.42-.58"
-              />
-              <path
-                d="M9.88 5.09A10.94 10.94 0 0 1 12 4.5c5.01 0 9.27 3.11 11 7.5a11.83 11.83 0 0 1-4.04 5.19"
-              />
-              <path
-                d="M6.61 6.61A11.86 11.86 0 0 0 1 12c1.73 4.39 5.99 7.5 11 7.5 1.55 0 3.03-.3 4.39-.84"
-              />
-            </svg>
+            @if (isLoading) {
+              <span class="spinner"></span>
+              <span>Registering...</span>
+            } @else {
+              <span>Create Account</span>
+              <span class="material-symbols-outlined btn-arrow">arrow_forward</span>
+            }
           </button>
-        </div>
+
+          <div class="login-link">
+            Already have an account?
+            <a routerLink="/login">Log In</a>
+          </div>
+        </form>
+        } @else {
+        <form class="register-form" (ngSubmit)="verifyOtp()" #otpForm="ngForm">
+          <div class="form-group">
+            <label for="otpCode">Verification Code</label>
+            <div class="otp-inputs-container">
+              @for (digit of otpDigits; track $index) {
+                <input
+                  type="text"
+                  maxlength="1"
+                  class="otp-digit-input"
+                  [(ngModel)]="otpDigits[$index]"
+                  name="otp{{$index}}"
+                  id="reg-otp-{{$index}}"
+                  (input)="onOtpInput($event, $index)"
+                  (keydown)="onOtpKeydown($event, $index)"
+                  (paste)="onOtpPaste($event)"
+                  [class.invalid-field]="otpForm.submitted && !otpCode"
+                  required
+                />
+              }
+            </div>
+          </div>
+
+          @if (errorMessage) {
+            <div class="error-banner">
+              <span class="material-symbols-outlined error-icon">error</span>
+              <p class="error-message">{{ errorMessage }}</p>
+            </div>
+          }
+          @if (successMessage) {
+            <div class="success-banner">
+              <span class="material-symbols-outlined success-icon">check_circle</span>
+              <p class="success-message">{{ successMessage }}</p>
+            </div>
+          }
+
+          <button 
+            type="submit" 
+            [disabled]="!otpForm.valid || isLoading"
+            class="submit-btn"
+          >
+            @if (isLoading) {
+              <span class="spinner"></span>
+              <span>Verifying...</span>
+            } @else {
+              <span>Verify OTP</span>
+              <span class="material-symbols-outlined btn-arrow">check_circle</span>
+            }
+          </button>
+
+          <div class="login-link" style="justify-content: center; margin-top: 16px;">
+            <span style="font-size: 13px; color: #64748b; font-weight: 500;">Didn't receive code?</span>
+            <a href="javascript:void(0)" 
+               (click)="resendCountdown === 0 ? resendOtp() : null" 
+               style="margin-left: 6px; text-decoration: none;"
+               [style.color]="resendCountdown > 0 ? '#94a3b8' : '#2563eb'"
+               [style.cursor]="resendCountdown > 0 ? 'not-allowed' : 'pointer'"
+            >
+              {{ resendCountdown > 0 ? 'Resend in ' + resendCountdown + 's' : 'Resend' }}
+            </a>
+          </div>
+          <div class="login-link">
+            <a href="javascript:void(0)" (click)="isOtpStep = false; successMessage = ''; errorMessage = '';">Back to register</a>
+          </div>
+        </form>
+        }
       </div>
-
-      <p class="error-message" *ngIf="errorMessage">
-        {{ errorMessage }}
-      </p>
-
-      <p class="success-message" *ngIf="successMessage">
-        {{ successMessage }}
-      </p>
-
-      <button type="submit" [disabled]="isLoading">
-        {{ isLoading ? 'Registering...' : 'Register' }}
-      </button>
-
-      <div class="login-link">
-        Already have an account?
-        <a routerLink="/login">Log In</a>
-      </div>
-    </form>
+    </div>
+    
   </div>
 </div>

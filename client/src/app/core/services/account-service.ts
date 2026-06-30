@@ -15,7 +15,7 @@ export class AccountService {
   currentUser = signal<User | null>(null);
   protected baseUrl = environment.apiUrl;
 
-  private useMockAuth = true;
+  private useMockAuth = false;
 
   private mockUsers = [
     {
@@ -106,21 +106,43 @@ export class AccountService {
     }
 
     return this.http
-      .post<User>(this.baseUrl + 'account/login', creds, { withCredentials: true })
+      .post<any>(this.baseUrl + 'account/login', creds, { withCredentials: true })
       .pipe(
-        map((user) => {
-          if (user) {
-            this.setCurrentUser(user);
-            localStorage.setItem('SnapticsUser', JSON.stringify(user));
+        map((response) => {
+          if (response && response.token) {
+            this.setCurrentUser(response as User);
+            localStorage.setItem('SnapticsUser', JSON.stringify(response));
           }
 
-          return user;
+          return response;
         }),
       );
   }
 
   register(creds: RegisterCreds) {
     return this.http.post(this.baseUrl + 'account/register', creds, { responseType: 'text' });
+  }
+
+  verifyOtp(email: string, otp: string) {
+    return this.http.post(this.baseUrl + 'account/verify-otp', { email, otp }, { withCredentials: true, responseType: 'text' })
+      .pipe(
+        map((response: string) => {
+          let parsedResponse: any = response;
+          try {
+            parsedResponse = JSON.parse(response);
+          } catch (e) {}
+
+          if (parsedResponse && parsedResponse.token) {
+            this.setCurrentUser(parsedResponse as User);
+            localStorage.setItem('SnapticsUser', JSON.stringify(parsedResponse));
+          }
+          return parsedResponse;
+        })
+      );
+  }
+
+  resendOtp(email: string) {
+    return this.http.post(this.baseUrl + 'account/resend-otp', { email }, { responseType: 'text' });
   }
 
   forgotPassword(email: string) {

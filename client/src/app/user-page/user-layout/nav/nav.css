@@ -505,11 +505,10 @@
   }
 
   .sidebar__brand {
-    padding: 16px 20px;
+    padding: 24px 20px 24px 32px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    justify-content: flex-start;
     border-bottom: 1px solid var(--sw-border);
   }
 
@@ -517,7 +516,8 @@
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: 0;
+    justify-content: center;
+    gap: 6px;
   }
 
   .sidebar__brand-mark {
@@ -535,10 +535,9 @@
   }
 
   .sidebar__brand-name {
-    font-size: 1.125rem;
+    font-size: 1.75rem;
     font-weight: 900;
     letter-spacing: -0.04em;
-    margin-left: -10px; /* Adjusted for smaller logo */
     background: linear-gradient(90deg, #1e40af, #3b82f6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

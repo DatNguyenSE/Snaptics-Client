@@ -155,7 +155,7 @@ export class Nav {
   }
 
   logout(): void {
-    this.closeAccountMenu();
+    this.closeMenus();
     this.accountService.logout('/landing');
   }
 
