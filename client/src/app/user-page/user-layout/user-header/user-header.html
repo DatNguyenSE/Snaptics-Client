@@ -1,7 +1,11 @@
 <header class="user-header">
-  <div class="user-header__copy">
-    <h1>{{ language.t('header.greeting', { name: userName }) }}</h1>
-    <p>{{ language.t('header.subtitle') }}</p>
+  <div class="user-header__avatar-wrapper">
+    <img src="/mascot/money.png" alt="Mascot Avatar" class="user-header__avatar-img" />
+  </div>
+
+  <div class="user-header__text">
+    <h3>Xin chào, {{ userName }}!</h3>
+    <p>Lưu giữ kỷ niệm, tính toán thu chi - Chúng tôi luôn đồng hành cùng bạn!</p>
   </div>
 
   <div class="user-header__actions">
@@ -29,14 +33,6 @@
         (notificationRead)="markNotificationAsRead($event)"
         (markAllRead)="markAllNotificationsAsRead()"
       />
-    </div>
-
-    <div
-      class="user-header__avatar"
-      [attr.aria-label]="language.t('header.greeting', { name: userName })"
-      role="img"
-    >
-      {{ initials }}
     </div>
   </div>
 </header>

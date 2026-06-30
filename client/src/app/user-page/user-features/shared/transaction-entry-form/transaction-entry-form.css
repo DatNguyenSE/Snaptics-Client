@@ -36,9 +36,9 @@
 
 .entry-field__control,
 .entry-field__amount {
-  border: 1px solid rgba(91, 123, 250, 0.16);
+  border: 1px solid var(--sw-border);
   border-radius: 18px;
-  background: #f8faff;
+  background: var(--sw-muted);
   color: var(--sw-foreground);
   transition:
     border-color 0.2s ease,
@@ -55,9 +55,9 @@
 
 .entry-field__control:focus,
 .entry-field__amount:focus-within {
-  border-color: rgba(91, 123, 250, 0.45);
-  box-shadow: 0 0 0 4px rgba(91, 123, 250, 0.12);
-  background: #ffffff;
+  border-color: var(--sw-primary);
+  box-shadow: 0 0 0 4px var(--sw-primary-soft);
+  background: var(--sw-card);
 }
 
 .entry-field__control--textarea {
@@ -78,6 +78,7 @@
   width: 100%;
   padding: 14px 0;
   font: inherit;
+  color: inherit;
   outline: 0;
 }
 

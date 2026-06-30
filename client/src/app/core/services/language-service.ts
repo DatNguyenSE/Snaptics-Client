@@ -111,6 +111,8 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       recentTransactions: 'Giao d\u1ecbch g\u1ea7n \u0111\u00e2y',
       viewAll: 'Xem t\u1ea5t c\u1ea3',
       aiGen: 'AI GEN',
+      weeklySpending: 'Chi tiêu tuần này',
+      byCategory: 'Theo danh mục',
       quickAction: {
         scan: 'Qu\u00e9t h\u00f3a \u0111\u01a1n',
         capture: 'Ch\u1ee5p m\u00f3n \u0111\u1ed3',
@@ -443,6 +445,8 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       recentTransactions: 'Recent Transactions',
       viewAll: 'View All',
       aiGen: 'AI GEN',
+      weeklySpending: 'Weekly Spending',
+      byCategory: 'By Category',
       quickAction: {
         scan: 'Scan Receipt',
         capture: 'Snap Item',

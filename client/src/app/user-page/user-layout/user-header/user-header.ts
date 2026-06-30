@@ -14,7 +14,7 @@ import { UserNotificationPopover } from '../user-notification-popover/user-notif
 export class UserHeader {
   private readonly accountService = inject(AccountService);
   private readonly notificationService = inject(NotificationService);
-  protected readonly language = inject(LanguageService);
+  private readonly language = inject(LanguageService);
   protected readonly notifications = this.notificationService.notifications;
   protected readonly unreadNotificationCount = this.notificationService.unreadCount;
   protected readonly isNotificationOpen = signal(false);
@@ -23,23 +23,7 @@ export class UserHeader {
   private notificationShell?: ElementRef<HTMLElement>;
 
   get userName(): string {
-    return this.accountService.currentUser()?.displayName?.trim() || 'Minh';
-  }
-
-  get initials(): string {
-    const parts = this.userName
-      .split(/\s+/)
-      .map((part) => part.trim())
-      .filter(Boolean);
-
-    if (parts.length === 0) {
-      return 'M';
-    }
-
-    return parts
-      .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase() ?? '')
-      .join('');
+    return this.accountService.currentUser()?.displayName?.trim() || 'bạn';
   }
 
   get notificationLabel(): string {

@@ -1,0 +1,80 @@
+<div class="ai-assistant-wrapper">
+  <!-- Floating Action Button -->
+  <button 
+    class="ai-fab" 
+    [class.ai-fab--hidden]="isOpen"
+    (click)="toggleChat()" 
+    aria-label="Open AI Assistant">
+    <img src="/mascot/chatbox.png" alt="AI Icon" class="ai-fab__icon-img">
+    <span class="ai-fab__tooltip">Hỏi AI</span>
+  </button>
+
+  <!-- Chat Window -->
+  <div class="chat-window" [class.chat-window--open]="isOpen">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="chat-header__info">
+        <div class="chat-header__avatar">
+          <img src="/mascot/chatbox.png" alt="AI" class="chat-header__avatar-img">
+        </div>
+        <div>
+          <h3 class="chat-header__title">Snaptics AI</h3>
+          <p class="chat-header__status">Sẵn sàng hỗ trợ</p>
+        </div>
+      </div>
+      <button class="chat-header__close" (click)="closeChat()" aria-label="Close chat">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Messages Area -->
+    <div class="chat-messages custom-scrollbar" #scrollMe>
+      <div class="chat-messages__date">Hôm nay</div>
+      
+      @for (msg of messages; track msg.id) {
+        <div class="message" [class.message--user]="msg.sender === 'user'" [class.message--ai]="msg.sender === 'ai'">
+          @if (msg.sender === 'ai') {
+            <div class="message__avatar">
+              <img src="/mascot/chatbox.png" alt="AI" class="message__avatar-img">
+            </div>
+          }
+          
+          <div class="message__content">
+            @if (msg.isTyping) {
+              <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            } @else {
+              <p class="message__text">{{ msg.text }}</p>
+              <span class="message__time">{{ msg.timestamp | date:'HH:mm' }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input-area">
+      <div class="chat-input-wrapper">
+        <textarea 
+          class="chat-input custom-scrollbar" 
+          placeholder="Hỏi Snaptics AI..." 
+          [(ngModel)]="newMessage" 
+          (keydown)="handleKeyDown($event)"
+          rows="1"
+        ></textarea>
+        <button 
+          class="chat-send-btn" 
+          [class.chat-send-btn--active]="newMessage.trim().length > 0 && !isWaitingForResponse"
+          (click)="sendMessage()" 
+          [disabled]="!newMessage.trim() || isWaitingForResponse"
+          aria-label="Send message">
+          <span class="material-symbols-outlined">send</span>
+        </button>
+      </div>
+      <p class="chat-footer-hint">AI có thể mắc lỗi. Hãy kiểm tra lại thông tin quan trọng.</p>
+    </div>
+  </div>
+</div>

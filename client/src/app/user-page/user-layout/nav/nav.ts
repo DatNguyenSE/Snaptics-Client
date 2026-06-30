@@ -2,12 +2,15 @@ import { Component, ElementRef, HostListener, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AccountService } from '../../../core/services/account-service';
 import { AppLanguage, LanguageService } from '../../../core/services/language-service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 interface AppNavItem {
   id: string;
   labelKey: string;
   icon: string;
   route?: string;
+  isActionMenu?: boolean;
+  children?: AppNavItem[];
 }
 
 interface AccountSummary {
@@ -34,7 +37,7 @@ export class Nav {
   private readonly accountService = inject(AccountService);
 
   protected readonly language = inject(LanguageService);
-
+  protected readonly theme = inject(ThemeService);
   readonly navItems: AppNavItem[] = [
     {
       id: 'dashboard',
@@ -43,28 +46,36 @@ export class Nav {
       route: '/user/dashboard',
     },
     {
-      id: 'scan',
-      labelKey: 'nav.scan',
-      icon: 'photo_camera',
-      route: '/user/scan',
+      id: 'transactions',
+      labelKey: 'nav.transactions',
+      icon: 'receipt_long',
+      route: '/user/transactions',
     },
     {
-      id: 'snap-item',
-      labelKey: 'nav.snapItem',
-      icon: 'image_search',
-      route: '/user/snap-item',
+      id: 'camera',
+      labelKey: 'nav.scan', // We can use nav.scan or a general label
+      icon: 'add_circle',
+      isActionMenu: true,
+      children: [
+        {
+          id: 'scan',
+          labelKey: 'nav.scan',
+          icon: 'receipt_long',
+          route: '/user/scan',
+        },
+        {
+          id: 'snap-item',
+          labelKey: 'nav.snapItem',
+          icon: 'image_search',
+          route: '/user/snap-item',
+        },
+      ],
     },
     {
       id: 'manual-entry',
       labelKey: 'nav.manualEntry',
       icon: 'edit_square',
       route: '/user/manual-entry',
-    },
-    {
-      id: 'transactions',
-      labelKey: 'nav.transactions',
-      icon: 'receipt_long',
-      route: '/user/transactions',
     },
     {
       id: 'reminders',
@@ -97,14 +108,41 @@ export class Nav {
   }
 
   isAccountMenuOpen = false;
+  isCameraMenuOpen = false;
+  cameraMenuLeft = 0;
+  accountMenuRight = 0;
 
   toggleAccountMenu(event: MouseEvent): void {
     event.stopPropagation();
     this.isAccountMenuOpen = !this.isAccountMenuOpen;
+    this.isCameraMenuOpen = false;
+
+    if (this.isAccountMenuOpen) {
+      const target = event.currentTarget as HTMLElement;
+      if (target) {
+        const rect = target.getBoundingClientRect();
+        this.accountMenuRight = document.documentElement.clientWidth - rect.right;
+      }
+    }
   }
 
-  closeAccountMenu(): void {
+  toggleCameraMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.isCameraMenuOpen = !this.isCameraMenuOpen;
     this.isAccountMenuOpen = false;
+    
+    if (this.isCameraMenuOpen) {
+      const target = event.currentTarget as HTMLElement;
+      if (target) {
+        const rect = target.getBoundingClientRect();
+        this.cameraMenuLeft = rect.left + rect.width / 2;
+      }
+    }
+  }
+
+  closeMenus(): void {
+    this.isAccountMenuOpen = false;
+    this.isCameraMenuOpen = false;
   }
 
   setLanguage(lang: AppLanguage): void {
@@ -112,7 +150,7 @@ export class Nav {
   }
 
   openSettings(): void {
-    this.closeAccountMenu();
+    this.closeMenus();
     void this.router.navigateByUrl('/settings');
   }
 
@@ -126,13 +164,13 @@ export class Nav {
     const target = event.target as Node | null;
 
     if (target && !this.elementRef.nativeElement.contains(target)) {
-      this.closeAccountMenu();
+      this.closeMenus();
     }
   }
 
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
-    this.closeAccountMenu();
+    this.closeMenus();
   }
 
   private buildInitials(fullName: string): string {
