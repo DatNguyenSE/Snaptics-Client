@@ -5,7 +5,12 @@ import { AppLanguage, LanguageService } from '../core/services/language-service'
 import { ToastService } from '../core/services/toast-service';
 import { Nav } from '../user-page/user-layout/nav/nav';
 
-type AiSettingKey = 'calories' | 'pricePopup' | 'dailyReminder' | 'usageReview';
+type AiSettingKey =
+  | 'calories'
+  | 'pricePopup'
+  | 'dailyReminder'
+  | 'budgetAlert'
+  | 'usageReview';
 type GeneralSettingKey = 'language' | 'currency' | 'budget' | 'backup';
 
 interface AiSettingItem {
@@ -51,6 +56,11 @@ export class SettingsPage {
       descriptionKey: 'settingsPage.ai.reminderDescription',
     },
     {
+      key: 'budgetAlert',
+      titleKey: 'settingsPage.ai.budgetAlertTitle',
+      descriptionKey: 'settingsPage.ai.budgetAlertDescription',
+    },
+    {
       key: 'usageReview',
       titleKey: 'settingsPage.ai.usageTitle',
       descriptionKey: 'settingsPage.ai.usageDescription',
@@ -67,6 +77,7 @@ export class SettingsPage {
     calories: true,
     pricePopup: true,
     dailyReminder: true,
+    budgetAlert: true,
     usageReview: true,
   };
 
@@ -155,6 +166,10 @@ export class SettingsPage {
     });
     this.closeProfileModal();
     this.toast.success(this.language.t('settingsPage.profile.success'));
+  }
+
+  logoutToHome(): void {
+    this.accountService.logout('/landing');
   }
 
   handleGeneralSettingClick(key: GeneralSettingKey): void {

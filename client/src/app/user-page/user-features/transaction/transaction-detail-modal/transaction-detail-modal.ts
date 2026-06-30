@@ -66,11 +66,9 @@ export class TransactionDetailModal implements OnChanges {
   }
 
   get imageToggleLabel(): string {
-    if (this.language.currentLang() === 'vi') {
-      return this.isImageExpanded ? 'An hinh giao dich' : 'Xem hinh giao dich';
-    }
-
-    return this.isImageExpanded ? 'Hide Transaction Image' : 'View Transaction Image';
+    return this.isImageExpanded
+      ? this.language.t('transaction.hideImage')
+      : this.language.t('transaction.viewImage');
   }
 
   formatCurrency(value: number): string {
@@ -83,5 +81,29 @@ export class TransactionDetailModal implements OnChanges {
 
   stopPropagation(event: Event) {
     event.stopPropagation();
+  }
+
+  getCategoryLabel(name: string | null | undefined): string {
+    if (!name) {
+      return this.language.t('dashboard.category.other');
+    }
+
+    const normalizedName = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const key = `dashboard.category.${normalizedName}`;
+    const translated = this.language.t(key);
+
+    return translated === key ? name : translated;
+  }
+
+  getPaymentMethodLabel(name: string | null | undefined): string {
+    if (!name) {
+      return '';
+    }
+
+    const normalizedName = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const key = `entryForm.paymentMethod.${normalizedName}`;
+    const translated = this.language.t(key);
+
+    return translated === key ? name : translated;
   }
 }

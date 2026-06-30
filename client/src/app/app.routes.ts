@@ -3,33 +3,38 @@ import { authGuard } from './core/_guard/auth-guard';
 import { ForgotPassword } from './features/account/forgot-password/forgot-password';
 import { Login } from './features/account/login/login';
 import { Register } from './features/account/register/register';
+import { LandingPage } from './features/landing-page/landing-page';
 import { SettingsPage } from './settings-page/settings-page';
 import { UserPage } from './user-page/user-page';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'user',
+    redirectTo: 'landing',
     pathMatch: 'full',
   },
   {
+    path: 'landing',
+    component: LandingPage,
+  },
+  {
     path: 'Trang-chu',
-    redirectTo: 'user',
+    redirectTo: 'landing',
     pathMatch: 'full',
   },
   {
     path: 'trang-chu',
-    redirectTo: 'user',
+    redirectTo: 'landing',
     pathMatch: 'full',
   },
   {
     path: 'Home-page',
-    redirectTo: 'user',
+    redirectTo: 'landing',
     pathMatch: 'full',
   },
   {
     path: 'home',
-    redirectTo: 'user',
+    redirectTo: 'landing',
     pathMatch: 'full',
   },
   {

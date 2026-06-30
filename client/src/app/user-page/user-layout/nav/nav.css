@@ -87,11 +87,6 @@
   background: rgba(91, 123, 250, 0.1);
 }
 
-.bottom-nav__item--account {
-  position: relative;
-  width: auto;
-}
-
 .bottom-nav__account-avatar {
   background: linear-gradient(135deg, #60a5fa, #8b5cf6);
   color: #ffffff;
@@ -147,17 +142,6 @@
   flex: 0 0 auto;
 }
 
-.account-dropdown__avatar-button {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 999px;
-  line-height: 0;
-}
-
-.account-dropdown__avatar-button:hover .account-dropdown__avatar,
-.account-dropdown__avatar-button[aria-expanded='true'] .account-dropdown__avatar,
 .bottom-nav__item--account:hover {
   box-shadow:
     0 0 0 4px rgba(91, 123, 250, 0.12),
@@ -185,7 +169,6 @@
   font-size: 0.9375rem;
 }
 
-.account-dropdown__summary,
 .account-dropdown__details {
   min-width: 0;
 }
@@ -213,23 +196,13 @@
   color: var(--sw-muted-foreground);
 }
 
-.account-dropdown__chevron {
-  font-size: 1.125rem;
-  color: var(--sw-muted-foreground);
-  transition: transform 0.2s ease;
-}
-
-.account-dropdown__chevron--open {
-  transform: rotate(180deg);
-}
-
 .account-dropdown__panel {
   position: absolute;
   right: 0;
   bottom: calc(100% + 12px);
-  width: min(280px, calc(100vw - 32px));
+  width: min(232px, calc(100vw - 32px));
   border: 1px solid rgba(91, 123, 250, 0.16);
-  border-radius: 22px;
+  border-radius: 20px;
   background: #ffffff;
   box-shadow:
     0 18px 38px rgba(15, 23, 42, 0.1),
@@ -237,11 +210,6 @@
   overflow: hidden;
   animation: accountDropdownFade 0.18s ease;
   z-index: 70;
-}
-
-.account-dropdown__panel--mobile {
-  right: 0;
-  bottom: calc(100% + 12px);
 }
 
 .account-dropdown__header {
@@ -260,6 +228,11 @@
   gap: 4px;
 }
 
+.account-dropdown__actions--compact {
+  padding: 10px;
+  gap: 6px;
+}
+
 .account-dropdown__language-row {
   margin-bottom: 4px;
   padding: 10px 12px 12px;
@@ -268,6 +241,11 @@
   justify-content: space-between;
   gap: 10px;
   border-bottom: 1px solid rgba(91, 123, 250, 0.1);
+}
+
+.account-dropdown__language-row--compact {
+  margin-bottom: 0;
+  padding: 0 0 10px;
 }
 
 .account-dropdown__language-label {
@@ -423,6 +401,9 @@
     font-weight: 600;
     text-align: left;
     cursor: pointer;
+    width: 100%;
+    max-width: 216px;
+    margin-inline: auto;
     transition:
       background 0.2s ease,
       color 0.2s ease;
@@ -443,7 +424,6 @@
   }
 
   .sidebar__footer {
-    position: relative;
     padding: 16px;
     border-top: 1px solid var(--sw-border);
   }
@@ -451,8 +431,29 @@
   .sidebar__account {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 10px;
+  }
+
+  .account-dropdown--desktop {
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .sidebar__account-trigger {
+    border: 0;
+    background: transparent;
+    width: 100%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    cursor: pointer;
+    min-width: 0;
   }
 
   .sidebar__account-copy {
@@ -479,17 +480,20 @@
     color: var(--sw-muted-foreground);
   }
 
-  .account-dropdown--desktop {
-    display: flex;
-    align-items: center;
-    position: static;
+  .sidebar__account-chevron {
+    color: var(--sw-muted-foreground);
+    font-size: 1.125rem;
+    transition: transform 0.2s ease;
+  }
+
+  .sidebar__account-chevron--open {
+    transform: rotate(180deg);
   }
 
   .account-dropdown__panel--desktop {
-    left: 0;
+    left: auto;
     right: 0;
-    bottom: calc(100% + 14px);
-    width: auto;
+    bottom: calc(100% + 12px);
   }
 }
 

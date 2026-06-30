@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { LanguageService } from '../../../core/services/language-service';
 import { ToastService } from '../../../core/services/toast-service';
 
 interface ReminderItem {
@@ -52,6 +53,7 @@ const REMINDER_ITEMS: ReminderItem[] = [
 })
 export class Reminder {
   private readonly toast = inject(ToastService);
+  readonly language = inject(LanguageService);
 
   readonly reminderItems = REMINDER_ITEMS;
   priceInputs: Record<number, string> = {};
@@ -73,7 +75,7 @@ export class Reminder {
       ...this.priceInputs,
       [itemId]:
         numericValue.length > 0
-          ? new Intl.NumberFormat('en-US').format(Number(numericValue))
+          ? new Intl.NumberFormat(this.language.locale()).format(Number(numericValue))
           : '',
     };
   }
@@ -86,10 +88,18 @@ export class Reminder {
     }
 
     this.updatedItems = nextUpdatedState;
-    this.toast.success('Reminder prices updated successfully.');
+    this.toast.success(this.language.t('reminder.toast.updated'));
   }
 
   isUpdated(itemId: number): boolean {
     return !!this.updatedItems[itemId];
+  }
+
+  getCategoryLabel(name: string): string {
+    const normalizedName = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const key = `dashboard.category.${normalizedName}`;
+    const translated = this.language.t(key);
+
+    return translated === key ? name : translated;
   }
 }

@@ -1,0 +1,739 @@
+<div class="landing-page">
+  <header class="landing-header" [class.landing-header--scrolled]="isScrolled">
+    <div class="landing-shell">
+      <div class="landing-header__bar">
+        <button class="landing-brand" type="button" (click)="scrollToSection('hero')">
+          <span class="landing-brand__mark">
+            <span class="material-symbols-outlined landing-brand__icon">receipt_long</span>
+            <span class="material-symbols-outlined landing-brand__badge">check</span>
+          </span>
+          <span class="landing-brand__label">Snaptics</span>
+        </button>
+
+        <nav class="landing-nav" aria-label="Homepage">
+          @for (item of navItems; track item.target) {
+            <button type="button" class="landing-nav__link" (click)="scrollToSection(item.target)">
+              {{ item.label }}
+            </button>
+          }
+        </nav>
+
+        <div class="landing-header__actions">
+          <a routerLink="/login" class="landing-btn landing-btn--ghost">Login</a>
+          <a routerLink="/login" class="landing-btn landing-btn--primary">Get Started</a>
+        </div>
+
+        <button
+          type="button"
+          class="landing-mobile-toggle"
+          [attr.aria-expanded]="isMenuOpen"
+          aria-label="Toggle menu"
+          (click)="toggleMenu()"
+        >
+          <span class="material-symbols-outlined">
+            {{ isMenuOpen ? 'close' : 'menu' }}
+          </span>
+        </button>
+      </div>
+
+      @if (isMenuOpen) {
+        <div class="landing-mobile-menu">
+          @for (item of navItems; track item.target) {
+            <button
+              type="button"
+              class="landing-mobile-menu__link"
+              (click)="scrollToSection(item.target)"
+            >
+              {{ item.label }}
+            </button>
+          }
+          <div class="landing-mobile-menu__actions">
+            <a routerLink="/login" class="landing-btn landing-btn--ghost" (click)="closeMenu()">
+              Login
+            </a>
+            <a
+              routerLink="/login"
+              class="landing-btn landing-btn--primary"
+              (click)="closeMenu()"
+            >
+              Get Started
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+  </header>
+
+  <main>
+    <section id="hero" class="landing-hero">
+      <div class="landing-hero__grid" aria-hidden="true"></div>
+      <div class="landing-hero__glow landing-hero__glow--left" aria-hidden="true"></div>
+      <div class="landing-hero__glow landing-hero__glow--right" aria-hidden="true"></div>
+      <div class="landing-hero__glow landing-hero__glow--center" aria-hidden="true"></div>
+      <div class="landing-hero__word" aria-hidden="true">TRACK</div>
+
+      <div class="landing-shell landing-hero__content">
+        <div class="landing-hero__badge">
+          <span class="landing-hero__badge-dot"></span>
+          Smart expense tracking powered by AI
+        </div>
+
+        <h1 class="landing-hero__title">
+          Scan receipts, track spending,
+          <span class="landing-hero__title-gradient">and understand your money</span>
+        </h1>
+
+        <p class="landing-hero__description">
+          Snaptics helps you capture receipts, organize transactions, monitor budgets,
+          and turn daily spending into clear financial insights.
+        </p>
+
+        <div class="landing-hero__actions">
+          <a routerLink="/login" class="landing-btn landing-btn--primary landing-btn--hero">
+            Start Tracking
+            <span class="material-symbols-outlined">arrow_right_alt</span>
+          </a>
+          <a routerLink="/login" class="landing-btn landing-btn--secondary landing-btn--hero">
+            Login
+          </a>
+        </div>
+
+        <p class="landing-hero__support">
+          Built for students, young professionals, and anyone who wants easier money management.
+        </p>
+
+        <div class="landing-hero__trust">
+          <div class="landing-hero__trust-item">
+            <span class="material-symbols-outlined">verified_user</span>
+            Secure &amp; Private
+          </div>
+          <div class="landing-hero__trust-item">
+            <span class="material-symbols-outlined">bolt</span>
+            Instant OCR Scan
+          </div>
+          <div class="landing-hero__trust-item">
+            <span class="material-symbols-outlined">star</span>
+            4.9 / 5 Rating
+          </div>
+        </div>
+
+        <div class="landing-marquee">
+          <div class="landing-marquee__fade landing-marquee__fade--left" aria-hidden="true"></div>
+          <div class="landing-marquee__fade landing-marquee__fade--right" aria-hidden="true"></div>
+          <div class="landing-marquee__track">
+            @for (item of marqueeTrack; track $index) {
+              <span class="landing-marquee__item">
+                {{ item }}
+                <span class="landing-marquee__dot"></span>
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="landing-shell landing-dashboard-wrap">
+        <div class="landing-dashboard">
+          <div class="landing-dashboard__float landing-dashboard__float--top">
+            <div class="landing-dashboard__float-icon landing-dashboard__float-icon--blue">
+              <span class="material-symbols-outlined">auto_awesome</span>
+            </div>
+            <div>
+              <p>AI Category Detected</p>
+              <span>Food &amp; Drinks • Auto-tagged</span>
+            </div>
+          </div>
+
+          <div class="landing-dashboard__float landing-dashboard__float--bottom">
+            <div class="landing-dashboard__float-icon landing-dashboard__float-icon--amber">
+              <span class="material-symbols-outlined">notifications</span>
+            </div>
+            <div>
+              <p>Budget Reminder</p>
+              <span>Food budget 78% used</span>
+            </div>
+          </div>
+
+          <div class="landing-dashboard__float landing-dashboard__float--side">
+            <div class="landing-dashboard__float-icon landing-dashboard__float-icon--green">
+              <span class="material-symbols-outlined">task_alt</span>
+            </div>
+            <div>
+              <p>Receipt Saved</p>
+              <span>6 items captured</span>
+            </div>
+          </div>
+
+          <div class="landing-dashboard__chip landing-dashboard__chip--left">
+            <span class="landing-dashboard__chip-dot"></span>
+            OCR Ready
+          </div>
+
+          <div class="landing-dashboard__chip landing-dashboard__chip--right">
+            <span class="landing-dashboard__chip-dot landing-dashboard__chip-dot--violet"></span>
+            Real-time Insight
+          </div>
+
+          <div class="landing-dashboard__frame">
+            <div class="landing-dashboard__chrome">
+              <div class="landing-dashboard__chrome-dots">
+                <span class="landing-dashboard__chrome-dot landing-dashboard__chrome-dot--red"></span>
+                <span class="landing-dashboard__chrome-dot landing-dashboard__chrome-dot--yellow"></span>
+                <span class="landing-dashboard__chrome-dot landing-dashboard__chrome-dot--green"></span>
+              </div>
+
+              <div class="landing-dashboard__chrome-pill">
+                <span class="landing-dashboard__chrome-status"></span>
+                app.snaptics.com · Dashboard
+              </div>
+
+              <div class="landing-dashboard__chrome-spacer"></div>
+            </div>
+
+            <div class="landing-dashboard__body">
+              <aside class="landing-dashboard__sidebar">
+                <div class="landing-dashboard__sidebar-brand">
+                  <span class="landing-dashboard__sidebar-logo">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                  </span>
+                  <span>Snaptics</span>
+                </div>
+
+                <div class="landing-dashboard__sidebar-nav">
+                  <div class="landing-dashboard__sidebar-item landing-dashboard__sidebar-item--active">
+                    <span class="material-symbols-outlined">space_dashboard</span>
+                    Dashboard
+                  </div>
+                  <div class="landing-dashboard__sidebar-item">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                    Transactions
+                  </div>
+                  <div class="landing-dashboard__sidebar-item">
+                    <span class="material-symbols-outlined">document_scanner</span>
+                    Scan Receipt
+                  </div>
+                  <div class="landing-dashboard__sidebar-item">
+                    <span class="material-symbols-outlined">pie_chart</span>
+                    Analytics
+                  </div>
+                  <div class="landing-dashboard__sidebar-item">
+                    <span class="material-symbols-outlined">notifications</span>
+                    Reminders
+                  </div>
+                </div>
+
+                <div class="landing-dashboard__tip">
+                  <p>Pro Tip</p>
+                  <span>Scan receipts for instant categorization</span>
+                </div>
+              </aside>
+
+              <div class="landing-dashboard__main">
+                <div class="landing-dashboard__topbar">
+                  <div>
+                    <p class="landing-dashboard__eyebrow">Good morning ·</p>
+                    <p class="landing-dashboard__name">Alex Johnson</p>
+                  </div>
+
+                  <div class="landing-dashboard__topbar-actions">
+                    <div class="landing-dashboard__bell">
+                      <span class="material-symbols-outlined">notifications</span>
+                    </div>
+                    <div class="landing-dashboard__avatar">AJ</div>
+                  </div>
+                </div>
+
+                <div class="landing-dashboard__summary">
+                  <article class="landing-summary-card landing-summary-card--primary">
+                    <p class="landing-summary-card__label">Monthly Spending</p>
+                    <h3>$428.50</h3>
+                    <div class="landing-summary-card__progress">
+                      <span></span>
+                    </div>
+                    <small>57% of $750</small>
+                  </article>
+
+                  <article class="landing-summary-card">
+                    <div class="landing-summary-card__icon landing-summary-card__icon--green">
+                      <span class="material-symbols-outlined">task_alt</span>
+                    </div>
+                    <p class="landing-summary-card__label">Receipts</p>
+                    <h3>12</h3>
+                    <small>This month</small>
+                  </article>
+
+                  <article class="landing-summary-card">
+                    <div class="landing-summary-card__icon landing-summary-card__icon--blue">
+                      <span class="material-symbols-outlined">local_cafe</span>
+                    </div>
+                    <p class="landing-summary-card__label">Food &amp; Drinks</p>
+                    <h3>32%</h3>
+                    <small>Top category</small>
+                  </article>
+                </div>
+
+                <div class="landing-dashboard__grid">
+                  <article class="landing-panel landing-panel--chart">
+                    <div class="landing-panel__header">
+                      <p>Weekly Spending</p>
+                      <span>This week</span>
+                    </div>
+
+                    <div class="landing-chart">
+                      <svg viewBox="0 0 320 110" preserveAspectRatio="none" aria-hidden="true">
+                        <defs>
+                          <linearGradient id="landingChartFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="rgba(37, 99, 235, 0.2)"></stop>
+                            <stop offset="100%" stop-color="rgba(37, 99, 235, 0)"></stop>
+                          </linearGradient>
+                        </defs>
+                        <path
+                          d="M0 90 C18 82, 30 70, 46 72 S78 94, 92 88 S122 40, 138 42 S170 60, 184 58 S216 18, 230 18 S262 66, 276 68 S304 48, 320 54 L320 110 L0 110 Z"
+                          fill="url(#landingChartFill)"
+                        ></path>
+                        <path
+                          d="M0 90 C18 82, 30 70, 46 72 S78 94, 92 88 S122 40, 138 42 S170 60, 184 58 S216 18, 230 18 S262 66, 276 68 S304 48, 320 54"
+                          fill="none"
+                          stroke="#2563EB"
+                          stroke-width="3"
+                          stroke-linecap="round"
+                        ></path>
+                        <circle cx="230" cy="18" r="5" fill="#2563EB" stroke="#ffffff" stroke-width="3"></circle>
+                      </svg>
+                    </div>
+
+                    <div class="landing-panel__bar-group">
+                      <div class="landing-panel__bar landing-panel__bar--blue"></div>
+                      <div class="landing-panel__bar landing-panel__bar--violet"></div>
+                      <div class="landing-panel__bar landing-panel__bar--sky"></div>
+                      <div class="landing-panel__bar landing-panel__bar--muted"></div>
+                    </div>
+
+                    <div class="landing-panel__legend">
+                      <span><i class="landing-dot landing-dot--blue"></i>Food &amp; Drinks 32%</span>
+                      <span><i class="landing-dot landing-dot--violet"></i>Groceries 24%</span>
+                      <span><i class="landing-dot landing-dot--sky"></i>Transport 18%</span>
+                    </div>
+                  </article>
+
+                  <div class="landing-side-panels">
+                    <article class="landing-side-panel landing-side-panel--amber">
+                      <div class="landing-side-panel__icon">
+                        <span class="material-symbols-outlined">warning</span>
+                      </div>
+                      <div>
+                        <p>Food budget 78% used</p>
+                        <div class="landing-side-panel__progress">
+                          <span></span>
+                        </div>
+                      </div>
+                    </article>
+
+                    <article class="landing-side-panel landing-side-panel--violet">
+                      <div class="landing-side-panel__icon">
+                        <span class="material-symbols-outlined">notifications</span>
+                      </div>
+                      <div>
+                        <p>Phone bill due tomorrow</p>
+                        <span>$18.00 · Utilities</span>
+                      </div>
+                    </article>
+
+                    <article class="landing-panel landing-panel--receipt">
+                      <div class="landing-panel__header">
+                        <p>Receipt Scan</p>
+                        <span class="landing-panel__badge">OCR Done</span>
+                      </div>
+
+                      <div class="landing-receipt">
+                        <div class="landing-receipt__row">
+                          <span>Coffee × 2</span>
+                          <i></i>
+                        </div>
+                        <div class="landing-receipt__row">
+                          <span>Sandwich</span>
+                          <i></i>
+                        </div>
+                        <div class="landing-receipt__row">
+                          <span>Water × 3</span>
+                          <i></i>
+                        </div>
+                      </div>
+
+                      <div class="landing-receipt__total">
+                        <span>Total</span>
+                        <strong>$14.75</strong>
+                      </div>
+
+                      <small>OCR captured 6 items</small>
+                    </article>
+                  </div>
+                </div>
+
+                <article class="landing-panel landing-panel--transactions">
+                  <div class="landing-panel__header">
+                    <p>Recent Transactions</p>
+                    <span class="landing-panel__view">
+                      View all
+                      <span class="material-symbols-outlined">chevron_right</span>
+                    </span>
+                  </div>
+
+                  <div class="landing-transactions">
+                    <div class="landing-transaction">
+                      <div class="landing-transaction__icon landing-transaction__icon--amber">
+                        <span class="material-symbols-outlined">local_cafe</span>
+                      </div>
+                      <div class="landing-transaction__meta">
+                        <p>Blue Bottle Coffee</p>
+                        <span>Food &amp; Drinks</span>
+                      </div>
+                      <strong>−$4.50</strong>
+                    </div>
+
+                    <div class="landing-transaction">
+                      <div class="landing-transaction__icon landing-transaction__icon--green">
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                      </div>
+                      <div class="landing-transaction__meta">
+                        <p>Whole Foods Market</p>
+                        <span>Groceries</span>
+                      </div>
+                      <strong>−$36.20</strong>
+                    </div>
+
+                    <div class="landing-transaction">
+                      <div class="landing-transaction__icon landing-transaction__icon--sky">
+                        <span class="material-symbols-outlined">credit_card</span>
+                      </div>
+                      <div class="landing-transaction__meta">
+                        <p>Commuter Rail</p>
+                        <span>Transport</span>
+                      </div>
+                      <strong>−$8.75</strong>
+                    </div>
+
+                    <div class="landing-transaction">
+                      <div class="landing-transaction__icon landing-transaction__icon--violet">
+                        <span class="material-symbols-outlined">smartphone</span>
+                      </div>
+                      <div class="landing-transaction__meta">
+                        <p>Phone Bill</p>
+                        <span>Utilities</span>
+                      </div>
+                      <strong>−$18.00</strong>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+
+          <div class="landing-dashboard__glow" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="landing-section landing-section--white landing-section--scan-word">
+      <div class="landing-shell">
+        <div class="landing-section__header">
+          <p class="landing-section__eyebrow">Features</p>
+          <h2>Everything you need to manage daily expenses</h2>
+          <p>Snaptics keeps expense tracking simple, visual, and useful.</p>
+        </div>
+
+        <div class="landing-features">
+          <article class="landing-feature-card landing-feature-card--blue">
+            <span class="landing-feature-card__tag">OCR</span>
+            <div class="landing-feature-card__icon">
+              <span class="material-symbols-outlined">document_scanner</span>
+            </div>
+            <h3>AI Receipt Scanner</h3>
+            <p>
+              Scan bills and receipts to instantly capture transaction details powered by OCR
+              and smart categorization.
+            </p>
+            <span class="landing-feature-card__link">
+              Learn more
+              <span class="material-symbols-outlined">chevron_right</span>
+            </span>
+          </article>
+
+          <article class="landing-feature-card landing-feature-card--violet">
+            <span class="landing-feature-card__tag">Manual</span>
+            <div class="landing-feature-card__icon">
+              <span class="material-symbols-outlined">edit_square</span>
+            </div>
+            <h3>Manual Entry</h3>
+            <p>
+              Add expenses manually with title, amount, category, date, and notes whenever
+              you want complete control.
+            </p>
+            <span class="landing-feature-card__link">
+              Learn more
+              <span class="material-symbols-outlined">chevron_right</span>
+            </span>
+          </article>
+
+          <article class="landing-feature-card landing-feature-card--sky">
+            <span class="landing-feature-card__tag">Analytics</span>
+            <div class="landing-feature-card__icon">
+              <span class="material-symbols-outlined">space_dashboard</span>
+            </div>
+            <h3>Smart Dashboard</h3>
+            <p>
+              View spending trends, category breakdowns, upcoming reminders, and financial
+              insights all in one clean view.
+            </p>
+            <span class="landing-feature-card__link">
+              Learn more
+              <span class="material-symbols-outlined">chevron_right</span>
+            </span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="howto" class="landing-section landing-section--soft">
+      <div class="landing-shell">
+        <div class="landing-section__header">
+          <p class="landing-section__eyebrow">How It Works</p>
+          <h2>Track your spending in three simple steps</h2>
+        </div>
+
+        <div class="landing-steps">
+          <div class="landing-steps__line" aria-hidden="true"></div>
+
+          <article class="landing-step-card">
+            <div class="landing-step-card__heading">
+              <span class="landing-step-card__number">01</span>
+              <div class="landing-step-card__icon">
+                <span class="material-symbols-outlined">document_scanner</span>
+              </div>
+            </div>
+            <h3>Scan or Add</h3>
+            <p>
+              Upload a receipt or enter an expense manually. Snaptics extracts details and
+              categorizes instantly.
+            </p>
+            <div class="landing-step-card__preview">
+              <div class="landing-step-card__preview-head">
+                <div class="landing-step-card__mini-icon">
+                  <span class="material-symbols-outlined">document_scanner</span>
+                </div>
+                <span>Scanning receipt…</span>
+                <strong>OCR</strong>
+              </div>
+              <div class="landing-step-card__preview-line">Coffee × 2 · $9.00</div>
+              <div class="landing-step-card__preview-line">Muffin · $3.50</div>
+              <div class="landing-step-card__preview-line">Water · $1.25</div>
+            </div>
+          </article>
+
+          <article class="landing-step-card">
+            <div class="landing-step-card__heading">
+              <span class="landing-step-card__number">02</span>
+              <div class="landing-step-card__icon">
+                <span class="material-symbols-outlined">receipt_long</span>
+              </div>
+            </div>
+            <h3>Review Transactions</h3>
+            <p>
+              Check extracted details, categories, and payment information, then edit
+              anything in one tap.
+            </p>
+            <div class="landing-step-card__preview">
+              <p class="landing-step-card__preview-title">Transaction Review</p>
+              <div class="landing-step-card__review-row">
+                <span class="landing-step-card__status landing-step-card__status--ok">
+                  <span class="material-symbols-outlined">check</span>
+                </span>
+                <div>
+                  <p>Blue Bottle Coffee</p>
+                  <span>Food &amp; Drinks</span>
+                </div>
+                <strong>$4.50</strong>
+              </div>
+              <div class="landing-step-card__review-row">
+                <span class="landing-step-card__status landing-step-card__status--warn">
+                  <span class="material-symbols-outlined">error</span>
+                </span>
+                <div>
+                  <p>Grab Commute</p>
+                  <span>Transport</span>
+                </div>
+                <strong>$8.75</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="landing-step-card">
+            <div class="landing-step-card__heading">
+              <span class="landing-step-card__number">03</span>
+              <div class="landing-step-card__icon">
+                <span class="material-symbols-outlined">bar_chart</span>
+              </div>
+            </div>
+            <h3>Get Insights</h3>
+            <p>
+              See reports, reminders, and spending patterns on your dashboard to make
+              smarter financial choices.
+            </p>
+            <div class="landing-step-card__preview">
+              <p class="landing-step-card__preview-title">Spending Insights</p>
+              <div class="landing-step-card__insight">
+                <span>Food &amp; Drinks</span>
+                <strong>32%</strong>
+                <div class="landing-step-card__insight-bar">
+                  <i style="width: 80%; background: #2563eb"></i>
+                </div>
+              </div>
+              <div class="landing-step-card__insight">
+                <span>Transport</span>
+                <strong>18%</strong>
+                <div class="landing-step-card__insight-bar">
+                  <i style="width: 45%; background: #7c3aed"></i>
+                </div>
+              </div>
+              <div class="landing-step-card__insight">
+                <span>Groceries</span>
+                <strong>24%</strong>
+                <div class="landing-step-card__insight-bar">
+                  <i style="width: 60%; background: #0ea5e9"></i>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="landing-section landing-section--white landing-section--clarity-word">
+      <div class="landing-shell">
+        <div class="landing-about">
+          <div class="landing-about__copy">
+            <p class="landing-section__eyebrow">About Snaptics</p>
+            <h2>About Snaptics</h2>
+            <p class="landing-about__description">
+              Snaptics was created to make personal finance easier for everyday users.
+              Instead of manually tracking every expense in complicated spreadsheets,
+              Snaptics combines receipt scanning, manual entry, reminders, and visual
+              reports into one simple platform.
+            </p>
+
+            <div class="landing-about__audience">
+              <span><i class="material-symbols-outlined">task_alt</i>Students</span>
+              <span><i class="material-symbols-outlined">task_alt</i>Young Professionals</span>
+              <span><i class="material-symbols-outlined">task_alt</i>Everyday Users</span>
+              <span><i class="material-symbols-outlined">task_alt</i>Freelancers</span>
+            </div>
+
+            <a routerLink="/login" class="landing-btn landing-btn--primary">
+              Get Started Free
+              <span class="material-symbols-outlined">arrow_right_alt</span>
+            </a>
+          </div>
+
+          <div class="landing-values">
+            <article class="landing-value-card">
+              <div class="landing-value-card__icon landing-value-card__icon--blue">
+                <span class="material-symbols-outlined">bolt</span>
+              </div>
+              <div>
+                <div class="landing-value-card__title">
+                  <h3>Simple</h3>
+                  <span>01</span>
+                </div>
+                <p>No learning curve, open the app and start tracking in under 60 seconds.</p>
+              </div>
+            </article>
+
+            <article class="landing-value-card">
+              <div class="landing-value-card__icon landing-value-card__icon--violet">
+                <span class="material-symbols-outlined">trending_up</span>
+              </div>
+              <div>
+                <div class="landing-value-card__title">
+                  <h3>Smart</h3>
+                  <span>02</span>
+                </div>
+                <p>AI extracts receipt data so you spend less time typing and more time saving.</p>
+              </div>
+            </article>
+
+            <article class="landing-value-card">
+              <div class="landing-value-card__icon landing-value-card__icon--green">
+                <span class="material-symbols-outlined">shield</span>
+              </div>
+              <div>
+                <div class="landing-value-card__title">
+                  <h3>Reliable</h3>
+                  <span>03</span>
+                </div>
+                <p>Your financial data is encrypted, accurate, and always accessible when you need it.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section landing-section--soft">
+      <div class="landing-shell">
+        <div class="landing-cta">
+          <div class="landing-cta__noise" aria-hidden="true"></div>
+          <div class="landing-cta__orb landing-cta__orb--left" aria-hidden="true"></div>
+          <div class="landing-cta__orb landing-cta__orb--right" aria-hidden="true"></div>
+          <svg class="landing-cta__art" viewBox="0 0 220 220" aria-hidden="true">
+            <rect x="30" y="24" width="100" height="146" rx="12"></rect>
+            <line x1="48" y1="58" x2="116" y2="58"></line>
+            <line x1="48" y1="80" x2="116" y2="80"></line>
+            <line x1="48" y1="102" x2="92" y2="102"></line>
+            <line x1="48" y1="124" x2="108" y2="124"></line>
+            <line x1="48" y1="146" x2="116" y2="146"></line>
+            <circle cx="168" cy="72" r="32"></circle>
+            <polyline points="154,72 164,82 184,60"></polyline>
+          </svg>
+
+          <div class="landing-cta__content">
+            <div class="landing-cta__icon">
+              <span class="material-symbols-outlined">account_balance_wallet</span>
+            </div>
+            <h2>Ready to take control of your spending?</h2>
+            <p>
+              Start using Snaptics to scan receipts, manage transactions, and build better
+              financial habits.
+            </p>
+            <div class="landing-cta__actions">
+              <a routerLink="/login" class="landing-btn landing-btn--white">
+                Get Started
+                <span class="material-symbols-outlined">arrow_right_alt</span>
+              </a>
+              <a routerLink="/login" class="landing-btn landing-btn--glass">Login</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer" class="landing-footer">
+    <div class="landing-shell landing-footer__content">
+      <div class="landing-footer__brand">
+        <span class="landing-brand__mark landing-brand__mark--small">
+          <span class="material-symbols-outlined landing-brand__icon">receipt_long</span>
+        </span>
+        <span class="landing-footer__name">Snaptics</span>
+        <span class="landing-footer__tagline">Smart expense tracking made simple</span>
+      </div>
+
+      <div class="landing-footer__links">
+        <button type="button" (click)="scrollToSection('about')">About</button>
+        <button type="button" (click)="scrollToSection('features')">Features</button>
+        <a routerLink="/login">Login</a>
+        <button type="button" (click)="scrollToSection('footer')">Contact</button>
+      </div>
+
+      <p class="landing-footer__copyright">© 2026 Snaptics. All rights reserved.</p>
+    </div>
+  </footer>
+</div>

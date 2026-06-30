@@ -3,33 +3,27 @@
     <header class="manual-entry-hero">
       <button class="manual-entry-hero__back" type="button" (click)="cancel()">
         <span class="material-symbols-outlined">arrow_back</span>
-        Back
+        {{ language.t('common.back') }}
       </button>
 
       <div class="manual-entry-hero__copy">
-        <p class="section-eyebrow">Quick Action</p>
-        <h1>Manual Entry</h1>
-        <p>
-          Add an expense manually when you already know the item, amount, category, and payment
-          details.
-        </p>
+        <p class="section-eyebrow">{{ language.t('manualEntry.eyebrow') }}</p>
+        <h1>{{ language.t('manualEntry.title') }}</h1>
+        <p>{{ language.t('manualEntry.subtitle') }}</p>
       </div>
 
       <div class="manual-entry-hero__badge">
         <span class="material-symbols-outlined">edit_square</span>
-        Quick expense draft
+        {{ language.t('manualEntry.badge') }}
       </div>
     </header>
 
     <section class="manual-entry-intro">
       <div>
-        <p class="section-eyebrow">Entry Details</p>
-        <h2>Save a transaction in one step</h2>
+        <p class="section-eyebrow">{{ language.t('manualEntry.entryEyebrow') }}</p>
+        <h2>{{ language.t('manualEntry.entryTitle') }}</h2>
       </div>
-      <p>
-        Required fields are title, amount, and date. Everything else is optional but helps keep
-        your timeline cleaner.
-      </p>
+      <p>{{ language.t('manualEntry.entryDescription') }}</p>
     </section>
 
     <app-transaction-entry-form
@@ -37,8 +31,8 @@
       [categories]="categories"
       [showPaymentMethod]="true"
       [isSaving]="isSaving"
-      saveLabel="Save Entry"
-      cancelLabel="Cancel"
+      [saveLabel]="language.t('manualEntry.saveLabel')"
+      [cancelLabel]="language.t('common.cancel')"
       (save)="saveTransaction()"
       (cancel)="cancel()"
     ></app-transaction-entry-form>
