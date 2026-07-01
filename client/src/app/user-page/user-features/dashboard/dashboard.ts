@@ -111,9 +111,9 @@ export class Dashboard implements OnInit {
   }
 
   readonly totalBudget = 500000;
-  readonly totalSpent = 185000;
-  readonly remainingBudget = this.totalBudget - this.totalSpent;
-  readonly spentPercentage = Math.round((this.totalSpent / this.totalBudget) * 100);
+  totalSpent = 0;
+  remainingBudget = 500000;
+  spentPercentage = 0;
 
   readonly quickActions: QuickAction[] = [
     {
@@ -256,9 +256,104 @@ export class Dashboard implements OnInit {
     this.transactionService.getTransactions().subscribe({
       next: (data) => {
         this.recentTransactions = data.slice(0, 4);
+        this.calculateDashboardStats(data);
       },
       error: (err) => console.error('Failed to load transactions', err),
     });
+  }
+
+  private getCategoryGroup(categoryName: string | null | undefined, name: string | null | undefined): 'Food' | 'Drinks' | 'Travel' | 'Other' {
+    const cat = (categoryName || '').toLowerCase();
+    const title = (name || '').toLowerCase();
+
+    if (cat.includes('food') || cat.includes('ăn') || title.includes('noodle') || title.includes('food') || title.includes('rice') || title.includes('bánh') || title.includes('phở') || title.includes('cơm')) {
+      return 'Food';
+    }
+    if (cat.includes('drink') || cat.includes('uống') || title.includes('coffee') || title.includes('tea') || title.includes('drink') || title.includes('nước') || title.includes('cafe')) {
+      return 'Drinks';
+    }
+    if (cat.includes('travel') || cat.includes('di chuyển') || cat.includes('xe') || title.includes('ride') || title.includes('grab') || title.includes('taxi') || title.includes('xe')) {
+      return 'Travel';
+    }
+    return 'Other';
+  }
+
+  private calculateDashboardStats(transactions: TransactionDto[]): void {
+    // 1. Total spent today
+    const today = new Date();
+    const todayTransactions = transactions.filter((t) => {
+      const tDate = new Date(t.transactionDate);
+      return (
+        tDate.getDate() === today.getDate() &&
+        tDate.getMonth() === today.getMonth() &&
+        tDate.getFullYear() === today.getFullYear()
+      );
+    });
+    this.totalSpent = todayTransactions.reduce((sum, t) => sum + t.totalAmount, 0);
+    this.remainingBudget = Math.max(0, this.totalBudget - this.totalSpent);
+    this.spentPercentage = this.totalBudget > 0 
+      ? Math.min(100, Math.round((this.totalSpent / this.totalBudget) * 100)) 
+      : 0;
+
+    // 2. Weekly spending (Monday - Sunday of the current week)
+    const now = new Date();
+    const currentDay = now.getDay();
+    const monday = new Date(now);
+    const distance = currentDay === 0 ? -6 : 1 - currentDay;
+    monday.setDate(now.getDate() + distance);
+    monday.setHours(0, 0, 0, 0);
+
+    const weeklyData = [0, 0, 0, 0, 0, 0, 0];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
+      const dayStr = day.toDateString();
+      const dayTransactions = transactions.filter(
+        (t) => new Date(t.transactionDate).toDateString() === dayStr
+      );
+      weeklyData[i] = dayTransactions.reduce((sum, t) => sum + t.totalAmount, 0);
+    }
+    this.barChartData.datasets[0].data = weeklyData;
+
+    // 3. Category spending (Food, Drinks, Travel, Other)
+    let foodTotal = 0;
+    let drinksTotal = 0;
+    let travelTotal = 0;
+    let otherTotal = 0;
+
+    for (const t of transactions) {
+      if (t.transactionDetails && t.transactionDetails.length > 0) {
+        for (const d of t.transactionDetails) {
+          const amount = d.price * (d.quantity || 1);
+          const group = this.getCategoryGroup(d.categoryName, d.itemName);
+          if (group === 'Food') foodTotal += amount;
+          else if (group === 'Drinks') drinksTotal += amount;
+          else if (group === 'Travel') travelTotal += amount;
+          else otherTotal += amount;
+        }
+      } else {
+        const group = this.getCategoryGroup(null, t.name);
+        if (group === 'Food') foodTotal += t.totalAmount;
+        else if (group === 'Drinks') drinksTotal += t.totalAmount;
+        else if (group === 'Travel') travelTotal += t.totalAmount;
+        else otherTotal += t.totalAmount;
+      }
+    }
+    this.doughnutChartData.datasets[0].data = [foodTotal, drinksTotal, travelTotal, otherTotal];
+
+    // 4. AI Insight (based on highest category spending)
+    const maxVal = Math.max(foodTotal, drinksTotal, travelTotal, otherTotal);
+    let highestCategoryKey = 'dashboard.category.other';
+    if (maxVal > 0) {
+      if (maxVal === foodTotal) highestCategoryKey = 'dashboard.category.food';
+      else if (maxVal === drinksTotal) highestCategoryKey = 'dashboard.category.drinks';
+      else if (maxVal === travelTotal) highestCategoryKey = 'dashboard.category.travel';
+    }
+    // Update aiInsight property
+    (this.aiInsight as any).categoryKey = highestCategoryKey;
+
+    // 5. Update charts view
+    this.charts?.forEach((c) => c.update());
   }
 
   openTransactionDetail(transaction: TransactionDto) {
