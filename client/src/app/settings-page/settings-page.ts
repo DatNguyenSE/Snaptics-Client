@@ -1,6 +1,7 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccountService } from '../core/services/account-service';
+import { BudgetService } from '../core/services/budget.service';
 import { AppLanguage, LanguageService } from '../core/services/language-service';
 import { ToastService } from '../core/services/toast-service';
 import { Nav } from '../user-page/user-layout/nav/nav';
@@ -33,11 +34,14 @@ interface GeneralSettingItem {
   templateUrl: './settings-page.html',
   styleUrl: './settings-page.css',
 })
-export class SettingsPage {
+export class SettingsPage implements OnInit {
   private readonly accountService = inject(AccountService);
+  private readonly budgetService = inject(BudgetService);
   private readonly toast = inject(ToastService);
 
   protected readonly language = inject(LanguageService);
+
+  currentBudgetAmount = 500000;
 
   readonly aiSettings: AiSettingItem[] = [
     {
@@ -72,6 +76,20 @@ export class SettingsPage {
     fullName: '',
     email: '',
   };
+
+  ngOnInit(): void {
+    this.budgetService.getUserBudgets().subscribe({
+      next: (budgets) => {
+        if (budgets && budgets.length > 0) {
+          const activeBudget = budgets.find((b) => b.isActive) || budgets[0];
+          if (activeBudget && activeBudget.amount > 0) {
+            this.currentBudgetAmount = activeBudget.amount;
+          }
+        }
+      },
+      error: (err) => console.error('Failed to load user budgets in settings', err),
+    });
+  }
 
   private aiSettingState: Record<AiSettingKey, boolean> = {
     calories: true,
@@ -113,7 +131,7 @@ export class SettingsPage {
       {
         key: 'budget',
         labelKey: 'settingsPage.general.budget',
-        value: '500,000 VND',
+        value: `${new Intl.NumberFormat(this.language.locale()).format(this.currentBudgetAmount)} VND`,
         icon: 'target',
       },
       {

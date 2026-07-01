@@ -3,6 +3,7 @@ import { Component, OnInit, inject, effect, ViewChildren, QueryList } from '@ang
 import { RouterLink } from '@angular/router';
 import { LanguageService } from '../../../core/services/language-service';
 import { TransactionService } from '../../../core/services/transaction.service';
+import { BudgetService } from '../../../core/services/budget.service';
 import { TransactionDto } from '../../../models/transaction.dto';
 import { environment } from '../../../environments/environment.development';
 import { UserHeader } from '../../user-layout/user-header/user-header';
@@ -37,6 +38,7 @@ interface DashboardInsight {
 export class Dashboard implements OnInit {
   protected readonly language = inject(LanguageService);
   private readonly transactionService = inject(TransactionService);
+  private readonly budgetService = inject(BudgetService);
   private readonly theme = inject(ThemeService);
 
   @ViewChildren(BaseChartDirective) charts!: QueryList<BaseChartDirective>;
@@ -110,7 +112,7 @@ export class Dashboard implements OnInit {
     });
   }
 
-  readonly totalBudget = 500000;
+  totalBudget = 500000;
   totalSpent = 0;
   remainingBudget = 500000;
   spentPercentage = 0;
@@ -253,6 +255,19 @@ export class Dashboard implements OnInit {
   };
 
   ngOnInit(): void {
+    this.budgetService.getUserBudgets().subscribe({
+      next: (budgets) => {
+        if (budgets && budgets.length > 0) {
+          const activeBudget = budgets.find((b) => b.isActive) || budgets[0];
+          if (activeBudget && activeBudget.amount > 0) {
+            this.totalBudget = activeBudget.amount;
+            this.updateBudgetStats();
+          }
+        }
+      },
+      error: (err) => console.error('Failed to load user budgets', err),
+    });
+
     this.transactionService.getTransactions().subscribe({
       next: (data) => {
         this.recentTransactions = data.slice(0, 4);
@@ -260,6 +275,13 @@ export class Dashboard implements OnInit {
       },
       error: (err) => console.error('Failed to load transactions', err),
     });
+  }
+
+  private updateBudgetStats(): void {
+    this.remainingBudget = Math.max(0, this.totalBudget - this.totalSpent);
+    this.spentPercentage = this.totalBudget > 0
+      ? Math.min(100, Math.round((this.totalSpent / this.totalBudget) * 100))
+      : 0;
   }
 
   private getCategoryGroup(categoryName: string | null | undefined, name: string | null | undefined): 'Food' | 'Drinks' | 'Travel' | 'Other' {
@@ -290,10 +312,7 @@ export class Dashboard implements OnInit {
       );
     });
     this.totalSpent = todayTransactions.reduce((sum, t) => sum + t.totalAmount, 0);
-    this.remainingBudget = Math.max(0, this.totalBudget - this.totalSpent);
-    this.spentPercentage = this.totalBudget > 0 
-      ? Math.min(100, Math.round((this.totalSpent / this.totalBudget) * 100)) 
-      : 0;
+    this.updateBudgetStats();
 
     // 2. Weekly spending (Monday - Sunday of the current week)
     const now = new Date();
