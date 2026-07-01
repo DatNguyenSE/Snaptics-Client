@@ -26,6 +26,22 @@ export class UserHeader {
     return this.accountService.currentUser()?.displayName?.trim() || 'bạn';
   }
 
+  get greeting(): string {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'Chào buổi sáng';
+    if (hour >= 12 && hour < 18) return 'Chào buổi chiều';
+    if (hour >= 18 && hour < 22) return 'Chào buổi tối';
+    return 'Chào buổi khuya';
+  }
+
+  get funnySlogan(): string {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'Dậy sớm để thành công... nhưng đừng quên ghi chép lại chầu cà phê sáng nhé! ☕';
+    if (hour >= 12 && hour < 18) return 'Nắng chiều đã ngả về tây, hôm nay ví bạn đã vơi đi nhiều chưa? ☀️';
+    if (hour >= 18 && hour < 22) return 'Lên đồ đi quẩy cũng đừng quên nhiệm vụ ghi chép chi tiêu đâu nha! 💃🕺';
+    return 'Khuya rồi mà vẫn thức kiểm kê tài sản à? Cố lên, sắp giàu rồi! 🦉';
+  }
+
   get notificationLabel(): string {
     return this.language.currentLang() === 'vi' ? 'Thông báo' : 'Notifications';
   }

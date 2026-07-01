@@ -100,8 +100,9 @@
 
 .stat-card--primary {
   border-color: transparent !important;
-  background:
-    linear-gradient(135deg, #4f7df5 0%, #7c5cf6 45%, #a855f7 100%) !important;
+  background: linear-gradient(135deg, #f43f5e 0%, #8b5cf6 50%, #3b82f6 100%) !important;
+  background-size: 200% 200% !important;
+  animation: gradientShift 8s ease infinite !important;
   color: #ffffff !important;
   box-shadow:
     0 12px 28px rgba(139, 92, 246, 0.3),
@@ -248,9 +249,30 @@
 .budget-progress__value {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #60a5fa, #8b5cf6);
+  background: linear-gradient(90deg, #f43f5e, #8b5cf6, #38bdf8);
+  background-size: 200% 200%;
+  animation: gradientShift 4s ease infinite;
   transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
+}
+
+/* Light Variant for Primary Card */
+.budget-progress--light .budget-progress__row {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.budget-progress--light .budget-progress__track {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.budget-progress--light .budget-progress__value {
+  background: #ffffff;
+  animation: none;
+}
+
+.budget-progress--light .budget-progress__value::after {
+  background: #ffffff;
+  box-shadow: 0 0 12px 3px rgba(255, 255, 255, 0.5);
 }
 
 /* Glow on progress bar end */
@@ -390,9 +412,9 @@
 }
 
 .quick-action:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  border-color: rgba(139, 92, 246, 0.2);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  border-color: rgba(244, 63, 94, 0.3);
 }
 
 :host-context(html.dark-theme) .quick-action:hover {
@@ -465,13 +487,14 @@
   border: 1.5px solid transparent;
   background:
     linear-gradient(to right, var(--sw-card), var(--sw-card)) padding-box,
-    linear-gradient(135deg, #8b5cf6, #38bdf8, #8b5cf6) border-box;
-  background-size: 100% 100%, 200% 100%;
+    linear-gradient(135deg, #f43f5e, #8b5cf6, #38bdf8, #f43f5e) border-box;
+  background-size: 100% 100%, 300% 100%;
   padding: 20px;
   display: flex;
   align-items: flex-start;
   gap: 14px;
   animation: fadeSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both,
+             gradientShift 6s linear infinite,
              borderGlow 4s ease-in-out infinite;
   overflow: visible;
   position: relative;
@@ -924,7 +947,7 @@
   }
 
   .chart-card {
-    grid-column: span 1;
+    grid-column: span 2;
   }
 
   .chart-card__body {

@@ -3,6 +3,7 @@ import { Component, inject, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AccountService } from '../../../core/services/account-service';
+import { ToastService } from '../../../core/services/toast-service';
 
 //các component: selector là 'app-login' nên trong HTML nếu muốn dùng component này thì viết <app-login></app-login>
 //Template và style được tách riêng thành file login.html và login.css
@@ -34,6 +35,7 @@ export class Login implements OnDestroy {
   otpDigits = ['', '', '', '', '', ''];
   resendCountdown = 0;
   private countdownInterval: any;
+  protected toast = inject(ToastService);
 
   ngOnDestroy() {
     if (this.countdownInterval) {
@@ -95,9 +97,9 @@ export class Login implements OnDestroy {
     this.errorMessage = '';
     this.accountService.login(this.model).subscribe({
       next: (res) => {
-        console.log('Login successful:', res,this.model);
+        this.toast.success('Login successful');
         this.isLoading = false;
-        if (res && res.token) {
+        if (this.accountService.currentUser()) {
           this.router.navigate(['/user/dashboard']);
         } else {
           this.isOtpStep = true;

@@ -160,10 +160,10 @@ export class SettingsPage {
       return;
     }
 
-    this.accountService.updateProfile({
-      displayName: this.profileForm.fullName,
-      email: this.profileForm.email,
-    });
+    // this.accountService.updateProfile({
+    //   displayName: this.profileForm.fullName,
+    //   email: this.profileForm.email,
+    // });
     this.closeProfileModal();
     this.toast.success(this.language.t('settingsPage.profile.success'));
   }

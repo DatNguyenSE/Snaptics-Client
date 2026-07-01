@@ -9,6 +9,11 @@ export type LoginCreds = {
     password: string
 }
 
+export type LoginResponse = {
+    token: string;
+    user: User;
+}
+
 export type User = {
     id: string;
     displayName?: string;

@@ -50,7 +50,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             router.navigateByUrl('/server-error', navigationExtras)
             break;
           default:
-            toast.error('Lỗi hệ thống - Vui lòng thử lại sau');
+           console.log('Lỗi hệ thống - Vui lòng thử lại sau');
             break;
         }
       }
