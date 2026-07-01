@@ -168,6 +168,13 @@
     0 2px 8px rgba(91, 123, 250, 0.1);
 }
 
+:host-context(html.dark-theme) .scan-preview__sheet {
+  background: var(--sw-card);
+  box-shadow:
+    0 18px 38px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(255, 255, 255, 0.05);
+}
+
 .scan-preview__badge {
   display: inline-flex;
   padding: 6px 12px;
@@ -208,6 +215,11 @@
   font-size: 0.6875rem;
   font-weight: 800;
   color: #4f46e5;
+}
+
+:host-context(html.dark-theme) .scan-preview__formats span {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
 }
 
 .scan-preview--scanning {
@@ -337,6 +349,15 @@
   font-size: 0.8125rem;
   line-height: 1.6;
   color: #92400e;
+}
+
+:host-context(html.dark-theme) .scan-note {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+:host-context(html.dark-theme) .scan-note p {
+  color: #fcd34d;
 }
 
 .receipt-card {
@@ -488,6 +509,21 @@
 .category-pill--slate {
   background: #f1f5f9;
   color: #475569;
+}
+
+:host-context(html.dark-theme) .category-pill--blue {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+:host-context(html.dark-theme) .category-pill--amber {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+:host-context(html.dark-theme) .category-pill--slate {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
 }
 
 @keyframes scanPulse {

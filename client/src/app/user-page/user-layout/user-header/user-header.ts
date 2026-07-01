@@ -27,19 +27,35 @@ export class UserHeader {
   }
 
   get greeting(): string {
+    const isEn = this.language.currentLang() === 'en';
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return 'Chào buổi sáng';
-    if (hour >= 12 && hour < 18) return 'Chào buổi chiều';
-    if (hour >= 18 && hour < 22) return 'Chào buổi tối';
-    return 'Chào buổi khuya';
+    if (hour >= 5 && hour < 12) return isEn ? 'Good morning' : 'Chào buổi sáng';
+    if (hour >= 12 && hour < 18) return isEn ? 'Good afternoon' : 'Chào buổi chiều';
+    if (hour >= 18 && hour < 22) return isEn ? 'Good evening' : 'Chào buổi tối';
+    return isEn ? 'Good night' : 'Chào buổi khuya';
   }
 
   get funnySlogan(): string {
+    const isEn = this.language.currentLang() === 'en';
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return 'Dậy sớm để thành công... nhưng đừng quên ghi chép lại chầu cà phê sáng nhé! ☕';
-    if (hour >= 12 && hour < 18) return 'Nắng chiều đã ngả về tây, hôm nay ví bạn đã vơi đi nhiều chưa? ☀️';
-    if (hour >= 18 && hour < 22) return 'Lên đồ đi quẩy cũng đừng quên nhiệm vụ ghi chép chi tiêu đâu nha! 💃🕺';
-    return 'Khuya rồi mà vẫn thức kiểm kê tài sản à? Cố lên, sắp giàu rồi! 🦉';
+    if (hour >= 5 && hour < 12) {
+      return isEn
+        ? "Early bird gets the worm... but don't forget to track your morning coffee! ☕"
+        : 'Dậy sớm để thành công... nhưng đừng quên ghi chép lại chầu cà phê sáng nhé! ☕';
+    }
+    if (hour >= 12 && hour < 18) {
+      return isEn
+        ? 'The afternoon sun is setting, has your wallet emptied much today? ☀️'
+        : 'Nắng chiều đã ngả về tây, hôm nay ví bạn đã vơi đi nhiều chưa? ☀️';
+    }
+    if (hour >= 18 && hour < 22) {
+      return isEn
+        ? "Dressing up for a night out? Don't forget to record your spending! 💃🕺"
+        : 'Lên đồ đi quẩy cũng đừng quên nhiệm vụ ghi chép chi tiêu đâu nha! 💃🕺';
+    }
+    return isEn
+      ? "Still awake counting your assets? Keep it up, you're getting rich! 🦉"
+      : 'Khuya rồi mà vẫn thức kiểm kê tài sản à? Cố lên, sắp giàu rồi! 🦉';
   }
 
   get notificationLabel(): string {

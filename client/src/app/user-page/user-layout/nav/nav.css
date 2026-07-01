@@ -219,6 +219,23 @@
   z-index: 70;
 }
 
+:host-context(html.dark-theme) .account-dropdown__panel {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.4);
+}
+
+:host-context(html.dark-theme) .language-switch {
+  background: var(--sw-muted);
+  border-color: var(--sw-border);
+}
+
+:host-context(html.dark-theme) .language-switch__button--active {
+  background: var(--sw-card);
+  color: var(--sw-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
 .account-dropdown__header {
   padding: 16px;
   display: flex;
@@ -379,6 +396,12 @@
   gap: 4px;
   z-index: 80;
   animation: accountDropdownFade 0.18s ease;
+}
+
+:host-context(html.dark-theme) .action-dropdown__panel {
+  background: rgba(15, 23, 42, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.4);
 }
 
 .action-dropdown__panel--sidebar {
@@ -677,8 +700,8 @@
   }
 
   .account-dropdown__panel--desktop {
-    left: auto;
-    right: 0;
+    left: 8px;
+    right: auto;
     bottom: calc(100% + 12px);
   }
 }
@@ -729,6 +752,8 @@
   }
 
   .account-dropdown__panel--mobile {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom) + 84px);
     width: min(280px, calc(100vw - 24px));
   }
 }

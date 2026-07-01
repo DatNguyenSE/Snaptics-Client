@@ -27,26 +27,41 @@ export class AiAssistant implements AfterViewChecked {
   newMessage = '';
   isWaitingForResponse = false;
 
-  messages: ChatMessage[] = [
-    {
-      id: '1',
-      sender: 'ai',
-      text: 'Chào bạn! Mình là trợ lý AI của Snaptics. Mình có thể giúp gì cho bạn hôm nay?',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-    },
-    {
-      id: '2',
-      sender: 'user',
-      text: 'Phân tích giúp tôi chi tiêu tuần này so với tuần trước nhé.',
-      timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 mins ago
-    },
-    {
-      id: '3',
-      sender: 'ai',
-      text: 'Tuần này bạn đã chi tiêu ít hơn 15% so với tuần trước. Chủ yếu là do bạn đã giảm chi tiêu cho việc ăn uống ngoài hàng. Hãy tiếp tục phát huy nhé!',
-      timestamp: new Date(Date.now() - 1000 * 60 * 4), // 4 mins ago
-    }
-  ];
+  messages: ChatMessage[] = [];
+
+  constructor() {
+    this.initializeMessages();
+  }
+
+  private initializeMessages() {
+    const isEn = this.language.currentLang() === 'en';
+    this.messages = [
+      {
+        id: '1',
+        sender: 'ai',
+        text: isEn
+          ? 'Hello! I am Snaptics AI. How can I help you today?'
+          : 'Chào bạn! Mình là trợ lý AI của Snaptics. Mình có thể giúp gì cho bạn hôm nay?',
+        timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
+      },
+      {
+        id: '2',
+        sender: 'user',
+        text: isEn
+          ? "Help me analyze this week's spending compared to last week."
+          : 'Phân tích giúp tôi chi tiêu tuần này so với tuần trước nhé.',
+        timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 mins ago
+      },
+      {
+        id: '3',
+        sender: 'ai',
+        text: isEn
+          ? 'You spent 15% less this week compared to last week, mainly because you reduced dining out. Keep it up!'
+          : 'Tuần này bạn đã chi tiêu ít hơn 15% so với tuần trước. Chủ yếu là do bạn đã giảm chi tiêu cho việc ăn uống ngoài hàng. Hãy tiếp tục phát huy nhé!',
+        timestamp: new Date(Date.now() - 1000 * 60 * 4), // 4 mins ago
+      }
+    ];
+  }
 
   ngAfterViewChecked() {
     this.scrollToBottom();
@@ -95,10 +110,13 @@ export class AiAssistant implements AfterViewChecked {
         this.messages = this.messages.filter(m => m.id !== typingMsgId);
         
         // Add AI response
+        const isEn = this.language.currentLang() === 'en';
         this.messages.push({
           id: Date.now().toString(),
           sender: 'ai',
-          text: 'Đây là câu trả lời mẫu từ AI. Chức năng thực tế sẽ gọi API để nhận phản hồi dựa trên dữ liệu thật của bạn.',
+          text: isEn
+            ? 'This is a sample AI response. The actual feature will call the API to generate responses based on your real data.'
+            : 'Đây là câu trả lời mẫu từ AI. Chức năng thực tế sẽ gọi API để nhận phản hồi dựa trên dữ liệu thật của bạn.',
           timestamp: new Date(),
         });
         this.isWaitingForResponse = false;

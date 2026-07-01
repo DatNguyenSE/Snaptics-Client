@@ -83,12 +83,7 @@ export class Nav {
       icon: 'notifications',
       route: '/user/reminders',
     },
-    {
-      id: 'settings',
-      labelKey: 'nav.settings',
-      icon: 'settings',
-      route: '/settings',
-    },
+
   ];
   readonly languages: LanguageOption[] = [
     { code: 'vi', label: 'VI' },
@@ -153,6 +148,7 @@ export class Nav {
     this.closeMenus();
     void this.router.navigateByUrl('/settings');
   }
+
 
   logout(): void {
     this.closeMenus();

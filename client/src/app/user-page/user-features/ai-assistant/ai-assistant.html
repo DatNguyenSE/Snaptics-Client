@@ -6,7 +6,7 @@
     (click)="toggleChat()" 
     aria-label="Open AI Assistant">
     <img src="/mascot/chatbox.png" alt="AI Icon" class="ai-fab__icon-img">
-    <span class="ai-fab__tooltip">Hỏi AI</span>
+    <span class="ai-fab__tooltip">{{ language.t('ai.ask') }}</span>
   </button>
 
   <!-- Chat Window -->
@@ -19,7 +19,7 @@
         </div>
         <div>
           <h3 class="chat-header__title">Snaptics AI</h3>
-          <p class="chat-header__status">Sẵn sàng hỗ trợ</p>
+          <p class="chat-header__status">{{ language.t('ai.ready') }}</p>
         </div>
       </div>
       <button class="chat-header__close" (click)="closeChat()" aria-label="Close chat">
@@ -29,7 +29,7 @@
 
     <!-- Messages Area -->
     <div class="chat-messages custom-scrollbar" #scrollMe>
-      <div class="chat-messages__date">Hôm nay</div>
+      <div class="chat-messages__date">{{ language.t('ai.today') }}</div>
       
       @for (msg of messages; track msg.id) {
         <div class="message" [class.message--user]="msg.sender === 'user'" [class.message--ai]="msg.sender === 'ai'">
@@ -60,7 +60,7 @@
       <div class="chat-input-wrapper">
         <textarea 
           class="chat-input custom-scrollbar" 
-          placeholder="Hỏi Snaptics AI..." 
+          [placeholder]="language.t('ai.placeholder')" 
           [(ngModel)]="newMessage" 
           (keydown)="handleKeyDown($event)"
           rows="1"
@@ -74,7 +74,7 @@
           <span class="material-symbols-outlined">send</span>
         </button>
       </div>
-      <p class="chat-footer-hint">AI có thể mắc lỗi. Hãy kiểm tra lại thông tin quan trọng.</p>
+      <p class="chat-footer-hint">{{ language.t('ai.hint') }}</p>
     </div>
   </div>
 </div>

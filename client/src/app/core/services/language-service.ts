@@ -345,6 +345,13 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         enabled: '\u0110\u00e3 b\u1eadt',
       },
     },
+    ai: {
+      ask: 'H\u1ecfi AI',
+      ready: 'S\u1eb5n s\u00e0ng h\u1ed7 tr\u1ee3',
+      today: 'H\u00f4m nay',
+      placeholder: 'H\u1ecfi Snaptics AI...',
+      hint: 'AI c\u00f3 th\u1ec3 m\u1eafc l\u1ed7i. H\u00e3y ki\u1ec3m tra l\u1ea1i th\u00f4ng tin quan tr\u1ecdng.',
+    },
   },
   en: {
     common: {
@@ -665,6 +672,13 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         backup: 'Cloud backup',
         enabled: 'Enabled',
       },
+    },
+    ai: {
+      ask: 'Ask AI',
+      ready: 'Ready to help',
+      today: 'Today',
+      placeholder: 'Ask Snaptics AI...',
+      hint: 'AI may make mistakes. Please verify important information.',
     },
   },
 };
