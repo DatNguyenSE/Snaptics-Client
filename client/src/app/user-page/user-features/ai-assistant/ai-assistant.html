@@ -5,7 +5,7 @@
     [class.ai-fab--hidden]="isOpen"
     (click)="toggleChat()" 
     aria-label="Open AI Assistant">
-    <img src="/mascot/chatbox.png" alt="AI Icon" class="ai-fab__icon-img">
+    <img src="/Roni_AI/roni_chat.png" alt="AI Icon" class="ai-fab__icon-img">
     <span class="ai-fab__tooltip">{{ language.t('ai.ask') }}</span>
   </button>
 
@@ -15,10 +15,10 @@
     <div class="chat-header">
       <div class="chat-header__info">
         <div class="chat-header__avatar">
-          <img src="/mascot/chatbox.png" alt="AI" class="chat-header__avatar-img">
+          <img src="/Roni_AI/roni_chat.png" alt="AI" class="chat-header__avatar-img">
         </div>
         <div>
-          <h3 class="chat-header__title">Snaptics AI</h3>
+          <h3 class="chat-header__title">Roni</h3>
           <p class="chat-header__status">{{ language.t('ai.ready') }}</p>
         </div>
       </div>
@@ -35,7 +35,7 @@
         <div class="message" [class.message--user]="msg.sender === 'user'" [class.message--ai]="msg.sender === 'ai'">
           @if (msg.sender === 'ai') {
             <div class="message__avatar">
-              <img src="/mascot/chatbox.png" alt="AI" class="message__avatar-img">
+              <img src="/Roni_AI/roni_chat.png" alt="AI" class="message__avatar-img">
             </div>
           }
           
