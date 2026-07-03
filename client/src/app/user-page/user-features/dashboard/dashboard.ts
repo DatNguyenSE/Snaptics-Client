@@ -26,7 +26,7 @@ interface DashboardInsight {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, UserHeader, DatePipe, TransactionDetailModal, NgApexchartsModule, AiAssistant],
+  imports: [RouterLink, DatePipe, TransactionDetailModal, NgApexchartsModule, AiAssistant],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -71,8 +71,36 @@ export class Dashboard implements OnInit {
     categoryKey: 'dashboard.category.drinks',
   };
 
+  readonly categoryStats = [
+    { nameKey: 'dashboard.category.food', amount: 85000, percent: 46, color: 'linear-gradient(90deg, #3b82f6, #60a5fa)' },
+    { nameKey: 'dashboard.category.drinks', amount: 40000, percent: 22, color: 'linear-gradient(90deg, #10b981, #34d399)' },
+    { nameKey: 'dashboard.category.travel', amount: 45000, percent: 24, color: 'linear-gradient(90deg, #f59e0b, #fbbf24)' },
+    { nameKey: 'dashboard.category.other', amount: 15000, percent: 8, color: 'linear-gradient(90deg, #64748b, #94a3b8)' },
+  ];
+
   recentTransactions: TransactionDto[] = [];
   selectedTransaction: TransactionDto | null = null;
+
+  chartViewMode: 'weekly' | 'monthly' | 'yearly' = 'weekly';
+
+  private readonly weeklyBarData = {
+    series: [{ name: "Spending", data: [20000, 45000, 35000, 30000, 50000, 95000, 120000] }]
+  };
+
+  private readonly monthlyBarData = {
+    series: [{ name: "Spending", data: [350000, 420000, 280000, 500000] }]
+  };
+
+  private readonly yearlyBarData = {
+    series: [{ name: "Spending", data: [420000, 380000, 500000, 480000, 600000, 750000, 680000, 800000, 950000, 850000, 920000, 1050000] }]
+  };
+
+  private readonly weeklyDoughnutData = [85000, 40000, 45000, 15000];
+  private readonly monthlyDoughnutData = [350000, 150000, 200000, 50000];
+  private readonly yearlyDoughnutData = [3500000, 1500000, 2000000, 500000];
+
+  touchStartX = 0;
+  touchEndX = 0;
 
   public barChartOptions: Partial<ApexOptions> = {
     series: [{
@@ -195,9 +223,14 @@ export class Dashboard implements OnInit {
     const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
     const strokeColor = isDark ? '#0f172a' : '#ffffff';
 
-    const barCategories = lang === 'vi' 
-      ? ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
-      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    let barCategories: string[] = [];
+    if (this.chartViewMode === 'weekly') {
+      barCategories = lang === 'vi' ? ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    } else if (this.chartViewMode === 'monthly') {
+      barCategories = lang === 'vi' ? ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'] : ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+    } else {
+      barCategories = lang === 'vi' ? ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'] : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    }
 
     const donutLabels = [
       this.language.t('dashboard.category.food'),
@@ -249,6 +282,61 @@ export class Dashboard implements OnInit {
 
   closeTransactionDetail() {
     this.selectedTransaction = null;
+  }
+
+  toggleChartView(mode: 'weekly' | 'monthly' | 'yearly') {
+    if (this.chartViewMode === mode) return;
+    this.chartViewMode = mode;
+    this.updateCharts();
+  }
+
+  handleTouchStart(event: TouchEvent) {
+    this.touchStartX = event.changedTouches[0].screenX;
+  }
+
+  handleTouchEnd(event: TouchEvent) {
+    this.touchEndX = event.changedTouches[0].screenX;
+    this.handleSwipe();
+  }
+
+  private handleSwipe() {
+    const swipeThreshold = 50;
+    if (this.touchEndX < this.touchStartX - swipeThreshold) {
+      // Swiped left (next)
+      if (this.chartViewMode === 'weekly') this.toggleChartView('monthly');
+      else if (this.chartViewMode === 'monthly') this.toggleChartView('yearly');
+    } else if (this.touchEndX > this.touchStartX + swipeThreshold) {
+      // Swiped right (prev)
+      if (this.chartViewMode === 'yearly') this.toggleChartView('monthly');
+      else if (this.chartViewMode === 'monthly') this.toggleChartView('weekly');
+    }
+  }
+
+  get currentSpentPercentage(): number {
+    return this.chartViewMode === 'weekly' ? this.spentPercentage : (this.chartViewMode === 'monthly' ? 75 : 60);
+  }
+
+  private updateCharts() {
+    const barData = this.chartViewMode === 'weekly' ? this.weeklyBarData : (this.chartViewMode === 'monthly' ? this.monthlyBarData : this.yearlyBarData);
+    const donutData = this.chartViewMode === 'weekly' ? this.weeklyDoughnutData : (this.chartViewMode === 'monthly' ? this.monthlyDoughnutData : this.yearlyDoughnutData);
+    
+    // Update the local options object with the new data
+    this.barChartOptions.series = barData.series;
+    this.doughnutChartOptions.series = donutData;
+
+    // Change chart type for yearly
+    if (this.barChartOptions.chart) {
+      this.barChartOptions.chart.type = this.chartViewMode === 'yearly' ? 'area' : 'bar';
+    }
+    // Adjust stroke for the line/area chart vs bar chart
+    if (this.barChartOptions.stroke) {
+      this.barChartOptions.stroke.width = this.chartViewMode === 'yearly' ? 3 : 0;
+      this.barChartOptions.stroke.curve = 'smooth';
+    }
+    
+    // updateChartTheme will now apply the new series along with the theme and X-axis categories 
+    // in a single updateOptions call for each chart, avoiding race conditions.
+    this.updateChartTheme(this.theme.currentTheme() === 'dark', this.language.currentLang());
   }
 
   formatCurrency(value: number): string {

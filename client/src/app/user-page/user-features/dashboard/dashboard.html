@@ -1,27 +1,54 @@
 <section class="user-dashboard">
   <div class="user-dashboard__content">
-    <app-user-header></app-user-header>
-
-    <!-- Summary Card (Merged Total Payment & Budget) -->
-    <article class="bento-card stat-card--primary stat-card" style="margin-bottom: 12px;">
-      <p class="stat-card__label stat-card__label--light">{{ language.t('dashboard.totalPayment') }}</p>
-      <h2 class="stat-card__amount">{{ formatCurrency(totalSpent) }}</h2>
+    <!-- Roni AI Greeting Section -->
+    <section class="roni-greeting-section">
+      <div class="roni-greeting-section__left">
+        <div class="roni-avatar-wrapper">
+          <img src="/Roni_AI/roni_sayhi.png" alt="Roni AI Greeting" class="roni-greeting-section__image" />
+          <div class="roni-thought-bubble">
+            <p>Hi there, I'm Roni</p>
+          </div>
+        </div>
+      </div>
       
-      <div class="stat-card__trend" style="margin-bottom: 20px;">
-        <span class="material-symbols-outlined">trending_down</span>
-        <span>{{ language.t('dashboard.comparedToYesterday') }}</span>
-      </div>
+      <div class="roni-greeting-section__right">
+        <div class="quick-budget-stats">
+          <div class="quick-budget-stats__grid">
+            <div class="quick-budget-stats__item">
+              <div class="quick-budget-stats__icon-wrapper quick-budget-stats__icon-wrapper--rose">
+                <span class="material-symbols-outlined" style="font-size: 1.5rem;">arrow_drop_down</span>
+              </div>
+              <div class="quick-budget-stats__info">
+                <span class="quick-budget-stats__label">{{ language.t('dashboard.totalPayment') || 'Spent' }}</span>
+                <span class="quick-budget-stats__value">{{ formatCurrency(totalSpent) }}</span>
+              </div>
+            </div>
+            
+            <div class="quick-budget-stats__item">
+              <div class="quick-budget-stats__icon-wrapper quick-budget-stats__icon-wrapper--emerald">
+                <span class="material-symbols-outlined" style="font-size: 1.5rem;">arrow_drop_up</span>
+              </div>
+              <div class="quick-budget-stats__info">
+                <span class="quick-budget-stats__label">{{ language.currentLang() === 'vi' ? 'Còn lại' : 'Remaining' }}</span>
+                <span class="quick-budget-stats__value quick-budget-stats__value--emerald">{{ formatCurrency(remainingBudget) }}</span>
+              </div>
+            </div>
+          </div>
 
-      <div class="budget-progress budget-progress--light">
-        <div class="budget-progress__row">
-          <span>{{ language.t('dashboard.used') }} {{ spentPercentage }}%</span>
-          <span>{{ formatCurrency(totalBudget) }}</span>
-        </div>
-        <div class="budget-progress__track" aria-hidden="true">
-          <div class="budget-progress__value" [style.width.%]="spentPercentage"></div>
+          <div class="quick-budget-stats__progress-block">
+            <div class="quick-budget-stats__progress-labels">
+              <span>{{ language.t('dashboard.used') || 'Used' }} <strong style="color: var(--sw-foreground);">{{ spentPercentage }}%</strong></span>
+              <span class="quick-budget-stats__budget-limit">{{ language.currentLang() === 'vi' ? 'Ngân sách' : 'Budget' }}: {{ formatCurrency(totalBudget) }}</span>
+            </div>
+            <div class="quick-budget-stats__progress-track">
+              <div class="quick-budget-stats__progress-fill" [style.width.%]="spentPercentage"></div>
+            </div>
+          </div>
         </div>
       </div>
-    </article>
+    </section>
+
+
 
     <div class="dashboard-bento-grid">
       <!-- Quick Actions -->
@@ -48,10 +75,37 @@
         </div>
       </section>
 
+      <!-- Charts Section Toggle -->
+      <div class="charts-toggle-container">
+        <div class="charts-toggle">
+          <button type="button" class="charts-toggle__btn" 
+                  [class.charts-toggle__btn--active]="chartViewMode === 'weekly'"
+                  (click)="toggleChartView('weekly')">
+            {{ language.currentLang() === 'vi' ? 'Tuần' : 'Weekly' }}
+          </button>
+          <button type="button" class="charts-toggle__btn" 
+                  [class.charts-toggle__btn--active]="chartViewMode === 'monthly'"
+                  (click)="toggleChartView('monthly')">
+            {{ language.currentLang() === 'vi' ? 'Tháng' : 'Monthly' }}
+          </button>
+          <button type="button" class="charts-toggle__btn" 
+                  [class.charts-toggle__btn--active]="chartViewMode === 'yearly'"
+                  (click)="toggleChartView('yearly')">
+            {{ language.currentLang() === 'vi' ? 'Năm' : 'Yearly' }}
+          </button>
+        </div>
+      </div>
+
       <!-- Charts Section -->
-      <article class="bento-card chart-card chart-card--bar">
+      <article class="bento-card chart-card chart-card--bar" 
+               (touchstart)="handleTouchStart($event)" 
+               (touchend)="handleTouchEnd($event)">
         <div class="chart-card__header">
-          <h3 class="chart-card__title">{{ language.t('dashboard.weeklySpending') }}</h3>
+          <h3 class="chart-card__title">
+            {{ chartViewMode === 'weekly' ? (language.t('dashboard.weeklySpending') || 'Weekly Spending') : 
+               (chartViewMode === 'monthly' ? (language.currentLang() === 'vi' ? 'Chi tiêu tháng' : 'Monthly Spending') : 
+               (language.currentLang() === 'vi' ? 'Chi tiêu năm' : 'Yearly Spending')) }}
+          </h3>
         </div>
         <div class="chart-card__body">
           <apx-chart
@@ -71,13 +125,15 @@
         </div>
       </article>
 
-      <article class="bento-card chart-card chart-card--doughnut">
+      <article class="bento-card chart-card chart-card--doughnut"
+               (touchstart)="handleTouchStart($event)" 
+               (touchend)="handleTouchEnd($event)">
         <div class="chart-card__header">
           <h3 class="chart-card__title">{{ language.t('dashboard.byCategory') }}</h3>
         </div>
         <div class="chart-card__body">
           <div class="doughnut-center-label">
-            <span class="doughnut-center-label__value">{{ spentPercentage }}<span class="doughnut-center-label__suffix">%</span></span>
+            <span class="doughnut-center-label__value">{{ currentSpentPercentage }}<span class="doughnut-center-label__suffix">%</span></span>
           </div>
           <apx-chart
             #doughnutChart
@@ -94,19 +150,7 @@
         </div>
       </article>
 
-      <!-- AI Insights -->
-      <section class="bento-card ai-insight-card">
-        <div class="ai-insight-card__icon">
-          <span class="material-symbols-outlined">auto_awesome</span>
-        </div>
-        <div class="ai-insight-card__content">
-          <p class="ai-insight-card__eyebrow">{{ language.t('dashboard.aiInsights') }}</p>
-          <p class="ai-insight-card__copy">
-            {{ language.t('dashboard.aiInsightPrefix') }}
-            <strong>{{ language.t(aiInsight.categoryKey) }}</strong>{{ language.t('dashboard.aiInsightSuffix') }}
-          </p>
-        </div>
-      </section>
+
 
 
       <!-- Usage Review -->
