@@ -27,8 +27,8 @@
         @for (transaction of transactionHistory; track transaction.id) {
           <article class="transaction-card" (click)="openTransactionDetail(transaction)" style="cursor: pointer;">
             <div class="transaction-media" [class]="getMediaClass(transaction)">
-              @if (isAnalyzedImage(transaction)) {
-                <img [src]="getImageUrl(transaction)!" [alt]="language.t('transaction.imageAlt')" />
+              @if (getIcon(transaction) === 'receipt_long') {
+                <img src="bill-icon.svg" alt="Bill Icon" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.1);" />
               } @else {
                 <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
               }

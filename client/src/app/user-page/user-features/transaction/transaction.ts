@@ -32,7 +32,12 @@ export class Transaction implements OnInit {
   }
 
   openTransactionDetail(transaction: TransactionDto) {
-    this.selectedTransaction = transaction;
+    this.transactionService.getTransaction(transaction.id).subscribe({
+      next: (fullTransaction) => {
+        this.selectedTransaction = fullTransaction;
+      },
+      error: (err) => console.error('Failed to load transaction details', err),
+    });
   }
 
   closeTransactionDetail() {

@@ -1,0 +1,16 @@
+<svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bill-gradient" x1="10" y1="10" x2="90" y2="90" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f1f5f9"/>
+    </linearGradient>
+    <filter id="bill-shadow" x="-5" y="-5" width="110" height="110" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#3b82f6" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <path d="M25 15C25 12.2386 27.2386 10 30 10H70C72.7614 10 75 12.2386 75 15V85L68 80L62.5 85L56 80L50 85L44 80L37.5 85L32 80L25 85V15Z" fill="url(#bill-gradient)" filter="url(#bill-shadow)"/>
+  <rect x="38" y="30" width="24" height="4" rx="2" fill="#3b82f6" fill-opacity="0.8"/>
+  <rect x="38" y="45" width="16" height="4" rx="2" fill="#3b82f6" fill-opacity="0.5"/>
+  <rect x="38" y="60" width="24" height="4" rx="2" fill="#3b82f6" fill-opacity="0.8"/>
+  <circle cx="62" cy="47" r="4" fill="#f59e0b"/>
+</svg>

@@ -1,95 +1,110 @@
 <div class="modal-overlay" (click)="onClose()">
   <div class="modal-content" (click)="stopPropagation($event)">
     <div class="modal-decorative-glow"></div>
-    
-    <header class="modal-header">
-      <div class="modal-header__info">
-        <h2>{{ transaction.name || language.t('dashboard.category.bill') }}</h2>
-        <span class="modal-date">{{ transaction.transactionDate | date:'medium' }}</span>
-      </div>
-      <button class="close-button" (click)="onClose()" [attr.aria-label]="language.t('transaction.closeAria')">
+
+    <div class="header-actions">
+      <button class="action-btn edit-btn" (click)="onEdit()" [attr.aria-label]="language.t('transaction.edit') || 'Edit'">
+        <span class="material-symbols-outlined">edit</span>
+      </button>
+      <button class="action-btn delete-btn" (click)="onDelete()" [attr.aria-label]="language.t('transaction.delete') || 'Delete'">
+        <span class="material-symbols-outlined">delete</span>
+      </button>
+      <div class="action-divider"></div>
+      <button class="action-btn close-btn" (click)="onClose()" [attr.aria-label]="language.t('transaction.closeAria')">
         <span class="material-symbols-outlined">close</span>
       </button>
-    </header>
-
-    <div class="modal-body">
-      @if (transaction.note) {
-        <p class="transaction-note">
-          <span class="material-symbols-outlined">notes</span>
-          {{ transaction.note }}
-        </p>
-      }
-
-      @if (transaction.paymentMethod) {
-        <div class="transaction-meta-row">
-          <span class="transaction-meta-chip">
-            <span class="material-symbols-outlined">credit_card</span>
-            {{ getPaymentMethodLabel(transaction.paymentMethod) }}
-          </span>
-        </div>
-      }
-
-      @if (hasImage()) {
-        <div class="transaction-image-container">
-          <button class="toggle-image-button" (click)="toggleImage()" type="button">
-            <span class="material-symbols-outlined">image</span>
-            {{ imageToggleLabel }}
-          </button>
-          
-          @if (isImageExpanded) {
-            <div class="image-preview-wrapper">
-              @if (isLoadingImage) {
-                <div class="image-loader">
-                  <span class="material-symbols-outlined loading-icon">progress_activity</span>
-                  <span>{{ language.t('transaction.loadingImage') }}</span>
+    </div>
+    
+    <div class="modal-split-layout">
+      <!-- Left side -->
+      <div class="modal-left-panel">
+        <header class="modal-header">
+          <div class="modal-header__info">
+            <span class="modal-date">{{ formatDate(transaction.transactionDate) }}</span>
+            <h2>{{ transaction.name || language.t('dashboard.category.bill') }}</h2>
+            
+            <div class="header-total-amount-row">
+              <span class="total-amount-large">{{ formatCurrency(transaction.totalAmount) }}</span>
+              @if (transaction.isAiEstimated) {
+                <div class="ai-estimated-badge">
+                  <span class="material-symbols-outlined">smart_toy</span>
+                  <span>{{ language.t('dashboard.aiGen') }}</span>
                 </div>
-              } @else if (imageUrl) {
-                <img [src]="imageUrl" [alt]="language.t('transaction.imageAlt')" class="receipt-image" />
+              }
+            </div>
+          </div>
+        </header>
+
+        <div class="modal-metadata">
+          @if (transaction.note) {
+            <p class="transaction-note">
+              <span class="material-symbols-outlined">notes</span>
+              {{ transaction.note }}
+            </p>
+          }
+
+          @if (transaction.paymentMethod) {
+            <div class="transaction-meta-row">
+              <span class="transaction-meta-chip">
+                <span class="material-symbols-outlined">credit_card</span>
+                {{ getPaymentMethodLabel(transaction.paymentMethod) }}
+              </span>
+            </div>
+          }
+
+          @if (hasImage()) {
+            <div class="transaction-image-container">
+              <button class="toggle-image-button" (click)="toggleImage()" type="button">
+                <span class="material-symbols-outlined">image</span>
+                {{ imageToggleLabel }}
+              </button>
+              
+              @if (isImageExpanded) {
+                <div class="image-preview-wrapper">
+                  @if (isLoadingImage) {
+                    <div class="image-loader">
+                      <span class="material-symbols-outlined loading-icon">progress_activity</span>
+                      <span>{{ language.t('transaction.loadingImage') }}</span>
+                    </div>
+                  } @else if (imageUrl) {
+                    <img [src]="imageUrl" [alt]="language.t('transaction.imageAlt')" class="receipt-image" />
+                  }
+                </div>
               }
             </div>
           }
         </div>
-      }
+      </div>
 
-      <div class="detail-section">
-        <h3>{{ language.t('nav.transactions') }}</h3>
-        <ul class="item-list">
-          @for (item of transaction.transactionDetails; track item.id) {
-            <li class="item-row">
-              <div class="item-info">
-                <span class="item-name">{{ item.itemName }}</span>
-                @if (item.categoryName) {
-                  <span class="item-category">{{ getCategoryLabel(item.categoryName) }}</span>
-                }
-                @if (item.estimatedCalories) {
-                  <span class="item-calories">{{ item.estimatedCalories }} kcal</span>
-                }
-              </div>
-              <div class="item-price-qty">
-                <span class="item-price">{{ formatCurrency(item.price * item.quantity) }}</span>
-                @if (item.unit) {
-                  <span class="item-qty">{{ item.quantity }} {{ item.unit }}</span>
-                } @else {
-                  <span class="item-qty">x{{ item.quantity }}</span>
-                }
-              </div>
-            </li>
-          }
-        </ul>
+      <!-- Right side -->
+      <div class="modal-right-panel">
+        <div class="detail-section">
+          <h3>{{ language.t('nav.transactions') }}</h3>
+          <ul class="item-list">
+            @for (item of transaction.transactionDetails; track item.id) {
+              <li class="item-row">
+                <div class="item-info">
+                  <span class="item-name">{{ item.itemName }}</span>
+                  @if (item.categoryName) {
+                    <span class="item-category">{{ getCategoryLabel(item.categoryName) }}</span>
+                  }
+                  @if (item.estimatedCalories) {
+                    <span class="item-calories">{{ item.estimatedCalories }} kcal</span>
+                  }
+                </div>
+                <div class="item-price-qty">
+                  <span class="item-price">{{ formatCurrency(item.price * item.quantity) }}</span>
+                  @if (item.unit) {
+                    <span class="item-qty">{{ item.quantity }} {{ item.unit }}</span>
+                  } @else {
+                    <span class="item-qty">x{{ item.quantity }}</span>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
       </div>
     </div>
-
-    <footer class="modal-footer">
-      <div class="total-row">
-        <span>{{ language.t('dashboard.totalPayment') }}</span>
-        <span class="total-amount">{{ formatCurrency(transaction.totalAmount) }}</span>
-      </div>
-      @if (transaction.isAiEstimated) {
-        <div class="ai-estimated-badge">
-          <span class="material-symbols-outlined">smart_toy</span>
-          <span>{{ language.t('dashboard.aiGen') }}</span>
-        </div>
-      }
-    </footer>
   </div>
 </div>

@@ -14,6 +14,8 @@ import { TransactionDto } from '../../../../models/transaction.dto';
 export class TransactionDetailModal implements OnChanges {
   @Input({ required: true }) transaction!: TransactionDto;
   @Output() closeModal = new EventEmitter<void>();
+  @Output() editTransaction = new EventEmitter<TransactionDto>();
+  @Output() deleteTransaction = new EventEmitter<TransactionDto>();
 
   protected readonly language = inject(LanguageService);
   private readonly s3Service = inject(S3Service);
@@ -30,6 +32,10 @@ export class TransactionDetailModal implements OnChanges {
     this.isImageExpanded = false;
     this.isLoadingImage = false;
     this.imageUrl = this.transaction.imagePreviewUrl ?? null;
+
+    if (this.hasImage() && typeof window !== 'undefined' && window.innerWidth >= 768) {
+      this.toggleImage();
+    }
   }
 
   toggleImage(): void {
@@ -75,8 +81,28 @@ export class TransactionDetailModal implements OnChanges {
     return `${new Intl.NumberFormat(this.language.locale()).format(value)}\u0111`;
   }
 
+  formatDate(dateString: string | Date): string {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat(this.language.locale(), {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }).format(date);
+  }
+
   onClose() {
     this.closeModal.emit();
+  }
+
+  onEdit() {
+    this.editTransaction.emit(this.transaction);
+  }
+
+  onDelete() {
+    this.deleteTransaction.emit(this.transaction);
   }
 
   stopPropagation(event: Event) {
