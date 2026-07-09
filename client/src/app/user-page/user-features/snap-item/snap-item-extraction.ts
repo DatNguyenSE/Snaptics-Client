@@ -63,6 +63,9 @@ export function parseSnapItemAnalysis(
     nestedItem?.['name'],
   ]);
   const estimatedAmount = getFirstNumber([
+    payload['estimatedPriceVND'],
+    payload['estimatedPriceVnd'],
+    payload['EstimatedPriceVND'],
     payload['estimatedPrice'],
     payload['amount'],
     payload['price'],

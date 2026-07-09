@@ -13,12 +13,31 @@
       </div>
     </header>
 
-    <section class="snap-preview" [class.snap-preview--interactive]="snapState === 'ready'">
-      @if (!hasPreview) {
-        <div class="snap-preview__empty">
-          <span class="material-symbols-outlined">photo_camera</span>
+    <section class="snap-preview" [class.snap-preview--has-image]="hasPreview || isCameraActive" [class.snap-preview--interactive]="snapState === 'ready'">
+      <canvas #canvasElement style="display: none;"></canvas>
+      
+      @if (isCameraActive) {
+        <video #videoElement class="snap-preview__video" playsinline autoplay muted></video>
+        <div class="snap-preview__camera-overlay">
+          <!-- Scanner Corners -->
+          <div class="camera-corners">
+            <div class="corner top-left"></div>
+            <div class="corner top-right"></div>
+            <div class="corner bottom-left"></div>
+            <div class="corner bottom-right"></div>
+          </div>
+          <button class="camera-capture-btn" type="button" (click)="capturePhoto($event)">
+            <span class="camera-capture-inner"></span>
+          </button>
+        </div>
+      } @else if (!hasPreview) {
+        <div class="snap-preview__empty" (click)="openCapture()" role="button" tabindex="0">
+          <div class="snap-preview__empty-icon">
+            <span class="material-symbols-outlined">photo_camera</span>
+          </div>
           <h2>{{ language.t('snapItem.emptyTitle') }}</h2>
           <p>{{ language.t('snapItem.emptyDescription') }}</p>
+          <span class="snap-preview__empty-hint">{{ language.t('snapItem.takePhoto') }}</span>
         </div>
       } @else {
         <img
@@ -28,12 +47,20 @@
         />
       }
 
+      @if (snapState === 'extracting') {
+        <div class="snap-preview__scanning-overlay">
+          <div class="snap-preview__scanner-line"></div>
+        </div>
+      }
+
       @if (snapState === 'extracting' || snapState === 'saving') {
         <div class="snap-preview__overlay">
           <div class="snap-preview__loader">
-            <span class="material-symbols-outlined">
-              {{ snapState === 'saving' ? 'check_circle' : 'auto_awesome' }}
-            </span>
+            <div class="snap-preview__loader-icon" [class.pulse]="snapState === 'extracting'">
+              <span class="material-symbols-outlined">
+                {{ snapState === 'saving' ? 'check_circle' : 'auto_awesome' }}
+              </span>
+            </div>
             <strong>
               {{
                 snapState === 'saving'
@@ -54,14 +81,14 @@
     </section>
 
     @if (snapState === 'error') {
-      <article class="snap-feedback snap-feedback--error">
+      <article class="snap-feedback snap-feedback--error animate-enter">
         <span class="material-symbols-outlined">error</span>
         <p>{{ errorMessage }}</p>
       </article>
     }
 
     @if (snapState === 'ready') {
-      <article class="snap-feedback">
+      <article class="snap-feedback animate-enter">
         <span class="material-symbols-outlined">
           {{ extractionSource === 'ai' ? 'smart_toy' : 'auto_fix_high' }}
         </span>
@@ -75,7 +102,7 @@
       </article>
     }
 
-    <div class="snap-actions">
+    <div class="snap-actions" [class.hidden]="isCameraActive">
       <input
         #captureInput
         type="file"
@@ -86,17 +113,17 @@
       />
       <input #uploadInput type="file" accept="image/*" hidden (change)="onUploadSelected($event)" />
 
-      <button class="snap-button snap-button--primary" type="button" (click)="openCapture()">
-        <span class="material-symbols-outlined">photo_camera</span>
-        {{ language.t('snapItem.takePhoto') }}
-      </button>
+      @if (!hasPreview) {
+        <button class="snap-button snap-button--primary" type="button" (click)="openCapture()">
+          <span class="material-symbols-outlined">photo_camera</span>
+          {{ language.t('snapItem.takePhoto') }}
+        </button>
 
-      <button class="snap-button snap-button--secondary" type="button" (click)="openUpload()">
-        <span class="material-symbols-outlined">upload</span>
-        {{ language.t('snapItem.uploadImage') }}
-      </button>
-
-      @if (hasPreview) {
+        <button class="snap-button snap-button--secondary" type="button" (click)="openUpload()">
+          <span class="material-symbols-outlined">photo_library</span>
+          {{ language.t('snapItem.uploadImage') }}
+        </button>
+      } @else {
         <button class="snap-button snap-button--ghost" type="button" (click)="resetSnapFlow()">
           <span class="material-symbols-outlined">replay</span>
           {{ language.t('snapItem.retake') }}
@@ -105,7 +132,7 @@
     </div>
 
     @if (snapState === 'ready' || snapState === 'saving') {
-      <section class="snap-confirmation">
+      <section class="snap-confirmation animate-enter">
         <div class="snap-confirmation__header">
           <div>
             <p class="section-eyebrow">{{ language.t('snapItem.confirmationEyebrow') }}</p>
@@ -117,15 +144,17 @@
           </span>
         </div>
 
-        <app-transaction-entry-form
-          [form]="form"
-          [categories]="categories"
-          [isSaving]="snapState === 'saving'"
-          [saveLabel]="language.t('snapItem.saveLabel')"
-          [cancelLabel]="language.t('common.cancel')"
-          (save)="saveTransaction()"
-          (cancel)="cancel()"
-        ></app-transaction-entry-form>
+        <div class="snap-confirmation__form-container">
+          <app-transaction-entry-form
+            [form]="form"
+            [categories]="categories"
+            [isSaving]="snapState === 'saving'"
+            [saveLabel]="language.t('snapItem.saveLabel')"
+            [cancelLabel]="language.t('common.cancel')"
+            (save)="saveTransaction()"
+            (cancel)="cancel()"
+          ></app-transaction-entry-form>
+        </div>
       </section>
     }
   </div>

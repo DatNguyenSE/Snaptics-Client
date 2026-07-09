@@ -60,12 +60,44 @@ export class TransactionService {
 
   createFromBill(data: CreateTransactionFromBillDto, file: File | null): Observable<TransactionDto> {
     const formData = new FormData();
-    formData.append('data', JSON.stringify(data));
+    if (data.merchantName) formData.append('MerchantName', data.merchantName);
+    formData.append('TotalAmount', data.totalAmount.toString());
+    if (data.transactionDate) formData.append('TransactionDate', data.transactionDate);
+    
+    if (data.items && data.items.length > 0) {
+      formData.append('Items', JSON.stringify(data.items));
+    }
+    
     if (file) {
       formData.append('image', file);
     }
 
     return this.http.post<TransactionDto>(`${this.apiUrl}/from-bill`, formData).pipe(
+      tap((transaction) => {
+        this.upsertRemoteTransaction(transaction);
+      }),
+    );
+  }
+
+  createFromAnalyze(data: {
+    itemName: string;
+    estimatedPriceVND: number;
+    quantity?: number;
+    category?: string | null;
+    unit?: string | null;
+  }, file: File | null): Observable<TransactionDto> {
+    const formData = new FormData();
+    formData.append('ItemName', data.itemName);
+    formData.append('EstimatedPriceVND', data.estimatedPriceVND.toString());
+    if (data.quantity) formData.append('Quantity', data.quantity.toString());
+    if (data.category) formData.append('Category', data.category);
+    if (data.unit) formData.append('Unit', data.unit);
+    
+    if (file) {
+      formData.append('image', file);
+    }
+
+    return this.http.post<TransactionDto>(`${this.apiUrl}/from-analyze`, formData).pipe(
       tap((transaction) => {
         this.upsertRemoteTransaction(transaction);
       }),
@@ -93,7 +125,7 @@ export class TransactionService {
     this.isLoadingRemoteTransactions = true;
 
     this.http
-      .get<TransactionDto[]>(this.apiUrl)
+      .get<TransactionDto[]>(this.apiUrl + '/user')
       .pipe(
         catchError(() => of([])),
         finalize(() => {

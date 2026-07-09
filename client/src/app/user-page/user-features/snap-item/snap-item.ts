@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewChild, ElementRef, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ElementRef, inject, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { catchError, map, of } from 'rxjs';
@@ -30,10 +30,13 @@ export class SnapItem implements OnInit, OnDestroy {
   private readonly toast = inject(ToastService);
   private readonly location = inject(Location);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
   readonly language = inject(LanguageService);
 
   @ViewChild('captureInput') captureInput?: ElementRef<HTMLInputElement>;
   @ViewChild('uploadInput') uploadInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
+  @ViewChild('canvasElement') canvasElement?: ElementRef<HTMLCanvasElement>;
 
   readonly form = new FormGroup<TransactionEntryFormControls>({
     title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -54,6 +57,9 @@ export class SnapItem implements OnInit, OnDestroy {
   currentFile: File | null = null;
   errorMessage = '';
 
+  isCameraActive = false;
+  mediaStream: MediaStream | null = null;
+
   ngOnInit(): void {
     this.categoryService
       .getCategories()
@@ -68,10 +74,81 @@ export class SnapItem implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.clearPreview();
+    this.closeCamera();
   }
 
   protected openCapture(): void {
-    this.captureInput?.nativeElement.click();
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode: 'environment' } })
+        .then((stream) => {
+          this.mediaStream = stream;
+          this.isCameraActive = true;
+          setTimeout(() => {
+            if (this.videoElement) {
+              this.videoElement.nativeElement.srcObject = stream;
+              this.videoElement.nativeElement.play();
+            }
+          }, 0);
+        })
+        .catch((err) => {
+          console.error('Camera access denied or not supported:', err);
+          this.captureInput?.nativeElement.click();
+        });
+    } else {
+      this.captureInput?.nativeElement.click();
+    }
+  }
+
+  protected capturePhoto(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    if (this.videoElement && this.canvasElement) {
+      const video = this.videoElement.nativeElement;
+      const canvas = this.canvasElement.nativeElement;
+
+      if (video.videoWidth === 0 || video.videoHeight === 0) {
+        this.toast.error(this.language.t('snapItem.error.cameraLoading') || 'Camera đang tải, vui lòng thử lại');
+        return;
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      if (context) {
+        try {
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const file = new File([blob], `snap-${Date.now()}.jpg`, { type: 'image/jpeg' });
+                this.closeCamera();
+                this.processFile(file);
+                this.cdr.detectChanges(); // Ensure UI updates immediately
+              } else {
+                this.toast.error(this.language.t('snapItem.error.captureFailed') || 'Không thể chụp ảnh');
+              }
+            },
+            'image/jpeg',
+            0.9
+          );
+        } catch (err) {
+          console.error("Lỗi vẽ canvas:", err);
+          this.toast.error(this.language.t('snapItem.error.captureFailed') || 'Lỗi chụp ảnh');
+        }
+      }
+    }
+  }
+
+  protected closeCamera(): void {
+    if (this.mediaStream) {
+      this.mediaStream.getTracks().forEach((track) => track.stop());
+      this.mediaStream = null;
+    }
+    this.isCameraActive = false;
   }
 
   protected openUpload(): void {
@@ -102,6 +179,7 @@ export class SnapItem implements OnInit, OnDestroy {
     this.extractionSource = null;
     this.snapState = 'idle';
     this.clearPreview();
+    this.closeCamera();
   }
 
   protected saveTransaction(): void {
@@ -119,16 +197,13 @@ export class SnapItem implements OnInit, OnDestroy {
     this.snapState = 'saving';
 
     this.transactionService
-      .createTransactionEntry({
-        title,
-        amount,
+      .createFromAnalyze({
+        itemName: title,
+        estimatedPriceVND: amount,
+        quantity: 1,
         category: category || null,
-        transactionDate: date,
-        note: note || null,
-        imagePreviewUrl: this.previewUrl,
-        isAiEstimated: true,
-        source: 'snap',
-      })
+        unit: 'cái'
+      }, this.currentFile)
       .subscribe({
         next: () => {
           this.toast.success(this.language.t('snapItem.toast.saved'));
@@ -142,6 +217,11 @@ export class SnapItem implements OnInit, OnDestroy {
   }
 
   protected cancel(): void {
+    if (this.isCameraActive) {
+      this.closeCamera();
+      return;
+    }
+
     if (window.history.length > 1) {
       this.location.back();
       return;
@@ -163,6 +243,10 @@ export class SnapItem implements OnInit, OnDestroy {
       return;
     }
 
+    this.processFile(file);
+  }
+
+  private processFile(file: File): void {
     this.currentFile = file;
     this.errorMessage = '';
     this.snapState = 'extracting';

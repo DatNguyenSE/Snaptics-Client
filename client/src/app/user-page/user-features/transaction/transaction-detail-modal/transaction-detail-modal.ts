@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
 import { LanguageService } from '../../../../core/services/language-service';
 import { S3Service } from '../../../../core/services/s3.service';
@@ -7,7 +6,7 @@ import { TransactionDto } from '../../../../models/transaction.dto';
 @Component({
   selector: 'app-transaction-detail-modal',
   standalone: true,
-  imports: [DatePipe],
+  imports: [],
   templateUrl: './transaction-detail-modal.html',
   styleUrl: './transaction-detail-modal.css',
 })

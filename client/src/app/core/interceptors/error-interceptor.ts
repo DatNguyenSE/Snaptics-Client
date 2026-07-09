@@ -46,8 +46,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             router.navigateByUrl('/not-found')
             break;
           case 500:
-            const navigationExtras: NavigationExtras = {state: {error: error.error}}
-            router.navigateByUrl('/server-error', navigationExtras)
+            console.log('Internal Server Error: ', error.error);
+            if (toast) {
+                // toast.error('Lỗi hệ thống từ máy chủ (500)'); 
+            }
             break;
           default:
            console.log('Lỗi hệ thống - Vui lòng thử lại sau');

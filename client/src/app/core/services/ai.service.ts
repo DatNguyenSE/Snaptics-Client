@@ -13,7 +13,7 @@ export class AiService {
 
   analyzeImage(file: File): Observable<any> {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('image', file);
     return this.http.post<any>(`${this.apiUrl}/analyze-image`, formData);
   }
 
