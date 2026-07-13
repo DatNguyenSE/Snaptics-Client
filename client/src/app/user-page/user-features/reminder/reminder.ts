@@ -1,6 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { LanguageService } from '../../../core/services/language-service';
 import { ToastService } from '../../../core/services/toast-service';
+import { TransactionService } from '../../../core/services/transaction.service';
+import { environment } from '../../../environments/environment.development';
+import { TransactionDto } from '../../../models/transaction.dto';
 
 interface ReminderItem {
   id: number;
@@ -12,37 +15,55 @@ interface ReminderItem {
   imageUrl?: string | null;
 }
 
-const REMINDER_ITEMS: ReminderItem[] = [
-  {
-    id: 1,
-    name: 'Aquafina Water',
-    categoryLabel: 'Drinks',
-    categoryClass: 'category-pill--blue',
-    mediaClass: 'reminder-media--blue',
-    icon: 'water_drop',
-    imageUrl:
-      'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=80&h=80&fit=crop&auto=format',
-  },
-  {
-    id: 2,
-    name: 'Ham Sandwich',
-    categoryLabel: 'Food',
-    categoryClass: 'category-pill--amber',
-    mediaClass: 'reminder-media--amber',
-    icon: 'lunch_dining',
-    imageUrl:
-      'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=80&h=80&fit=crop&auto=format',
-  },
-  {
-    id: 3,
-    name: 'Mentos Gum',
-    categoryLabel: 'Other',
-    categoryClass: 'category-pill--slate',
-    mediaClass: 'reminder-media--slate',
-    icon: 'local_mall',
-    imageUrl: null,
-  },
-];
+function mapTransactionToReminderItem(transaction: TransactionDto): ReminderItem {
+  const firstDetail = transaction.transactionDetails?.[0];
+  const categoryName = firstDetail?.categoryName || null;
+  const itemName =
+    transaction.name ||
+    firstDetail?.itemName ||
+    'Unknown item';
+
+  return {
+    id: transaction.id,
+    name: itemName,
+    categoryLabel: categoryName || 'Other',
+    categoryClass: resolveCategoryClass(categoryName),
+    mediaClass: resolveMediaClass(categoryName),
+    icon: resolveIcon(categoryName),
+    imageUrl: transaction.imagePreviewUrl
+      ? transaction.imagePreviewUrl
+      : transaction.imageKey
+        ? `${environment.apiUrl}s3/image?key=${encodeURIComponent(transaction.imageKey)}`
+        : null,
+  };
+}
+
+function resolveCategoryClass(category: string | null | undefined): string {
+  const name = (category || '').toLowerCase();
+  if (name.includes('drink') || name.includes('beverage')) return 'category-pill--blue';
+  if (name.includes('food') || name.includes('meal')) return 'category-pill--amber';
+  if (name.includes('travel') || name.includes('transport')) return 'category-pill--emerald';
+  if (name.includes('electronic')) return 'category-pill--violet';
+  return 'category-pill--slate';
+}
+
+function resolveMediaClass(category: string | null | undefined): string {
+  const name = (category || '').toLowerCase();
+  if (name.includes('drink') || name.includes('beverage')) return 'reminder-media--blue';
+  if (name.includes('food') || name.includes('meal')) return 'reminder-media--amber';
+  if (name.includes('travel') || name.includes('transport')) return 'reminder-media--emerald';
+  if (name.includes('electronic')) return 'reminder-media--violet';
+  return 'reminder-media--slate';
+}
+
+function resolveIcon(category: string | null | undefined): string {
+  const name = (category || '').toLowerCase();
+  if (name.includes('drink') || name.includes('beverage')) return 'local_cafe';
+  if (name.includes('food') || name.includes('meal')) return 'lunch_dining';
+  if (name.includes('travel') || name.includes('transport')) return 'directions_car';
+  if (name.includes('electronic')) return 'devices';
+  return 'local_mall';
+}
 
 @Component({
   selector: 'app-reminder',
@@ -51,16 +72,41 @@ const REMINDER_ITEMS: ReminderItem[] = [
   templateUrl: './reminder.html',
   styleUrl: './reminder.css',
 })
-export class Reminder {
+export class Reminder implements OnInit {
   private readonly toast = inject(ToastService);
+  private readonly transactionService = inject(TransactionService);
   readonly language = inject(LanguageService);
 
-  readonly reminderItems = REMINDER_ITEMS;
+  reminderItems: ReminderItem[] = [];
   priceInputs: Record<number, string> = {};
   updatedItems: Record<number, boolean> = {};
+  isLoading = true;
+  hasError = false;
+
+  ngOnInit(): void {
+    this.loadReminderItems();
+  }
+
+  private loadReminderItems(): void {
+    this.isLoading = true;
+    this.hasError = false;
+
+    this.transactionService.getTransactions().subscribe({
+      next: (transactions) => {
+        this.reminderItems = transactions
+          .filter((t) => t.isAiEstimated === true)
+          .map(mapTransactionToReminderItem);
+        this.isLoading = false;
+      },
+      error: () => {
+        this.hasError = true;
+        this.isLoading = false;
+      },
+    });
+  }
 
   get allUpdated(): boolean {
-    return this.reminderItems.every((item) => this.updatedItems[item.id]);
+    return this.reminderItems.length > 0 && this.reminderItems.every((item) => this.updatedItems[item.id]);
   }
 
   get pendingCount(): number {

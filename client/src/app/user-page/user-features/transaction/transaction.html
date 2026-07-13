@@ -20,43 +20,62 @@
           <h2>{{ language.t('dashboard.recentTransactions') }}</h2>
         </div>
 
-        <span class="transaction-count">{{ transactionHistory.length }}</span>
+        @if (!isLoading && !hasError) {
+          <span class="transaction-count">{{ transactionHistory.length }}</span>
+        }
       </div>
 
       <div class="transaction-list">
-        @for (transaction of transactionHistory; track transaction.id) {
-          <article class="transaction-card" (click)="openTransactionDetail(transaction)" style="cursor: pointer;">
-            <div class="transaction-media" [class]="getMediaClass(transaction)">
-              @if (getIcon(transaction) === 'receipt_long') {
-                <img src="bill-icon.svg" alt="Bill Icon" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.1);" />
-              } @else {
-                <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
-              }
-            </div>
-
-            <div class="transaction-body">
-              <div class="transaction-title-row">
-                <p class="transaction-title">{{ transaction.name }}</p>
-
-                @if (transaction.isAiEstimated) {
-                  <span class="ai-badge">
-                    <span class="material-symbols-outlined">smart_toy</span>
-                    {{ language.t('dashboard.aiGen') }}
-                  </span>
+        @if (isLoading) {
+          <div class="transaction-list__state">
+            <span class="material-symbols-outlined">hourglass_empty</span>
+            <p>{{ language.t('common.loading') }}</p>
+          </div>
+        } @else if (hasError) {
+          <div class="transaction-list__state">
+            <span class="material-symbols-outlined">error_outline</span>
+            <p>{{ language.t('common.loadError') }}</p>
+          </div>
+        } @else if (transactionHistory.length === 0) {
+          <div class="transaction-list__state">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <p>{{ language.t('transaction.empty') }}</p>
+          </div>
+        } @else {
+          @for (transaction of transactionHistory; track transaction.id) {
+            <article class="transaction-card" (click)="openTransactionDetail(transaction)" style="cursor: pointer;">
+              <div class="transaction-media" [class]="getMediaClass(transaction)">
+                @if (getIcon(transaction) === 'receipt_long') {
+                  <img src="bill-icon.svg" alt="Bill Icon" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.1);" />
+                } @else {
+                  <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
                 }
               </div>
 
-              <div class="transaction-meta">
-                <span class="category-pill" [class]="getCategoryClass(transaction)">
-                  <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
-                  {{ language.t(getCategoryKey(transaction)) }}
-                </span>
-                <span class="transaction-time">{{ transaction.transactionDate | date:'HH:mm' }}</span>
-              </div>
-            </div>
+              <div class="transaction-body">
+                <div class="transaction-title-row">
+                  <p class="transaction-title">{{ transaction.name }}</p>
 
-            <p class="transaction-price">{{ formatCurrency(transaction.totalAmount) }}</p>
-          </article>
+                  @if (transaction.isAiEstimated) {
+                    <span class="ai-badge">
+                      <span class="material-symbols-outlined">smart_toy</span>
+                      {{ language.t('dashboard.aiGen') }}
+                    </span>
+                  }
+                </div>
+
+                <div class="transaction-meta">
+                  <span class="category-pill" [class]="getCategoryClass(transaction)">
+                    <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
+                    {{ language.t(getCategoryKey(transaction)) }}
+                  </span>
+                  <span class="transaction-time">{{ transaction.transactionDate | date:'HH:mm' }}</span>
+                </div>
+              </div>
+
+              <p class="transaction-price">{{ formatCurrency(transaction.totalAmount) }}</p>
+            </article>
+          }
         }
       </div>
     </section>
@@ -64,8 +83,8 @@
 </section>
 
 @if (selectedTransaction) {
-  <app-transaction-detail-modal 
-    [transaction]="selectedTransaction" 
+  <app-transaction-detail-modal
+    [transaction]="selectedTransaction"
     (closeModal)="closeTransactionDetail()">
   </app-transaction-detail-modal>
 }

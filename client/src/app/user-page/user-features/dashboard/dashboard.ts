@@ -32,9 +32,34 @@ export class Dashboard implements OnInit {
   private readonly transactionService = inject(TransactionService);
 
   readonly totalBudget = 500000;
-  readonly totalSpent = 185000;
-  readonly remainingBudget = this.totalBudget - this.totalSpent;
-  readonly spentPercentage = Math.round((this.totalSpent / this.totalBudget) * 100);
+
+  isLoading = true;
+  hasError = false;
+
+  recentTransactions: TransactionDto[] = [];
+  selectedTransaction: TransactionDto | null = null;
+
+  private allTransactions: TransactionDto[] = [];
+
+  get totalSpent(): number {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    return this.allTransactions
+      .filter((t) => {
+        const d = new Date(t.transactionDate);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+      })
+      .reduce((sum, t) => sum + t.totalAmount, 0);
+  }
+
+  get remainingBudget(): number {
+    return this.totalBudget - this.totalSpent;
+  }
+
+  get spentPercentage(): number {
+    return Math.min(100, Math.round((this.totalSpent / this.totalBudget) * 100));
+  }
 
   readonly quickActions: QuickAction[] = [
     {
@@ -64,15 +89,24 @@ export class Dashboard implements OnInit {
     categoryKey: 'dashboard.category.drinks',
   };
 
-  recentTransactions: TransactionDto[] = [];
-  selectedTransaction: TransactionDto | null = null;
-
   ngOnInit(): void {
+    this.loadTransactions();
+  }
+
+  private loadTransactions(): void {
+    this.isLoading = true;
+    this.hasError = false;
+
     this.transactionService.getTransactions().subscribe({
       next: (data) => {
+        this.allTransactions = data;
         this.recentTransactions = data.slice(0, 4);
+        this.isLoading = false;
       },
-      error: (err) => console.error('Failed to load transactions', err),
+      error: () => {
+        this.hasError = true;
+        this.isLoading = false;
+      },
     });
   }
 

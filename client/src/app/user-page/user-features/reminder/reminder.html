@@ -3,20 +3,54 @@
     <div class="reminder-header">
       <div>
         <p class="section-eyebrow">{{ language.t('reminder.eyebrow') }}</p>
-        <h2>
-          {{
-            allUpdated
-              ? language.t('reminder.allResolvedTitle')
-              : language.t('reminder.pendingTitle', { count: pendingCount })
-          }}
-        </h2>
-        <p>{{ allUpdated ? language.t('reminder.allResolvedSubtitle') : language.t('reminder.pendingSubtitle') }}</p>
+        @if (isLoading) {
+          <h2>{{ language.t('common.loading') }}</h2>
+          <p>{{ language.t('reminder.pendingSubtitle') }}</p>
+        } @else if (hasError) {
+          <h2>{{ language.t('common.loadError') }}</h2>
+          <p>{{ language.t('reminder.pendingSubtitle') }}</p>
+        } @else if (reminderItems.length === 0) {
+          <h2>{{ language.t('reminder.allResolvedTitle') }}</h2>
+          <p>{{ language.t('reminder.allResolvedSubtitle') }}</p>
+        } @else {
+          <h2>
+            {{
+              allUpdated
+                ? language.t('reminder.allResolvedTitle')
+                : language.t('reminder.pendingTitle', { count: pendingCount })
+            }}
+          </h2>
+          <p>{{ allUpdated ? language.t('reminder.allResolvedSubtitle') : language.t('reminder.pendingSubtitle') }}</p>
+        }
       </div>
 
-      <span class="reminder-header__count">{{ pendingCount }}</span>
+      @if (!isLoading && !hasError && reminderItems.length > 0) {
+        <span class="reminder-header__count">{{ pendingCount }}</span>
+      }
     </div>
 
-    @if (allUpdated) {
+    @if (isLoading) {
+      <div class="transaction-list__state">
+        <span class="material-symbols-outlined">hourglass_empty</span>
+        <p>{{ language.t('common.loading') }}</p>
+      </div>
+    } @else if (hasError) {
+      <div class="transaction-list__state">
+        <span class="material-symbols-outlined">error_outline</span>
+        <p>{{ language.t('common.loadError') }}</p>
+      </div>
+    } @else if (reminderItems.length === 0) {
+      <article class="reminder-success">
+        <div class="reminder-success__icon">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+
+        <div class="reminder-success__copy">
+          <h3>{{ language.t('reminder.successTitle') }}</h3>
+          <p>{{ language.t('reminder.successDescription') }}</p>
+        </div>
+      </article>
+    } @else if (allUpdated) {
       <article class="reminder-success">
         <div class="reminder-success__icon">
           <span class="material-symbols-outlined">check_circle</span>

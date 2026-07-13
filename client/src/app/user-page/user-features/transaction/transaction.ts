@@ -21,13 +21,26 @@ export class Transaction implements OnInit {
 
   transactionHistory: TransactionDto[] = [];
   selectedTransaction: TransactionDto | null = null;
+  isLoading = true;
+  hasError = false;
 
   ngOnInit(): void {
+    this.loadTransactions();
+  }
+
+  private loadTransactions(): void {
+    this.isLoading = true;
+    this.hasError = false;
+
     this.transactionService.getTransactions().subscribe({
       next: (data) => {
         this.transactionHistory = data;
+        this.isLoading = false;
       },
-      error: (err) => console.error('Failed to load transactions', err),
+      error: () => {
+        this.hasError = true;
+        this.isLoading = false;
+      },
     });
   }
 
@@ -36,7 +49,10 @@ export class Transaction implements OnInit {
       next: (fullTransaction) => {
         this.selectedTransaction = fullTransaction;
       },
-      error: (err) => console.error('Failed to load transaction details', err),
+      error: () => {
+        // fallback: show what we already have
+        this.selectedTransaction = transaction;
+      },
     });
   }
 
