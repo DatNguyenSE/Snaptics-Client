@@ -2,6 +2,8 @@
   <div class="user-dashboard__content">
     <app-user-header></app-user-header>
 
+
+    <!-- ── STAT CARDS ──────────────────────────────────────────── -->
     <section class="dashboard-summary-grid">
       <article class="stat-card stat-card--primary">
         <p class="stat-card__label stat-card__label--light">
@@ -15,7 +17,10 @@
       </article>
 
       <article class="stat-card">
-        <p class="stat-card__label">{{ language.t('dashboard.remainingBudget') }}</p>
+        <div class="stat-card__budget-header">
+          <p class="stat-card__label">{{ language.t('dashboard.remainingBudget') }}</p>
+        </div>
+
         <h2 class="stat-card__amount stat-card__amount--accent">
           {{ formatCurrency(remainingBudget) }}
         </h2>
@@ -25,28 +30,37 @@
             <span>{{ language.t('dashboard.used') }} {{ spentPercentage }}%</span>
             <span>{{ formatCurrency(totalBudget) }}</span>
           </div>
-
           <div class="budget-progress__track" aria-hidden="true">
-            <div class="budget-progress__value" [style.width.%]="spentPercentage"></div>
+            <div
+              class="budget-progress__value"
+              [style.width.%]="spentPercentage"
+              [class.budget-progress__value--danger]="spentPercentage >= 90"
+            ></div>
           </div>
         </div>
+
       </article>
     </section>
 
+    <!-- ── QUICK ACTIONS ──────────────────────────────────────── -->
     <section class="quick-actions">
       <p class="section-eyebrow">{{ language.t('dashboard.quickActions') }}</p>
-
       <div class="quick-actions__grid">
         @for (action of quickActions; track action.id) {
           @if (action.route; as route) {
-            <a class="quick-action" [routerLink]="route">
+            <a class="quick-action" [routerLink]="route" [id]="'quick-action-btn-' + action.id">
               <span class="quick-action__icon" [class]="action.iconClass">
                 <span class="material-symbols-outlined">{{ action.icon }}</span>
               </span>
               <span class="quick-action__label">{{ language.t(action.labelKey) }}</span>
             </a>
           } @else {
-            <button class="quick-action" type="button">
+            <button
+              class="quick-action"
+              type="button"
+              [id]="'quick-action-btn-' + action.id"
+              (click)="onQuickActionClick(action)"
+            >
               <span class="quick-action__icon" [class]="action.iconClass">
                 <span class="material-symbols-outlined">{{ action.icon }}</span>
               </span>
@@ -57,34 +71,98 @@
       </div>
     </section>
 
-    <section class="ai-insight-card">
-      <div class="ai-insight-card__icon">
-        <span class="material-symbols-outlined">auto_awesome</span>
+    <!-- ── AI COMPANION ───────────────────────────────────────── -->
+    <section class="ai-insight-card ai-insight-card--dynamic">
+      <div class="ai-companion">
+        <div class="ai-companion__avatar">
+          <span class="ai-companion__pulse"></span>
+          <span class="material-symbols-outlined">smart_toy</span>
+        </div>
       </div>
-
       <div class="ai-insight-card__content">
-        <p class="ai-insight-card__eyebrow">{{ language.t('dashboard.aiInsights') }}</p>
-        <p class="ai-insight-card__copy">
-          {{ language.t('dashboard.aiInsightPrefix') }}
-          <strong>{{ language.t(aiInsight.categoryKey) }}</strong>
-          {{ language.t('dashboard.aiInsightSuffix') }}
+        <p class="ai-insight-card__eyebrow">
+          <span class="material-symbols-outlined" style="font-size:0.75rem;vertical-align:middle">auto_awesome</span>
+          {{ language.t('dashboard.aiInsights') }}
         </p>
+        <p class="ai-insight-card__copy">{{ aiMessage }}</p>
       </div>
     </section>
 
+    <!-- ── ANALYTICS ──────────────────────────────────────────── -->
+    <section class="analytics-section">
+      <p class="section-eyebrow">Analytics</p>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        @for (card of kpiCards; track card.label) {
+          <article class="kpi-card" [class]="card.colorClass">
+            <div class="kpi-card__top">
+              <span class="kpi-card__icon">
+                <span class="material-symbols-outlined">{{ card.icon }}</span>
+              </span>
+              <span class="kpi-card__label">{{ card.label }}</span>
+            </div>
+            <p class="kpi-card__value">{{ card.value }}</p>
+            @if (card.subLabel) {
+              <p class="kpi-card__sub">{{ card.subLabel }}</p>
+            }
+          </article>
+        }
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row">
+        <!-- Bar Chart – Weekly Spending -->
+        <div class="chart-card">
+          <div class="chart-card__header">
+            <h4 class="chart-card__title">
+              <span class="material-symbols-outlined">bar_chart</span>
+              Chi tiêu theo tuần
+            </h4>
+            <span class="chart-card__sub">Tháng này</span>
+          </div>
+
+          @if (isLoading) {
+            <div class="chart-placeholder">
+              <span class="material-symbols-outlined spin">progress_activity</span>
+              <p>Đang tải...</p>
+            </div>
+          } @else if (currentMonthTransactions.length === 0) {
+            <div class="chart-placeholder">
+              <span class="material-symbols-outlined">bar_chart</span>
+              <p>Chưa có dữ liệu tháng này</p>
+            </div>
+          } @else {
+            <apx-chart
+              [series]="lineSeries"
+              [chart]="lineChartOptions.chart"
+              [plotOptions]="lineChartOptions.plotOptions"
+              [xaxis]="lineChartOptions.xaxis"
+              [yaxis]="lineChartOptions.yaxis"
+              [grid]="lineChartOptions.grid"
+              [dataLabels]="lineChartOptions.dataLabels"
+              [tooltip]="lineChartOptions.tooltip"
+              [fill]="lineChartOptions.fill"
+              [colors]="lineChartOptions.colors"
+            ></apx-chart>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ── USAGE REVIEW ───────────────────────────────────────── -->
     <button class="usage-review-card" type="button">
       <div class="usage-review-card__icon">
         <span class="material-symbols-outlined">grade</span>
       </div>
-
       <div class="usage-review-card__copy">
         <p>{{ language.t('dashboard.usageTitle') }}</p>
         <span>{{ language.t('dashboard.usageHint') }}</span>
       </div>
-
       <span class="material-symbols-outlined usage-review-card__chevron">chevron_right</span>
     </button>
 
+    <!-- ── RECENT TRANSACTIONS ────────────────────────────────── -->
     <section class="transactions-section">
       <div class="transactions-section__header">
         <h3>{{ language.t('dashboard.recentTransactions') }}</h3>
@@ -112,7 +190,7 @@
           </div>
         } @else {
           @for (transaction of recentTransactions; track transaction.id) {
-            <article class="transaction-card" (click)="openTransactionDetail(transaction)" style="cursor: pointer;">
+            <article class="transaction-card" (click)="openTransactionDetail(transaction)" style="cursor:pointer">
               <div class="transaction-media" [class]="getMediaClass(transaction)">
                 @if (isAnalyzedImage(transaction)) {
                   <img [src]="getImageUrl(transaction)!" alt="transaction" />
@@ -120,11 +198,9 @@
                   <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
                 }
               </div>
-
               <div class="transaction-body">
                 <div class="transaction-title-row">
                   <p class="transaction-title">{{ transaction.name }}</p>
-
                   @if (transaction.isAiEstimated) {
                     <span class="ai-badge">
                       <span class="material-symbols-outlined">smart_toy</span>
@@ -132,7 +208,6 @@
                     </span>
                   }
                 </div>
-
                 <div class="transaction-meta">
                   <span class="category-pill" [class]="getCategoryClass(transaction)">
                     <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
@@ -141,7 +216,6 @@
                   <span class="transaction-time">{{ transaction.transactionDate | date:'HH:mm' }}</span>
                 </div>
               </div>
-
               <p class="transaction-price">{{ formatCurrency(transaction.totalAmount) }}</p>
             </article>
           }
@@ -151,9 +225,21 @@
   </div>
 </section>
 
+<!-- ── TRANSACTION DETAIL MODAL ─────────────────────────────────────────── -->
 @if (selectedTransaction) {
-  <app-transaction-detail-modal 
-    [transaction]="selectedTransaction" 
+  <app-transaction-detail-modal
+    [transaction]="selectedTransaction"
     (closeModal)="closeTransactionDetail()">
   </app-transaction-detail-modal>
 }
+
+<!-- ── CREATE BUDGET MODAL ─────────────────────────────────────────────── -->
+@if (isCreateBudgetOpen) {
+  <app-create-budget-modal
+    (closeModal)="closeCreateBudgetModal()"
+    (budgetCreated)="onBudgetCreated()">
+  </app-create-budget-modal>
+}
+
+
+

@@ -1,0 +1,216 @@
+<div class="budget-modal-overlay" (click)="onClose()">
+  <div class="budget-modal" (click)="stopPropagation($event)">
+    <div class="budget-modal__header">
+      <div class="budget-modal__icon">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+      </div>
+      <div>
+        <h3 class="budget-modal__title">{{ language.t('dashboard.createBudgetModal.title') }}</h3>
+        <p class="budget-modal__subtitle">{{ language.t('header.subtitle') }}</p>
+      </div>
+      <button class="budget-modal__close" type="button" (click)="onClose()" [disabled]="isSubmitting" aria-label="Close modal">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="budget-modal__form">
+      <!-- Budget Name -->
+      <div class="budget-form-group">
+        <label for="budgetName" class="budget-form-label">
+          <span class="material-symbols-outlined">badge</span>
+          {{ language.t('dashboard.createBudgetModal.name') }}
+        </label>
+        <input
+          id="budgetName"
+          type="text"
+          formControlName="name"
+          class="budget-form-input"
+          [placeholder]="language.t('dashboard.createBudgetModal.name')"
+          [disabled]="isSubmitting"
+        />
+        @if (getErrorMessage('name'); as errMsg) {
+          <div class="budget-form-error">
+            <span class="material-symbols-outlined">error</span>
+            <span>{{ errMsg }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Limit Amount -->
+      <div class="budget-form-group">
+        <label for="budgetAmount" class="budget-form-label">
+          <span class="material-symbols-outlined">payments</span>
+          {{ language.t('dashboard.createBudgetModal.amount') }}
+        </label>
+        <div class="budget-form-amount-wrap">
+          <input
+            id="budgetAmount"
+            type="number"
+            formControlName="amount"
+            class="budget-form-input budget-form-input--amount"
+            placeholder="0"
+            [disabled]="isSubmitting"
+          />
+          <span class="budget-form-unit">VND</span>
+        </div>
+        <p class="budget-form-preview">{{ formattedAmountPreview }}</p>
+        
+        @if (getErrorMessage('amount'); as errMsg) {
+          <div class="budget-form-error">
+            <span class="material-symbols-outlined">error</span>
+            <span>{{ errMsg }}</span>
+          </div>
+        }
+
+        <!-- Presets -->
+        <div class="budget-presets" style="margin-top: 6px;">
+          <p class="budget-presets__label">{{ language.t('entryForm.presets') || 'Gợi ý nhanh' }}</p>
+          <div class="budget-presets__list">
+            @for (val of presets; track val) {
+              <button
+                type="button"
+                class="budget-preset-btn"
+                [class.budget-preset-btn--active]="form.controls.amount.value === val"
+                [disabled]="isSubmitting"
+                (click)="setAmountPreset(val)"
+              >
+                {{ val >= 1000000 ? (val / 1000000) + 'M' : (val / 1000) + 'k' }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Period Selection -->
+      <div class="budget-form-group">
+        <label for="budgetPeriod" class="budget-form-label">
+          <span class="material-symbols-outlined">calendar_today</span>
+          {{ language.t('dashboard.createBudgetModal.period') }}
+        </label>
+        <select
+          id="budgetPeriod"
+          formControlName="period"
+          class="budget-form-input"
+          [disabled]="isSubmitting"
+          (change)="onPeriodChange($event)"
+        >
+          <option value="WEEKLY">{{ language.t('dashboard.createBudgetModal.weekly') }}</option>
+          <option value="MONTHLY">{{ language.t('dashboard.createBudgetModal.monthly') }}</option>
+          <option value="CUSTOM">{{ language.t('dashboard.createBudgetModal.custom') }}</option>
+        </select>
+      </div>
+
+      <!-- Start Date -->
+      <div class="budget-form-group">
+        <label for="budgetStartDate" class="budget-form-label">
+          <span class="material-symbols-outlined">date_range</span>
+          {{ language.t('dashboard.createBudgetModal.startDate') }}
+        </label>
+        <input
+          id="budgetStartDate"
+          type="date"
+          formControlName="startDate"
+          class="budget-form-input"
+          [disabled]="isSubmitting"
+        />
+        @if (getErrorMessage('startDate'); as errMsg) {
+          <div class="budget-form-error">
+            <span class="material-symbols-outlined">error</span>
+            <span>{{ errMsg }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- End Date (only for custom periods) -->
+      @if (form.controls.period.value === 'CUSTOM') {
+        <div class="budget-form-group">
+          <label for="budgetEndDate" class="budget-form-label">
+            <span class="material-symbols-outlined">date_range</span>
+            {{ language.t('dashboard.createBudgetModal.endDate') }}
+          </label>
+          <input
+            id="budgetEndDate"
+            type="date"
+            formControlName="endDate"
+            class="budget-form-input"
+            [disabled]="isSubmitting"
+          />
+          @if (getErrorMessage('endDate'); as errMsg) {
+            <div class="budget-form-error">
+              <span class="material-symbols-outlined">error</span>
+              <span>{{ errMsg }}</span>
+            </div>
+          }
+          @if (formRangeError; as rangeErrorMsg) {
+            <div class="budget-form-error">
+              <span class="material-symbols-outlined">error</span>
+              <span>{{ rangeErrorMsg }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Category Select -->
+      @if (categories.length > 0) {
+        <div class="budget-form-group">
+          <label for="budgetCategory" class="budget-form-label">
+            <span class="material-symbols-outlined">category</span>
+            {{ language.t('dashboard.createBudgetModal.category') }}
+          </label>
+          <select
+            id="budgetCategory"
+            formControlName="categoryId"
+            class="budget-form-input"
+            [disabled]="isSubmitting"
+          >
+            <option [value]="null">{{ language.t('dashboard.createBudgetModal.allCategories') }}</option>
+            @for (cat of categories; track cat.id) {
+              <option [value]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <!-- Note -->
+      <div class="budget-form-group">
+        <label for="budgetNote" class="budget-form-label">
+          <span class="material-symbols-outlined">notes</span>
+          {{ language.t('dashboard.createBudgetModal.note') }}
+        </label>
+        <textarea
+          id="budgetNote"
+          formControlName="note"
+          class="budget-form-input"
+          style="min-height: 80px; resize: vertical;"
+          [disabled]="isSubmitting"
+          [placeholder]="language.t('dashboard.createBudgetModal.note')"
+        ></textarea>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="budget-modal__actions">
+        <button
+          type="button"
+          class="budget-btn budget-btn--ghost"
+          (click)="onClose()"
+          [disabled]="isSubmitting"
+        >
+          {{ language.t('dashboard.createBudgetModal.cancel') }}
+        </button>
+        <button
+          type="submit"
+          class="budget-btn budget-btn--primary"
+          [disabled]="isSubmitting"
+        >
+          @if (isSubmitting) {
+            <span class="material-symbols-outlined spin" style="font-size: 1.1rem;">progress_activity</span>
+            <span>{{ language.t('dashboard.createBudgetModal.submitting') }}</span>
+          } @else {
+            <span class="material-symbols-outlined">add</span>
+            <span>{{ language.t('dashboard.createBudgetModal.submit') }}</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
