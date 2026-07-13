@@ -1,0 +1,62 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="closeModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <span class="material-symbols-outlined title-icon">category</span>
+        Phân tích chi tiêu
+      </h2>
+      <button class="close-btn" (click)="closeModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-tabs">
+      <button class="filter-tab" [class.active]="activeFilter === 'week'" (click)="setFilter('week')">Tuần này</button>
+      <button class="filter-tab" [class.active]="activeFilter === 'month'" (click)="setFilter('month')">Tháng này</button>
+      <button class="filter-tab" [class.active]="activeFilter === 'year'" (click)="setFilter('year')">Năm nay</button>
+    </div>
+
+    <!-- Content -->
+    <div class="modal-body">
+      <div class="loading-state" *ngIf="isLoading">
+        <span class="material-symbols-outlined spinner">refresh</span>
+        <p>Đang tải dữ liệu...</p>
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoading && (!summaryData || summaryData.breakdown.length === 0)">
+        <span class="material-symbols-outlined empty-icon">receipt_long</span>
+        <p>Chưa có chi tiêu nào trong thời gian này.</p>
+      </div>
+
+      <div class="category-list" *ngIf="!isLoading && summaryData && summaryData.breakdown.length > 0">
+        <!-- Top Category Highlight -->
+        <div class="top-category-card" *ngIf="summaryData.topCategory">
+          <div class="top-badge">Chi nhiều nhất</div>
+          <div class="top-category-info">
+            <span class="top-name">{{ summaryData.topCategory.name }}</span>
+            <span class="top-amount">{{ summaryData.topCategory.totalAmount | number }}đ</span>
+          </div>
+          <div class="top-percent">Chiếm {{ summaryData.topCategory.percentage }}% tổng chi tiêu</div>
+        </div>
+
+        <!-- Breakdown List -->
+        <h3 class="list-title">Tất cả danh mục</h3>
+        <div class="breakdown-item" *ngFor="let item of summaryData.breakdown; let i = index">
+          <div class="item-header">
+            <div class="item-name-group">
+              <div class="color-dot" [style.backgroundColor]="getColor(i)"></div>
+              <span class="item-name">{{ item.name }}</span>
+            </div>
+            <span class="item-amount">{{ item.totalAmount | number }}đ</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar" [style.width.%]="item.percentage" [style.backgroundColor]="getColor(i)"></div>
+          </div>
+          <span class="item-percent">{{ item.percentage }}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -11,6 +11,9 @@ import { TransactionDetailModal } from '../transaction/transaction-detail-modal/
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { BudgetService } from '../../../core/services/budget.service';
 import { CreateBudgetModal } from './create-budget-modal/create-budget-modal';
+import { DashboardService } from '../../../core/services/dashboard.service';
+import { CategorySummaryModal } from './category-summary-modal/category-summary-modal';
+import { AiAssistant } from '../ai-assistant/ai-assistant';
 import type {
   ApexNonAxisChartSeries,
   ApexChart,
@@ -36,11 +39,13 @@ interface QuickAction {
 }
 
 interface KpiCard {
+  id?: string;
   label: string;
   value: string;
   icon: string;
   colorClass: string;
   subLabel?: string;
+  clickable?: boolean;
 }
 
 export interface UserBudget {
@@ -50,17 +55,10 @@ export interface UserBudget {
   isDefault: boolean;
 }
 
-export interface CategoryItem {
-  label: string;
-  amount: number;
-  percent: number;
-  color: string;
-}
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, UserHeader, DatePipe, TransactionDetailModal, NgApexchartsModule, FormsModule, CreateBudgetModal],
+  imports: [RouterLink, UserHeader, DatePipe, TransactionDetailModal, NgApexchartsModule, FormsModule, CreateBudgetModal, CategorySummaryModal, AiAssistant],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -68,9 +66,12 @@ export class Dashboard implements OnInit {
   protected readonly language = inject(LanguageService);
   private readonly transactionService = inject(TransactionService);
   private readonly budgetService = inject(BudgetService);
+  private readonly dashboardService = inject(DashboardService);
   
   totalBudget = 5_000_000;
   isCreateBudgetOpen = false;
+  isCategorySummaryModalOpen = false;
+  topCategoryName = '—';
 
   // ─── Loading state ───────────────────────────────────────────────────────
   isLoading = true;
@@ -105,46 +106,21 @@ export class Dashboard implements OnInit {
     return this.currentMonthTransactions.length;
   }
 
-  get topCategory(): string {
-    const items = this.categoryItems;
-    if (!items.length) return '—';
-    const top = items[0].label;
-    return top.length > 18 ? top.slice(0, 18) + '…' : top;
-  }
-
   get kpiCards(): KpiCard[] {
     return [
-      { label: 'Tổng chi tiêu', value: this.formatCurrency(this.totalSpent), icon: 'payments', colorClass: 'kpi-card--violet', subLabel: 'Tháng này' },
-      { label: 'Giao dịch', value: String(this.totalTransactions), icon: 'receipt_long', colorClass: 'kpi-card--blue', subLabel: 'Tháng này' },
-      { label: 'Top danh mục', value: this.topCategory, icon: 'category', colorClass: 'kpi-card--amber', subLabel: 'Chi nhiều nhất' },
-      { label: 'Ngân sách', value: `${this.spentPercentage}%`, icon: 'donut_large', colorClass: this.spentPercentage >= 90 ? 'kpi-card--red' : 'kpi-card--emerald', subLabel: 'Đã sử dụng' },
+      { id: 'total-spent', label: 'Tổng chi tiêu', value: this.formatCurrency(this.totalSpent), icon: 'payments', colorClass: 'kpi-card--violet', subLabel: 'Tháng này' },
+      { id: 'transactions', label: 'Giao dịch', value: String(this.totalTransactions), icon: 'receipt_long', colorClass: 'kpi-card--blue', subLabel: 'Tháng này' },
+      { id: 'top-category', label: 'Top danh mục', value: this.topCategoryName, icon: 'category', colorClass: 'kpi-card--amber', subLabel: 'Chi nhiều nhất', clickable: true },
+      { id: 'budget', label: 'Ngân sách', value: `${this.spentPercentage}%`, icon: 'donut_large', colorClass: this.spentPercentage >= 90 ? 'kpi-card--red' : 'kpi-card--emerald', subLabel: 'Đã sử dụng' },
     ];
   }
 
-  // ─── Category breakdown (thay thế pie chart) ─────────────────────────────
-  readonly categoryColors = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
+  openCategorySummaryModal(): void {
+    this.isCategorySummaryModalOpen = true;
+  }
 
-  get categoryItems(): CategoryItem[] {
-    const totals: Record<string, number> = {};
-    for (const t of this.currentMonthTransactions) {
-      if (t.transactionDetails?.length) {
-        for (const d of t.transactionDetails) {
-          const cat = d.categoryName || d.itemName || 'Khác';
-          totals[cat] = (totals[cat] || 0) + d.price * d.quantity;
-        }
-      } else {
-        const cat = t.name || 'Khác';
-        totals[cat] = (totals[cat] || 0) + t.totalAmount;
-      }
-    }
-    const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const total = sorted.reduce((s, [, v]) => s + v, 0);
-    return sorted.map(([label, amount], i) => ({
-      label: label.length > 20 ? label.slice(0, 20) + '…' : label,
-      amount,
-      percent: total > 0 ? Math.round((amount / total) * 100) : 0,
-      color: this.categoryColors[i % this.categoryColors.length],
-    }));
+  closeCategorySummaryModal(): void {
+    this.isCategorySummaryModalOpen = false;
   }
 
   // ─── AI Message ──────────────────────────────────────────────────────────
@@ -152,7 +128,7 @@ export class Dashboard implements OnInit {
     if (this.isLoading) return 'Đang tải dữ liệu tài chính của bạn...';
     if (this.currentMonthTransactions.length === 0) return 'Hãy bắt đầu thêm giao dịch để mình hỗ trợ theo dõi chi tiêu nhé! 🚀';
     if (this.spentPercentage >= 90) return `⚠️ Bạn đã sử dụng ${this.spentPercentage}% ngân sách tháng này. Hãy cẩn thận!`;
-    if (this.spentPercentage >= 70) return `Bạn đã dùng ${this.spentPercentage}%. Top: ${this.topCategory}. Theo dõi sát hơn nhé!`;
+    if (this.spentPercentage >= 70) return `Bạn đã dùng ${this.spentPercentage}%. Top: ${this.topCategoryName}. Theo dõi sát hơn nhé!`;
     return `Bạn đang kiểm soát tài chính rất tốt! 💪 Đã chi ${this.spentPercentage}% với ${this.totalTransactions} giao dịch.`;
   }
 
@@ -176,17 +152,14 @@ export class Dashboard implements OnInit {
   };
 
   private buildLineData(): void {
-    const now = new Date();
-    const weekLabels = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'];
-    const weeklyTotals: number[] = [0, 0, 0, 0, 0];
+    const weekLabels = ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
+    const weeklyTotals: number[] = [0, 0, 0, 0];
     for (const t of this.currentMonthTransactions) {
       const day = new Date(t.transactionDate).getDate();
-      const weekIdx = Math.min(Math.floor((day - 1) / 7), 4);
+      const weekIdx = Math.min(Math.floor((day - 1) / 7), 3);
       weeklyTotals[weekIdx] += t.totalAmount;
     }
-    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    const weekCount = Math.ceil(daysInMonth / 7);
-    this.lineSeries = [{ name: 'Chi tiêu', data: weeklyTotals.slice(0, weekCount).map((val, i) => ({ x: weekLabels[i], y: val })) } as any];
+    this.lineSeries = [{ name: 'Chi tiêu', data: weeklyTotals.map((val, i) => ({ x: weekLabels[i], y: val })) } as any];
   }
 
   // ─── Quick Actions ────────────────────────────────────────────────────────
@@ -197,10 +170,23 @@ export class Dashboard implements OnInit {
     { id: 'create-budget', labelKey: 'dashboard.quickAction.createBudget', icon: 'account_balance_wallet', iconClass: 'quick-action__icon--emerald' },
   ];
 
-  // ─── Lifecycle ───────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.loadTransactions();
     this.loadActiveBudget();
+    this.loadTopCategory();
+  }
+
+  private loadTopCategory(): void {
+    this.dashboardService.getCategorySummary('month').subscribe({
+      next: (data) => {
+        if (data && data.topCategory) {
+          const name = data.topCategory.name;
+          this.topCategoryName = name.length > 18 ? name.slice(0, 18) + '…' : name;
+        } else {
+          this.topCategoryName = '—';
+        }
+      }
+    });
   }
 
   private loadTransactions(): void {

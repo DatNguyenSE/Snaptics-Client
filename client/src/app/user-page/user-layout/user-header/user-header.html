@@ -1,6 +1,13 @@
 <header class="user-header">
   <div class="user-header__avatar-wrapper">
-    <img src="/mascot/money.png" alt="Mascot Avatar" class="user-header__avatar-img" />
+    <video 
+      src="/Roni_AI/Roni_hi_video.mp4" 
+      [autoplay]="true" 
+      [loop]="true" 
+      [muted]="true" 
+      playsinline 
+      class="user-header__avatar-video"
+    ></video>
   </div>
 
   <div class="user-header__text">
@@ -36,3 +43,29 @@
     </div>
   </div>
 </header>
+
+<svg width="0" height="0" style="position: absolute; width: 0; height: 0; overflow: hidden;">
+  <defs>
+    <filter id="chroma-key-green">
+      <!-- 1. Spill Suppression: Convert green fringes to neutral gray shadows -->
+      <feColorMatrix in="SourceGraphic" type="matrix" values="
+        1 0 0 0 0
+        0.45 0.1 0.45 0 0
+        0 0 1 0 0
+        0 0 0 1 0" result="spill" />
+      
+      <!-- 2. Safe Alpha Matte: Keys out green without eroding the black outlines -->
+      <feColorMatrix in="SourceGraphic" type="matrix" values="
+        1 0 0 0 0
+        0 1 0 0 0
+        0 0 1 0 0
+        2 -4 2 0 1.5" result="matte" />
+      
+      <!-- 3. Soften the matte for smooth anti-aliasing -->
+      <feGaussianBlur in="matte" stdDeviation="0.4" result="blurred_matte" />
+      
+      <!-- 4. Apply the cleaned alpha to the spill-suppressed video -->
+      <feComposite in="spill" in2="blurred_matte" operator="in" />
+    </filter>
+  </defs>
+</svg>

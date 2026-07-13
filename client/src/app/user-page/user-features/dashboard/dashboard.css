@@ -1262,8 +1262,213 @@
 .budget-btn--primary:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 28px rgba(99, 102, 241, 0.36);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.budget-modal__close:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.budget-modal__close .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.budget-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.budget-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.budget-form-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--sw-foreground);
+}
+
+.budget-form-label .material-symbols-outlined {
+  font-size: 0.9375rem;
+  color: var(--sw-primary, #6366f1);
+}
+
+.budget-form-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--sw-border, #e2e8f0);
+  border-radius: 14px;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  color: var(--sw-foreground);
+  background: var(--sw-background, #f8fafc);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.budget-form-input:focus {
+  border-color: var(--sw-primary, #6366f1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+  background: #fff;
+}
+
+.budget-form-amount-wrap {
+  position: relative;
+}
+
+.budget-form-input--amount {
+  padding-right: 36px;
+}
+
+.budget-form-unit {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--sw-muted-foreground);
+  pointer-events: none;
+}
+
+.budget-form-preview {
+  font-size: 0.75rem;
+  color: var(--sw-primary, #6366f1);
+  font-weight: 700;
+  margin: 2px 0 0;
+  font-family: 'DM Mono', monospace;
+}
+
+/* Quick presets */
+.budget-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.budget-presets__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--sw-muted-foreground);
+  margin: 0;
+}
+
+.budget-presets__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.budget-preset-btn {
+  padding: 5px 12px;
+  border: 1.5px solid var(--sw-border, #e2e8f0);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--sw-foreground);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: 'DM Mono', monospace;
+}
+
+.budget-preset-btn:hover {
+  border-color: var(--sw-primary, #6366f1);
+  color: var(--sw-primary, #6366f1);
+  background: #eef2ff;
+}
+
+.budget-preset-btn--active {
+  border-color: var(--sw-primary, #6366f1);
+  background: #6366f1;
+  color: #fff;
+}
+
+.budget-form-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #dc2626;
+  margin: 0;
+  padding: 10px 12px;
+  background: #fef2f2;
+  border-radius: 12px;
+  border: 1px solid #fecaca;
+}
+
+.budget-form-error .material-symbols-outlined {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.budget-modal__actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.budget-btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: 16px;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.budget-btn .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+.budget-btn--ghost {
+  background: var(--sw-border, #e2e8f0);
+  color: var(--sw-foreground);
+  flex: 0.6;
+}
+
+.budget-btn--ghost:hover {
+  opacity: 0.8;
+}
+
+.budget-btn--primary {
+  background: linear-gradient(135deg, #6366f1, #7c3aed);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.28);
+}
+
+.budget-btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(99, 102, 241, 0.36);
 }
 
 .budget-btn--primary:active {
   transform: scale(0.98);
+}
+
+.clickable {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }

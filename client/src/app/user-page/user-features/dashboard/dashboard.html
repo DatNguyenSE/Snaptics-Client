@@ -95,7 +95,7 @@
       <!-- KPI Cards -->
       <div class="kpi-grid">
         @for (card of kpiCards; track card.label) {
-          <article class="kpi-card" [class]="card.colorClass">
+          <article class="kpi-card" [class]="card.colorClass" [class.clickable]="card.clickable" (click)="card.clickable ? openCategorySummaryModal() : null">
             <div class="kpi-card__top">
               <span class="kpi-card__icon">
                 <span class="material-symbols-outlined">{{ card.icon }}</span>
@@ -241,5 +241,11 @@
   </app-create-budget-modal>
 }
 
+<!-- ── CATEGORY SUMMARY MODAL ──────────────────────────────────────────── -->
+<app-category-summary-modal
+  [isOpen]="isCategorySummaryModalOpen"
+  (close)="closeCategorySummaryModal()">
+</app-category-summary-modal>
 
-
+<!-- ── AI ASSISTANT CHAT BOX ────────────────────────────────────────────── -->
+<app-ai-assistant></app-ai-assistant>
