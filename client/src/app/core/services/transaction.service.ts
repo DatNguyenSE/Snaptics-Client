@@ -25,7 +25,8 @@ import { AccountService } from './account-service';
 export class TransactionService {
   private readonly http = inject(HttpClient);
   private readonly accountService = inject(AccountService);
-  private readonly apiUrl = environment.apiUrl + 'Transaction';
+  private baseUrl = environment.apiUrl;
+  private readonly apiUrl = this.baseUrl + 'Transaction';
   private readonly remoteTransactionsSubject = new BehaviorSubject<TransactionDto[]>([]);
   private readonly localTransactionsSubject = new BehaviorSubject<TransactionDto[]>([]);
   private readonly transactions$ = combineLatest([
@@ -115,6 +116,38 @@ export class TransactionService {
 
     this.localTransactionsSubject.next(nextTransactions);
     return of(transaction);
+  }
+
+  createTransaction(data: CreateTransactionEntryDto): Observable<TransactionDto> {
+    return this.http.post<TransactionDto>(this.baseUrl + 'Transaction', data).pipe(
+      tap((transaction) => {
+        this.upsertRemoteTransaction(transaction);
+      }),
+    );
+  }
+
+  updateTransaction(id: number, data: CreateTransactionEntryDto): Observable<TransactionDto> {
+    return this.http.put<TransactionDto>(this.baseUrl + `Transaction/${id}`, data).pipe(
+      tap((updatedTransaction) => {
+        this.upsertRemoteTransaction(updatedTransaction);
+      }),
+    );
+  }
+
+  deleteTransaction(id: number): Observable<void> {
+    return this.http.delete<void>(this.baseUrl + `Transaction/${id}`).pipe(
+      tap(() => {
+        const nextRemote = this.remoteTransactionsSubject.value.filter(
+          (t) => t.id !== id
+        );
+        this.remoteTransactionsSubject.next(nextRemote);
+
+        const nextLocal = this.localTransactionsSubject.value.filter(
+          (t) => t.id !== id
+        );
+        this.localTransactionsSubject.next(nextLocal);
+      })
+    );
   }
 
   private ensureTransactionsLoaded(): void {
