@@ -1,5 +1,7 @@
 <section class="transaction-page">
   <div class="transaction-page__content">
+
+    <!-- ─── Hero ──────────────────────────────────────────────────────────── -->
     <header class="transaction-page__hero">
       <div class="transaction-page__hero-copy">
         <p class="section-eyebrow">{{ language.t('nav.transactions') }}</p>
@@ -9,76 +11,301 @@
         </p>
       </div>
 
-      <div class="transaction-page__hero-avatar" [attr.aria-label]="language.t('nav.transactions')" role="img">
+      <div class="transaction-page__hero-avatar"
+           [attr.aria-label]="language.t('nav.transactions')"
+           role="img">
         {{ initials }}
       </div>
     </header>
 
-    <section class="transactions-section">
-      <div class="transactions-section__header">
-        <div>
-          <h2>{{ language.t('dashboard.recentTransactions') }}</h2>
+    <!-- ─── Summary Cards ─────────────────────────────────────────────────── -->
+    @if (!isLoading && !hasError && transactionHistory.length > 0) {
+      <div class="summary-cards" role="region" aria-label="Transaction summary">
+        <!-- Total Spent -->
+        <div class="summary-card summary-card--primary">
+          <div class="summary-card__icon-wrap summary-card__icon-wrap--violet">
+            <span class="material-symbols-outlined">account_balance_wallet</span>
+          </div>
+          <div class="summary-card__body">
+            <p class="summary-card__label">{{ language.t('transaction.totalSpent') }}</p>
+            <p class="summary-card__value">{{ formatCurrency(summaryStats.total) }}</p>
+          </div>
         </div>
 
+        <!-- Transaction Count -->
+        <div class="summary-card">
+          <div class="summary-card__icon-wrap summary-card__icon-wrap--blue">
+            <span class="material-symbols-outlined">receipt_long</span>
+          </div>
+          <div class="summary-card__body">
+            <p class="summary-card__label">{{ language.t('transaction.transactionCount') }}</p>
+            <p class="summary-card__value">{{ summaryStats.count }}</p>
+          </div>
+        </div>
+
+        <!-- Source Breakdown -->
+        <div class="summary-card summary-card--breakdown">
+          <p class="summary-card__breakdown-label">{{ language.t('transaction.sourceLabel') }}</p>
+          <div class="summary-card__breakdown-chips">
+            @if (summaryStats.receiptCount > 0) {
+              <span class="breakdown-chip breakdown-chip--receipt">
+                <span class="material-symbols-outlined">receipt_long</span>
+                {{ summaryStats.receiptCount }}
+              </span>
+            }
+            @if (summaryStats.snapCount > 0) {
+              <span class="breakdown-chip breakdown-chip--snap">
+                <span class="material-symbols-outlined">photo_camera</span>
+                {{ summaryStats.snapCount }}
+              </span>
+            }
+            @if (summaryStats.manualCount > 0) {
+              <span class="breakdown-chip breakdown-chip--manual">
+                <span class="material-symbols-outlined">edit_square</span>
+                {{ summaryStats.manualCount }}
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ─── Filter Bar ─────────────────────────────────────────────────────── -->
+    @if (!isLoading && !hasError && transactionHistory.length > 0) {
+      <div class="filter-bar" role="search">
+        <!-- Search input -->
+        <div class="filter-search">
+          <span class="filter-search__icon material-symbols-outlined" aria-hidden="true">search</span>
+          <input
+            id="transaction-search"
+            class="filter-search__input"
+            type="search"
+            [(ngModel)]="searchQuery"
+            [placeholder]="language.t('transaction.searchPlaceholder')"
+            autocomplete="off"
+            aria-label="Search transactions"
+          />
+          @if (searchQuery) {
+            <button class="filter-search__clear" (click)="searchQuery = ''" aria-label="Clear search" type="button">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          }
+        </div>
+
+        <!-- Source filter chips -->
+        <div class="filter-chips" role="group" aria-label="Filter by source">
+          <button
+            class="filter-chip"
+            [class.filter-chip--active]="filterSource === 'all'"
+            (click)="setSourceFilter('all')"
+            type="button"
+            [attr.aria-pressed]="filterSource === 'all'">
+            {{ language.t('transaction.filterAll') }}
+          </button>
+          <button
+            class="filter-chip"
+            [class.filter-chip--active]="filterSource === 'receipt'"
+            (click)="setSourceFilter('receipt')"
+            type="button"
+            [attr.aria-pressed]="filterSource === 'receipt'">
+            <span class="material-symbols-outlined">receipt_long</span>
+            {{ language.t('transaction.filterReceipt') }}
+          </button>
+          <button
+            class="filter-chip"
+            [class.filter-chip--active]="filterSource === 'snap'"
+            (click)="setSourceFilter('snap')"
+            type="button"
+            [attr.aria-pressed]="filterSource === 'snap'">
+            <span class="material-symbols-outlined">photo_camera</span>
+            {{ language.t('transaction.filterSnap') }}
+          </button>
+          <button
+            class="filter-chip"
+            [class.filter-chip--active]="filterSource === 'manual'"
+            (click)="setSourceFilter('manual')"
+            type="button"
+            [attr.aria-pressed]="filterSource === 'manual'">
+            <span class="material-symbols-outlined">edit_square</span>
+            {{ language.t('transaction.filterManual') }}
+          </button>
+        </div>
+
+        <!-- Month filter + reset -->
+        <div class="filter-secondary">
+          <div class="filter-month-wrap">
+            <span class="material-symbols-outlined filter-month-icon" aria-hidden="true">calendar_month</span>
+            <input
+              id="transaction-month-filter"
+              class="filter-month"
+              type="month"
+              [(ngModel)]="filterMonth"
+              [attr.aria-label]="language.t('transaction.filterMonth')"
+            />
+          </div>
+
+          @if (hasActiveFilters) {
+            <button class="filter-reset-btn" (click)="clearFilters()" type="button" aria-label="Reset all filters">
+              <span class="material-symbols-outlined">filter_list_off</span>
+              {{ language.t('transaction.resetFilters') }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ─── Transaction List ───────────────────────────────────────────────── -->
+    <section class="transactions-section">
+      <div class="transactions-section__header">
+        <h2>{{ language.t('dashboard.recentTransactions') }}</h2>
+
         @if (!isLoading && !hasError) {
-          <span class="transaction-count">{{ transactionHistory.length }}</span>
+          <span class="transaction-count" aria-live="polite">
+            {{ filteredTransactions.length }}
+          </span>
         }
       </div>
 
       <div class="transaction-list">
+
+        <!-- Loading State -->
         @if (isLoading) {
-          <div class="transaction-list__state">
-            <span class="material-symbols-outlined">hourglass_empty</span>
-            <p>{{ language.t('common.loading') }}</p>
+          <div class="transaction-list__state transaction-list__state--loading" role="status" aria-live="polite">
+            <div class="state-icon-wrap state-icon-wrap--loading">
+              <span class="material-symbols-outlined spin-icon">progress_activity</span>
+            </div>
+            <div class="state-text">
+              <p class="state-title">{{ language.t('common.loading') }}</p>
+            </div>
           </div>
-        } @else if (hasError) {
-          <div class="transaction-list__state">
-            <span class="material-symbols-outlined">error_outline</span>
-            <p>{{ language.t('common.loadError') }}</p>
-          </div>
-        } @else if (transactionHistory.length === 0) {
-          <div class="transaction-list__state">
-            <span class="material-symbols-outlined">receipt_long</span>
-            <p>{{ language.t('transaction.empty') }}</p>
-          </div>
-        } @else {
-          @for (transaction of transactionHistory; track transaction.id) {
-            <article class="transaction-card" (click)="openTransactionDetail(transaction)" style="cursor: pointer;">
-              <div class="transaction-media" [class]="getMediaClass(transaction)">
-                @if (getIcon(transaction) === 'receipt_long') {
-                  <img src="bill-icon.svg" alt="Bill Icon" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.1);" />
-                } @else {
-                  <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
-                }
+
+          <!-- Skeleton items -->
+          @for (sk of [1,2,3,4]; track sk) {
+            <div class="skeleton-card" aria-hidden="true">
+              <div class="skeleton skeleton--icon"></div>
+              <div class="skeleton-body">
+                <div class="skeleton skeleton--line skeleton--line-lg"></div>
+                <div class="skeleton skeleton--line skeleton--line-sm"></div>
               </div>
+              <div class="skeleton skeleton--amount"></div>
+            </div>
+          }
 
-              <div class="transaction-body">
-                <div class="transaction-title-row">
-                  <p class="transaction-title">{{ transaction.name }}</p>
+        <!-- Error State -->
+        } @else if (hasError) {
+          <div class="transaction-list__state transaction-list__state--error" role="alert">
+            <div class="state-icon-wrap state-icon-wrap--error">
+              <span class="material-symbols-outlined">error_outline</span>
+            </div>
+            <div class="state-text">
+              <p class="state-title">{{ language.t('common.loadError') }}</p>
+            </div>
+            <button class="state-retry-btn" (click)="retryLoad()" type="button">
+              <span class="material-symbols-outlined">refresh</span>
+              {{ language.t('common.retry') }}
+            </button>
+          </div>
 
-                  @if (transaction.isAiEstimated) {
-                    <span class="ai-badge">
-                      <span class="material-symbols-outlined">smart_toy</span>
-                      {{ language.t('dashboard.aiGen') }}
-                    </span>
+        <!-- Empty (no data at all) -->
+        } @else if (transactionHistory.length === 0) {
+          <div class="transaction-list__state transaction-list__state--empty" role="status">
+            <div class="state-icon-wrap state-icon-wrap--empty">
+              <span class="material-symbols-outlined">receipt_long</span>
+            </div>
+            <div class="state-text">
+              <p class="state-title">{{ language.t('transaction.empty') }}</p>
+            </div>
+          </div>
+
+        <!-- No filter results -->
+        } @else if (filteredTransactions.length === 0) {
+          <div class="transaction-list__state transaction-list__state--empty" role="status">
+            <div class="state-icon-wrap state-icon-wrap--empty">
+              <span class="material-symbols-outlined">search_off</span>
+            </div>
+            <div class="state-text">
+              <p class="state-title">{{ language.t('transaction.noResults') }}</p>
+            </div>
+            <button class="state-retry-btn" (click)="clearFilters()" type="button">
+              <span class="material-symbols-outlined">filter_list_off</span>
+              {{ language.t('transaction.resetFilters') }}
+            </button>
+          </div>
+
+        <!-- Transaction Groups -->
+        } @else {
+          @for (group of groupedTransactions; track group.dateLabel) {
+            <!-- Date group header -->
+            <div class="date-group-header">
+              <span class="date-group-label">{{ group.dateLabel }}</span>
+              <span class="date-group-count">{{ group.transactions.length }}</span>
+            </div>
+
+            @for (transaction of group.transactions; track transaction.id) {
+              <article
+                class="transaction-card"
+                (click)="openTransactionDetail(transaction)"
+                role="button"
+                tabindex="0"
+                (keydown.enter)="openTransactionDetail(transaction)"
+                (keydown.space)="openTransactionDetail(transaction)"
+                [attr.aria-label]="transaction.name + ' – ' + formatCurrency(transaction.totalAmount)">
+
+                <!-- Icon / Media -->
+                <div class="transaction-media" [class]="getMediaClass(transaction)" aria-hidden="true">
+                  @if (getIcon(transaction) === 'receipt_long') {
+                    <img src="bill-icon.svg" alt="" style="width: 100%; height: 100%; object-fit: contain; transform: scale(1.1);" />
+                  } @else {
+                    <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
                   }
                 </div>
 
-                <div class="transaction-meta">
-                  <span class="category-pill" [class]="getCategoryClass(transaction)">
-                    <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
-                    {{ language.t(getCategoryKey(transaction)) }}
-                  </span>
-                  <span class="transaction-time">{{ transaction.transactionDate | date:'HH:mm' }}</span>
-                </div>
-              </div>
+                <!-- Body -->
+                <div class="transaction-body">
+                  <div class="transaction-title-row">
+                    <p class="transaction-title">{{ transaction.name || language.t('dashboard.category.bill') }}</p>
 
-              <p class="transaction-price">{{ formatCurrency(transaction.totalAmount) }}</p>
-            </article>
+                    @if (transaction.isAiEstimated) {
+                      <span class="ai-badge" aria-label="AI estimated">
+                        <span class="material-symbols-outlined" aria-hidden="true">smart_toy</span>
+                        {{ language.t('dashboard.aiGen') }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="transaction-meta">
+                    <span class="category-pill" [class]="getCategoryClass(transaction)">
+                      <span class="material-symbols-outlined" aria-hidden="true">{{ getIcon(transaction) }}</span>
+                      {{ language.t(getCategoryKey(transaction)) }}
+                    </span>
+
+                    <!-- Source badge -->
+                    <span class="source-badge" [class]="getSourceBadge(transaction.source).cssClass"
+                          [attr.aria-label]="getSourceBadge(transaction.source).label">
+                      <span class="material-symbols-outlined" aria-hidden="true">{{ getSourceBadge(transaction.source).icon }}</span>
+                    </span>
+
+                    <span class="transaction-time">{{ transaction.transactionDate | date:'HH:mm' }}</span>
+                  </div>
+                </div>
+
+                <!-- Right side: amount + status -->
+                <div class="transaction-right">
+                  <p class="transaction-price">{{ formatCurrency(transaction.totalAmount) }}</p>
+                  <span class="status-badge"
+                        [class]="getStatusBadge(transaction.status).cssClass"
+                        role="status">
+                    {{ getStatusBadge(transaction.status).label }}
+                  </span>
+                </div>
+
+              </article>
+            }
           }
         }
       </div>
     </section>
+
   </div>
 </section>
 

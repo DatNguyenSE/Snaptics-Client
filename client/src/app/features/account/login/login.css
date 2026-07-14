@@ -20,7 +20,8 @@
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.03);
-  overflow: hidden; /* Ensures the inner corners match the outer border radius */
+  overflow: hidden;
+  /* Ensures the inner corners match the outer border radius */
 }
 
 /* --- LEFT SIDE: Image / Promo --- */
@@ -56,8 +57,13 @@
 }
 
 @keyframes floatImage {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-15px); }
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-15px);
+  }
 }
 
 .promo-text h2 {
@@ -204,13 +210,13 @@
 .input-icon-wrapper input:focus {
   background: #ffffff;
   border-color: #2563eb;
-  box-shadow: 
+  box-shadow:
     0 0 0 1px #2563eb,
     0 4px 12px rgba(37, 99, 235, 0.08);
 }
 
-.input-icon-wrapper input:focus + .password-toggle-btn,
-.input-icon-wrapper input:focus ~ .input-icon {
+.input-icon-wrapper input:focus+.password-toggle-btn,
+.input-icon-wrapper input:focus~.input-icon {
   color: #2563eb;
 }
 
@@ -218,6 +224,7 @@
 .input-icon-wrapper input.invalid-field {
   border-color: #ef4444;
 }
+
 .input-icon-wrapper input.invalid-field:focus {
   box-shadow: 0 0 0 1px #ef4444, 0 4px 12px rgba(239, 68, 68, 0.08);
 }
@@ -286,11 +293,11 @@
   transition: all 0.2s ease;
 }
 
-.remember-me:hover input ~ .checkbox-custom {
+.remember-me:hover input~.checkbox-custom {
   border-color: #94a3b8;
 }
 
-.remember-me input:checked ~ .checkbox-custom {
+.remember-me input:checked~.checkbox-custom {
   background: #2563eb;
   border-color: #2563eb;
 }
@@ -308,7 +315,7 @@
   transform: rotate(45deg);
 }
 
-.remember-me input:checked ~ .checkbox-custom::after {
+.remember-me input:checked~.checkbox-custom::after {
   display: block;
 }
 
@@ -383,7 +390,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error Banner */
@@ -399,8 +408,15 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .error-icon {
@@ -481,17 +497,17 @@ input:-webkit-autofill:active {
     flex-direction: column;
     min-height: auto;
   }
-  
+
   .login-image-side {
     padding: 30px;
     flex: none;
   }
-  
+
   .hero-image {
     max-width: 200px;
     margin-bottom: 20px;
   }
-  
+
   .login-form-side {
     padding: 40px 24px;
     flex: none;
@@ -528,7 +544,7 @@ input:-webkit-autofill:active {
 .otp-digit-input:focus {
   background: #ffffff;
   border-color: #2563eb;
-  box-shadow: 
+  box-shadow:
     0 0 0 1px #2563eb,
     0 4px 12px rgba(37, 99, 235, 0.08);
 }
@@ -536,6 +552,7 @@ input:-webkit-autofill:active {
 .otp-digit-input.invalid-field {
   border-color: #ef4444;
 }
+
 .otp-digit-input.invalid-field:focus {
   box-shadow: 0 0 0 1px #ef4444, 0 4px 12px rgba(239, 68, 68, 0.08);
 }

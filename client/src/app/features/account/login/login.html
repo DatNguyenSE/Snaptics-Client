@@ -1,6 +1,6 @@
 <div class="login-wrapper">
   <div class="login-split-card">
-    
+
     <!-- Left Side: Project Image/Promo -->
     <div class="login-image-side">
       <div class="image-content">
@@ -32,17 +32,9 @@
             <label for="email">Email Address</label>
             <div class="input-icon-wrapper">
               <span class="material-symbols-outlined input-icon">mail</span>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                [(ngModel)]="model.email"
-                required
-                email
-                placeholder="name@example.com"
-                #emailInput="ngModel"
-                [class.invalid-field]="emailInput.invalid && emailInput.touched"
-              />
+              <input type="email" id="email" name="email" [(ngModel)]="model.email" required email
+                placeholder="name@example.com" #emailInput="ngModel"
+                [class.invalid-field]="emailInput.invalid && emailInput.touched" />
             </div>
           </div>
 
@@ -51,23 +43,11 @@
             <label for="password">Password</label>
             <div class="input-icon-wrapper">
               <span class="material-symbols-outlined input-icon">lock</span>
-              <input
-                [type]="showPassword ? 'text' : 'password'"
-                id="password"
-                name="password"
-                [(ngModel)]="model.password"
-                required
-                placeholder="••••••••"
-                #passwordInput="ngModel"
-                [class.invalid-field]="passwordInput.invalid && passwordInput.touched"
-              />
-              <button 
-                type="button" 
-                class="password-toggle-btn" 
-                (click)="showPassword = !showPassword" 
-                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-                tabindex="-1"
-              >
+              <input [type]="showPassword ? 'text' : 'password'" id="password" name="password"
+                [(ngModel)]="model.password" required placeholder="••••••••" #passwordInput="ngModel"
+                [class.invalid-field]="passwordInput.invalid && passwordInput.touched" />
+              <button type="button" class="password-toggle-btn" (click)="showPassword = !showPassword"
+                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'" tabindex="-1">
                 <span class="material-symbols-outlined">
                   {{ showPassword ? 'visibility_off' : 'visibility' }}
                 </span>
@@ -77,10 +57,10 @@
 
           <!-- Error Message Banner -->
           @if (errorMessage) {
-            <div class="error-banner">
-              <span class="material-symbols-outlined error-icon">error</span>
-              <p class="error-message">{{ errorMessage }}</p>
-            </div>
+          <div class="error-banner">
+            <span class="material-symbols-outlined error-icon">error</span>
+            <p class="error-message">{{ errorMessage }}</p>
+          </div>
           }
 
           <div class="login-options">
@@ -93,17 +73,13 @@
           </div>
 
           <!-- Submit button with loading spinner -->
-          <button 
-            type="submit" 
-            [disabled]="!loginForm.valid || isLoading"
-            class="submit-btn"
-          >
+          <button type="submit" [disabled]="!loginForm.valid || isLoading" class="submit-btn">
             @if (isLoading) {
-              <span class="spinner"></span>
-              <span>Signing in...</span>
+            <span class="spinner"></span>
+            <span>Signing in...</span>
             } @else {
-              <span>Sign In</span>
-              <span class="material-symbols-outlined btn-arrow">arrow_forward</span>
+            <span>Sign In</span>
+            <span class="material-symbols-outlined btn-arrow">arrow_forward</span>
             }
           </button>
 
@@ -118,69 +94,54 @@
             <label for="otpCode">Verification Code</label>
             <div class="otp-inputs-container">
               @for (digit of otpDigits; track $index) {
-                <input
-                  type="text"
-                  maxlength="1"
-                  class="otp-digit-input"
-                  [(ngModel)]="otpDigits[$index]"
-                  name="otp{{$index}}"
-                  id="log-otp-{{$index}}"
-                  (input)="onOtpInput($event, $index)"
-                  (keydown)="onOtpKeydown($event, $index)"
-                  (paste)="onOtpPaste($event)"
-                  [class.invalid-field]="otpForm.submitted && !otpCode"
-                  required
-                />
+              <input type="text" maxlength="1" class="otp-digit-input" [(ngModel)]="otpDigits[$index]"
+                name="otp{{$index}}" id="log-otp-{{$index}}" (input)="onOtpInput($event, $index)"
+                (keydown)="onOtpKeydown($event, $index)" (paste)="onOtpPaste($event)"
+                [class.invalid-field]="otpForm.submitted && !otpCode" required />
               }
             </div>
           </div>
 
           @if (errorMessage) {
-            <div class="error-banner">
-              <span class="material-symbols-outlined error-icon">error</span>
-              <p class="error-message">{{ errorMessage }}</p>
-            </div>
+          <div class="error-banner">
+            <span class="material-symbols-outlined error-icon">error</span>
+            <p class="error-message">{{ errorMessage }}</p>
+          </div>
           }
           @if (successMessage) {
-            <div class="success-banner">
-              <span class="material-symbols-outlined success-icon">check_circle</span>
-              <p class="success-message">{{ successMessage }}</p>
-            </div>
+          <div class="success-banner">
+            <span class="material-symbols-outlined success-icon">check_circle</span>
+            <p class="success-message">{{ successMessage }}</p>
+          </div>
           }
 
-          <button 
-            type="submit" 
-            [disabled]="!otpForm.valid || isLoading"
-            class="submit-btn"
-          >
+          <button type="submit" [disabled]="!otpForm.valid || isLoading" class="submit-btn">
             @if (isLoading) {
-              <span class="spinner"></span>
-              <span>Verifying...</span>
+            <span class="spinner"></span>
+            <span>Verifying...</span>
             } @else {
-              <span>Verify OTP</span>
-              <span class="material-symbols-outlined btn-arrow">check_circle</span>
+            <span>Verify OTP</span>
+            <span class="material-symbols-outlined btn-arrow">check_circle</span>
             }
           </button>
 
           <div class="login-options" style="justify-content: center; margin-top: 16px;">
             <span style="font-size: 13px; color: #64748b; font-weight: 500;">Didn't receive code?</span>
-            <a href="javascript:void(0)" 
-               (click)="resendCountdown === 0 ? resendOtp() : null" 
-               class="forgot-password-link" 
-               style="margin-left: 6px; text-decoration: none;"
-               [style.color]="resendCountdown > 0 ? '#94a3b8' : '#2563eb'"
-               [style.cursor]="resendCountdown > 0 ? 'not-allowed' : 'pointer'"
-            >
+            <a href="javascript:void(0)" (click)="resendCountdown === 0 ? resendOtp() : null"
+              class="forgot-password-link" style="margin-left: 6px; text-decoration: none;"
+              [style.color]="resendCountdown > 0 ? '#94a3b8' : '#2563eb'"
+              [style.cursor]="resendCountdown > 0 ? 'not-allowed' : 'pointer'">
               {{ resendCountdown > 0 ? 'Resend in ' + resendCountdown + 's' : 'Resend' }}
             </a>
           </div>
           <div class="register-link">
-            <a href="javascript:void(0)" (click)="isOtpStep = false; successMessage = ''; errorMessage = '';">Back to login</a>
+            <a href="javascript:void(0)" (click)="isOtpStep = false; successMessage = ''; errorMessage = '';">Back to
+              login</a>
           </div>
         </form>
         }
       </div>
     </div>
-    
+
   </div>
 </div>

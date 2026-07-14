@@ -23,7 +23,10 @@ import { ToastService } from '../../../core/services/toast-service';
 export class Login implements OnDestroy {
   private accountService = inject(AccountService);
   private router = inject(Router);
-  
+
+  /** true khi mock mode đang bật — dùng để hiển thị nhãn "Development Mock Mode" */
+  protected readonly isMockMode = this.accountService.useMockAuth;
+
   protected Title = 'Welcome Back';
   model: any = {};
   isLoading = false;
