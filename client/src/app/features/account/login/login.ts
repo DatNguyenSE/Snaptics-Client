@@ -100,7 +100,7 @@ export class Login implements OnDestroy {
     this.errorMessage = '';
     this.accountService.login(this.model).subscribe({
       next: (res) => {
-        this.toast.success('Login successful');
+       
         this.isLoading = false;
         if (this.accountService.currentUser()) {
           this.router.navigate(['/user/dashboard']);

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { LanguageService } from '../../../core/services/language-service';
@@ -9,10 +9,10 @@ import { environment } from '../../../environments/environment.development';
 import { UserHeader } from '../../user-layout/user-header/user-header';
 import { TransactionDetailModal } from '../transaction/transaction-detail-modal/transaction-detail-modal';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { BudgetService } from '../../../core/services/budget.service';
-import { CreateBudgetModal } from './create-budget-modal/create-budget-modal';
+import { BudgetService, BudgetDto } from '../../../core/services/budget.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { CategorySummaryModal } from './category-summary-modal/category-summary-modal';
+import { TrendSummaryModal } from './trend-summary-modal/trend-summary-modal';
 import { AiAssistant } from '../ai-assistant/ai-assistant';
 import type {
   ApexNonAxisChartSeries,
@@ -58,7 +58,7 @@ export interface UserBudget {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, UserHeader, DatePipe, TransactionDetailModal, NgApexchartsModule, FormsModule, CreateBudgetModal, CategorySummaryModal, AiAssistant],
+  imports: [RouterLink, UserHeader, DatePipe, TransactionDetailModal, NgApexchartsModule, FormsModule, CategorySummaryModal, TrendSummaryModal, AiAssistant],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -69,9 +69,15 @@ export class Dashboard implements OnInit {
   private readonly dashboardService = inject(DashboardService);
   
   totalBudget = 5_000_000;
-  isCreateBudgetOpen = false;
   isCategorySummaryModalOpen = false;
+  isTrendSummaryModalOpen = false;
   topCategoryName = '—';
+
+  allBudgets: BudgetDto[] = [];
+  activeBudget: BudgetDto | null = null;
+  private scrollTimeout: any;
+
+  @ViewChild('walletCarousel') walletCarousel!: ElementRef<HTMLDivElement>;
 
   // ─── Loading state ───────────────────────────────────────────────────────
   isLoading = true;
@@ -95,11 +101,19 @@ export class Dashboard implements OnInit {
   }
 
   get remainingBudget(): number {
-    return this.totalBudget - this.totalSpent;
+    if (this.activeBudget) {
+      return this.activeBudget.currentAmount !== undefined
+        ? this.activeBudget.currentAmount
+        : Math.max(0, this.activeBudget.amount - this.getBudgetSpent(this.activeBudget));
+    }
+    return Math.max(0, this.totalBudget - this.totalSpent);
   }
 
   get spentPercentage(): number {
-    return Math.min(100, Math.round((this.totalSpent / this.totalBudget) * 100));
+    const total = this.activeBudget ? this.activeBudget.amount : this.totalBudget;
+    const remaining = this.remainingBudget;
+    const spent = Math.max(0, total - remaining);
+    return Math.min(100, Math.round((spent / total) * 100));
   }
 
   get totalTransactions(): number {
@@ -121,6 +135,14 @@ export class Dashboard implements OnInit {
 
   closeCategorySummaryModal(): void {
     this.isCategorySummaryModalOpen = false;
+  }
+
+  openTrendSummaryModal(): void {
+    this.isTrendSummaryModalOpen = true;
+  }
+
+  closeTrendSummaryModal(): void {
+    this.isTrendSummaryModalOpen = false;
   }
 
   // ─── AI Message ──────────────────────────────────────────────────────────
@@ -167,7 +189,7 @@ export class Dashboard implements OnInit {
     { id: 'scan', labelKey: 'dashboard.quickAction.scan', icon: 'receipt_long', iconClass: 'quick-action__icon--blue', route: '/user/scan' },
     { id: 'capture', labelKey: 'dashboard.quickAction.capture', icon: 'photo_camera', iconClass: 'quick-action__icon--violet', route: '/user/snap-item' },
     { id: 'manual', labelKey: 'dashboard.quickAction.manual', icon: 'edit_square', iconClass: 'quick-action__icon--amber', route: '/user/manual-entry' },
-    { id: 'create-budget', labelKey: 'dashboard.quickAction.createBudget', icon: 'account_balance_wallet', iconClass: 'quick-action__icon--emerald' },
+    { id: 'create-budget', labelKey: 'dashboard.quickAction.createBudget', icon: 'account_balance_wallet', iconClass: 'quick-action__icon--emerald', route: '/user/budget' },
   ];
 
   ngOnInit(): void {
@@ -214,40 +236,118 @@ export class Dashboard implements OnInit {
 
   // ─── Quick Action Handlers ────────────────────────────────────────────────
   onQuickActionClick(action: QuickAction): void {
-    if (action.id === 'create-budget') {
-      this.isCreateBudgetOpen = true;
-    }
-  }
-
-  closeCreateBudgetModal(): void {
-    this.isCreateBudgetOpen = false;
-    setTimeout(() => {
-      const btn = document.getElementById('quick-action-btn-create-budget');
-      if (btn) btn.focus();
-    }, 50);
-  }
-
-  onBudgetCreated(): void {
-    this.loadActiveBudget();
-    this.loadTransactions();
+    // Other quick actions logic can be added here if needed
   }
 
   private loadActiveBudget(): void {
     this.budgetService.getBudgets().subscribe({
       next: (budgets) => {
-        if (budgets && budgets.length > 0) {
-          const sorted = [...budgets].sort(
-            (a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-          );
-          this.totalBudget = sorted[0].amount;
+        this.allBudgets = budgets || [];
+        if (this.allBudgets.length > 0) {
+          // Sort: isDefault wallets first, then by startDate descending
+          this.allBudgets.sort((a, b) => {
+            const aDefault = a.isDefault ? 1 : 0;
+            const bDefault = b.isDefault ? 1 : 0;
+            if (aDefault !== bDefault) {
+              return bDefault - aDefault;
+            }
+            return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+          });
+
+          const savedBudgetId = localStorage.getItem('active_budget_id');
+          let found = this.allBudgets.find(b => b.id === Number(savedBudgetId));
+          if (!found) {
+            found = this.allBudgets.find(b => b.isDefault) || this.allBudgets[0];
+          }
+          this.activeBudget = found;
+          this.totalBudget = found.amount;
+
+          // Scroll to the active budget position initially
+          const idx = this.allBudgets.findIndex(b => b.id === found.id);
+          if (idx > 0) {
+            setTimeout(() => {
+              this.scrollToWallet(idx);
+            }, 300);
+          }
         } else {
+          this.activeBudget = null;
           this.totalBudget = 5_000_000;
         }
       },
       error: () => {
         this.totalBudget = 5_000_000;
+        this.activeBudget = null;
+        this.allBudgets = [];
       }
     });
+  }
+
+  onWalletScroll(event: Event): void {
+    const container = event.target as HTMLDivElement;
+    if (!container) return;
+
+    clearTimeout(this.scrollTimeout);
+    this.scrollTimeout = setTimeout(() => {
+      const width = container.clientWidth;
+      if (width === 0) return;
+      const index = Math.round(container.scrollLeft / width);
+      
+      if (this.allBudgets[index] && this.activeBudget?.id !== this.allBudgets[index].id) {
+        const budget = this.allBudgets[index];
+        this.activeBudget = budget;
+        this.totalBudget = budget.amount;
+        localStorage.setItem('active_budget_id', String(budget.id));
+      }
+    }, 150);
+  }
+
+  scrollToWallet(index: number, event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const container = this.walletCarousel?.nativeElement || document.querySelector('.wallet-carousel-container');
+    if (!container) return;
+
+    const children = container.querySelectorAll('.stat-card--wallet-item');
+    if (children && children[index]) {
+      children[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    } else {
+      const width = container.clientWidth;
+      container.scrollTo({
+        left: index * width,
+        behavior: 'smooth'
+      });
+    }
+  }
+
+  getBudgetSpentPercent(budget: BudgetDto): number {
+    const spent = budget.currentAmount !== undefined 
+      ? (budget.amount - budget.currentAmount) 
+      : this.getBudgetSpent(budget);
+    return Math.min(100, Math.round((spent / budget.amount) * 100));
+  }
+
+  getBudgetSpent(budget: BudgetDto): number {
+    const start = new Date(budget.startDate);
+    const end = new Date(budget.endDate);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    return this.allTransactions.reduce((sum, t) => {
+      const tDate = new Date(t.transactionDate);
+      if (tDate >= start && tDate <= end) {
+        if (!budget.categoryId) {
+          return sum + t.totalAmount;
+        } else {
+          const catSum = (t.transactionDetails || [])
+            .filter(d => d.categoryId === budget.categoryId)
+            .reduce((s, d) => s + (d.price * d.quantity), 0);
+          return sum + catSum;
+        }
+      }
+      return sum;
+    }, 0);
   }
 
   // ─── Helpers ─────────────────────────────────────────────────────────────

@@ -9,6 +9,7 @@ export interface CreateTransactionEntryDto {
   paymentMethod?: string | null;
   imagePreviewUrl?: string | null;
   isAiEstimated?: boolean;
+  isExpense: boolean;
   source: TransactionEntrySource;
 }
 

@@ -1,0 +1,49 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="closeModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <span class="material-symbols-outlined title-icon">timeline</span>
+        Xu hướng chi tiêu
+      </h2>
+      <button class="close-btn" (click)="closeModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-tabs">
+      <button class="filter-tab" [class.active]="activeFilter === 'week'" (click)="setFilter('week')">Tuần này</button>
+      <button class="filter-tab" [class.active]="activeFilter === 'month'" (click)="setFilter('month')">Tháng này</button>
+      <button class="filter-tab" [class.active]="activeFilter === 'year'" (click)="setFilter('year')">Năm nay</button>
+    </div>
+
+    <!-- Content -->
+    <div class="modal-body">
+      <div class="loading-state" *ngIf="isLoading">
+        <span class="material-symbols-outlined spinner">refresh</span>
+        <p>Đang tải dữ liệu...</p>
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoading && trendData.length === 0">
+        <span class="material-symbols-outlined empty-icon">receipt_long</span>
+        <p>Chưa có chi tiêu nào trong thời gian này.</p>
+      </div>
+
+      <div class="category-list" *ngIf="!isLoading && trendData.length > 0">
+        <h3 class="list-title">Chi tiết theo thời gian</h3>
+        <div class="breakdown-item" *ngFor="let item of trendData; let i = index">
+          <div class="item-header">
+            <div class="item-name-group">
+              <span class="item-name">{{ item.label }}</span>
+            </div>
+            <span class="item-amount" style="color: #ef4444;">{{ item.expense | number }}đ</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar" [style.width.%]="(item.expense / maxExpense) * 100" style="background-color: #ef4444;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -16,30 +16,61 @@
         </div>
       </article>
 
-      <article class="stat-card">
-        <div class="stat-card__budget-header">
-          <p class="stat-card__label">{{ language.t('dashboard.remainingBudget') }}</p>
+      <div 
+        class="wallet-carousel-wrapper"
+        [class.wallet-carousel-wrapper--multi]="allBudgets.length > 1"
+      >
+        <div class="wallet-carousel-container" #walletCarousel (scroll)="onWalletScroll($event)">
+          @if (allBudgets.length === 0) {
+            <article class="stat-card">
+              <div class="stat-card__budget-header">
+                <p class="stat-card__label">{{ language.t('dashboard.remainingBudget') }}</p>
+              </div>
+              <h2 class="stat-card__amount stat-card__amount--accent">{{ formatCurrency(totalBudget) }}</h2>
+              <div class="budget-progress">
+                <div class="budget-progress__row">
+                  <span>{{ language.t('dashboard.used') }} {{ spentPercentage }}%</span>
+                  <span>{{ formatCurrency(totalBudget) }}</span>
+                </div>
+                <div class="budget-progress__track" aria-hidden="true">
+                  <div class="budget-progress__value" [style.width.%]="spentPercentage" [class.budget-progress__value--danger]="spentPercentage >= 90"></div>
+                </div>
+              </div>
+            </article>
+          } @else {
+            @for (budget of allBudgets; track budget.id) {
+              <article class="stat-card stat-card--wallet-item" [class.stat-card--saving]="budget.type === 1">
+                <div class="stat-card__budget-header">
+                  <div class="wallet-name-wrapper">
+                    <span class="material-symbols-outlined wallet-icon-inline">{{ budget.type === 1 ? 'savings' : 'account_balance_wallet' }}</span>
+                    <p class="stat-card__label">{{ budget.name }}</p>
+                  </div>
+                </div>
+                <h2 class="stat-card__amount stat-card__amount--accent" [class.stat-card__amount--saving]="budget.type === 1">
+                  {{ formatCurrency(budget.currentAmount !== undefined ? budget.currentAmount : (budget.amount - getBudgetSpent(budget))) }}
+                </h2>
+                <div class="budget-progress">
+                  <div class="budget-progress__row">
+                    <span>{{ budget.type === 1 ? 'Đã tích lũy' : language.t('dashboard.used') }} {{ getBudgetSpentPercent(budget) }}%</span>
+                    <span>{{ formatCurrency(budget.amount) }}</span>
+                  </div>
+                  <div class="budget-progress__track" aria-hidden="true">
+                    <div class="budget-progress__value" [class.budget-progress__value--saving]="budget.type === 1" [style.width.%]="getBudgetSpentPercent(budget)" [class.budget-progress__value--danger]="budget.type !== 1 && getBudgetSpentPercent(budget) >= 90"></div>
+                  </div>
+                </div>
+              </article>
+            }
+          }
         </div>
 
-        <h2 class="stat-card__amount stat-card__amount--accent">
-          {{ formatCurrency(remainingBudget) }}
-        </h2>
-
-        <div class="budget-progress">
-          <div class="budget-progress__row">
-            <span>{{ language.t('dashboard.used') }} {{ spentPercentage }}%</span>
-            <span>{{ formatCurrency(totalBudget) }}</span>
+        @if (allBudgets.length > 1) {
+          <div class="wallet-carousel-dots">
+            @for (budget of allBudgets; track budget.id; let idx = $index) {
+              <span class="carousel-dot" [class.carousel-dot--active]="activeBudget?.id === budget.id" (click)="scrollToWallet(idx)"></span>
+            }
           </div>
-          <div class="budget-progress__track" aria-hidden="true">
-            <div
-              class="budget-progress__value"
-              [style.width.%]="spentPercentage"
-              [class.budget-progress__value--danger]="spentPercentage >= 90"
-            ></div>
-          </div>
-        </div>
-
-      </article>
+        }
+      </div>
     </section>
 
     <!-- ── QUICK ACTIONS ──────────────────────────────────────── -->
@@ -233,13 +264,7 @@
   </app-transaction-detail-modal>
 }
 
-<!-- ── CREATE BUDGET MODAL ─────────────────────────────────────────────── -->
-@if (isCreateBudgetOpen) {
-  <app-create-budget-modal
-    (closeModal)="closeCreateBudgetModal()"
-    (budgetCreated)="onBudgetCreated()">
-  </app-create-budget-modal>
-}
+
 
 <!-- ── CATEGORY SUMMARY MODAL ──────────────────────────────────────────── -->
 <app-category-summary-modal

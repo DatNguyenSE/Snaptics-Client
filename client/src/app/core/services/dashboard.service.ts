@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.development';
-import { CategorySummaryResponseDto } from '../../models/dashboard.dto';
+import { CategorySummaryResponseDto, BarChartDto } from '../../models/dashboard.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -14,5 +14,10 @@ export class DashboardService {
   getCategorySummary(filterType: 'week' | 'month' | 'year' = 'month'): Observable<CategorySummaryResponseDto> {
     const params = new HttpParams().set('filterType', filterType);
     return this.http.get<CategorySummaryResponseDto>(`${this.apiUrl}/category-summary`, { params });
+  }
+
+  getTrendSummary(filterType: 'week' | 'month' | 'year' = 'month'): Observable<BarChartDto[]> {
+    const params = new HttpParams().set('filterType', filterType);
+    return this.http.get<BarChartDto[]>(`${this.apiUrl}/trend-summary`, { params });
   }
 }

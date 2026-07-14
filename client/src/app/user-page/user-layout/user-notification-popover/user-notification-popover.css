@@ -1,4 +1,4 @@
-:host{position:absolute;top:calc(100% + 12px);right:0;z-index:1100;width:min(22rem,calc(100vw - 32px))}
+:host{position:absolute;top:calc(100% + 12px);right:0;z-index:1100;width:min(22rem,calc(100vw - 32px));pointer-events:none;}
 .notification-popover{position:relative;border:1px solid rgba(99,102,241,.16);border-radius:24px;background:rgba(255,255,255,.96);box-shadow:0 24px 44px rgba(15,23,42,.18);padding:16px;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-10px) scale(.98);transition:opacity .2s ease,transform .2s ease}
 .notification-popover--open{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1)}
 .notification-popover__header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}

@@ -79,6 +79,11 @@ export const routes: Routes = [
           import('./user-page/user-features/dashboard/dashboard').then((m) => m.Dashboard),
       },
       {
+        path: 'budget',
+        loadComponent: () =>
+          import('./user-page/user-features/budget/budget').then((m) => m.Budget),
+      },
+      {
         path: 'transactions',
         loadComponent: () =>
           import('./user-page/user-features/transaction/transaction').then((m) => m.Transaction),

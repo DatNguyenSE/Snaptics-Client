@@ -199,6 +199,7 @@ export class TransactionService {
       isAiEstimated: data.isAiEstimated ?? false,
       createdAt: new Date().toISOString(),
       note: data.note?.trim() || null,
+      isExpense: data.isExpense,
       paymentMethod: data.paymentMethod?.trim() || null,
       source: data.source,
       transactionDetails: [

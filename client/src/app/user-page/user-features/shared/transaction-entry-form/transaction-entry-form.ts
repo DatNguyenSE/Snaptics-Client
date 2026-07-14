@@ -11,6 +11,7 @@ export interface TransactionEntryFormControls {
   date: FormControl<string>;
   paymentMethod: FormControl<string>;
   note: FormControl<string>;
+  isExpense: FormControl<boolean>;
 }
 
 export type TransactionEntryFormGroup = FormGroup<TransactionEntryFormControls>;

@@ -34,6 +34,7 @@
   background: linear-gradient(135deg, var(--sw-primary), #7c3aed);
   color: #ffffff;
   box-shadow: 0 18px 38px rgba(91, 123, 250, 0.22);
+  padding: 16px 20px;
 }
 
 .stat-card__label,
@@ -613,6 +614,14 @@
 
 .budget-progress__value--danger {
   background: linear-gradient(90deg, #ef4444, #dc2626) !important;
+}
+
+.budget-progress__track--saving {
+  background: #d1fae5;
+}
+
+.budget-progress__value--saving {
+  background: linear-gradient(90deg, #10b981, #059669) !important;
 }
 
 /* ─── AI Companion ──────────────────────────────────────────────────────── */
@@ -1471,4 +1480,171 @@
 .clickable:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── WALLET CAROUSEL STYLES (Widgetsmith Style) ─────────────────────────── */
+.wallet-carousel-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.wallet-carousel-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  border-radius: 24px;
+}
+
+.wallet-carousel-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Stat card as a carousel item */
+.stat-card--wallet-item {
+  flex: 0 0 100%;
+  width: 100%;
+  scroll-snap-align: start;
+  box-sizing: border-box;
+  border: 1px solid var(--sw-border);
+  border-radius: 24px;
+  background: var(--sw-card);
+  box-shadow: var(--sw-shadow-sm);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wallet-carousel-wrapper--multi .stat-card--wallet-item {
+  cursor: grab;
+}
+
+.wallet-carousel-wrapper--multi .stat-card--wallet-item:active {
+  cursor: grabbing;
+}
+
+/* Wallet Name & Header */
+.wallet-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wallet-icon-inline {
+  font-size: 1.25rem;
+  color: var(--sw-primary, #6366f1);
+}
+
+.default-tag {
+  font-size: 0.55rem;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 99px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(124, 58, 237, 0.06));
+  color: var(--sw-primary, #6366f1);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  display: inline-block;
+  transform: translateY(-1px);
+}
+
+/* Scroll Hint (e.g. 1/3) & Nav Buttons for Laptop */
+.wallet-scroll-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(99, 102, 241, 0.06);
+  padding: 2px;
+  border-radius: 99px;
+  position: relative;
+  z-index: 50;
+}
+
+.wallet-nav-btn {
+  border: 0;
+  background: transparent;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sw-primary, #6366f1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  outline: none;
+  position: relative;
+  z-index: 51;
+  pointer-events: auto;
+}
+
+.wallet-nav-btn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.12);
+  transform: scale(1.05);
+}
+
+.wallet-nav-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.wallet-nav-btn:disabled {
+  color: var(--sw-muted-foreground, #94a3b8);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.wallet-nav-btn .material-symbols-outlined {
+  font-size: 1.1rem;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+.wallet-scroll-nav .wallet-scroll-hint {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--sw-muted-foreground, #94a3b8);
+  background: transparent;
+  padding: 0 6px;
+}
+
+@media (max-width: 1023px) {
+  .wallet-nav-btn {
+    display: none;
+  }
+  .wallet-scroll-nav {
+    background: rgba(99, 102, 241, 0.08);
+    padding: 3px 8px;
+  }
+}
+
+/* Dot Indicators under the card */
+.wallet-carousel-dots {
+  position: absolute;
+  bottom: -16px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 0;
+}
+
+.carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sw-border, #cbd5e1);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.carousel-dot--active {
+  width: 18px;
+  border-radius: 3px;
+  background: var(--sw-primary, #6366f1);
 }

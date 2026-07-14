@@ -1,5 +1,17 @@
 <form class="entry-form" [formGroup]="form" (ngSubmit)="onSave()">
   <div class="entry-form__grid">
+    <label class="entry-field entry-field--full" style="display: flex; gap: 1rem; align-items: center;">
+      <span class="entry-field__label" style="margin-bottom: 0;">Loại giao dịch:</span>
+      <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+        <input type="radio" formControlName="isExpense" [value]="true" />
+        <span>Chi tiêu</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+        <input type="radio" formControlName="isExpense" [value]="false" />
+        <span>Thu nhập</span>
+      </label>
+    </label>
+
     <label class="entry-field">
       <span class="entry-field__label">{{ language.t('entryForm.title') }}</span>
       <input

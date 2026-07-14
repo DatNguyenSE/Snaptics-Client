@@ -102,6 +102,10 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
     dashboard: {
       totalPayment: 'T\u1ed5ng chi',
       remainingBudget: 'Ng\u00e2n s\u00e1ch c\u00f2n l\u1ea1i',
+      defaultWallet: 'Ví mặc định',
+      otherWallets: 'ví khác',
+      selectWallet: 'Chọn ví hoạt động',
+      remaining: 'còn lại',
       comparedToYesterday: '+12% so v\u1edbi h\u00f4m qua',
       used: '\u0110\u00e3 d\u00f9ng',
       quickActions: 'Thao t\u00e1c nhanh',
@@ -494,6 +498,10 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
     dashboard: {
       totalPayment: 'Total Payment',
       remainingBudget: 'Remaining Budget',
+      defaultWallet: 'Default Wallet',
+      otherWallets: 'other wallets',
+      selectWallet: 'Select Active Wallet',
+      remaining: 'remaining',
       comparedToYesterday: '+12% compared to yesterday',
       used: 'Used',
       quickActions: 'Quick Actions',

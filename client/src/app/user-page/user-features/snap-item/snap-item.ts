@@ -48,6 +48,7 @@ export class SnapItem implements OnInit, OnDestroy {
     }),
     paymentMethod: new FormControl('Cash', { nonNullable: true }),
     note: new FormControl('', { nonNullable: true }),
+    isExpense: new FormControl(true, { nonNullable: true }),
   });
 
   categories: CategoryDto[] = FALLBACK_CATEGORIES;

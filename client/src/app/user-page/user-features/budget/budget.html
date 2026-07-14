@@ -1,0 +1,174 @@
+<section class="budget-page">
+  <div class="budget-page__content">
+    <app-user-header></app-user-header>
+
+    <header class="budget-header">
+      <div class="budget-header__title">
+        <h1>Ngân sách của bạn</h1>
+        <p>Quản lý chi tiêu và tích lũy hiệu quả</p>
+      </div>
+      <button class="btn-primary" (click)="openModal()">
+        <span class="material-symbols-outlined">add</span>
+        Thêm mới
+      </button>
+    </header>
+
+    <main class="budget-list-container">
+      @if (isLoading) {
+        <div class="state-container">
+          <span class="material-symbols-outlined spin state-icon">progress_activity</span>
+          <p>Đang tải ngân sách...</p>
+        </div>
+      } @else if (hasError) {
+        <div class="state-container state-container--error">
+          <span class="material-symbols-outlined state-icon">error_outline</span>
+          <p>Không thể tải dữ liệu. Vui lòng thử lại sau.</p>
+        </div>
+      } @else if (budgets.length === 0) {
+        <div class="state-container">
+          <span class="material-symbols-outlined state-icon">account_balance_wallet</span>
+          <p>Bạn chưa có ngân sách nào.</p>
+        </div>
+      } @else {
+        <div class="budget-grid">
+          @for (budget of budgets; track budget.id) {
+            <article class="budget-card" [class.budget-card--saving]="budget.type === 1">
+              <div class="budget-card__header">
+                <div class="budget-card__title-wrap">
+                  <div class="budget-icon-wrap">
+                    <span class="material-symbols-outlined">
+                      {{ budget.type === 1 ? 'savings' : 'account_balance_wallet' }}
+                    </span>
+                  </div>
+                  <div class="budget-title-details">
+                    <h3 class="budget-name">{{ budget.name }}</h3>
+                    <span class="budget-period">
+                      {{ budget.startDate | date:'dd/MM' }} - {{ budget.endDate | date:'dd/MM' }}
+                    </span>
+                  </div>
+                </div>
+                <div class="budget-card__actions">
+                  <button class="btn-icon" aria-label="Edit budget" (click)="openModal(budget)">
+                    <span class="material-symbols-outlined">edit</span>
+                  </button>
+                  <button class="btn-icon btn-icon--danger" aria-label="Delete budget" (click)="deleteBudget(budget.id)">
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="budget-card__body">
+                <div class="budget-amounts">
+                  <div class="amount-group">
+                    <span class="amount-label">
+                      {{ budget.type === 1 ? 'Đã tích lũy' : 'Đã sử dụng' }}
+                    </span>
+                    <p class="amount-value" [class.text-saving]="budget.type === 1">
+                      {{ formatCurrency(getSpentAmount(budget)) }}
+                    </p>
+                  </div>
+                  <div class="amount-group align-right">
+                    <span class="amount-label">Tổng ngân sách</span>
+                    <p class="amount-value">{{ formatCurrency(budget.amount) }}</p>
+                  </div>
+                </div>
+
+                <div class="budget-progress-container">
+                  <div class="progress-bar-bg" [class.bg-saving]="budget.type === 1">
+                    <div 
+                      class="progress-bar-fill" 
+                      [style.width.%]="getBudgetSpentPercent(budget)"
+                      [class.fill-saving]="budget.type === 1"
+                      [class.fill-danger]="budget.type !== 1 && getBudgetSpentPercent(budget) >= 90">
+                    </div>
+                  </div>
+                  <div class="progress-footer">
+                    <span>{{ getBudgetSpentPercent(budget) }}%</span>
+                    @if (budget.isDefault) {
+                      <span class="badge badge-default">Mặc định</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </main>
+  </div>
+</section>
+
+<!-- ── MODAL ── -->
+@if (isModalOpen) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="stopPropagation($event)">
+      <div class="modal-header">
+        <div class="modal-icon">
+          <span class="material-symbols-outlined">
+            {{ modalMode === 'ADD' ? 'add_circle' : 'edit' }}
+          </span>
+        </div>
+        <div class="modal-titles">
+          <h3>{{ modalMode === 'ADD' ? 'Thêm ngân sách' : 'Chỉnh sửa ngân sách' }}</h3>
+          <p>{{ modalMode === 'ADD' ? 'Thiết lập mục tiêu quản lý tài chính' : 'Cập nhật lại thông tin mục tiêu' }}</p>
+        </div>
+        <button class="btn-close" (click)="closeModal()" aria-label="Close">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form [formGroup]="budgetForm" (ngSubmit)="onSubmit()" class="modal-form">
+        <!-- Tên ngân sách -->
+        <div class="form-group">
+          <label>Tên ngân sách</label>
+          <input type="text" formControlName="name" placeholder="VD: Mua xe máy, Chi tiêu sinh hoạt..." class="form-control" [class.is-invalid]="budgetForm.get('name')?.invalid && budgetForm.get('name')?.touched" />
+        </div>
+
+        <!-- Loại & Số tiền -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Loại ngân sách</label>
+            <select formControlName="type" class="form-control">
+              <option [value]="0">Chi tiêu hàng ngày</option>
+              <option [value]="1">Tiết kiệm mục tiêu</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Số tiền (VND)</label>
+            <input type="number" formControlName="amount" placeholder="0" class="form-control" [class.is-invalid]="budgetForm.get('amount')?.invalid && budgetForm.get('amount')?.touched" />
+          </div>
+        </div>
+
+
+
+        <!-- Ngày -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ngày bắt đầu</label>
+            <input type="date" formControlName="startDate" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label>Ngày kết thúc</label>
+            <input type="date" formControlName="endDate" class="form-control" />
+          </div>
+        </div>
+
+        <!-- Nút hành động -->
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" (click)="closeModal()" [disabled]="isSubmitting">
+            Hủy
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+            @if (isSubmitting) {
+              <span class="material-symbols-outlined spin">progress_activity</span>
+              Đang lưu...
+            } @else {
+              <span class="material-symbols-outlined">save</span>
+              Lưu ngân sách
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

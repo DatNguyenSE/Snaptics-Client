@@ -41,6 +41,7 @@ export class ManualEntry implements OnInit {
     }),
     paymentMethod: new FormControl(PAYMENT_METHOD_OPTIONS[0], { nonNullable: true }),
     note: new FormControl('', { nonNullable: true }),
+    isExpense: new FormControl(true, { nonNullable: true }),
   });
 
   categories: CategoryDto[] = FALLBACK_CATEGORIES;
@@ -64,7 +65,7 @@ export class ManualEntry implements OnInit {
       return;
     }
 
-    const { title, amount, category, date, paymentMethod, note } = this.form.getRawValue();
+    const { title, amount, category, date, paymentMethod, note, isExpense } = this.form.getRawValue();
 
     if (amount === null) {
       return;
@@ -80,6 +81,7 @@ export class ManualEntry implements OnInit {
         transactionDate: date,
         paymentMethod,
         note: note || null,
+        isExpense,
         source: 'manual',
       })
       .subscribe({

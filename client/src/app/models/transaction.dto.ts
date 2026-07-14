@@ -21,6 +21,7 @@ export interface TransactionDto {
   isAiEstimated: boolean;
   createdAt: string;
   note: string | null;
+  isExpense: boolean;
   paymentMethod?: string | null;
   imagePreviewUrl?: string | null;
   source?: 'receipt' | 'manual' | 'snap';
