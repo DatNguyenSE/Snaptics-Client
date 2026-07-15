@@ -8,6 +8,7 @@ import {
   OnInit,
   ViewChild,
   inject,
+  NgZone,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -29,7 +30,7 @@ import {
   getTodayInputValue,
   resolveCategories,
 } from '../shared/transaction-entry/transaction-entry.utils';
-import { buildMockSnapItemExtraction, parseSnapItemAnalysis } from '../snap-item/snap-item-extraction';
+import { parseSnapItemAnalysis } from './scan-extraction';
 
 // ─── Type Definitions ─────────────────────────────────────────────────────────
 export type ScanMode = 'receipt' | 'item' | 'manual';
@@ -53,6 +54,7 @@ export interface ReceiptItem {
   price: number;
   quantity: number;
   unit: string | null;
+  isEditing?: boolean;
 }
 
 const CATEGORY_CLASSES: Record<string, string> = {
@@ -78,6 +80,7 @@ export class Scan implements OnInit, OnDestroy {
   private readonly categoryService = inject(CategoryService);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly ngZone = inject(NgZone);
   readonly lang = inject(LanguageService);
 
   // ─── ViewChild refs ─────────────────────────────────────────────────────────
@@ -119,6 +122,9 @@ export class Scan implements OnInit, OnDestroy {
   storeName = '';
   receiptDate: string | null = null;
   billImageKey: string | null = null;
+  billNote = '';
+  totalAmount = 0;
+  isEditingBill = false;
   receiptItems: ReceiptItem[] = [];
   categories: CategoryDto[] = FALLBACK_CATEGORIES;
   errorMessage: string | null = null;
@@ -139,8 +145,8 @@ export class Scan implements OnInit, OnDestroy {
   isSaving = false;
 
   // ─── Computed ────────────────────────────────────────────────────────────────
-  get totalAmount(): number {
-    return this.receiptItems.reduce((sum, item) => sum + item.price, 0);
+  recalculateTotal(): void {
+    this.totalAmount = this.receiptItems.reduce((sum, item) => sum + item.price, 0);
   }
 
   get isProcessing(): boolean {
@@ -220,18 +226,25 @@ export class Scan implements OnInit, OnDestroy {
 
       this.mediaStream = stream;
       this.cameraPermission = 'granted';
-
+      
       // Check for flash/torch
       const track = stream.getVideoTracks()[0];
-      if (track) {
-        const caps = track.getCapabilities() as MediaTrackCapabilities & { torch?: boolean };
-        this.hasFlash = !!caps.torch;
+      if (track && track.getCapabilities) {
+        try {
+          const caps = track.getCapabilities() as MediaTrackCapabilities & { torch?: boolean };
+          this.hasFlash = !!caps.torch;
+        } catch {
+          this.hasFlash = false;
+        }
       }
+      
+      this.cdr.detectChanges();
 
       // Bind to video element after Angular renders it
       setTimeout(() => {
         if (this.videoElement?.nativeElement) {
           this.videoElement.nativeElement.srcObject = stream;
+          this.videoElement.nativeElement.play().catch(() => {});
         }
         this.cdr.detectChanges();
 
@@ -390,17 +403,19 @@ export class Scan implements OnInit, OnDestroy {
 
     canvas.toBlob(
       (blob) => {
-        if (!blob) {
-          this.toast.error(this.lang.t('scan.toast.captureError'));
-          return;
-        }
-        const fileName = this.scanMode === 'receipt' ? 'receipt.jpg' : 'item.jpg';
-        const file = new File([blob], fileName, { type: 'image/jpeg' });
-        this.stopCamera();
-        this.setPreview(file);
+        this.ngZone.run(() => {
+          if (!blob) {
+            this.toast.error(this.lang.t('scan.toast.captureError'));
+            return;
+          }
+          const fileName = this.scanMode === 'receipt' ? 'receipt.jpg' : 'item.jpg';
+          const file = new File([blob], fileName, { type: 'image/jpeg' });
+          this.stopCamera();
+          this.setPreview(file);
+        });
       },
       'image/jpeg',
-      0.9,
+      0.8
     );
   }
 
@@ -471,6 +486,7 @@ export class Scan implements OnInit, OnDestroy {
           this.storeName = response.merchantName || this.lang.t('scan.unknownStore');
           this.receiptDate = response.transactionDate || new Date().toISOString();
           this.billImageKey = response.billImageKey || null;
+          this.totalAmount = response.totalAmount || 0;
 
           this.receiptItems = response.items.map((item, index) => {
             const matchedCategory = item.category
@@ -517,17 +533,8 @@ export class Scan implements OnInit, OnDestroy {
           if (parsed) {
             return { extraction: parsed, source: 'ai' as const };
           }
-          return {
-            extraction: buildMockSnapItemExtraction(file, this.categories),
-            source: 'mock' as const,
-          };
-        }),
-        catchError(() =>
-          of({
-            extraction: buildMockSnapItemExtraction(file, this.categories),
-            source: 'mock' as const,
-          }),
-        ),
+          throw new Error('Failed to extract item details from image.');
+        })
       )
       .subscribe({
         next: ({ extraction }) => {
@@ -562,6 +569,7 @@ export class Scan implements OnInit, OnDestroy {
       imageKey: this.billImageKey,
       totalAmount: this.totalAmount,
       transactionDate: this.receiptDate,
+      note: this.billNote || null,
       items: this.receiptItems.map((item) => ({
         itemName: item.name,
         category: item.categoryLabel,
@@ -635,7 +643,49 @@ export class Scan implements OnInit, OnDestroy {
     });
   }
 
-  // ─── Category / Price Updates ────────────────────────────────────────────────
+  // ─── Update Methods ────────────────────────────────────────────────────────────
+  updateReceiptDate(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.value) {
+      this.receiptDate = new Date(input.value).toISOString();
+    }
+  }
+
+  updateTotalAmount(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.totalAmount = Number(input.value) || 0;
+  }
+
+  updateBillNote(event: Event): void {
+    const input = event.target as HTMLTextAreaElement;
+    this.billNote = input.value;
+  }
+
+  updateItemName(itemId: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.receiptItems = this.receiptItems.map((item) =>
+      item.id === itemId ? { ...item, name: input.value } : item
+    );
+  }
+
+  updateItemPriceRaw(itemId: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const val = Number(input.value) || 0;
+    this.receiptItems = this.receiptItems.map((item) =>
+      item.id === itemId ? { ...item, unitPrice: val, price: val * item.quantity } : item
+    );
+    this.recalculateTotal();
+  }
+
+  updateItemQuantity(itemId: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const val = Number(input.value) || 1;
+    this.receiptItems = this.receiptItems.map((item) =>
+      item.id === itemId ? { ...item, quantity: val, price: item.unitPrice * val } : item
+    );
+    this.recalculateTotal();
+  }
+
   updateCategory(itemId: number, event: Event): void {
     const select = event.target as HTMLSelectElement;
     const newCategoryId = select.value === 'null' ? null : Number(select.value);
@@ -677,6 +727,7 @@ export class Scan implements OnInit, OnDestroy {
       const newUnitPrice = item.quantity > 0 ? numericValue / item.quantity : numericValue;
       return { ...item, price: numericValue, unitPrice: newUnitPrice };
     });
+    this.recalculateTotal();
   }
 
   updateStoreName(event: Event): void {

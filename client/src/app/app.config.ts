@@ -7,6 +7,10 @@ import { lastValueFrom } from 'rxjs';
 import { InitService } from './core/services/init-service';
 import { errorInterceptor } from './core/interceptors/error-interceptor';
 import { jwtInterceptor } from './core/interceptors/jwt-interceptor';
+import { registerLocaleData } from '@angular/common';
+import localeVi from '@angular/common/locales/vi';
+
+registerLocaleData(localeVi, 'vi-VN');
 
 export const appConfig: ApplicationConfig = {
   providers: [

@@ -220,7 +220,7 @@ export class Budget implements OnInit {
 
   getBudgetSpentPercent(budget: BudgetDto): number {
     if (budget.currentAmount !== undefined) {
-      const spent = budget.currentAmount;
+      const spent = budget.amount - budget.currentAmount;
       return Math.min(100, Math.max(0, Math.round((spent / budget.amount) * 100)));
     }
     return 0; 
@@ -228,7 +228,7 @@ export class Budget implements OnInit {
 
   getSpentAmount(budget: BudgetDto): number {
     if (budget.currentAmount !== undefined) {
-      return budget.currentAmount;
+      return budget.amount - budget.currentAmount;
     }
     return 0;
   }

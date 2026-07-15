@@ -102,7 +102,7 @@ export class Dashboard implements OnInit {
   get remainingBudget(): number {
     if (this.activeBudget) {
       const spent = this.activeBudget.currentAmount !== undefined
-        ? this.activeBudget.currentAmount
+        ? this.activeBudget.amount - this.activeBudget.currentAmount
         : this.getBudgetSpent(this.activeBudget);
       return Math.max(0, this.activeBudget.amount - spent);
     }
@@ -187,7 +187,7 @@ export class Dashboard implements OnInit {
   // ─── Quick Actions ────────────────────────────────────────────────────────
   readonly quickActions: QuickAction[] = [
     { id: 'scan', labelKey: 'dashboard.quickAction.scan', icon: 'receipt_long', iconClass: 'quick-action__icon--blue', route: '/user/scan' },
-    { id: 'capture', labelKey: 'dashboard.quickAction.capture', icon: 'photo_camera', iconClass: 'quick-action__icon--violet', route: '/user/snap-item' },
+    { id: 'capture', labelKey: 'dashboard.quickAction.capture', icon: 'photo_camera', iconClass: 'quick-action__icon--violet', route: '/user/scan' },
     { id: 'manual', labelKey: 'dashboard.quickAction.manual', icon: 'edit_square', iconClass: 'quick-action__icon--amber', route: '/user/manual-entry' },
     { id: 'create-budget', labelKey: 'dashboard.quickAction.createBudget', icon: 'account_balance_wallet', iconClass: 'quick-action__icon--emerald', route: '/user/budget' },
   ];
@@ -323,15 +323,15 @@ export class Dashboard implements OnInit {
 
   getDisplayAmount(budget: BudgetDto): number {
     return budget.currentAmount !== undefined 
-      ? budget.currentAmount 
+      ? budget.amount - budget.currentAmount 
       : this.getBudgetSpent(budget);
   }
 
   getBudgetSpentPercent(budget: BudgetDto): number {
     const spent = budget.currentAmount !== undefined 
-      ? budget.currentAmount 
+      ? budget.amount - budget.currentAmount 
       : this.getBudgetSpent(budget);
-    return Math.min(100, Math.round((spent / budget.amount) * 100));
+    return Math.min(100, Math.max(0, Math.round((spent / budget.amount) * 100)));
   }
 
   getBudgetSpent(budget: BudgetDto): number {

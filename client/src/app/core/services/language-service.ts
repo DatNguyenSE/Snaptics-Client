@@ -195,7 +195,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       savingDescription:
         'Vui l\u00f2ng ch\u1edd trong khi ch\u00fang t\u00f4i th\u00eam giao d\u1ecbch n\u00e0y v\u00e0o danh s\u00e1ch c\u1ee7a b\u1ea1n.',
       readingDescription:
-        'Vui l\u00f2ng ch\u1edd trong khi ch\u00fang t\u00f4i t\u1ea1o b\u1ea3n xem tr\u01b0\u1edbc.',
+        'Đợi tí nhé bạn yêu, AI đang "căng mắt" phân tích ảnh nè...',
       errorAria: 'Khu v\u1ef1c th\u00f4ng b\u00e1o l\u1ed7i',
       errorTitle: '\u00d4i kh\u00f4ng!',
       retake: 'Ch\u1ee5p l\u1ea1i',
@@ -211,10 +211,12 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         readFailed: '\u0110\u1ecdc h\u00f3a \u0111\u01a1n th\u1ea5t b\u1ea1i. Vui l\u00f2ng th\u1eed l\u1ea1i.',
       },
       toast: {
+        cameraLoading: 'Vui lòng chờ camera tải xong...',
+        captureError: 'Không thể chụp ảnh, vui lòng thử lại.',
         cameraError:
-          'Kh\u00f4ng th\u1ec3 truy c\u1eadp camera. Vui l\u00f2ng ki\u1ec3m tra quy\u1ec1n.',
+          'Không thể truy cập camera. Vui lòng kiểm tra quyền.',
         selectCategory:
-          'Vui l\u00f2ng ch\u1ecdn danh m\u1ee5c cho t\u1ea5t c\u1ea3 m\u00f3n tr\u01b0\u1edbc khi l\u01b0u.',
+          'Vui lòng chọn danh mục cho tất cả món trước khi lưu.',
         saved: '\u0110\u00e3 l\u01b0u h\u00f3a \u0111\u01a1n v\u00e0o danh s\u00e1ch giao d\u1ecbch.',
         saveFailed: 'L\u01b0u h\u00f3a \u0111\u01a1n th\u1ea5t b\u1ea1i.',
       },
@@ -628,6 +630,8 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         readFailed: 'Failed to read receipt. Please try again.',
       },
       toast: {
+        cameraLoading: 'Please wait for camera to load...',
+        captureError: 'Could not capture photo, please try again.',
         cameraError: 'Cannot access the camera. Please check permissions.',
         selectCategory: 'Please select a category for all items before saving.',
         saved: 'Receipt saved to your transactions.',

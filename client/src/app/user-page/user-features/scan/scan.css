@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════
    SCAN PAGE – Design tokens & resets
    ═══════════════════════════════════════════════════════════════════ */
+@import './scan-edit.css';
 
 :host {
   display: block;
@@ -52,7 +53,7 @@
 }
 
 .scan-header-section {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -116,6 +117,89 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
+   STEPPER
+   ═══════════════════════════════════════════════════════════════════ */
+.scan-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 600px;
+  margin: 0 auto 8px;
+  padding: 0 16px;
+  width: 100%;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.step__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--sw-card);
+  border: 2px solid var(--sw-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--sw-muted-foreground);
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.step__icon .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+.step__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sw-muted-foreground);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.step--active .step__icon {
+  border-color: var(--scan-primary);
+  background: var(--scan-primary-soft);
+  color: var(--scan-primary);
+  box-shadow: 0 0 0 4px var(--scan-primary-glow);
+}
+
+.step--active .step__label {
+  color: var(--scan-primary);
+  font-weight: 700;
+}
+
+.step--done .step__icon {
+  background: var(--scan-primary);
+  border-color: var(--scan-primary);
+  color: #fff;
+}
+
+.step-connector {
+  flex: 1;
+  height: 2px;
+  background: var(--sw-border);
+  margin: 0 8px;
+  margin-top: -24px;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.step-connector--active {
+  background: var(--scan-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    CAMERA CONTAINER
    ═══════════════════════════════════════════════════════════════════ */
 .camera-container {
@@ -126,7 +210,7 @@
   flex: 1;
   min-height: 0;
   width: 100%;
-  max-width: 760px;
+  max-width: 480px;
   margin: 0 auto;
 }
 
@@ -203,7 +287,11 @@
 }
 
 .camera-canvas {
-  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* ── Overlay with dark vignette around scan frame ─────────────────── */
@@ -599,24 +687,214 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════════════════════ */
+.scan-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 16px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.scan-btn .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.scan-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.scan-btn--primary {
+  background: var(--scan-primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(91, 123, 250, 0.25);
+}
+
+.scan-btn--primary:hover:not(:disabled) {
+  background: #4a66d8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(91, 123, 250, 0.35);
+}
+
+.scan-btn--primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.scan-btn--ghost {
+  background: var(--sw-muted);
+  color: var(--sw-foreground);
+  border: 1px solid var(--sw-border);
+  box-shadow: var(--sw-shadow-sm);
+  font-weight: 500;
+}
+
+.scan-btn--ghost:hover:not(:disabled) {
+  background: var(--sw-border);
+  transform: translateY(-1px);
+}
+
+.scan-btn--outline {
+  background: transparent;
+  border: 1px solid var(--sw-border);
+  color: var(--sw-foreground);
+}
+
+.scan-btn--outline:hover:not(:disabled) {
+  background: var(--sw-muted);
+  border-color: var(--sw-border);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    IMAGE PREVIEW (captured / uploaded)
    ═══════════════════════════════════════════════════════════════════ */
 .preview-container {
   border-radius: 24px;
   overflow: hidden;
   border: 1px solid var(--sw-border);
-  background: #000;
+  background: var(--sw-card);
+  padding: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  box-shadow: var(--sw-shadow-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CAMERA SCAN GUIDES
+   ═══════════════════════════════════════════════════════════════════ */
+.camera-guide-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.camera-guide-cutout {
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.5); /* The blurred/darkened effect outside the cutout */
+  border-radius: 16px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* 4 corners brackets effect */
+.camera-guide-cutout::before,
+.camera-guide-cutout::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 4px solid #fff;
+  border-radius: 4px;
+}
+
+.camera-guide-cutout::before {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.camera-guide-cutout::after {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+}
+
+.camera-guide-cutout-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.camera-guide-cutout-inner::before,
+.camera-guide-cutout-inner::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 4px solid #fff;
+  border-radius: 4px;
+}
+
+.camera-guide-cutout-inner::before {
+  top: -2px;
+  right: -2px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.camera-guide-cutout-inner::after {
+  bottom: -2px;
+  left: -2px;
+  border-right: none;
+  border-top: none;
+}
+
+/* Guide specific dimensions */
+.camera-guide-overlay--receipt .camera-guide-cutout {
+  width: 75%;
+  height: 92%;
+  max-width: 320px;
+  border-radius: 8px;
+}
+
+.camera-guide-overlay--item .camera-guide-cutout {
+  width: 70%;
+  max-height: 85%;
+  aspect-ratio: 1;
+  max-width: 320px;
+  border-radius: 24px;
+  border-style: dashed;
+}
+
+.camera-guide-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.2;
+  color: #000;
+  pointer-events: none;
+}
+
+.camera-guide-icon .material-symbols-outlined {
+  font-size: 6rem;
 }
 
 .preview-image {
   width: 100%;
-  max-height: 420px;
+  max-height: 320px;
   object-fit: contain;
   display: block;
+  border-radius: 12px;
 }
 
 .preview-actions {
@@ -630,6 +908,58 @@
 
 .preview-actions .scan-btn {
   flex: 1;
+}
+
+/* ── Scanning Overlay Effect ── */
+.preview-container--scanning {
+  position: relative;
+}
+
+.preview-container--scanning .preview-image {
+  filter: blur(5px) brightness(0.6);
+  transition: filter 0.4s ease;
+}
+
+.scanning-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  overflow: hidden;
+  gap: 12px;
+}
+
+.scanning-overlay__line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--scan-primary);
+  box-shadow: 0 0 20px 4px var(--scan-primary-glow);
+  animation: scanLineVertical 2.5s ease-in-out infinite;
+  z-index: 11;
+}
+
+.scanning-overlay__title {
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  margin-top: 12px;
+}
+
+.scanning-overlay__sub {
+  color: rgba(255,255,255,0.8);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+}
+
+@keyframes scanLineVertical {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -971,15 +1301,25 @@
 .item-preview-thumb {
   border-radius: 18px;
   overflow: hidden;
-  max-height: 200px;
   border: 1px solid var(--sw-border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.02);
+  padding: 8px;
+}
+
+:host-context(html.dark-theme) .item-preview-thumb {
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .item-preview-thumb img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 240px;
+  height: auto;
+  object-fit: contain;
   display: block;
+  border-radius: 10px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -1388,6 +1728,10 @@
   }
 
   .floating-upload-wrapper {
+    display: none !important;
+  }
+
+  .mobile-only {
     display: none !important;
   }
 }

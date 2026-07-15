@@ -30,4 +30,6 @@ export interface CreateTransactionFromBillDto {
   totalAmount: number;
   transactionDate: string | null;
   items: CreateTransactionFromBillItemDto[];
+  isExpense?: boolean;
+  note?: string | null;
 }

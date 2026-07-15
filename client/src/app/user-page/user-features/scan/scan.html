@@ -3,25 +3,69 @@
 
     <!-- ── Header ── -->
     <header class="scan-header-section">
-      <div class="scan-eyebrow-badge">
-        <span class="material-symbols-outlined">auto_awesome</span>
-        <span>{{ lang.currentLang() === 'vi' ? 'Phân tích bằng AI' : 'AI Analysis' }}</span>
-      </div>
       <h1 class="scan-title scan-title--gradient">
         {{ scanMode === 'receipt' 
            ? (lang.currentLang() === 'vi' ? 'Quét hóa đơn' : 'Receipt Scan') 
            : (lang.currentLang() === 'vi' ? 'Chụp ảnh món đồ' : 'Snap Item') }}
       </h1>
-      <p class="scan-description-sub">
-        {{ scanMode === 'receipt'
-           ? (lang.currentLang() === 'vi' ? 'Quét hóa đơn bán lẻ hoặc hóa đơn mua sắm để tự động trích xuất các khoản chi tiêu.' : 'Scan receipts to automatically extract your shopping transactions.')
-           : (lang.currentLang() === 'vi' ? 'Chụp ảnh món đồ bạn đã mua để AI tự động nhận dạng tên và giá tiền.' : 'Snap a picture of your purchase to automatically identify its name and price.') }}
-      </p>
+
     </header>
 
     <!-- ── Centered Workspace Card ── -->
     <div class="scan-workspace-centered">
       
+      <!-- Flow Stepper -->
+      @if (captureState !== 'live') {
+        <div class="scan-stepper">
+        <div class="step" [class.step--active]="false" [class.step--done]="true">
+          <div class="step__icon">
+            @if (captureState === 'preview' || processingState === 'scanning' || processingState === 'result' || processingState === 'saving') {
+              <span class="material-symbols-outlined">check</span>
+            } @else {
+              1
+            }
+          </div>
+          <span class="step__label">{{ lang.currentLang() === 'vi' ? 'Chụp ảnh' : 'Capture' }}</span>
+        </div>
+        <div class="step-connector" [class.step-connector--active]="captureState === 'preview' || processingState === 'scanning' || processingState === 'result' || processingState === 'saving'"></div>
+        
+        <div class="step" [class.step--active]="captureState === 'preview' && processingState === 'idle'" [class.step--done]="processingState === 'scanning' || processingState === 'result' || processingState === 'saving'">
+          <div class="step__icon">
+            @if (processingState === 'scanning' || processingState === 'result' || processingState === 'saving') {
+              <span class="material-symbols-outlined">check</span>
+            } @else {
+              2
+            }
+          </div>
+          <span class="step__label">{{ lang.currentLang() === 'vi' ? 'Kiểm tra' : 'Preview' }}</span>
+        </div>
+        <div class="step-connector" [class.step-connector--active]="processingState === 'scanning' || processingState === 'result' || processingState === 'saving'"></div>
+
+        <div class="step" [class.step--active]="processingState === 'scanning'" [class.step--done]="processingState === 'result' || processingState === 'saving'">
+          <div class="step__icon">
+            @if (processingState === 'result' || processingState === 'saving') {
+              <span class="material-symbols-outlined">check</span>
+            } @else {
+              3
+            }
+          </div>
+          <span class="step__label">{{ lang.currentLang() === 'vi' ? 'Phân tích' : 'Analysis' }}</span>
+        </div>
+        <div class="step-connector" [class.step-connector--active]="processingState === 'result' || processingState === 'saving'"></div>
+
+        <div class="step" [class.step--active]="processingState === 'result' || processingState === 'saving'">
+          <div class="step__icon">
+            @if (processingState === 'saving') {
+              <span class="material-symbols-outlined">hourglass_empty</span>
+            } @else {
+              4
+            }
+          </div>
+          <span class="step__label">{{ lang.currentLang() === 'vi' ? 'Xác nhận' : 'Confirm' }}</span>
+        </div>
+        </div>
+      }
+
       <!-- Live camera Viewfinder / Preview / Result Area -->
       <div class="scan-workspace__top">
         
@@ -86,7 +130,21 @@
               ></video>
               <canvas #canvasElement class="camera-canvas" aria-hidden="true"></canvas>
 
-
+              <!-- Blur Overlay Guide for scanning -->
+              <div class="camera-guide-overlay" [class.camera-guide-overlay--receipt]="scanMode === 'receipt'" [class.camera-guide-overlay--item]="scanMode === 'item'">
+                <div class="camera-guide-cutout">
+                  <div class="camera-guide-cutout-inner"></div>
+                  @if (scanMode === 'receipt') {
+                    <div class="camera-guide-icon">
+                      <span class="material-symbols-outlined">receipt_long</span>
+                    </div>
+                  } @else {
+                    <div class="camera-guide-icon">
+                      <span class="material-symbols-outlined">image_search</span>
+                    </div>
+                  }
+                </div>
+              </div>
 
               <!-- Auto-Capture Countdown Overlay -->
               @if (autoCaptureEnabled && countdownSeconds > 0) {
@@ -132,46 +190,43 @@
           }
         }
 
-        <!-- Captured Image Preview -->
-        @if (captureState === 'preview' && previewUrl && processingState === 'idle') {
+        <!-- Captured Image Preview or Scanning Overlay -->
+        @if (captureState === 'preview' && previewUrl && (processingState === 'idle' || processingState === 'scanning')) {
           <div class="preview-viewport-card">
-            <div class="preview-container">
+            <div class="preview-container" [class.preview-container--scanning]="processingState === 'scanning'">
               <img [src]="previewUrl" alt="Captured image preview" class="preview-image" />
+              
+              @if (processingState === 'scanning') {
+                <div class="scanning-overlay">
+                  <div class="scanning-overlay__line"></div>
+                  <p class="scanning-overlay__title">{{ lang.t('scan.state.analyzing') }}</p>
+                  <p class="scanning-overlay__sub">{{ lang.t('scan.readingDescription') }}</p>
+                </div>
+              }
             </div>
-            <div class="preview-actions">
-              <button
-                class="scan-btn scan-btn--ghost"
-                type="button"
-                (click)="retakePhoto()"
-                id="btn-retake"
-              >
-                <span class="material-symbols-outlined">replay</span>
-                {{ lang.t('scan.retake') }}
-              </button>
-              <button
-                class="scan-btn scan-btn--primary"
-                type="button"
-                (click)="usePhoto()"
-                id="btn-use-photo"
-              >
-                <span class="material-symbols-outlined">check_circle</span>
-                {{ lang.t('scan.usePhoto') }}
-              </button>
-            </div>
-          </div>
-        }
-
-        <!-- Processing state (scanning) -->
-        @if (processingState === 'scanning') {
-          <div class="processing-state">
-            <div class="processing-state__orb">
-              <div class="processing-state__pulse"></div>
-              <div class="processing-state__icon">
-                <span class="material-symbols-outlined">auto_awesome</span>
+            
+            @if (processingState === 'idle') {
+              <div class="preview-actions">
+                <button
+                  class="scan-btn scan-btn--ghost"
+                  type="button"
+                  (click)="retakePhoto()"
+                  id="btn-retake"
+                >
+                  <span class="material-symbols-outlined">replay</span>
+                  {{ lang.t('scan.retake') }}
+                </button>
+                <button
+                  class="scan-btn scan-btn--primary"
+                  type="button"
+                  (click)="usePhoto()"
+                  id="btn-use-photo"
+                >
+                  <span class="material-symbols-outlined">check_circle</span>
+                  {{ lang.t('scan.steps.confirm') }}
+                </button>
               </div>
-            </div>
-            <p class="processing-state__title">{{ lang.t('scan.processing.title') }}</p>
-            <p class="processing-state__sub">{{ lang.t('scan.processing.sub') }}</p>
+            }
           </div>
         }
 
@@ -184,8 +239,8 @@
                 <span class="material-symbols-outlined">save</span>
               </div>
             </div>
-            <p class="processing-state__title">{{ lang.t('scan.saving.title') }}</p>
-            <p class="processing-state__sub">{{ lang.t('scan.saving.sub') }}</p>
+            <p class="processing-state__title">{{ lang.t('scan.savingTitle') }}</p>
+            <p class="processing-state__sub">{{ lang.t('scan.savingDescription') }}</p>
           </div>
         }
 
@@ -195,7 +250,7 @@
             <div class="camera-state__icon camera-state__icon--error">
               <span class="material-symbols-outlined">error_outline</span>
             </div>
-            <p class="camera-state__title">{{ lang.t('scan.error.title') }}</p>
+            <p class="camera-state__title">{{ lang.t('scan.errorTitle') }}</p>
             <p class="camera-state__sub">{{ errorMessage }}</p>
             <div class="camera-state__actions">
               <button class="scan-btn scan-btn--ghost" type="button" (click)="retakePhoto()" id="btn-retry-scan">
@@ -230,46 +285,101 @@
                   />
                   <p class="receipt-card__meta">
                     <span class="material-symbols-outlined">schedule</span>
-                    {{ receiptDate | date:'mediumDate' }}
+                    {{ receiptDate | date:'mediumDate':'':'vi-VN' }}
                   </p>
                 </div>
                 <div class="receipt-card__total">
                   <span>{{ lang.t('scan.total') }}</span>
                   <strong>{{ formatCurrency(totalAmount) }}</strong>
                 </div>
+                <button class="icon-btn" (click)="isEditingBill = !isEditingBill" title="Sửa thông tin" style="align-self: flex-start; margin-left: auto;">
+                  <span class="material-symbols-outlined">tune</span>
+                </button>
               </div>
+              @if (isEditingBill) {
+                <div class="receipt-card__edit-form" style="padding: 16px 20px; background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--sw-border);">
+                  <label class="form-label">
+                    <span>Tên cửa hàng</span>
+                    <input type="text" [value]="storeName" (input)="updateStoreName($event)" class="form-input" />
+                  </label>
+                  <label class="form-label">
+                    <span>Ngày giờ</span>
+                    <input type="datetime-local" [value]="receiptDate | date:'yyyy-MM-ddTHH:mm'" (input)="updateReceiptDate($event)" class="form-input" />
+                  </label>
+                  <label class="form-label">
+                    <span>Tổng tiền (VND)</span>
+                    <input type="number" [value]="totalAmount" (input)="updateTotalAmount($event)" class="form-input" />
+                  </label>
+                  <label class="form-label">
+                    <span>Ghi chú</span>
+                    <textarea [value]="billNote" (input)="updateBillNote($event)" class="form-input" rows="2"></textarea>
+                  </label>
+                </div>
+              }
 
               <div class="receipt-card__list">
                 @for (item of receiptItems; track item.id) {
-                  <div class="receipt-item">
-                    <div class="receipt-item__copy">
-                      <p class="receipt-item__name">{{ item.name }}</p>
-                      <select
-                        class="category-pill"
-                        [class]="item.categoryClass"
-                        (change)="updateCategory(item.id, $event)"
-                        [id]="'category-select-' + item.id"
-                      >
-                        <option [value]="null" [selected]="!item.categoryId">
-                          {{ lang.t('scan.category.unassigned') }}
-                        </option>
-                        @for (cat of categories; track cat.id) {
-                          <option [value]="cat.id" [selected]="cat.id === item.categoryId">
-                            {{ getCategoryName(cat.name) }}
-                          </option>
-                        }
-                      </select>
+                  <div class="receipt-item-container" style="display: flex; flex-direction: column; width: 100%;">
+                    <div class="receipt-item" [class.receipt-item--editing]="item.isEditing">
+                      <div class="receipt-item__copy">
+                        <p class="receipt-item__name">{{ item.name }}</p>
+                        <select
+                          class="category-pill"
+                          [class]="item.categoryClass"
+                          (change)="updateCategory(item.id, $event)"
+                          [id]="'category-select-' + item.id"
+                        >
+                          @for (cat of categories; track cat.id) {
+                            <option [value]="cat.id" [selected]="cat.id === item.categoryId">
+                              {{ getCategoryName(cat.name) }}
+                            </option>
+                          }
+                        </select>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 12px;">
+                        <label class="receipt-item__price">
+                          <input
+                            type="text"
+                            inputmode="numeric"
+                            [value]="formatEditablePrice(item.price)"
+                            (input)="updatePrice(item.id, $event)"
+                            [id]="'price-input-' + item.id"
+                          />
+                          <span>VND</span>
+                        </label>
+                        <button class="icon-btn" (click)="item.isEditing = !item.isEditing" title="Sửa chi tiết">
+                          <span class="material-symbols-outlined" style="font-size: 20px;">tune</span>
+                        </button>
+                      </div>
                     </div>
-                    <label class="receipt-item__price">
-                      <input
-                        type="text"
-                        inputmode="numeric"
-                        [value]="formatEditablePrice(item.price)"
-                        (input)="updatePrice(item.id, $event)"
-                        [id]="'price-input-' + item.id"
-                      />
-                      <span>VND</span>
-                    </label>
+                    @if (item.isEditing) {
+                      <div class="receipt-item__edit-form" style="width: 100%; display: flex; flex-direction: column; gap: 12px; padding: 12px 20px; background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--sw-border);">
+                        <label class="form-label">
+                          <span>Tên món</span>
+                          <input type="text" [value]="item.name" (input)="updateItemName(item.id, $event)" class="form-input" />
+                        </label>
+                        <div style="display: flex; gap: 12px;">
+                          <label class="form-label" style="flex: 1;">
+                            <span>Đơn Giá (VND)</span>
+                            <input type="number" [value]="item.unitPrice" (input)="updateItemPriceRaw(item.id, $event)" class="form-input" />
+                          </label>
+                          <label class="form-label" style="width: 80px;">
+                            <span>Số lượng</span>
+                            <input type="number" [value]="item.quantity" (input)="updateItemQuantity(item.id, $event)" class="form-input" />
+                          </label>
+                        </div>
+                        <label class="form-label">
+                          <span>Danh mục</span>
+                          <select class="form-input" (change)="updateCategory(item.id, $event)">
+                            @for (cat of categories; track cat.id) {
+                              <option [value]="cat.id" [selected]="cat.id === item.categoryId">
+                                {{ getCategoryName(cat.name) }}
+                              </option>
+                            }
+                          </select>
+                        </label>
+                      </div>
+                    }
                   </div>
                 }
               </div>
@@ -293,7 +403,6 @@
                 [disabled]="isProcessing"
                 id="btn-confirm-save"
               >
-                <span class="material-symbols-outlined">check</span>
                 {{ lang.t('scan.confirmSave') }}
               </button>
             </div>
@@ -336,6 +445,30 @@
             <button class="desktop-action-btn desktop-action-btn--secondary" type="button" (click)="triggerUpload()">
               <span class="material-symbols-outlined">photo_library</span>
               {{ lang.currentLang() === 'vi' ? 'Chọn ảnh' : 'Upload' }}
+            </button>
+          </div>
+
+          <!-- Mobile Capture Bar (Visible on Mobile) -->
+          <div class="capture-bar mobile-only">
+            <div class="capture-bar__spacer"></div>
+            <button
+              class="capture-btn"
+              type="button"
+              (click)="capturePhoto()"
+              [disabled]="!isCameraActive"
+              aria-label="Take photo"
+            >
+              <div class="capture-btn__ring"></div>
+              <div class="capture-btn__inner"></div>
+            </button>
+            <button
+              class="capture-bar__upload"
+              type="button"
+              (click)="triggerUpload()"
+              [disabled]="isProcessing"
+            >
+              <span class="material-symbols-outlined">photo_library</span>
+              <span class="capture-bar__upload-label">{{ lang.currentLang() === 'vi' ? 'Chọn ảnh' : 'Upload' }}</span>
             </button>
           </div>
 

@@ -69,6 +69,9 @@ export class TransactionService {
       formData.append('Items', JSON.stringify(data.items));
     }
     
+    formData.append('IsExpense', data.isExpense !== undefined ? String(data.isExpense) : 'true');
+    if (data.note) formData.append('Note', data.note);
+
     if (file) {
       formData.append('image', file);
     }
@@ -86,6 +89,8 @@ export class TransactionService {
     quantity?: number;
     category?: string | null;
     unit?: string | null;
+    isExpense?: boolean;
+    note?: string | null;
   }, file: File | null): Observable<TransactionDto> {
     const formData = new FormData();
     formData.append('ItemName', data.itemName);
@@ -94,6 +99,9 @@ export class TransactionService {
     if (data.category) formData.append('Category', data.category);
     if (data.unit) formData.append('Unit', data.unit);
     
+    formData.append('IsExpense', data.isExpense !== undefined ? String(data.isExpense) : 'true');
+    if (data.note) formData.append('Note', data.note);
+
     if (file) {
       formData.append('image', file);
     }
