@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.development';
-
+//tạo budget request
 export interface CreateBudgetRequest {
   id?: number;
   name: string;
@@ -42,7 +42,7 @@ export class BudgetService {
   }
 
   getBudgets(): Observable<BudgetDto[]> {
-    return this.http.get<BudgetDto[]>(this.apiUrl + '/user');
+    return this.http.get<BudgetDto[]>(this.apiUrl);
   }
 
   updateBudget(id: number, data: CreateBudgetRequest): Observable<BudgetDto> {
