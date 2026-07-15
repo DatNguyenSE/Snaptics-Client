@@ -16,24 +16,25 @@ export class LandingPage {
   protected isScrolled = false;
 
   protected readonly navItems = [
-    { label: 'Features', target: 'features' },
-    { label: 'How It Works', target: 'howto' },
-    { label: 'About Us', target: 'about' },
-    { label: 'Contact', target: 'footer' },
+    { label: 'Tính năng', target: 'features' },
+    { label: 'Cách hoạt động', target: 'howto' },
+    { label: 'Giới thiệu', target: 'about' },
+    { label: 'Liên hệ', target: 'footer' },
   ];
 
   protected readonly marqueeItems = [
-    'Receipts',
-    'Transactions',
-    'Budgets',
-    'Reminders',
-    'Analytics',
-    'Insights',
-    'Categories',
-    'Reports',
+    'Hoá đơn',
+    'Giao dịch',
+    'Ngân sách',
+    'Nhắc nhở',
+    'Phân tích',
+    'Thống kê',
+    'Danh mục',
+    'Báo cáo',
   ];
 
   protected readonly marqueeTrack = [...this.marqueeItems, ...this.marqueeItems];
+
 
   @HostListener('window:scroll')
   protected onWindowScroll(): void {

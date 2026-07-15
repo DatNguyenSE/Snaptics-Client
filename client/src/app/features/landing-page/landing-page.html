@@ -10,7 +10,7 @@
           <span class="landing-brand__label">Snaptics</span>
         </button>
 
-        <nav class="landing-nav" aria-label="Homepage">
+        <nav class="landing-nav" aria-label="Trang chủ">
           @for (item of navItems; track item.target) {
             <button type="button" class="landing-nav__link" (click)="scrollToSection(item.target)">
               {{ item.label }}
@@ -19,15 +19,15 @@
         </nav>
 
         <div class="landing-header__actions">
-          <a routerLink="/login" class="landing-btn landing-btn--ghost">Login</a>
-          <a routerLink="/login" class="landing-btn landing-btn--primary">Get Started</a>
+          <a routerLink="/login" class="landing-btn landing-btn--ghost">Đăng nhập</a>
+          <a routerLink="/login" class="landing-btn landing-btn--primary">Bắt đầu ngay</a>
         </div>
 
         <button
           type="button"
           class="landing-mobile-toggle"
           [attr.aria-expanded]="isMenuOpen"
-          aria-label="Toggle menu"
+          aria-label="Mở/đóng menu"
           (click)="toggleMenu()"
         >
           <span class="material-symbols-outlined">
@@ -49,14 +49,14 @@
           }
           <div class="landing-mobile-menu__actions">
             <a routerLink="/login" class="landing-btn landing-btn--ghost" (click)="closeMenu()">
-              Login
+              Đăng nhập
             </a>
             <a
               routerLink="/login"
               class="landing-btn landing-btn--primary"
               (click)="closeMenu()"
             >
-              Get Started
+              Bắt đầu ngay
             </a>
           </div>
         </div>
@@ -75,45 +75,45 @@
       <div class="landing-shell landing-hero__content">
         <div class="landing-hero__badge">
           <span class="landing-hero__badge-dot"></span>
-          Smart expense tracking powered by AI
+          Theo dõi chi tiêu thông minh nhờ AI
         </div>
 
         <h1 class="landing-hero__title">
-          Scan receipts, track spending,
-          <span class="landing-hero__title-gradient">and understand your money</span>
+          Chụp hoá đơn, theo dõi chi tiêu,
+          <span class="landing-hero__title-gradient">và làm chủ tài chính cá nhân</span>
         </h1>
 
         <p class="landing-hero__description">
-          Snaptics helps you capture receipts, organize transactions, monitor budgets,
-          and turn daily spending into clear financial insights.
+          Snaptics giúp bạn chụp hoá đơn, tổ chức giao dịch, theo dõi ngân sách
+          và biến các khoản chi hàng ngày thành những thông tin tài chính rõ ràng, trực quan.
         </p>
 
         <div class="landing-hero__actions">
           <a routerLink="/login" class="landing-btn landing-btn--primary landing-btn--hero">
-            Start Tracking
+            Bắt đầu theo dõi
             <span class="material-symbols-outlined">arrow_right_alt</span>
           </a>
           <a routerLink="/login" class="landing-btn landing-btn--secondary landing-btn--hero">
-            Login
+            Đăng nhập
           </a>
         </div>
 
         <p class="landing-hero__support">
-          Built for students, young professionals, and anyone who wants easier money management.
+          Dành cho sinh viên, người đi làm trẻ và bất kỳ ai muốn quản lý tiền dễ dàng hơn.
         </p>
 
         <div class="landing-hero__trust">
           <div class="landing-hero__trust-item">
             <span class="material-symbols-outlined">verified_user</span>
-            Secure &amp; Private
+            Bảo mật &amp; Riêng tư
           </div>
           <div class="landing-hero__trust-item">
             <span class="material-symbols-outlined">bolt</span>
-            Instant OCR Scan
+            Quét OCR tức thì
           </div>
           <div class="landing-hero__trust-item">
             <span class="material-symbols-outlined">star</span>
-            4.9 / 5 Rating
+            Đánh giá 4.9 / 5
           </div>
         </div>
 
@@ -138,8 +138,8 @@
               <span class="material-symbols-outlined">auto_awesome</span>
             </div>
             <div>
-              <p>AI Category Detected</p>
-              <span>Food &amp; Drinks • Auto-tagged</span>
+              <p>AI Phát Hiện Danh Mục</p>
+              <span>Ăn uống &amp; Đồ uống • Tự động gắn nhãn</span>
             </div>
           </div>
 
@@ -148,8 +148,8 @@
               <span class="material-symbols-outlined">notifications</span>
             </div>
             <div>
-              <p>Budget Reminder</p>
-              <span>Food budget 78% used</span>
+              <p>Nhắc Nhở Ngân Sách</p>
+              <span>Ngân sách ăn uống đã dùng 78%</span>
             </div>
           </div>
 
@@ -158,19 +158,19 @@
               <span class="material-symbols-outlined">task_alt</span>
             </div>
             <div>
-              <p>Receipt Saved</p>
-              <span>6 items captured</span>
+              <p>Đã Lưu Hoá Đơn</p>
+              <span>Đã chụp 6 mục</span>
             </div>
           </div>
 
           <div class="landing-dashboard__chip landing-dashboard__chip--left">
             <span class="landing-dashboard__chip-dot"></span>
-            OCR Ready
+            Sẵn sàng OCR
           </div>
 
           <div class="landing-dashboard__chip landing-dashboard__chip--right">
             <span class="landing-dashboard__chip-dot landing-dashboard__chip-dot--violet"></span>
-            Real-time Insight
+            Thống kê thời gian thực
           </div>
 
           <div class="landing-dashboard__frame">
@@ -183,7 +183,7 @@
 
               <div class="landing-dashboard__chrome-pill">
                 <span class="landing-dashboard__chrome-status"></span>
-                app.snaptics.com · Dashboard
+                app.snaptics.com · Tổng quan
               </div>
 
               <div class="landing-dashboard__chrome-spacer"></div>
@@ -201,81 +201,81 @@
                 <div class="landing-dashboard__sidebar-nav">
                   <div class="landing-dashboard__sidebar-item landing-dashboard__sidebar-item--active">
                     <span class="material-symbols-outlined">space_dashboard</span>
-                    Dashboard
+                    Tổng quan
                   </div>
                   <div class="landing-dashboard__sidebar-item">
                     <span class="material-symbols-outlined">receipt_long</span>
-                    Transactions
+                    Giao dịch
                   </div>
                   <div class="landing-dashboard__sidebar-item">
                     <span class="material-symbols-outlined">document_scanner</span>
-                    Scan Receipt
+                    Quét hoá đơn
                   </div>
                   <div class="landing-dashboard__sidebar-item">
                     <span class="material-symbols-outlined">pie_chart</span>
-                    Analytics
+                    Phân tích
                   </div>
                   <div class="landing-dashboard__sidebar-item">
                     <span class="material-symbols-outlined">notifications</span>
-                    Reminders
+                    Nhắc nhở
                   </div>
                 </div>
 
                 <div class="landing-dashboard__tip">
-                  <p>Pro Tip</p>
-                  <span>Scan receipts for instant categorization</span>
+                  <p>Mẹo hay</p>
+                  <span>Quét hoá đơn để phân loại tức thì</span>
                 </div>
               </aside>
 
               <div class="landing-dashboard__main">
                 <div class="landing-dashboard__topbar">
                   <div>
-                    <p class="landing-dashboard__eyebrow">Good morning ·</p>
-                    <p class="landing-dashboard__name">Alex Johnson</p>
+                    <p class="landing-dashboard__eyebrow">Chào buổi sáng ·</p>
+                    <p class="landing-dashboard__name">Nguyễn Minh Anh</p>
                   </div>
 
                   <div class="landing-dashboard__topbar-actions">
                     <div class="landing-dashboard__bell">
                       <span class="material-symbols-outlined">notifications</span>
                     </div>
-                    <div class="landing-dashboard__avatar">AJ</div>
+                    <div class="landing-dashboard__avatar">MA</div>
                   </div>
                 </div>
 
                 <div class="landing-dashboard__summary">
                   <article class="landing-summary-card landing-summary-card--primary">
-                    <p class="landing-summary-card__label">Monthly Spending</p>
-                    <h3>$428.50</h3>
+                    <p class="landing-summary-card__label">Chi tiêu tháng này</p>
+                    <h3>9.850.000đ</h3>
                     <div class="landing-summary-card__progress">
                       <span></span>
                     </div>
-                    <small>57% of $750</small>
+                    <small>57% của 17.250.000đ</small>
                   </article>
 
                   <article class="landing-summary-card">
                     <div class="landing-summary-card__icon landing-summary-card__icon--green">
                       <span class="material-symbols-outlined">task_alt</span>
                     </div>
-                    <p class="landing-summary-card__label">Receipts</p>
+                    <p class="landing-summary-card__label">Hoá đơn</p>
                     <h3>12</h3>
-                    <small>This month</small>
+                    <small>Tháng này</small>
                   </article>
 
                   <article class="landing-summary-card">
                     <div class="landing-summary-card__icon landing-summary-card__icon--blue">
                       <span class="material-symbols-outlined">local_cafe</span>
                     </div>
-                    <p class="landing-summary-card__label">Food &amp; Drinks</p>
+                    <p class="landing-summary-card__label">Ăn uống &amp; Đồ uống</p>
                     <h3>32%</h3>
-                    <small>Top category</small>
+                    <small>Danh mục nhiều nhất</small>
                   </article>
                 </div>
 
                 <div class="landing-dashboard__grid">
                   <article class="landing-panel landing-panel--chart">
                     <div class="landing-panel__header">
-                      <p>Weekly Spending</p>
-                      <span>This week</span>
+                      <p>Chi tiêu tuần này</p>
+                      <span>Tuần hiện tại</span>
                     </div>
 
                     <div class="landing-chart">
@@ -309,9 +309,9 @@
                     </div>
 
                     <div class="landing-panel__legend">
-                      <span><i class="landing-dot landing-dot--blue"></i>Food &amp; Drinks 32%</span>
-                      <span><i class="landing-dot landing-dot--violet"></i>Groceries 24%</span>
-                      <span><i class="landing-dot landing-dot--sky"></i>Transport 18%</span>
+                      <span><i class="landing-dot landing-dot--blue"></i>Ăn uống 32%</span>
+                      <span><i class="landing-dot landing-dot--violet"></i>Thực phẩm 24%</span>
+                      <span><i class="landing-dot landing-dot--sky"></i>Di chuyển 18%</span>
                     </div>
                   </article>
 
@@ -321,7 +321,7 @@
                         <span class="material-symbols-outlined">warning</span>
                       </div>
                       <div>
-                        <p>Food budget 78% used</p>
+                        <p>Ngân sách ăn uống đã dùng 78%</p>
                         <div class="landing-side-panel__progress">
                           <span></span>
                         </div>
@@ -333,47 +333,47 @@
                         <span class="material-symbols-outlined">notifications</span>
                       </div>
                       <div>
-                        <p>Phone bill due tomorrow</p>
-                        <span>$18.00 · Utilities</span>
+                        <p>Tiền điện thoại đến hạn ngày mai</p>
+                        <span>410.000đ · Tiện ích</span>
                       </div>
                     </article>
 
                     <article class="landing-panel landing-panel--receipt">
                       <div class="landing-panel__header">
-                        <p>Receipt Scan</p>
-                        <span class="landing-panel__badge">OCR Done</span>
+                        <p>Quét hoá đơn</p>
+                        <span class="landing-panel__badge">OCR Xong</span>
                       </div>
 
                       <div class="landing-receipt">
                         <div class="landing-receipt__row">
-                          <span>Coffee × 2</span>
+                          <span>Cà phê × 2</span>
                           <i></i>
                         </div>
                         <div class="landing-receipt__row">
-                          <span>Sandwich</span>
+                          <span>Bánh mì kẹp</span>
                           <i></i>
                         </div>
                         <div class="landing-receipt__row">
-                          <span>Water × 3</span>
+                          <span>Nước × 3</span>
                           <i></i>
                         </div>
                       </div>
 
                       <div class="landing-receipt__total">
-                        <span>Total</span>
-                        <strong>$14.75</strong>
+                        <span>Tổng</span>
+                        <strong>340.000đ</strong>
                       </div>
 
-                      <small>OCR captured 6 items</small>
+                      <small>OCR đã chụp 6 mục</small>
                     </article>
                   </div>
                 </div>
 
                 <article class="landing-panel landing-panel--transactions">
                   <div class="landing-panel__header">
-                    <p>Recent Transactions</p>
+                    <p>Giao dịch gần đây</p>
                     <span class="landing-panel__view">
-                      View all
+                      Xem tất cả
                       <span class="material-symbols-outlined">chevron_right</span>
                     </span>
                   </div>
@@ -384,10 +384,10 @@
                         <span class="material-symbols-outlined">local_cafe</span>
                       </div>
                       <div class="landing-transaction__meta">
-                        <p>Blue Bottle Coffee</p>
-                        <span>Food &amp; Drinks</span>
+                        <p>Highlands Coffee</p>
+                        <span>Ăn uống &amp; Đồ uống</span>
                       </div>
-                      <strong>−$4.50</strong>
+                      <strong>−55.000đ</strong>
                     </div>
 
                     <div class="landing-transaction">
@@ -395,10 +395,10 @@
                         <span class="material-symbols-outlined">shopping_cart</span>
                       </div>
                       <div class="landing-transaction__meta">
-                        <p>Whole Foods Market</p>
-                        <span>Groceries</span>
+                        <p>Vinmart+</p>
+                        <span>Thực phẩm</span>
                       </div>
-                      <strong>−$36.20</strong>
+                      <strong>−320.000đ</strong>
                     </div>
 
                     <div class="landing-transaction">
@@ -406,10 +406,10 @@
                         <span class="material-symbols-outlined">credit_card</span>
                       </div>
                       <div class="landing-transaction__meta">
-                        <p>Commuter Rail</p>
-                        <span>Transport</span>
+                        <p>Xe buýt nhanh BRT</p>
+                        <span>Di chuyển</span>
                       </div>
-                      <strong>−$8.75</strong>
+                      <strong>−7.000đ</strong>
                     </div>
 
                     <div class="landing-transaction">
@@ -417,10 +417,10 @@
                         <span class="material-symbols-outlined">smartphone</span>
                       </div>
                       <div class="landing-transaction__meta">
-                        <p>Phone Bill</p>
-                        <span>Utilities</span>
+                        <p>Tiền điện thoại</p>
+                        <span>Tiện ích</span>
                       </div>
-                      <strong>−$18.00</strong>
+                      <strong>−410.000đ</strong>
                     </div>
                   </div>
                 </article>
@@ -436,9 +436,9 @@
     <section id="features" class="landing-section landing-section--white landing-section--scan-word">
       <div class="landing-shell">
         <div class="landing-section__header">
-          <p class="landing-section__eyebrow">Features</p>
-          <h2>Everything you need to manage daily expenses</h2>
-          <p>Snaptics keeps expense tracking simple, visual, and useful.</p>
+          <p class="landing-section__eyebrow">Tính năng</p>
+          <h2>Mọi thứ bạn cần để quản lý chi tiêu hàng ngày</h2>
+          <p>Snaptics giúp theo dõi chi tiêu đơn giản, trực quan và thực sự hữu ích.</p>
         </div>
 
         <div class="landing-features">
@@ -447,45 +447,45 @@
             <div class="landing-feature-card__icon">
               <span class="material-symbols-outlined">document_scanner</span>
             </div>
-            <h3>AI Receipt Scanner</h3>
+            <h3>Quét hoá đơn bằng AI</h3>
             <p>
-              Scan bills and receipts to instantly capture transaction details powered by OCR
-              and smart categorization.
+              Chụp ảnh hoá đơn và biên lai để tự động trích xuất thông tin giao dịch
+              nhờ công nghệ OCR kết hợp phân loại thông minh.
             </p>
             <span class="landing-feature-card__link">
-              Learn more
+              Tìm hiểu thêm
               <span class="material-symbols-outlined">chevron_right</span>
             </span>
           </article>
 
           <article class="landing-feature-card landing-feature-card--violet">
-            <span class="landing-feature-card__tag">Manual</span>
+            <span class="landing-feature-card__tag">Thủ công</span>
             <div class="landing-feature-card__icon">
               <span class="material-symbols-outlined">edit_square</span>
             </div>
-            <h3>Manual Entry</h3>
+            <h3>Nhập thủ công</h3>
             <p>
-              Add expenses manually with title, amount, category, date, and notes whenever
-              you want complete control.
+              Thêm chi tiêu thủ công với tiêu đề, số tiền, danh mục, ngày và ghi chú
+              để kiểm soát hoàn toàn mọi khoản chi tiêu.
             </p>
             <span class="landing-feature-card__link">
-              Learn more
+              Tìm hiểu thêm
               <span class="material-symbols-outlined">chevron_right</span>
             </span>
           </article>
 
           <article class="landing-feature-card landing-feature-card--sky">
-            <span class="landing-feature-card__tag">Analytics</span>
+            <span class="landing-feature-card__tag">Phân tích</span>
             <div class="landing-feature-card__icon">
               <span class="material-symbols-outlined">space_dashboard</span>
             </div>
-            <h3>Smart Dashboard</h3>
+            <h3>Tổng quan thông minh</h3>
             <p>
-              View spending trends, category breakdowns, upcoming reminders, and financial
-              insights all in one clean view.
+              Xem xu hướng chi tiêu, phân tích theo danh mục, lịch nhắc nhở sắp tới
+              và các thông tin tài chính – tất cả trong một giao diện gọn gàng.
             </p>
             <span class="landing-feature-card__link">
-              Learn more
+              Tìm hiểu thêm
               <span class="material-symbols-outlined">chevron_right</span>
             </span>
           </article>
@@ -496,8 +496,8 @@
     <section id="howto" class="landing-section landing-section--soft">
       <div class="landing-shell">
         <div class="landing-section__header">
-          <p class="landing-section__eyebrow">How It Works</p>
-          <h2>Track your spending in three simple steps</h2>
+          <p class="landing-section__eyebrow">Cách hoạt động</p>
+          <h2>Theo dõi chi tiêu chỉ với ba bước đơn giản</h2>
         </div>
 
         <div class="landing-steps">
@@ -510,22 +510,22 @@
                 <span class="material-symbols-outlined">document_scanner</span>
               </div>
             </div>
-            <h3>Scan or Add</h3>
+            <h3>Quét hoặc Nhập</h3>
             <p>
-              Upload a receipt or enter an expense manually. Snaptics extracts details and
-              categorizes instantly.
+              Tải ảnh hoá đơn lên hoặc nhập chi tiêu thủ công. Snaptics tự động trích xuất
+              thông tin và phân loại ngay lập tức.
             </p>
             <div class="landing-step-card__preview">
               <div class="landing-step-card__preview-head">
                 <div class="landing-step-card__mini-icon">
                   <span class="material-symbols-outlined">document_scanner</span>
                 </div>
-                <span>Scanning receipt…</span>
+                <span>Đang quét hoá đơn…</span>
                 <strong>OCR</strong>
               </div>
-              <div class="landing-step-card__preview-line">Coffee × 2 · $9.00</div>
-              <div class="landing-step-card__preview-line">Muffin · $3.50</div>
-              <div class="landing-step-card__preview-line">Water · $1.25</div>
+              <div class="landing-step-card__preview-line">Cà phê × 2 · 90.000đ</div>
+              <div class="landing-step-card__preview-line">Bánh muffin · 35.000đ</div>
+              <div class="landing-step-card__preview-line">Nước suối · 12.000đ</div>
             </div>
           </article>
 
@@ -536,32 +536,32 @@
                 <span class="material-symbols-outlined">receipt_long</span>
               </div>
             </div>
-            <h3>Review Transactions</h3>
+            <h3>Xem lại giao dịch</h3>
             <p>
-              Check extracted details, categories, and payment information, then edit
-              anything in one tap.
+              Kiểm tra thông tin đã trích xuất, danh mục và phương thức thanh toán,
+              rồi chỉnh sửa bất kỳ nội dung nào chỉ bằng một chạm.
             </p>
             <div class="landing-step-card__preview">
-              <p class="landing-step-card__preview-title">Transaction Review</p>
+              <p class="landing-step-card__preview-title">Xem lại giao dịch</p>
               <div class="landing-step-card__review-row">
                 <span class="landing-step-card__status landing-step-card__status--ok">
                   <span class="material-symbols-outlined">check</span>
                 </span>
                 <div>
-                  <p>Blue Bottle Coffee</p>
-                  <span>Food &amp; Drinks</span>
+                  <p>Highlands Coffee</p>
+                  <span>Ăn uống &amp; Đồ uống</span>
                 </div>
-                <strong>$4.50</strong>
+                <strong>55.000đ</strong>
               </div>
               <div class="landing-step-card__review-row">
                 <span class="landing-step-card__status landing-step-card__status--warn">
                   <span class="material-symbols-outlined">error</span>
                 </span>
                 <div>
-                  <p>Grab Commute</p>
-                  <span>Transport</span>
+                  <p>Grab đi làm</p>
+                  <span>Di chuyển</span>
                 </div>
-                <strong>$8.75</strong>
+                <strong>45.000đ</strong>
               </div>
             </div>
           </article>
@@ -573,29 +573,29 @@
                 <span class="material-symbols-outlined">bar_chart</span>
               </div>
             </div>
-            <h3>Get Insights</h3>
+            <h3>Nhận thông tin chi tiết</h3>
             <p>
-              See reports, reminders, and spending patterns on your dashboard to make
-              smarter financial choices.
+              Xem báo cáo, lịch nhắc nhở và xu hướng chi tiêu trên tổng quan
+              để đưa ra những quyết định tài chính thông minh hơn.
             </p>
             <div class="landing-step-card__preview">
-              <p class="landing-step-card__preview-title">Spending Insights</p>
+              <p class="landing-step-card__preview-title">Thống kê chi tiêu</p>
               <div class="landing-step-card__insight">
-                <span>Food &amp; Drinks</span>
+                <span>Ăn uống &amp; Đồ uống</span>
                 <strong>32%</strong>
                 <div class="landing-step-card__insight-bar">
                   <i style="width: 80%; background: #2563eb"></i>
                 </div>
               </div>
               <div class="landing-step-card__insight">
-                <span>Transport</span>
+                <span>Di chuyển</span>
                 <strong>18%</strong>
                 <div class="landing-step-card__insight-bar">
                   <i style="width: 45%; background: #7c3aed"></i>
                 </div>
               </div>
               <div class="landing-step-card__insight">
-                <span>Groceries</span>
+                <span>Thực phẩm</span>
                 <strong>24%</strong>
                 <div class="landing-step-card__insight-bar">
                   <i style="width: 60%; background: #0ea5e9"></i>
@@ -611,24 +611,24 @@
       <div class="landing-shell">
         <div class="landing-about">
           <div class="landing-about__copy">
-            <p class="landing-section__eyebrow">About Snaptics</p>
-            <h2>About Snaptics</h2>
+            <p class="landing-section__eyebrow">Về Snaptics</p>
+            <h2>Về Snaptics</h2>
             <p class="landing-about__description">
-              Snaptics was created to make personal finance easier for everyday users.
-              Instead of manually tracking every expense in complicated spreadsheets,
-              Snaptics combines receipt scanning, manual entry, reminders, and visual
-              reports into one simple platform.
+              Snaptics được tạo ra để giúp việc quản lý tài chính cá nhân trở nên dễ dàng hơn
+              cho mọi người. Thay vì theo dõi thủ công từng khoản chi tiêu trên bảng tính phức tạp,
+              Snaptics kết hợp quét hoá đơn, nhập tay, nhắc nhở và báo cáo trực quan
+              vào một nền tảng duy nhất, đơn giản.
             </p>
 
             <div class="landing-about__audience">
-              <span><i class="material-symbols-outlined">task_alt</i>Students</span>
-              <span><i class="material-symbols-outlined">task_alt</i>Young Professionals</span>
-              <span><i class="material-symbols-outlined">task_alt</i>Everyday Users</span>
-              <span><i class="material-symbols-outlined">task_alt</i>Freelancers</span>
+              <span><i class="material-symbols-outlined">task_alt</i>Sinh viên</span>
+              <span><i class="material-symbols-outlined">task_alt</i>Người đi làm trẻ</span>
+              <span><i class="material-symbols-outlined">task_alt</i>Người dùng hàng ngày</span>
+              <span><i class="material-symbols-outlined">task_alt</i>Freelancer</span>
             </div>
 
             <a routerLink="/login" class="landing-btn landing-btn--primary">
-              Get Started Free
+              Bắt đầu miễn phí
               <span class="material-symbols-outlined">arrow_right_alt</span>
             </a>
           </div>
@@ -640,10 +640,10 @@
               </div>
               <div>
                 <div class="landing-value-card__title">
-                  <h3>Simple</h3>
+                  <h3>Đơn giản</h3>
                   <span>01</span>
                 </div>
-                <p>No learning curve, open the app and start tracking in under 60 seconds.</p>
+                <p>Không cần học, mở ứng dụng và bắt đầu theo dõi trong vòng 60 giây.</p>
               </div>
             </article>
 
@@ -653,10 +653,10 @@
               </div>
               <div>
                 <div class="landing-value-card__title">
-                  <h3>Smart</h3>
+                  <h3>Thông minh</h3>
                   <span>02</span>
                 </div>
-                <p>AI extracts receipt data so you spend less time typing and more time saving.</p>
+                <p>AI trích xuất dữ liệu hoá đơn để bạn mất ít thời gian nhập liệu, dành nhiều hơn cho tiết kiệm.</p>
               </div>
             </article>
 
@@ -666,10 +666,10 @@
               </div>
               <div>
                 <div class="landing-value-card__title">
-                  <h3>Reliable</h3>
+                  <h3>Đáng tin cậy</h3>
                   <span>03</span>
                 </div>
-                <p>Your financial data is encrypted, accurate, and always accessible when you need it.</p>
+                <p>Dữ liệu tài chính của bạn được mã hoá, chính xác và luôn sẵn sàng khi bạn cần.</p>
               </div>
             </article>
           </div>
@@ -698,17 +698,17 @@
             <div class="landing-cta__icon">
               <span class="material-symbols-outlined">account_balance_wallet</span>
             </div>
-            <h2>Ready to take control of your spending?</h2>
+            <h2>Sẵn sàng kiểm soát chi tiêu của bạn chưa?</h2>
             <p>
-              Start using Snaptics to scan receipts, manage transactions, and build better
-              financial habits.
+              Bắt đầu dùng Snaptics để quét hoá đơn, quản lý giao dịch và xây dựng
+              thói quen tài chính tốt hơn mỗi ngày.
             </p>
             <div class="landing-cta__actions">
               <a routerLink="/login" class="landing-btn landing-btn--white">
-                Get Started
+                Bắt đầu ngay
                 <span class="material-symbols-outlined">arrow_right_alt</span>
               </a>
-              <a routerLink="/login" class="landing-btn landing-btn--glass">Login</a>
+              <a routerLink="/login" class="landing-btn landing-btn--glass">Đăng nhập</a>
             </div>
           </div>
         </div>
@@ -723,17 +723,17 @@
           <span class="material-symbols-outlined landing-brand__icon">receipt_long</span>
         </span>
         <span class="landing-footer__name">Snaptics</span>
-        <span class="landing-footer__tagline">Smart expense tracking made simple</span>
+        <span class="landing-footer__tagline">Theo dõi chi tiêu thông minh, đơn giản</span>
       </div>
 
       <div class="landing-footer__links">
-        <button type="button" (click)="scrollToSection('about')">About</button>
-        <button type="button" (click)="scrollToSection('features')">Features</button>
-        <a routerLink="/login">Login</a>
-        <button type="button" (click)="scrollToSection('footer')">Contact</button>
+        <button type="button" (click)="scrollToSection('about')">Giới thiệu</button>
+        <button type="button" (click)="scrollToSection('features')">Tính năng</button>
+        <a routerLink="/login">Đăng nhập</a>
+        <button type="button" (click)="scrollToSection('footer')">Liên hệ</button>
       </div>
 
-      <p class="landing-footer__copyright">© 2026 Snaptics. All rights reserved.</p>
+      <p class="landing-footer__copyright">© 2026 Snaptics. Tất cả quyền được bảo lưu.</p>
     </div>
   </footer>
 </div>
