@@ -14,3 +14,16 @@ export interface BarChartDto {
   income: number;
   expense: number;
 }
+
+export interface SpendingPeriodDto {
+  currentAmount: number;
+  previousAmount: number;
+  percentageChange: number;
+  isBetter: boolean;
+}
+
+export interface SpendingComparisonResponseDto {
+  week: SpendingPeriodDto;
+  month: SpendingPeriodDto;
+  year: SpendingPeriodDto;
+}

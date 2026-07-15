@@ -12,7 +12,9 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 import { BudgetService, BudgetDto } from '../../../core/services/budget.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { CategorySummaryModal } from './category-summary-modal/category-summary-modal';
+import { TrendSummaryModal } from './trend-summary-modal/trend-summary-modal';
 import { AiAssistant } from '../ai-assistant/ai-assistant';
+import { SpendingComparisonResponseDto, SpendingPeriodDto } from '../../../models/dashboard.dto';
 import type {
   ApexNonAxisChartSeries,
   ApexChart,
@@ -57,7 +59,7 @@ export interface UserBudget {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, UserHeader, DatePipe, TransactionDetailModal, NgApexchartsModule, FormsModule, CategorySummaryModal, AiAssistant],
+  imports: [RouterLink, UserHeader, DatePipe, TransactionDetailModal, NgApexchartsModule, FormsModule, CategorySummaryModal, TrendSummaryModal, AiAssistant],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -122,7 +124,7 @@ export class Dashboard implements OnInit {
 
   get kpiCards(): KpiCard[] {
     return [
-      { id: 'total-spent', label: 'Tổng chi tiêu', value: this.formatCurrency(this.totalSpent), icon: 'payments', colorClass: 'kpi-card--violet', subLabel: 'Tháng này' },
+      { id: 'total-spent', label: 'Tổng chi tiêu', value: this.formatCurrency(this.totalSpent), icon: 'payments', colorClass: 'kpi-card--violet', subLabel: 'Tháng này', clickable: true },
       { id: 'transactions', label: 'Giao dịch', value: String(this.totalTransactions), icon: 'receipt_long', colorClass: 'kpi-card--blue', subLabel: 'Tháng này' },
       { id: 'top-category', label: 'Top danh mục', value: this.topCategoryName, icon: 'category', colorClass: 'kpi-card--amber', subLabel: 'Chi nhiều nhất', clickable: true },
       { id: 'budget', label: 'Ngân sách', value: `${this.spentPercentage}%`, icon: 'donut_large', colorClass: this.spentPercentage >= 90 ? 'kpi-card--red' : 'kpi-card--emerald', subLabel: 'Đã sử dụng' },
@@ -143,6 +145,14 @@ export class Dashboard implements OnInit {
 
   closeTrendSummaryModal(): void {
     this.isTrendSummaryModalOpen = false;
+  }
+
+  onKpiCardClick(card: KpiCard): void {
+    if (card.id === 'top-category') {
+      this.openCategorySummaryModal();
+    } else if (card.id === 'total-spent') {
+      this.openTrendSummaryModal();
+    }
   }
 
   // ─── AI Message ──────────────────────────────────────────────────────────
@@ -192,10 +202,33 @@ export class Dashboard implements OnInit {
     { id: 'create-budget', labelKey: 'dashboard.quickAction.createBudget', icon: 'account_balance_wallet', iconClass: 'quick-action__icon--emerald', route: '/user/budget' },
   ];
 
+  // ─── Spending Comparison ──────────────────────────────────────────────────
+  spendingComparison: SpendingComparisonResponseDto | null = null;
+  selectedSpendingTab: 'week' | 'month' | 'year' = 'month';
+
+  get currentSpendingPeriod(): SpendingPeriodDto | null {
+    if (!this.spendingComparison) return null;
+    return this.spendingComparison[this.selectedSpendingTab];
+  }
+
+  setSpendingTab(tab: 'week' | 'month' | 'year', event: Event): void {
+    event.stopPropagation(); // prevent clicking the card
+    this.selectedSpendingTab = tab;
+  }
+
   ngOnInit(): void {
     this.loadTransactions();
     this.loadActiveBudget();
     this.loadTopCategory();
+    this.loadSpendingComparison();
+  }
+
+  private loadSpendingComparison(): void {
+    this.dashboardService.getSpendingComparison().subscribe({
+      next: (data) => {
+        this.spendingComparison = data;
+      }
+    });
   }
 
   private loadTopCategory(): void {
@@ -322,9 +355,14 @@ export class Dashboard implements OnInit {
   }
 
   getDisplayAmount(budget: BudgetDto): number {
-    return budget.currentAmount !== undefined 
+    const spent = budget.currentAmount !== undefined 
       ? budget.amount - budget.currentAmount 
       : this.getBudgetSpent(budget);
+    
+    if (budget.type === 1) {
+      return spent;
+    }
+    return budget.amount - spent;
   }
 
   getBudgetSpentPercent(budget: BudgetDto): number {

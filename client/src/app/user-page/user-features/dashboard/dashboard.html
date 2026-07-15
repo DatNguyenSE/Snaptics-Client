@@ -6,14 +6,37 @@
     <!-- ── STAT CARDS ──────────────────────────────────────────── -->
     <section class="dashboard-summary-grid">
       <article class="stat-card stat-card--primary">
-        <p class="stat-card__label stat-card__label--light">
-          {{ language.t('dashboard.totalPayment') }}
-        </p>
-        <h2 class="stat-card__amount">{{ formatCurrency(totalSpent) }}</h2>
-        <div class="stat-card__trend">
-          <span class="material-symbols-outlined">trending_down</span>
-          <span>{{ language.t('dashboard.comparedToYesterday') }}</span>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <p class="stat-card__label stat-card__label--light">
+            {{ language.t('dashboard.totalPayment') }}
+          </p>
+          
+          <div class="stat-card__tabs" style="display: flex; gap: 4px; background: rgba(0,0,0,0.1); padding: 2px; border-radius: 6px;">
+            <button class="stat-card__tab" [class.active]="selectedSpendingTab === 'week'" (click)="setSpendingTab('week', $event)" style="border: none; background: transparent; color: white; padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; cursor: pointer; opacity: 0.7; transition: all 0.2s;" [style.opacity]="selectedSpendingTab === 'week' ? '1' : '0.7'" [style.background]="selectedSpendingTab === 'week' ? 'rgba(255,255,255,0.2)' : 'transparent'">Tuần</button>
+            <button class="stat-card__tab" [class.active]="selectedSpendingTab === 'month'" (click)="setSpendingTab('month', $event)" style="border: none; background: transparent; color: white; padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; cursor: pointer; opacity: 0.7; transition: all 0.2s;" [style.opacity]="selectedSpendingTab === 'month' ? '1' : '0.7'" [style.background]="selectedSpendingTab === 'month' ? 'rgba(255,255,255,0.2)' : 'transparent'">Tháng</button>
+            <button class="stat-card__tab" [class.active]="selectedSpendingTab === 'year'" (click)="setSpendingTab('year', $event)" style="border: none; background: transparent; color: white; padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; cursor: pointer; opacity: 0.7; transition: all 0.2s;" [style.opacity]="selectedSpendingTab === 'year' ? '1' : '0.7'" [style.background]="selectedSpendingTab === 'year' ? 'rgba(255,255,255,0.2)' : 'transparent'">Năm</button>
+          </div>
         </div>
+        
+        <h2 class="stat-card__amount">
+          {{ currentSpendingPeriod ? formatCurrency(currentSpendingPeriod.currentAmount) : formatCurrency(totalSpent) }}
+        </h2>
+        
+        @if (currentSpendingPeriod) {
+          <div class="stat-card__trend">
+            <span class="material-symbols-outlined" [style.color]="currentSpendingPeriod.isBetter ? '#a7f3d0' : '#fecaca'">
+              {{ currentSpendingPeriod.isBetter ? 'trending_down' : 'trending_up' }}
+            </span>
+            <span [style.color]="currentSpendingPeriod.isBetter ? '#a7f3d0' : '#fecaca'">
+              {{ currentSpendingPeriod.percentageChange >= 0 ? 'Tăng' : 'Giảm' }} {{ currentSpendingPeriod.percentageChange >= 0 ? currentSpendingPeriod.percentageChange : -currentSpendingPeriod.percentageChange }}% so với {{ selectedSpendingTab === 'week' ? 'tuần' : selectedSpendingTab === 'month' ? 'tháng' : 'năm' }} trước
+            </span>
+          </div>
+        } @else {
+          <div class="stat-card__trend">
+            <span class="material-symbols-outlined">trending_down</span>
+            <span>Đang tải dữ liệu...</span>
+          </div>
+        }
       </article>
 
       <div 
@@ -46,7 +69,9 @@
                     <p class="stat-card__label">{{ budget.name }}</p>
                   </div>
                 </div>
-                <h2 class="stat-card__amount stat-card__amount--accent" [class.stat-card__amount--saving]="budget.type === 1">
+                <h2 class="stat-card__amount stat-card__amount--accent" 
+                    [class.stat-card__amount--saving]="budget.type === 1"
+                    [class.stat-card__amount--danger]="budget.type !== 1 && getDisplayAmount(budget) < 0">
                   {{ formatCurrency(getDisplayAmount(budget)) }}
                 </h2>
                 <div class="budget-progress">
@@ -126,7 +151,7 @@
       <!-- KPI Cards -->
       <div class="kpi-grid">
         @for (card of kpiCards; track card.label) {
-          <article class="kpi-card" [class]="card.colorClass" [class.clickable]="card.clickable" (click)="card.clickable ? openCategorySummaryModal() : null">
+          <article class="kpi-card" [class]="card.colorClass" [class.clickable]="card.clickable" (click)="card.clickable ? onKpiCardClick(card) : null">
             <div class="kpi-card__top">
               <span class="kpi-card__icon">
                 <span class="material-symbols-outlined">{{ card.icon }}</span>
@@ -271,6 +296,12 @@
   [isOpen]="isCategorySummaryModalOpen"
   (close)="closeCategorySummaryModal()">
 </app-category-summary-modal>
+
+<!-- ── TREND SUMMARY MODAL ─────────────────────────────────────────────── -->
+<app-trend-summary-modal
+  [isOpen]="isTrendSummaryModalOpen"
+  (close)="closeTrendSummaryModal()">
+</app-trend-summary-modal>
 
 <!-- ── AI ASSISTANT CHAT BOX ────────────────────────────────────────────── -->
 <app-ai-assistant></app-ai-assistant>

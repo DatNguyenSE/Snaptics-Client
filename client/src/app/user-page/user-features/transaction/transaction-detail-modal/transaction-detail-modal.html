@@ -94,7 +94,7 @@
                 </div>
                 <div class="item-price-qty">
                   <span class="item-price">{{ formatCurrency(item.price * item.quantity) }}</span>
-                  @if (item.unit) {
+                  @if (transaction.transactionDetails.length > 1 && item.unit) {
                     <span class="item-qty">{{ item.quantity }} {{ item.unit }}</span>
                   } @else {
                     <span class="item-qty">x{{ item.quantity }}</span>
