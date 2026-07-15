@@ -3,11 +3,14 @@
 
     <!-- ── Header ── -->
     <header class="scan-header-section">
-      <p class="scan-eyebrow">{{ lang.currentLang() === 'vi' ? 'QUÉT' : 'SCAN' }}</p>
-      <h1 class="scan-title">
+      <div class="scan-eyebrow-badge">
+        <span class="material-symbols-outlined">auto_awesome</span>
+        <span>{{ lang.currentLang() === 'vi' ? 'Phân tích bằng AI' : 'AI Analysis' }}</span>
+      </div>
+      <h1 class="scan-title scan-title--gradient">
         {{ scanMode === 'receipt' 
            ? (lang.currentLang() === 'vi' ? 'Quét hóa đơn' : 'Receipt Scan') 
-           : (lang.currentLang() === 'vi' ? 'Quét món đồ' : 'Item Scan') }}
+           : (lang.currentLang() === 'vi' ? 'Chụp ảnh món đồ' : 'Snap Item') }}
       </h1>
       <p class="scan-description-sub">
         {{ scanMode === 'receipt'
@@ -83,24 +86,7 @@
               ></video>
               <canvas #canvasElement class="camera-canvas" aria-hidden="true"></canvas>
 
-              <!-- Viewfinder scanning overlays -->
-              <div class="camera-overlay">
-                <div class="camera-overlay__top"></div>
-                <div class="camera-overlay__middle">
-                  <div class="camera-overlay__side"></div>
-                  <div class="scan-frame" [class]="cameraFrameClass">
-                    <span class="scan-frame__corner scan-frame__corner--tl"></span>
-                    <span class="scan-frame__corner scan-frame__corner--tr"></span>
-                    <span class="scan-frame__corner scan-frame__corner--bl"></span>
-                    <span class="scan-frame__corner scan-frame__corner--br"></span>
-                    <span class="scan-line" [class.scan-line--auto]="autoCaptureEnabled" aria-hidden="true"></span>
-                  </div>
-                  <div class="camera-overlay__side"></div>
-                </div>
-                <div class="camera-overlay__bottom">
-                  <p class="camera-instruction">{{ instructionText }}</p>
-                </div>
-              </div>
+
 
               <!-- Auto-Capture Countdown Overlay -->
               @if (autoCaptureEnabled && countdownSeconds > 0) {
@@ -341,6 +327,18 @@
       @if (captureState === 'live' && processingState === 'idle') {
         <div class="scan-workspace__bottom-controls">
           
+          <!-- Desktop Actions (Hidden on Mobile) -->
+          <div class="desktop-actions">
+            <button class="desktop-action-btn desktop-action-btn--primary" type="button" (click)="capturePhoto()">
+              <span class="material-symbols-outlined">photo_camera</span>
+              {{ lang.currentLang() === 'vi' ? 'Chụp ảnh' : 'Capture' }}
+            </button>
+            <button class="desktop-action-btn desktop-action-btn--secondary" type="button" (click)="triggerUpload()">
+              <span class="material-symbols-outlined">photo_library</span>
+              {{ lang.currentLang() === 'vi' ? 'Chọn ảnh' : 'Upload' }}
+            </button>
+          </div>
+
           <!-- Mode Tabs Selector -->
           <div class="scan-mode-tabs-pill">
             <button
@@ -365,12 +363,10 @@
             </button>
           </div>
 
-          <!-- Bottom Camera Action Bar -->
-          <div class="bottom-camera-action-bar">
-            
-            <!-- Left: Gallery upload trigger -->
+          <!-- Floating Gallery Upload Trigger -->
+          <div class="floating-upload-wrapper">
             <button
-              class="circular-action-btn"
+              class="floating-upload-btn"
               type="button"
               (click)="triggerUpload()"
               [disabled]="isProcessing"
@@ -379,55 +375,10 @@
             >
               <span class="material-symbols-outlined">photo_library</span>
             </button>
-
-            <!-- Center: Shutter Button -->
-            <div class="shutter-trigger-wrap">
-              @if (cameraPermission === 'granted') {
-                <button
-                  class="centered-shutter-btn"
-                  type="button"
-                  (click)="capturePhoto()"
-                  [disabled]="isProcessing"
-                  id="btn-capture"
-                  aria-label="Capture"
-                >
-                  <span class="shutter-btn__ring"></span>
-                  <span class="shutter-btn__inner"></span>
-                </button>
-              } @else {
-                <div class="shutter-btn-placeholder"></div>
-              }
-            </div>
-
-            <!-- Right: Smart Auto-Capture Toggle -->
-            <button
-              class="circular-action-btn"
-              [class.circular-action-btn--active]="autoCaptureEnabled"
-              type="button"
-              (click)="toggleAutoCapture()"
-              title="{{ lang.currentLang() === 'vi' ? 'Tự động chụp' : 'Auto Detect Capture' }}"
-              id="btn-toggle-autocapture"
-            >
-              <span class="material-symbols-outlined">center_focus_strong</span>
-            </button>
-
+            <span class="floating-upload-label">{{ lang.currentLang() === 'vi' ? 'Chọn ảnh' : 'Gallery' }}</span>
           </div>
 
-          <!-- Description instructions details below camera controls -->
-          <div class="guide-collapsible-info">
-            <span class="material-symbols-outlined">info</span>
-            <span>
-              @if (scanMode === 'receipt') {
-                {{ lang.currentLang() === 'vi' 
-                   ? 'Căn chỉnh hóa đơn phẳng phiu, thẳng đứng và có đủ ánh sáng.' 
-                   : 'Flatten the receipt, align it straight, and ensure good lighting.' }}
-              } @else {
-                {{ lang.currentLang() === 'vi' 
-                   ? 'Đặt món đồ cần quét ở nơi sáng sủa và căn chỉnh vào giữa khung hình.' 
-                   : 'Place the item in a well-lit area and center it in the frame.' }}
-              }
-            </span>
-          </div>
+
 
         </div>
       }

@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  HostListener,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -354,6 +355,16 @@ export class Scan implements OnInit, OnDestroy {
   }
 
   // ─── Capture ─────────────────────────────────────────────────────────────────
+  @HostListener('window:nav-shutter-click')
+  onNavShutterClick(): void {
+    if (
+      this.cameraPermission === 'granted' &&
+      this.captureState === 'live' &&
+      this.processingState === 'idle'
+    ) {
+      this.capturePhoto();
+    }
+  }
   capturePhoto(): void {
     if (!this.videoElement?.nativeElement || !this.canvasElement?.nativeElement) {
       return;

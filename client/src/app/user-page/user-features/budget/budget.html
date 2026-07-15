@@ -4,7 +4,7 @@
 
     <header class="budget-header">
       <div class="budget-header__title">
-        <h1>Ngân sách của bạn</h1>
+        <h1>Ví của bạn</h1>
         <p>Quản lý chi tiêu và tích lũy hiệu quả</p>
       </div>
       <button class="btn-primary" (click)="openModal()">
@@ -63,13 +63,13 @@
                     <span class="amount-label">
                       {{ budget.type === 1 ? 'Đã tích lũy' : 'Đã sử dụng' }}
                     </span>
-                    <p class="amount-value" [class.text-saving]="budget.type === 1">
+                    <p class="amount-value" [class.text-saving]="budget.type === 1 && getSpentAmount(budget) >= 0" [class.text-danger]="getSpentAmount(budget) < 0">
                       {{ formatCurrency(getSpentAmount(budget)) }}
                     </p>
                   </div>
                   <div class="amount-group align-right">
                     <span class="amount-label">Tổng ngân sách</span>
-                    <p class="amount-value">{{ formatCurrency(budget.amount) }}</p>
+                    <p class="amount-value" [class.text-danger]="budget.amount < 0">{{ formatCurrency(budget.amount) }}</p>
                   </div>
                 </div>
 
@@ -135,7 +135,7 @@
           </div>
           <div class="form-group">
             <label>Số tiền (VND)</label>
-            <input type="number" formControlName="amount" placeholder="0" class="form-control" [class.is-invalid]="budgetForm.get('amount')?.invalid && budgetForm.get('amount')?.touched" />
+            <input type="text" [value]="displayAmount" (input)="onAmountChange($event)" placeholder="0" class="form-control" [class.is-invalid]="budgetForm.get('amount')?.invalid && budgetForm.get('amount')?.touched" />
           </div>
         </div>
 

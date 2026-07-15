@@ -124,7 +124,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         scan: 'Qu\u00e9t h\u00f3a \u0111\u01a1n',
         capture: 'Ch\u1ee5p m\u00f3n \u0111\u1ed3',
         manual: 'Nh\u1eadp th\u1ee7 c\u00f4ng',
-        createBudget: 'T\u1ea1o budget m\u1edbi',
+        createBudget: 'Quản lý ví',
       },
       category: {
         drinks: '\u0110\u1ed3 u\u1ed1ng',

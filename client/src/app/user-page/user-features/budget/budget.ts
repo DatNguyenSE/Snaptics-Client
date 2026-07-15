@@ -47,6 +47,31 @@ export class Budget implements OnInit {
     });
   }
 
+  get displayAmount(): string {
+    const val = this.budgetForm.get('amount')?.value;
+    if (!val) return '';
+    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  onAmountChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let rawValue = input.value.replace(/\./g, '');
+    
+    let isNegative = rawValue.startsWith('-');
+    if (isNegative) rawValue = rawValue.substring(1);
+    
+    let numericValue = parseInt(rawValue, 10);
+    if (isNaN(numericValue)) numericValue = 0;
+    
+    let finalValue = isNegative ? -numericValue : numericValue;
+    this.budgetForm.patchValue({ amount: finalValue });
+    
+    let display = numericValue === 0 && rawValue === '' ? '' : numericValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    if (isNegative) display = '-' + (numericValue === 0 && input.value === '-' ? '' : display);
+    
+    input.value = display;
+  }
+
   loadBudgets(): void {
     this.isLoading = true;
     this.hasError = false;
@@ -195,7 +220,7 @@ export class Budget implements OnInit {
 
   getBudgetSpentPercent(budget: BudgetDto): number {
     if (budget.currentAmount !== undefined) {
-      const spent = budget.amount - budget.currentAmount;
+      const spent = budget.currentAmount;
       return Math.min(100, Math.max(0, Math.round((spent / budget.amount) * 100)));
     }
     return 0; 
@@ -203,7 +228,7 @@ export class Budget implements OnInit {
 
   getSpentAmount(budget: BudgetDto): number {
     if (budget.currentAmount !== undefined) {
-      return budget.amount - budget.currentAmount;
+      return budget.currentAmount;
     }
     return 0;
   }

@@ -1,14 +1,12 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { of } from 'rxjs';
 import { AccountService } from '../../../core/services/account-service';
 import { LanguageService } from '../../../core/services/language-service';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { TransactionDto } from '../../../models/transaction.dto';
 import { environment } from '../../../environments/environment.development';
 import { TransactionDetailModal } from './transaction-detail-modal/transaction-detail-modal';
-import { TRANSACTION_MOCK_DATA } from './transaction-mock.data';
 
 export interface StatusBadge {
   label: string;
@@ -64,17 +62,7 @@ export class Transaction implements OnInit {
     this.isLoading = true;
     this.hasError = false;
 
-    // ─── Mock Mode Guard ───────────────────────────────────────────────────
-    // Chỉ sử dụng mock khi:
-    //   1. environment.useMockTransactions = true
-    //   2. Và không phải production build
-    // ———————————————————————————————————————————————————————
-    const useMock = !environment.production && !!environment.useMockTransactions;
-    const source$ = useMock
-      ? of(TRANSACTION_MOCK_DATA)
-      : this.transactionService.getTransactions();
-
-    source$.subscribe({
+    this.transactionService.getTransactions().subscribe({
       next: (data) => {
         this.transactionHistory = data;
         this.isLoading = false;

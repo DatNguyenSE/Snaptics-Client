@@ -42,7 +42,7 @@ export class BudgetService {
   }
 
   getBudgets(): Observable<BudgetDto[]> {
-    return this.http.get<BudgetDto[]>(this.apiUrl);
+    return this.http.get<BudgetDto[]>(this.apiUrl + '/user');
   }
 
   updateBudget(id: number, data: CreateBudgetRequest): Observable<BudgetDto> {

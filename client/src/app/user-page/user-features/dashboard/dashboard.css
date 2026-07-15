@@ -17,7 +17,7 @@
 
 .dashboard-summary-grid {
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
   align-items: stretch;
 }
@@ -74,16 +74,22 @@
 
 .stat-card__amount {
   margin-top: 6px;
-  font-family: 'DM Mono', monospace;
-  font-size: 1.875rem;
-  font-weight: 500;
+  font-family: inherit; /* Use standard font instead of monospace */
+  font-size: 1.75rem;
+  font-weight: 800; /* Bolder for premium look */
   line-height: 1.2;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
+  word-break: break-word; /* Ensure long numbers fit */
 }
 
 .stat-card__amount--accent {
   font-size: 1.5rem;
   color: #059669;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
 }
 
 .stat-card__trend {

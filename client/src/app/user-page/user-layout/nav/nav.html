@@ -13,6 +13,7 @@
         class="sidebar__item sidebar__item--{{ item.id }}"
         [routerLink]="item.route"
         routerLinkActive="sidebar__item--active"
+        #rla="routerLinkActive"
         [routerLinkActiveOptions]="{ exact: true }"
       >
         @if (item.isScanItem) {
@@ -134,22 +135,31 @@
         class="bottom-nav__item bottom-nav__item--{{ item.id }}"
         [routerLink]="item.route"
         routerLinkActive="bottom-nav__item--active"
+        #rla="routerLinkActive"
         [routerLinkActiveOptions]="{ exact: true }"
+        (click)="handleItemClick($event, item, rla.isActive)"
       >
         <span class="bottom-nav__icon-wrap" [class.bottom-nav__icon-wrap--scan]="item.isScanItem">
           @if (item.isScanItem) {
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="custom-scan-svg">
-              <path d="M8 5H6C5.44772 5 5 5.44772 5 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M16 5H18C18.5523 5 19 5.44772 19 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M8 19H6C5.44772 19 5 18.5523 5 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M16 19H18C18.5523 19 19 18.5523 19 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="custom-scan-line" />
-            </svg>
+            @if (rla.isActive) {
+              <span class="nav-shutter-ring"></span>
+              <span class="nav-shutter-inner">
+                <span class="material-symbols-outlined" style="font-size: 24px;">photo_camera</span>
+              </span>
+            } @else {
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="custom-scan-svg">
+                <path d="M8 5H6C5.44772 5 5 5.44772 5 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 5H18C18.5523 5 19 5.44772 19 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 19H6C5.44772 19 5 18.5523 5 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 19H18C18.5523 19 19 18.5523 19 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="custom-scan-line" />
+              </svg>
+            }
           } @else {
             <span class="material-symbols-outlined">{{ item.icon }}</span>
           }
         </span>
-        <span class="bottom-nav__label">{{ language.t(item.labelKey) }}</span>
+        <span class="bottom-nav__label" [style.visibility]="(item.isScanItem && rla.isActive) ? 'hidden' : 'visible'">{{ language.t(item.labelKey) }}</span>
       </a>
     }
 

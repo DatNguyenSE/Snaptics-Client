@@ -53,5 +53,11 @@ html.dark-theme .snaptics-shell {
     height: calc(100vh - 80px); /* fallback */
     min-height: auto;
     overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  .user-main::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
 }

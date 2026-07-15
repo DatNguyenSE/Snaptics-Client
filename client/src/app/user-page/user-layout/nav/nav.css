@@ -72,7 +72,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .bottom-nav__item .material-symbols-outlined {
@@ -93,6 +93,52 @@
 
 .bottom-nav__item--active .bottom-nav__icon-wrap {
   background: rgba(91, 123, 250, 0.1);
+}
+
+.bottom-nav__item--active .bottom-nav__icon-wrap--scan {
+  position: relative;
+  background: transparent;
+  color: var(--sw-primary);
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  box-shadow: none;
+  transform: translateY(-14px);
+  margin-bottom: -24px;
+}
+
+.nav-shutter-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 3px solid var(--sw-primary);
+  animation: navCapturePulse 2.5s ease-in-out infinite;
+}
+
+.nav-shutter-inner {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+:host-context(html.dark-theme) .nav-shutter-inner {
+  background: var(--sw-card, #1e293b);
+}
+
+@keyframes navCapturePulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(91, 123, 250, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 8px transparent;
+  }
 }
 
 .bottom-nav__account-avatar {

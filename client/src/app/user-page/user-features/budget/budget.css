@@ -8,6 +8,12 @@
   background-color: var(--sw-background, #f8fafc);
 }
 
+@media (min-width: 1024px) {
+  .budget-page {
+    padding: 32px 32px 32px 272px;
+  }
+}
+
 .budget-page__content {
   max-width: 48rem;
   margin: 0 auto;
@@ -255,8 +261,7 @@
 }
 
 .amount-value {
-  font-family: 'DM Mono', monospace;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--sw-foreground, #0f172a);
   margin: 0;
@@ -265,6 +270,10 @@
 
 .text-saving {
   color: #059669;
+}
+
+.text-danger {
+  color: #ef4444 !important;
 }
 
 /* ─── Progress Bar ─── */

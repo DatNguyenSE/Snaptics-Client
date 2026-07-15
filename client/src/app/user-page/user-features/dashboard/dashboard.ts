@@ -101,9 +101,10 @@ export class Dashboard implements OnInit {
 
   get remainingBudget(): number {
     if (this.activeBudget) {
-      return this.activeBudget.currentAmount !== undefined
+      const spent = this.activeBudget.currentAmount !== undefined
         ? this.activeBudget.currentAmount
-        : Math.max(0, this.activeBudget.amount - this.getBudgetSpent(this.activeBudget));
+        : this.getBudgetSpent(this.activeBudget);
+      return Math.max(0, this.activeBudget.amount - spent);
     }
     return Math.max(0, this.totalBudget - this.totalSpent);
   }
@@ -320,9 +321,15 @@ export class Dashboard implements OnInit {
     }
   }
 
+  getDisplayAmount(budget: BudgetDto): number {
+    return budget.currentAmount !== undefined 
+      ? budget.currentAmount 
+      : this.getBudgetSpent(budget);
+  }
+
   getBudgetSpentPercent(budget: BudgetDto): number {
     const spent = budget.currentAmount !== undefined 
-      ? (budget.amount - budget.currentAmount) 
+      ? budget.currentAmount 
       : this.getBudgetSpent(budget);
     return Math.min(100, Math.round((spent / budget.amount) * 100));
   }

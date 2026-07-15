@@ -47,7 +47,7 @@
                   </div>
                 </div>
                 <h2 class="stat-card__amount stat-card__amount--accent" [class.stat-card__amount--saving]="budget.type === 1">
-                  {{ formatCurrency(budget.currentAmount !== undefined ? budget.currentAmount : (budget.amount - getBudgetSpent(budget))) }}
+                  {{ formatCurrency(getDisplayAmount(budget)) }}
                 </h2>
                 <div class="budget-progress">
                   <div class="budget-progress__row">
