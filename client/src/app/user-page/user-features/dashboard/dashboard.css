@@ -17,8 +17,9 @@
 
 .dashboard-summary-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 3fr 2fr;
   gap: 12px;
+  align-items: stretch;
 }
 
 .stat-card {
@@ -35,6 +36,10 @@
   color: #ffffff;
   box-shadow: 0 18px 38px rgba(91, 123, 250, 0.22);
   padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
 }
 
 .stat-card__label,
@@ -497,7 +502,7 @@
 
 @media (min-width: 640px) {
   .dashboard-summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 3fr 2fr;
   }
 }
 
@@ -1486,6 +1491,9 @@
 .wallet-carousel-wrapper {
   position: relative;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .wallet-carousel-container {
@@ -1496,6 +1504,8 @@
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
   border-radius: 24px;
+  flex: 1;
+  height: 100%;
 }
 
 .wallet-carousel-container::-webkit-scrollbar {
@@ -1503,7 +1513,8 @@
 }
 
 /* Stat card as a carousel item */
-.stat-card--wallet-item {
+.stat-card--wallet-item,
+.wallet-carousel-container > .stat-card {
   flex: 0 0 100%;
   width: 100%;
   scroll-snap-align: start;
@@ -1514,6 +1525,10 @@
   box-shadow: var(--sw-shadow-sm);
   padding: 20px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
 }
 
 .wallet-carousel-wrapper--multi .stat-card--wallet-item {

@@ -1,218 +1,476 @@
 <section class="scan-page">
-  <div class="scan-page__content">
-    <div class="scan-header">
-      <div>
-        <p class="section-eyebrow">{{ lang.t('scan.eyebrow') }}</p>
-        <h2>{{ lang.t('scan.title') }}</h2>
-      </div>
-      <span class="scan-header__status">{{ stateLabel }}</span>
-    </div>
+  <div class="scan-layout">
 
-    <div class="scan-steps" [attr.aria-label]="lang.t('scan.progressAria')">
-      @for (step of steps; track step; let index = $index) {
-        <div class="scan-step">
-          <div
-            class="scan-step__marker"
-            [class.scan-step__marker--complete]="index < stepIndex"
-            [class.scan-step__marker--active]="index === stepIndex"
-          >
-            @if (index < stepIndex) {
-              <span class="material-symbols-outlined">check</span>
-            } @else {
-              {{ index + 1 }}
-            }
-          </div>
+    <!-- ── Header ── -->
+    <header class="scan-header-section">
+      <p class="scan-eyebrow">{{ lang.currentLang() === 'vi' ? 'QUÉT' : 'SCAN' }}</p>
+      <h1 class="scan-title">
+        {{ scanMode === 'receipt' 
+           ? (lang.currentLang() === 'vi' ? 'Quét hóa đơn' : 'Receipt Scan') 
+           : (lang.currentLang() === 'vi' ? 'Quét món đồ' : 'Item Scan') }}
+      </h1>
+      <p class="scan-description-sub">
+        {{ scanMode === 'receipt'
+           ? (lang.currentLang() === 'vi' ? 'Quét hóa đơn bán lẻ hoặc hóa đơn mua sắm để tự động trích xuất các khoản chi tiêu.' : 'Scan receipts to automatically extract your shopping transactions.')
+           : (lang.currentLang() === 'vi' ? 'Chụp ảnh món đồ bạn đã mua để AI tự động nhận dạng tên và giá tiền.' : 'Snap a picture of your purchase to automatically identify its name and price.') }}
+      </p>
+    </header>
 
-          <p class="scan-step__label" [class.scan-step__label--active]="index <= stepIndex">
-            {{ lang.t(step) }}
-          </p>
-
-          @if (index < steps.length - 1) {
-            <span
-              class="scan-step__line"
-              [class.scan-step__line--active]="index < stepIndex"
-              aria-hidden="true"
-            ></span>
-          }
-        </div>
-      }
-    </div>
-
-    @if (scanState === 'upload') {
-      <section
-        class="scan-preview scan-preview--upload"
-        [attr.aria-label]="lang.t('scan.uploadPreviewAria')"
-      >
-        <div class="scan-preview__device">
-          <div class="scan-preview__sheet">
-            <span class="scan-preview__badge">{{ lang.t('scan.previewBadge') }}</span>
-            <h3>{{ lang.t('scan.uploadTitle') }}</h3>
-            <p>{{ lang.t('scan.uploadDescription') }}</p>
-
-            <div class="scan-preview__formats">
-              @for (format of supportedFormats; track format) {
-                <span>{{ format }}</span>
-              }
+    <!-- ── Centered Workspace Card ── -->
+    <div class="scan-workspace-centered">
+      
+      <!-- Live camera Viewfinder / Preview / Result Area -->
+      <div class="scan-workspace__top">
+        
+        <!-- Live camera Viewfinder -->
+        @if (scanMode !== 'manual' && captureState === 'live' && processingState === 'idle') {
+          
+          <!-- State: Loading/Requesting permission/Error/Unavailable/Unsupported -->
+          @if (cameraPermission === 'requesting' || cameraPermission === 'idle') {
+            <div class="camera-state camera-state--loading">
+              <div class="camera-state__icon-ring">
+                <span class="camera-state__spinner"></span>
+              </div>
+              <p class="camera-state__title">{{ lang.t('scan.camera.initializing') }}</p>
+              <p class="camera-state__sub">{{ lang.t('scan.camera.pleaseWait') }}</p>
             </div>
-          </div>
-        </div>
-      </section>
+          }
 
-      <div class="scan-actions">
-        <!-- Hidden inputs for file selection -->
-        <input type="file" #uploadInput accept="image/*,.pdf" (change)="onFileSelected($event)" style="display: none;">
+          @if (cameraPermission === 'denied') {
+            <div class="camera-state camera-state--denied">
+              <div class="camera-state__icon camera-state__icon--denied">
+                <span class="material-symbols-outlined">no_photography</span>
+              </div>
+              <p class="camera-state__title">{{ lang.t('scan.camera.deniedTitle') }}</p>
+              <p class="camera-state__sub">{{ lang.t('scan.camera.deniedSub') }}</p>
+              <button class="scan-btn scan-btn--outline" type="button" (click)="initCamera()">
+                <span class="material-symbols-outlined">refresh</span>
+                {{ lang.t('scan.camera.retryPermission') }}
+              </button>
+            </div>
+          }
 
-        <button class="scan-button scan-button--primary" type="button" (click)="openCamera()">
-          <span class="material-symbols-outlined">photo_camera</span>
-          {{ lang.t('scan.captureReceipt') }}
-        </button>
+          @if (cameraPermission === 'unavailable') {
+            <div class="camera-state camera-state--unavailable">
+              <div class="camera-state__icon">
+                <span class="material-symbols-outlined">videocam_off</span>
+              </div>
+              <p class="camera-state__title">{{ lang.t('scan.camera.unavailableTitle') }}</p>
+              <p class="camera-state__sub">{{ lang.t('scan.camera.unavailableSub') }}</p>
+            </div>
+          }
 
-        <button class="scan-button scan-button--secondary" type="button" (click)="uploadInput.click()">
-          <span class="material-symbols-outlined">upload</span>
-          {{ lang.t('scan.uploadImage') }}
-        </button>
-      </div>
-    }
+          @if (cameraPermission === 'unsupported') {
+            <div class="camera-state camera-state--unsupported">
+              <div class="camera-state__icon">
+                <span class="material-symbols-outlined">browser_not_supported</span>
+              </div>
+              <p class="camera-state__title">{{ lang.t('scan.camera.unsupportedTitle') }}</p>
+              <p class="camera-state__sub">{{ lang.t('scan.camera.unsupportedSub') }}</p>
+            </div>
+          }
 
-    @if (scanState === 'camera') {
-      <section class="scan-preview" [attr.aria-label]="lang.t('scan.cameraPreviewAria')">
-        <div class="scan-preview__device" style="background: #000; border-radius: 12px; overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 300px;">
-          <video #videoElement autoplay playsinline muted style="width: 100%; max-height: 400px; object-fit: contain;"></video>
-          <canvas #canvasElement style="display: none;"></canvas>
-        </div>
-      </section>
+          <!-- Live camera Viewfinder Active -->
+          @if (cameraPermission === 'granted') {
+            <div class="camera-container" [class.camera-container--receipt]="scanMode === 'receipt'">
+              <video
+                #videoElement
+                class="camera-video"
+                autoplay
+                playsinline
+                muted
+                aria-label="Camera preview"
+              ></video>
+              <canvas #canvasElement class="camera-canvas" aria-hidden="true"></canvas>
 
-      <div class="scan-actions">
-        <button class="scan-button scan-button--primary" type="button" (click)="capturePhoto()">
-          <span class="material-symbols-outlined">camera</span>
-          {{ lang.t('scan.takePhoto') }}
-        </button>
-
-        <button class="scan-button scan-button--secondary" type="button" (click)="stopCamera()">
-          <span class="material-symbols-outlined">close</span>
-          {{ lang.t('common.cancel') }}
-        </button>
-      </div>
-    }
-
-    @if (scanState === 'scanning' || scanState === 'saving') {
-      <section
-        class="scan-preview scan-preview--scanning"
-        [attr.aria-label]="lang.t('scan.loadingPreviewAria')"
-      >
-        <div class="scan-preview__pulse"></div>
-
-        <div class="scan-preview__loader">
-          <div class="scan-preview__loader-icon">
-            <span class="material-symbols-outlined">
-              {{ scanState === 'saving' ? 'check' : 'auto_awesome' }}
-            </span>
-          </div>
-
-          <div class="scan-preview__loader-copy">
-            <p>
-              {{
-                scanState === 'saving'
-                  ? lang.t('scan.savingTitle')
-                  : lang.t('scan.readingTitle')
-              }}
-            </p>
-            <span>
-              {{
-                scanState === 'saving'
-                  ? lang.t('scan.savingDescription')
-                  : lang.t('scan.readingDescription')
-              }}
-            </span>
-          </div>
-        </div>
-      </section>
-    }
-
-    @if (scanState === 'error') {
-      <section class="scan-preview" [attr.aria-label]="lang.t('scan.errorAria')">
-        <div class="scan-preview__device" style="background: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; text-align: center; color: #991b1b; min-height: 300px;">
-          <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 1rem;">error_outline</span>
-          <h3 style="margin-bottom: 0.5rem; color: #991b1b;">{{ lang.t('scan.errorTitle') }}</h3>
-          <p style="color: #b91c1c; font-size: 0.875rem;">{{ errorMessage }}</p>
-        </div>
-      </section>
-
-      <div class="scan-actions scan-actions--result">
-        <button class="scan-button scan-button--primary" type="button" (click)="resetScan()">
-          <span class="material-symbols-outlined">replay</span>
-          {{ lang.t('scan.retake') }}
-        </button>
-      </div>
-    }
-
-    @if (scanState === 'result') {
-      <article class="scan-note">
-        <span class="material-symbols-outlined">warning</span>
-        <p>{{ lang.t('scan.editHint') }}</p>
-      </article>
-
-      <article class="receipt-card">
-        <div class="receipt-card__header">
-          <div style="flex: 1;">
-            <input
-              type="text"
-              class="receipt-card__store"
-              [value]="storeName"
-              (input)="updateStoreName($event)"
-              [placeholder]="lang.t('scan.storePlaceholder')"
-              style="background: transparent; border: none; border-bottom: 1px dashed #ccc; font: inherit; color: inherit; width: 100%; outline: none;"
-            />
-            <p class="receipt-card__meta">
-              <span class="material-symbols-outlined">schedule</span>
-              {{ receiptDate | date:'mediumDate' }}
-            </p>
-          </div>
-
-          <div class="receipt-card__total">
-            <span>{{ lang.t('scan.total') }}</span>
-            <strong>{{ formatCurrency(totalAmount) }}</strong>
-          </div>
-        </div>
-
-        <div class="receipt-card__list">
-          @for (item of receiptItems; track item.id) {
-            <div class="receipt-item">
-              <div class="receipt-item__copy">
-                <p class="receipt-item__name">{{ item.name }}</p>
-                <select class="category-pill" [class]="item.categoryClass" (change)="updateCategory(item.id, $event)">
-                  <option [value]="null" [selected]="!item.categoryId">{{ lang.t('scan.category.unassigned') }}</option>
-                  @for (cat of categories; track cat.id) {
-                    <option [value]="cat.id" [selected]="cat.id === item.categoryId">{{ getCategoryName(cat.name) }}</option>
-                  }
-                </select>
+              <!-- Viewfinder scanning overlays -->
+              <div class="camera-overlay">
+                <div class="camera-overlay__top"></div>
+                <div class="camera-overlay__middle">
+                  <div class="camera-overlay__side"></div>
+                  <div class="scan-frame" [class]="cameraFrameClass">
+                    <span class="scan-frame__corner scan-frame__corner--tl"></span>
+                    <span class="scan-frame__corner scan-frame__corner--tr"></span>
+                    <span class="scan-frame__corner scan-frame__corner--bl"></span>
+                    <span class="scan-frame__corner scan-frame__corner--br"></span>
+                    <span class="scan-line" [class.scan-line--auto]="autoCaptureEnabled" aria-hidden="true"></span>
+                  </div>
+                  <div class="camera-overlay__side"></div>
+                </div>
+                <div class="camera-overlay__bottom">
+                  <p class="camera-instruction">{{ instructionText }}</p>
+                </div>
               </div>
 
-              <label class="receipt-item__price">
-                <input
-                  type="text"
-                  inputmode="numeric"
-                  [value]="formatEditablePrice(item.price)"
-                  (input)="updatePrice(item.id, $event)"
-                />
-                <span>VND</span>
-              </label>
+              <!-- Auto-Capture Countdown Overlay -->
+              @if (autoCaptureEnabled && countdownSeconds > 0) {
+                <div class="auto-capture-countdown-overlay">
+                  <div class="countdown-circle">
+                    <span class="countdown-number">{{ countdownSeconds }}</span>
+                  </div>
+                  <p class="countdown-text">
+                    {{ lang.currentLang() === 'vi' ? 'Giữ yên camera để tự động quét...' : 'Hold still to auto capture...' }}
+                  </p>
+                </div>
+              }
+
+              <!-- Viewfinder Top toggles -->
+              <div class="camera-controls camera-controls--top">
+                @if (hasFlash) {
+                  <button
+                    class="camera-ctrl-btn"
+                    type="button"
+                    [class.camera-ctrl-btn--active]="flashEnabled"
+                    (click)="toggleFlash()"
+                    aria-label="Toggle flash"
+                    id="btn-flash-toggle"
+                  >
+                    <span class="material-symbols-outlined">
+                      {{ flashEnabled ? 'flash_on' : 'flash_off' }}
+                    </span>
+                  </button>
+                }
+                @if (hasMultipleCameras) {
+                  <button
+                    class="camera-ctrl-btn"
+                    type="button"
+                    (click)="flipCamera()"
+                    aria-label="Flip camera"
+                    id="btn-flip-camera"
+                  >
+                    <span class="material-symbols-outlined">flip_camera_ios</span>
+                  </button>
+                }
+              </div>
             </div>
           }
-        </div>
-      </article>
+        }
 
-      <div class="scan-actions scan-actions--result">
-        <button class="scan-button scan-button--ghost" type="button" (click)="resetScan()">
-          <span class="material-symbols-outlined">replay</span>
-          {{ lang.t('scan.retake') }}
-        </button>
+        <!-- Captured Image Preview -->
+        @if (captureState === 'preview' && previewUrl && processingState === 'idle') {
+          <div class="preview-viewport-card">
+            <div class="preview-container">
+              <img [src]="previewUrl" alt="Captured image preview" class="preview-image" />
+            </div>
+            <div class="preview-actions">
+              <button
+                class="scan-btn scan-btn--ghost"
+                type="button"
+                (click)="retakePhoto()"
+                id="btn-retake"
+              >
+                <span class="material-symbols-outlined">replay</span>
+                {{ lang.t('scan.retake') }}
+              </button>
+              <button
+                class="scan-btn scan-btn--primary"
+                type="button"
+                (click)="usePhoto()"
+                id="btn-use-photo"
+              >
+                <span class="material-symbols-outlined">check_circle</span>
+                {{ lang.t('scan.usePhoto') }}
+              </button>
+            </div>
+          </div>
+        }
 
-        <button class="scan-button scan-button--primary" type="button" (click)="confirmScan()">
-          <span class="material-symbols-outlined">check</span>
-          {{ lang.t('scan.confirmSave') }}
-        </button>
+        <!-- Processing state (scanning) -->
+        @if (processingState === 'scanning') {
+          <div class="processing-state">
+            <div class="processing-state__orb">
+              <div class="processing-state__pulse"></div>
+              <div class="processing-state__icon">
+                <span class="material-symbols-outlined">auto_awesome</span>
+              </div>
+            </div>
+            <p class="processing-state__title">{{ lang.t('scan.processing.title') }}</p>
+            <p class="processing-state__sub">{{ lang.t('scan.processing.sub') }}</p>
+          </div>
+        }
+
+        <!-- Saving state -->
+        @if (processingState === 'saving') {
+          <div class="processing-state processing-state--saving">
+            <div class="processing-state__orb">
+              <div class="processing-state__pulse"></div>
+              <div class="processing-state__icon">
+                <span class="material-symbols-outlined">save</span>
+              </div>
+            </div>
+            <p class="processing-state__title">{{ lang.t('scan.saving.title') }}</p>
+            <p class="processing-state__sub">{{ lang.t('scan.saving.sub') }}</p>
+          </div>
+        }
+
+        <!-- Error state -->
+        @if (processingState === 'error') {
+          <div class="camera-state camera-state--error">
+            <div class="camera-state__icon camera-state__icon--error">
+              <span class="material-symbols-outlined">error_outline</span>
+            </div>
+            <p class="camera-state__title">{{ lang.t('scan.error.title') }}</p>
+            <p class="camera-state__sub">{{ errorMessage }}</p>
+            <div class="camera-state__actions">
+              <button class="scan-btn scan-btn--ghost" type="button" (click)="retakePhoto()" id="btn-retry-scan">
+                <span class="material-symbols-outlined">replay</span>
+                {{ lang.t('scan.retake') }}
+              </button>
+              <button class="scan-btn scan-btn--outline" type="button" (click)="triggerUpload()" id="btn-retry-upload">
+                <span class="material-symbols-outlined">upload</span>
+                {{ lang.t('scan.uploadImage') }}
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Results: Receipt mode -->
+        @if (scanMode === 'receipt' && processingState === 'result') {
+          <div class="result-panel">
+            <div class="result-hint">
+              <span class="material-symbols-outlined">warning</span>
+              <p>{{ lang.t('scan.editHint') }}</p>
+            </div>
+
+            <article class="receipt-card">
+              <div class="receipt-card__header">
+                <div class="receipt-card__store-wrap">
+                  <input
+                    type="text"
+                    class="receipt-card__store"
+                    [value]="storeName"
+                    (input)="updateStoreName($event)"
+                    [placeholder]="lang.t('scan.storePlaceholder')"
+                  />
+                  <p class="receipt-card__meta">
+                    <span class="material-symbols-outlined">schedule</span>
+                    {{ receiptDate | date:'mediumDate' }}
+                  </p>
+                </div>
+                <div class="receipt-card__total">
+                  <span>{{ lang.t('scan.total') }}</span>
+                  <strong>{{ formatCurrency(totalAmount) }}</strong>
+                </div>
+              </div>
+
+              <div class="receipt-card__list">
+                @for (item of receiptItems; track item.id) {
+                  <div class="receipt-item">
+                    <div class="receipt-item__copy">
+                      <p class="receipt-item__name">{{ item.name }}</p>
+                      <select
+                        class="category-pill"
+                        [class]="item.categoryClass"
+                        (change)="updateCategory(item.id, $event)"
+                        [id]="'category-select-' + item.id"
+                      >
+                        <option [value]="null" [selected]="!item.categoryId">
+                          {{ lang.t('scan.category.unassigned') }}
+                        </option>
+                        @for (cat of categories; track cat.id) {
+                          <option [value]="cat.id" [selected]="cat.id === item.categoryId">
+                            {{ getCategoryName(cat.name) }}
+                          </option>
+                        }
+                      </select>
+                    </div>
+                    <label class="receipt-item__price">
+                      <input
+                        type="text"
+                        inputmode="numeric"
+                        [value]="formatEditablePrice(item.price)"
+                        (input)="updatePrice(item.id, $event)"
+                        [id]="'price-input-' + item.id"
+                      />
+                      <span>VND</span>
+                    </label>
+                  </div>
+                }
+              </div>
+            </article>
+
+            <div class="result-actions">
+              <button
+                class="scan-btn scan-btn--ghost"
+                type="button"
+                (click)="retakePhoto()"
+                [disabled]="isProcessing"
+                id="btn-result-retake"
+              >
+                <span class="material-symbols-outlined">replay</span>
+                {{ lang.t('scan.retake') }}
+              </button>
+              <button
+                class="scan-btn scan-btn--primary"
+                type="button"
+                (click)="confirmScan()"
+                [disabled]="isProcessing"
+                id="btn-confirm-save"
+              >
+                <span class="material-symbols-outlined">check</span>
+                {{ lang.t('scan.confirmSave') }}
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- Results: Item mode -->
+        @if (scanMode === 'item' && processingState === 'result') {
+          <div class="result-panel">
+            @if (previewUrl) {
+              <div class="item-preview-thumb">
+                <img [src]="previewUrl" alt="Item preview" />
+              </div>
+            }
+            <app-transaction-entry-form
+              [form]="manualForm"
+              [categories]="categories"
+              [showPaymentMethod]="false"
+              [isSaving]="isSaving"
+              [saveLabel]="lang.t('scan.confirmSave')"
+              [cancelLabel]="lang.t('scan.retake')"
+              (save)="saveItemTransaction()"
+              (cancel)="retakePhoto()"
+            ></app-transaction-entry-form>
+          </div>
+        }
+
       </div>
-    }
+
+      <!-- ── Bottom Dashboard Controls Area ── -->
+      @if (captureState === 'live' && processingState === 'idle') {
+        <div class="scan-workspace__bottom-controls">
+          
+          <!-- Mode Tabs Selector -->
+          <div class="scan-mode-tabs-pill">
+            <button
+              class="mode-pill-btn"
+              type="button"
+              [class.mode-pill-btn--active]="scanMode === 'receipt'"
+              (click)="setScanMode('receipt')"
+              id="mode-tab-receipt"
+            >
+              <span class="material-symbols-outlined">receipt_long</span>
+              <span>{{ lang.t('scan.mode.receipt') }}</span>
+            </button>
+            <button
+              class="mode-pill-btn"
+              type="button"
+              [class.mode-pill-btn--active]="scanMode === 'item'"
+              (click)="setScanMode('item')"
+              id="mode-tab-item"
+            >
+              <span class="material-symbols-outlined">image_search</span>
+              <span>{{ lang.t('scan.mode.item') }}</span>
+            </button>
+          </div>
+
+          <!-- Bottom Camera Action Bar -->
+          <div class="bottom-camera-action-bar">
+            
+            <!-- Left: Gallery upload trigger -->
+            <button
+              class="circular-action-btn"
+              type="button"
+              (click)="triggerUpload()"
+              [disabled]="isProcessing"
+              title="{{ lang.t('scan.gallery') }}"
+              id="btn-upload-gallery"
+            >
+              <span class="material-symbols-outlined">photo_library</span>
+            </button>
+
+            <!-- Center: Shutter Button -->
+            <div class="shutter-trigger-wrap">
+              @if (cameraPermission === 'granted') {
+                <button
+                  class="centered-shutter-btn"
+                  type="button"
+                  (click)="capturePhoto()"
+                  [disabled]="isProcessing"
+                  id="btn-capture"
+                  aria-label="Capture"
+                >
+                  <span class="shutter-btn__ring"></span>
+                  <span class="shutter-btn__inner"></span>
+                </button>
+              } @else {
+                <div class="shutter-btn-placeholder"></div>
+              }
+            </div>
+
+            <!-- Right: Smart Auto-Capture Toggle -->
+            <button
+              class="circular-action-btn"
+              [class.circular-action-btn--active]="autoCaptureEnabled"
+              type="button"
+              (click)="toggleAutoCapture()"
+              title="{{ lang.currentLang() === 'vi' ? 'Tự động chụp' : 'Auto Detect Capture' }}"
+              id="btn-toggle-autocapture"
+            >
+              <span class="material-symbols-outlined">center_focus_strong</span>
+            </button>
+
+          </div>
+
+          <!-- Description instructions details below camera controls -->
+          <div class="guide-collapsible-info">
+            <span class="material-symbols-outlined">info</span>
+            <span>
+              @if (scanMode === 'receipt') {
+                {{ lang.currentLang() === 'vi' 
+                   ? 'Căn chỉnh hóa đơn phẳng phiu, thẳng đứng và có đủ ánh sáng.' 
+                   : 'Flatten the receipt, align it straight, and ensure good lighting.' }}
+              } @else {
+                {{ lang.currentLang() === 'vi' 
+                   ? 'Đặt món đồ cần quét ở nơi sáng sủa và căn chỉnh vào giữa khung hình.' 
+                   : 'Place the item in a well-lit area and center it in the frame.' }}
+              }
+            </span>
+          </div>
+
+        </div>
+      }
+
+      <!-- ── Footer Scans History Panel ── -->
+      @if (recentScans.length > 0 && captureState === 'live' && processingState === 'idle') {
+        <div class="scan-history-panel">
+          <h3 class="scan-history-panel__title">
+            <span class="material-symbols-outlined">history</span>
+            {{ lang.currentLang() === 'vi' ? 'Lịch sử quét gần đây' : 'Recent Scans History' }}
+          </h3>
+          <div class="scan-history-grid">
+            @for (tx of recentScans; track tx.id) {
+              <div class="scan-history-card">
+                <div class="scan-history-card__icon" [class.scan-history-card__icon--receipt]="tx.source === 'receipt'">
+                  <span class="material-symbols-outlined">
+                    {{ tx.source === 'receipt' ? 'receipt_long' : 'image_search' }}
+                  </span>
+                </div>
+                <div class="scan-history-card__info">
+                  <span class="scan-history-card__name">{{ tx.title }}</span>
+                  <span class="scan-history-card__date">{{ tx.transactionDate | date:'mediumDate' }}</span>
+                </div>
+                <div class="scan-history-card__amount">
+                  {{ formatCurrency(tx.totalAmount) }}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+    </div>
+
   </div>
+
+  <!-- Hidden file input -->
+  <input
+    #uploadInput
+    type="file"
+    [accept]="acceptedFormats"
+    style="display: none"
+    aria-hidden="true"
+    (change)="onFileSelected($event)"
+  />
 </section>

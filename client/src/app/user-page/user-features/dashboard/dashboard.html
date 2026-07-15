@@ -22,7 +22,7 @@
       >
         <div class="wallet-carousel-container" #walletCarousel (scroll)="onWalletScroll($event)">
           @if (allBudgets.length === 0) {
-            <article class="stat-card">
+            <article class="stat-card stat-card--wallet-item">
               <div class="stat-card__budget-header">
                 <p class="stat-card__label">{{ language.t('dashboard.remainingBudget') }}</p>
               </div>

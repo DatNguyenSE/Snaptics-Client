@@ -8,9 +8,8 @@ interface AppNavItem {
   id: string;
   labelKey: string;
   icon: string;
-  route?: string;
-  isActionMenu?: boolean;
-  children?: AppNavItem[];
+  route: string;
+  isScanItem?: boolean;
 }
 
 interface AccountSummary {
@@ -38,6 +37,7 @@ export class Nav {
 
   protected readonly language = inject(LanguageService);
   protected readonly theme = inject(ThemeService);
+
   readonly navItems: AppNavItem[] = [
     {
       id: 'dashboard',
@@ -52,24 +52,11 @@ export class Nav {
       route: '/user/transactions',
     },
     {
-      id: 'camera',
-      labelKey: 'nav.scan', // We can use nav.scan or a general label
-      icon: 'add_circle',
-      isActionMenu: true,
-      children: [
-        {
-          id: 'scan',
-          labelKey: 'nav.scan',
-          icon: 'receipt_long',
-          route: '/user/scan',
-        },
-        {
-          id: 'snap-item',
-          labelKey: 'nav.snapItem',
-          icon: 'image_search',
-          route: '/user/snap-item',
-        },
-      ],
+      id: 'scan',
+      labelKey: 'nav.scan',
+      icon: 'qr_code_scanner',
+      route: '/user/scan',
+      isScanItem: true,
     },
     {
       id: 'manual-entry',
@@ -83,8 +70,8 @@ export class Nav {
       icon: 'notifications',
       route: '/user/reminders',
     },
-
   ];
+
   readonly languages: LanguageOption[] = [
     { code: 'vi', label: 'VI' },
     { code: 'en', label: 'EN' },
@@ -103,14 +90,11 @@ export class Nav {
   }
 
   isAccountMenuOpen = false;
-  isCameraMenuOpen = false;
-  cameraMenuLeft = 0;
   accountMenuRight = 0;
 
   toggleAccountMenu(event: MouseEvent): void {
     event.stopPropagation();
     this.isAccountMenuOpen = !this.isAccountMenuOpen;
-    this.isCameraMenuOpen = false;
 
     if (this.isAccountMenuOpen) {
       const target = event.currentTarget as HTMLElement;
@@ -121,23 +105,8 @@ export class Nav {
     }
   }
 
-  toggleCameraMenu(event: MouseEvent): void {
-    event.stopPropagation();
-    this.isCameraMenuOpen = !this.isCameraMenuOpen;
-    this.isAccountMenuOpen = false;
-    
-    if (this.isCameraMenuOpen) {
-      const target = event.currentTarget as HTMLElement;
-      if (target) {
-        const rect = target.getBoundingClientRect();
-        this.cameraMenuLeft = rect.left + rect.width / 2;
-      }
-    }
-  }
-
   closeMenus(): void {
     this.isAccountMenuOpen = false;
-    this.isCameraMenuOpen = false;
   }
 
   setLanguage(lang: AppLanguage): void {
@@ -148,7 +117,6 @@ export class Nav {
     this.closeMenus();
     void this.router.navigateByUrl('/settings');
   }
-
 
   logout(): void {
     this.closeMenus();

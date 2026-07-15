@@ -221,6 +221,29 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       category: {
         unassigned: 'Ch\u01b0a ph\u00e2n lo\u1ea1i',
       },
+      modeNav: {
+        label: 'Chế độ quét',
+      },
+      mode: {
+        receipt: 'Quét hóa đơn',
+        item: 'Quét món đồ',
+      },
+      instruction: {
+        receipt: 'Căn chỉnh hóa đơn vào giữa khung hình để quét',
+        item: 'Chụp ảnh sản phẩm để AI nhận diện và trích xuất',
+      },
+      gallery: 'Tải ảnh lên',
+      camera: {
+        initializing: 'Đang khởi tạo camera...',
+        pleaseWait: 'Vui lòng đợi giây lát',
+        deniedTitle: 'Quyền truy cập camera bị từ chối',
+        deniedSub: 'Vui lòng cấp quyền truy cập camera trong cài đặt trình duyệt để sử dụng tính năng này.',
+        retryPermission: 'Cấp lại quyền truy cập',
+        unavailableTitle: 'Không tìm thấy camera',
+        unavailableSub: 'Thiết bị của bạn không có camera khả dụng hoặc camera đang bị ứng dụng khác chiếm dụng.',
+        unsupportedTitle: 'Trình duyệt không hỗ trợ camera',
+        unsupportedSub: 'Vui lòng nâng cấp trình duyệt hoặc sử dụng trình duyệt khác được hỗ trợ.',
+      },
     },
     snapItem: {
       eyebrow: 'Thao t\u00e1c nhanh',
@@ -612,6 +635,29 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       },
       category: {
         unassigned: 'Unassigned',
+      },
+      modeNav: {
+        label: 'Scan Mode',
+      },
+      mode: {
+        receipt: 'Receipt Scan',
+        item: 'Item Scan',
+      },
+      instruction: {
+        receipt: 'Align receipt within the frame to scan',
+        item: 'Take a photo of the product for AI detection',
+      },
+      gallery: 'Upload Image',
+      camera: {
+        initializing: 'Initializing camera...',
+        pleaseWait: 'Please wait a moment',
+        deniedTitle: 'Camera access denied',
+        deniedSub: 'Please allow camera access in browser settings to use this feature.',
+        retryPermission: 'Retry permission request',
+        unavailableTitle: 'No camera found',
+        unavailableSub: 'Your device does not have an active camera or it is occupied by another app.',
+        unsupportedTitle: 'Camera unsupported',
+        unsupportedSub: 'Please upgrade your browser or use another supported browser.',
       },
     },
     snapItem: {

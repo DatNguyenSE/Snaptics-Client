@@ -12,7 +12,6 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 import { BudgetService, BudgetDto } from '../../../core/services/budget.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { CategorySummaryModal } from './category-summary-modal/category-summary-modal';
-import { TrendSummaryModal } from './trend-summary-modal/trend-summary-modal';
 import { AiAssistant } from '../ai-assistant/ai-assistant';
 import type {
   ApexNonAxisChartSeries,
@@ -58,7 +57,7 @@ export interface UserBudget {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, UserHeader, DatePipe, TransactionDetailModal, NgApexchartsModule, FormsModule, CategorySummaryModal, TrendSummaryModal, AiAssistant],
+  imports: [RouterLink, UserHeader, DatePipe, TransactionDetailModal, NgApexchartsModule, FormsModule, CategorySummaryModal, AiAssistant],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })

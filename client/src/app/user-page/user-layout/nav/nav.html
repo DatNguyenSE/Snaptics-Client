@@ -9,49 +9,25 @@
 
   <nav class="sidebar__nav">
     @for (item of navItems; track item.id) {
-      @if (item.isActionMenu) {
-        <div class="sidebar__item-wrapper">
-          <button class="sidebar__item" type="button" (click)="toggleCameraMenu($event)">
-            @if (item.id === 'camera') {
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="custom-scan-svg">
-                <path d="M8 5H6C5.44772 5 5 5.44772 5 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M16 5H18C18.5523 5 19 5.44772 19 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M8 19H6C5.44772 19 5 18.5523 5 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M16 19H18C18.5523 19 19 18.5523 19 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="custom-scan-line" />
-              </svg>
-            } @else {
-              <span class="material-symbols-outlined">{{ item.icon }}</span>
-            }
-            <span>{{ language.t(item.labelKey) }}</span>
-          </button>
-          @if (isCameraMenuOpen) {
-            <div class="action-dropdown__panel action-dropdown__panel--sidebar" (click)="$event.stopPropagation()">
-              @for (child of item.children; track child.id) {
-                <a class="action-dropdown__item" [routerLink]="child.route" (click)="closeMenus()">
-                  <span class="material-symbols-outlined">{{ child.icon }}</span>
-                  <span>{{ language.t(child.labelKey) }}</span>
-                </a>
-              }
-            </div>
-          }
-        </div>
-      } @else if (item.route; as route) {
-        <a
-          class="sidebar__item sidebar__item--{{ item.id }}"
-          [routerLink]="route"
-          routerLinkActive="sidebar__item--active"
-          [routerLinkActiveOptions]="{ exact: true }"
-        >
+      <a
+        class="sidebar__item sidebar__item--{{ item.id }}"
+        [routerLink]="item.route"
+        routerLinkActive="sidebar__item--active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        @if (item.isScanItem) {
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="custom-scan-svg">
+            <path d="M8 5H6C5.44772 5 5 5.44772 5 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 5H18C18.5523 5 19 5.44772 19 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 19H6C5.44772 19 5 18.5523 5 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 19H18C18.5523 19 19 18.5523 19 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="custom-scan-line" />
+          </svg>
+        } @else {
           <span class="material-symbols-outlined">{{ item.icon }}</span>
-          <span>{{ language.t(item.labelKey) }}</span>
-        </a>
-      } @else {
-        <button class="sidebar__item" type="button">
-          <span class="material-symbols-outlined">{{ item.icon }}</span>
-          <span>{{ language.t(item.labelKey) }}</span>
-        </button>
-      }
+        }
+        <span>{{ language.t(item.labelKey) }}</span>
+      </a>
     }
   </nav>
 
@@ -154,58 +130,27 @@
 <nav class="bottom-nav" aria-label="Bottom navigation">
   <div class="bottom-nav__inner">
     @for (item of navItems; track item.id) {
-      @if (item.isActionMenu) {
-        <div class="bottom-nav__item-wrapper">
-          <button class="bottom-nav__item bottom-nav__item--action" type="button" (click)="toggleCameraMenu($event)">
-            <span class="bottom-nav__icon-wrap bottom-nav__icon-wrap--action">
-              @if (item.id === 'camera') {
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="custom-scan-svg custom-scan-svg--white">
-                  <path d="M8 5H6C5.44772 5 5 5.44772 5 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M16 5H18C18.5523 5 19 5.44772 19 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M8 19H6C5.44772 19 5 18.5523 5 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M16 19H18C18.5523 19 19 18.5523 19 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="custom-scan-line" />
-                </svg>
-              } @else {
-                <span class="material-symbols-outlined">{{ item.icon }}</span>
-              }
-            </span>
-            <!-- Mobile label for consistency -->
-            <span class="bottom-nav__label">{{ language.t(item.labelKey) }}</span>
-          </button>
-          @if (isCameraMenuOpen) {
-            <div class="action-dropdown__panel action-dropdown__panel--bottom" 
-                 [style.left.px]="cameraMenuLeft"
-                 (click)="$event.stopPropagation()">
-              @for (child of item.children; track child.id) {
-                <a class="action-dropdown__item" [routerLink]="child.route" (click)="closeMenus()">
-                  <span class="material-symbols-outlined">{{ child.icon }}</span>
-                  <span>{{ language.t(child.labelKey) }}</span>
-                </a>
-              }
-            </div>
+      <a
+        class="bottom-nav__item bottom-nav__item--{{ item.id }}"
+        [routerLink]="item.route"
+        routerLinkActive="bottom-nav__item--active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span class="bottom-nav__icon-wrap" [class.bottom-nav__icon-wrap--scan]="item.isScanItem">
+          @if (item.isScanItem) {
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="custom-scan-svg">
+              <path d="M8 5H6C5.44772 5 5 5.44772 5 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M16 5H18C18.5523 5 19 5.44772 19 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 19H6C5.44772 19 5 18.5523 5 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M16 19H18C18.5523 19 19 18.5523 19 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="custom-scan-line" />
+            </svg>
+          } @else {
+            <span class="material-symbols-outlined">{{ item.icon }}</span>
           }
-        </div>
-      } @else if (item.route; as route) {
-        <a
-          class="bottom-nav__item bottom-nav__item--{{ item.id }}"
-          [routerLink]="route"
-          routerLinkActive="bottom-nav__item--active"
-          [routerLinkActiveOptions]="{ exact: true }"
-        >
-          <span class="bottom-nav__icon-wrap">
-            <span class="material-symbols-outlined">{{ item.icon }}</span>
-          </span>
-          <span class="bottom-nav__label">{{ language.t(item.labelKey) }}</span>
-        </a>
-      } @else {
-        <button class="bottom-nav__item bottom-nav__item--{{ item.id }}" type="button">
-          <span class="bottom-nav__icon-wrap">
-            <span class="material-symbols-outlined">{{ item.icon }}</span>
-          </span>
-          <span class="bottom-nav__label">{{ language.t(item.labelKey) }}</span>
-        </button>
-      }
+        </span>
+        <span class="bottom-nav__label">{{ language.t(item.labelKey) }}</span>
+      </a>
     }
 
     <div class="account-dropdown account-dropdown--mobile">

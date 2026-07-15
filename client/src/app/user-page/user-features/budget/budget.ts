@@ -1,6 +1,5 @@
 import { Component, OnInit, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserHeader } from '../../user-layout/user-header/user-header';
 import { BudgetService, BudgetDto, CreateBudgetRequest } from '../../../core/services/budget.service';
@@ -10,7 +9,7 @@ import { ToastService } from '../../../core/services/toast-service';
 @Component({
   selector: 'app-budget',
   standalone: true,
-  imports: [CommonModule, RouterLink, UserHeader, ReactiveFormsModule],
+  imports: [CommonModule, UserHeader, ReactiveFormsModule],
   templateUrl: './budget.html',
   styleUrl: './budget.css',
 })

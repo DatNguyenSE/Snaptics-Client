@@ -1,6 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { finalize } from 'rxjs/operators';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  inject,
+} from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { catchError, finalize, map, of } from 'rxjs';
 import { AiService } from '../../../core/services/ai.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { LanguageService } from '../../../core/services/language-service';
@@ -8,8 +18,29 @@ import { ToastService } from '../../../core/services/toast-service';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { CreateTransactionFromBillDto, ReadBillResponseDto } from '../../../models/ai-bill.dto';
 import { CategoryDto } from '../../../models/category.dto';
+import {
+  TransactionEntryForm,
+  TransactionEntryFormControls,
+} from '../shared/transaction-entry-form/transaction-entry-form';
+import {
+  FALLBACK_CATEGORIES,
+  PAYMENT_METHOD_OPTIONS,
+  getTodayInputValue,
+  resolveCategories,
+} from '../shared/transaction-entry/transaction-entry.utils';
+import { buildMockSnapItemExtraction, parseSnapItemAnalysis } from '../snap-item/snap-item-extraction';
 
-type ScanState = 'upload' | 'camera' | 'scanning' | 'result' | 'saving' | 'error';
+// ─── Type Definitions ─────────────────────────────────────────────────────────
+export type ScanMode = 'receipt' | 'item' | 'manual';
+export type CameraPermission =
+  | 'idle'
+  | 'requesting'
+  | 'granted'
+  | 'denied'
+  | 'unavailable'
+  | 'unsupported';
+export type CaptureState = 'live' | 'preview';
+export type ProcessingState = 'idle' | 'scanning' | 'result' | 'saving' | 'error';
 
 export interface ReceiptItem {
   id: number;
@@ -29,138 +60,201 @@ const CATEGORY_CLASSES: Record<string, string> = {
   Other: 'category-pill--slate',
 };
 
+const ACCEPTED_FORMATS = 'image/jpeg,image/png,image/webp,image/jpg';
+
 @Component({
   selector: 'app-scan',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule, TransactionEntryForm],
   templateUrl: './scan.html',
   styleUrl: './scan.css',
 })
 export class Scan implements OnInit, OnDestroy {
+  // ─── Services ───────────────────────────────────────────────────────────────
   private readonly toast = inject(ToastService);
   private readonly aiService = inject(AiService);
   private readonly transactionService = inject(TransactionService);
   private readonly categoryService = inject(CategoryService);
+  private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
   readonly lang = inject(LanguageService);
 
-  readonly steps = [
-    'scan.steps.upload',
-    'scan.steps.aiRead',
-    'scan.steps.confirm',
-    'scan.steps.save',
-  ];
-  readonly supportedFormats = ['JPG', 'PNG', 'PDF'];
-
-  storeName = this.lang.t('scan.unknownStore');
-  receiptDate: string | null = null;
-  billImageKey: string | null = null;
-  categories: CategoryDto[] = [];
-
+  // ─── ViewChild refs ─────────────────────────────────────────────────────────
   @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('uploadInput') uploadInput?: ElementRef<HTMLInputElement>;
 
+  // ─── Constants ──────────────────────────────────────────────────────────────
+  readonly acceptedFormats = ACCEPTED_FORMATS;
+  readonly scanModes: { id: ScanMode; icon: string; labelKey: string }[] = [
+    { id: 'receipt', icon: 'receipt_long', labelKey: 'scan.mode.receipt' },
+    { id: 'item', icon: 'image_search', labelKey: 'scan.mode.item' },
+  ];
+
+  // ─── State ──────────────────────────────────────────────────────────────────
+  scanMode: ScanMode = 'receipt';
+  cameraPermission: CameraPermission = 'idle';
+  captureState: CaptureState = 'live';
+  processingState: ProcessingState = 'idle';
+
+  // Auto Capture & Scan History
+  autoCaptureEnabled = false;
+  countdownSeconds = 0;
+  private autoCaptureInterval: any = null;
+  recentScans: any[] = [];
+
+  // Camera
   mediaStream: MediaStream | null = null;
-  scanState: ScanState = 'upload';
-  receiptItems: ReceiptItem[] = [];
-  errorMessage: string | null = null;
+  facingMode: 'environment' | 'user' = 'environment';
+  flashEnabled = false;
+  hasMultipleCameras = false;
+  hasFlash = false;
+
+  // Preview / image
+  previewUrl: string | null = null;
   currentFile: File | null = null;
 
-  ngOnInit(): void {
-    this.categoryService.getCategories().subscribe({
-      next: (categories) => {
-        this.categories = categories.filter(
-          (category) =>
-            !!category.name &&
-            category.name.toLowerCase() !== 'unknown' &&
-            category.name.toLowerCase() !== 'string',
-        );
-      },
-      error: (error) => console.error('Failed to load categories', error),
-    });
-  }
+  // Receipt scan results
+  storeName = '';
+  receiptDate: string | null = null;
+  billImageKey: string | null = null;
+  receiptItems: ReceiptItem[] = [];
+  categories: CategoryDto[] = FALLBACK_CATEGORIES;
+  errorMessage: string | null = null;
 
-  get stepIndex(): number {
-    if (this.scanState === 'scanning' || this.scanState === 'error') {
-      return 1;
-    }
+  // Manual / item form
+  readonly manualForm = new FormGroup<TransactionEntryFormControls>({
+    title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    category: new FormControl('', { nonNullable: true }),
+    date: new FormControl(getTodayInputValue(), {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    paymentMethod: new FormControl(PAYMENT_METHOD_OPTIONS[0], { nonNullable: true }),
+    note: new FormControl('', { nonNullable: true }),
+    isExpense: new FormControl(true, { nonNullable: true }),
+  });
+  isSaving = false;
 
-    if (this.scanState === 'result') {
-      return 2;
-    }
-
-    if (this.scanState === 'saving') {
-      return 3;
-    }
-
-    return 0;
-  }
-
-  get stateLabel(): string {
-    switch (this.scanState) {
-      case 'scanning':
-        return this.lang.t('scan.state.analyzing');
-      case 'result':
-        return this.lang.t('scan.state.ready');
-      case 'saving':
-        return this.lang.t('scan.state.saving');
-      case 'error':
-        return this.lang.t('scan.state.error');
-      default:
-        return this.lang.t('scan.state.waiting');
-    }
-  }
-
+  // ─── Computed ────────────────────────────────────────────────────────────────
   get totalAmount(): number {
     return this.receiptItems.reduce((sum, item) => sum + item.price, 0);
   }
 
-  async openCamera(): Promise<void> {
-    try {
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-      });
-      this.scanState = 'camera';
+  get isProcessing(): boolean {
+    return this.processingState === 'scanning' || this.processingState === 'saving';
+  }
 
-      setTimeout(() => {
-        if (this.videoElement?.nativeElement) {
-          this.videoElement.nativeElement.srcObject = this.mediaStream;
-        }
-      }, 0);
-    } catch (error) {
-      console.error('Error accessing camera', error);
-      this.toast.error(this.lang.t('scan.toast.cameraError'));
+  get isCameraActive(): boolean {
+    return !!this.mediaStream;
+  }
+
+  get showCamera(): boolean {
+    return this.scanMode !== 'manual' && this.captureState === 'live' && !this.previewUrl;
+  }
+
+  get cameraFrameClass(): string {
+    return this.scanMode === 'receipt' ? 'scan-frame--receipt' : 'scan-frame--item';
+  }
+
+  get instructionText(): string {
+    return this.scanMode === 'receipt'
+      ? this.lang.t('scan.instruction.receipt')
+      : this.lang.t('scan.instruction.item');
+  }
+
+  // ─── Lifecycle ───────────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.categoryService.getCategories().pipe(
+      map((cats) => resolveCategories(cats)),
+      catchError(() => of(FALLBACK_CATEGORIES)),
+    ).subscribe((categories) => {
+      this.categories = categories;
+    });
+
+    this.detectCameraCapabilities();
+    this.initCamera();
+    this.loadRecentScans();
+  }
+
+  ngOnDestroy(): void {
+    this.stopCamera();
+    this.clearPreview();
+    this.clearAutoCaptureTimer();
+  }
+
+  // ─── Camera Capabilities ─────────────────────────────────────────────────────
+  private async detectCameraCapabilities(): Promise<void> {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter((d) => d.kind === 'videoinput');
+      this.hasMultipleCameras = videoDevices.length > 1;
+    } catch {
+      this.hasMultipleCameras = false;
     }
   }
 
-  capturePhoto(): void {
-    if (!this.videoElement || !this.canvasElement) {
+  // ─── Camera Lifecycle ────────────────────────────────────────────────────────
+  async initCamera(): Promise<void> {
+    if (this.scanMode === 'manual') {
       return;
     }
 
-    const video = this.videoElement.nativeElement;
-    const canvas = this.canvasElement.nativeElement;
-    const context = canvas.getContext('2d');
-
-    if (!context || video.videoWidth <= 0 || video.videoHeight <= 0) {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      this.cameraPermission = 'unsupported';
       return;
     }
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    this.cameraPermission = 'requesting';
 
-    this.stopCamera();
-    this.scanState = 'scanning';
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: this.facingMode,
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+      });
 
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const file = new File([blob], 'captured_receipt.jpg', { type: 'image/jpeg' });
-        this.startScan(file);
-        return;
+      this.mediaStream = stream;
+      this.cameraPermission = 'granted';
+
+      // Check for flash/torch
+      const track = stream.getVideoTracks()[0];
+      if (track) {
+        const caps = track.getCapabilities() as MediaTrackCapabilities & { torch?: boolean };
+        this.hasFlash = !!caps.torch;
       }
 
-      this.resetScan();
-    }, 'image/jpeg', 0.8);
+      // Bind to video element after Angular renders it
+      setTimeout(() => {
+        if (this.videoElement?.nativeElement) {
+          this.videoElement.nativeElement.srcObject = stream;
+        }
+        this.cdr.detectChanges();
+
+        if (this.autoCaptureEnabled) {
+          this.startAutoCaptureCountdown();
+        }
+      }, 0);
+    } catch (err: unknown) {
+      const error = err as { name?: string };
+      if (
+        error?.name === 'NotAllowedError' ||
+        error?.name === 'PermissionDeniedError'
+      ) {
+        this.cameraPermission = 'denied';
+      } else if (
+        error?.name === 'NotFoundError' ||
+        error?.name === 'DevicesNotFoundError'
+      ) {
+        this.cameraPermission = 'unavailable';
+      } else {
+        this.cameraPermission = 'denied';
+      }
+      this.cdr.detectChanges();
+    }
   }
 
   stopCamera(): void {
@@ -168,32 +262,190 @@ export class Scan implements OnInit, OnDestroy {
       this.mediaStream.getTracks().forEach((track) => track.stop());
       this.mediaStream = null;
     }
+  }
 
-    if (this.scanState === 'camera') {
-      this.scanState = 'upload';
+  async flipCamera(): Promise<void> {
+    this.stopCamera();
+    this.facingMode = this.facingMode === 'environment' ? 'user' : 'environment';
+    await this.initCamera();
+  }
+
+  async toggleFlash(): Promise<void> {
+    if (!this.mediaStream) {
+      return;
     }
+    const track = this.mediaStream.getVideoTracks()[0];
+    if (!track) {
+      return;
+    }
+    this.flashEnabled = !this.flashEnabled;
+    try {
+      await track.applyConstraints({
+        advanced: [{ torch: this.flashEnabled } as MediaTrackConstraintSet],
+      });
+    } catch {
+      this.flashEnabled = !this.flashEnabled; // revert on failure
+    }
+  }
+
+  // ─── Mode Switching ──────────────────────────────────────────────────────────
+  setScanMode(mode: ScanMode): void {
+    if (mode === 'manual') {
+      void this.router.navigate(['/user/manual-entry']);
+      return;
+    }
+
+    if (this.scanMode === mode) {
+      return;
+    }
+
+    this.scanMode = mode;
+    this.resetCaptureState();
+  }
+
+  toggleAutoCapture(): void {
+    this.autoCaptureEnabled = !this.autoCaptureEnabled;
+    if (this.autoCaptureEnabled) {
+      if (this.cameraPermission === 'granted' && this.captureState === 'live') {
+        this.startAutoCaptureCountdown();
+      }
+    } else {
+      this.clearAutoCaptureTimer();
+    }
+  }
+
+  startAutoCaptureCountdown(): void {
+    this.clearAutoCaptureTimer();
+    this.countdownSeconds = 3;
+    this.cdr.detectChanges();
+
+    this.autoCaptureInterval = setInterval(() => {
+      this.countdownSeconds--;
+      this.cdr.detectChanges();
+
+      if (this.countdownSeconds <= 0) {
+        this.clearAutoCaptureTimer();
+        this.capturePhoto();
+      }
+    }, 1000);
+  }
+
+  private clearAutoCaptureTimer(): void {
+    if (this.autoCaptureInterval) {
+      clearInterval(this.autoCaptureInterval);
+      this.autoCaptureInterval = null;
+    }
+    this.countdownSeconds = 0;
+    this.cdr.detectChanges();
+  }
+
+  loadRecentScans(): void {
+    this.transactionService.getTransactions().subscribe({
+      next: (txs) => {
+        this.recentScans = txs
+          .filter((t) => t.source === 'receipt' || t.source === 'snap')
+          .slice(0, 3);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.recentScans = [];
+      }
+    });
+  }
+
+  // ─── Capture ─────────────────────────────────────────────────────────────────
+  capturePhoto(): void {
+    if (!this.videoElement?.nativeElement || !this.canvasElement?.nativeElement) {
+      return;
+    }
+
+    const video = this.videoElement.nativeElement;
+    const canvas = this.canvasElement.nativeElement;
+
+    if (video.videoWidth <= 0 || video.videoHeight <= 0) {
+      this.toast.error(this.lang.t('scan.toast.cameraLoading'));
+      return;
+    }
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      return;
+    }
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          this.toast.error(this.lang.t('scan.toast.captureError'));
+          return;
+        }
+        const fileName = this.scanMode === 'receipt' ? 'receipt.jpg' : 'item.jpg';
+        const file = new File([blob], fileName, { type: 'image/jpeg' });
+        this.stopCamera();
+        this.setPreview(file);
+      },
+      'image/jpeg',
+      0.9,
+    );
+  }
+
+  retakePhoto(): void {
+    this.clearPreview();
+    this.processingState = 'idle';
+    this.errorMessage = null;
+    this.receiptItems = [];
+    void this.initCamera();
+  }
+
+  usePhoto(): void {
+    if (!this.currentFile) {
+      return;
+    }
+    this.processFile(this.currentFile);
+  }
+
+  // ─── File Upload ─────────────────────────────────────────────────────────────
+  triggerUpload(): void {
+    this.uploadInput?.nativeElement.click();
   }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    input.value = '';
 
-    if (input.files && input.files.length > 0) {
-      this.startScan(input.files[0]);
+    if (!file) {
+      return;
     }
 
-    input.value = '';
+    this.stopCamera();
+    this.setPreview(file);
   }
 
-  startScan(file: File): void {
-    this.scanState = 'scanning';
+  // ─── Processing ──────────────────────────────────────────────────────────────
+  private processFile(file: File): void {
+    if (this.scanMode === 'receipt') {
+      this.processBillScan(file);
+    } else if (this.scanMode === 'item') {
+      this.processItemScan(file);
+    }
+  }
+
+  private processBillScan(file: File): void {
     this.currentFile = file;
+    this.processingState = 'scanning';
+    this.errorMessage = null;
 
     this.aiService
       .readBill(file)
       .pipe(
         finalize(() => {
-          if (this.scanState === 'scanning') {
-            this.scanState = 'error';
+          if (this.processingState === 'scanning') {
+            this.processingState = 'error';
           }
         }),
       )
@@ -201,7 +453,7 @@ export class Scan implements OnInit, OnDestroy {
         next: (response: ReadBillResponseDto) => {
           if (!response.items || response.items.length === 0) {
             this.errorMessage = this.lang.t('scan.error.noData');
-            this.scanState = 'error';
+            this.processingState = 'error';
             return;
           }
 
@@ -212,8 +464,7 @@ export class Scan implements OnInit, OnDestroy {
           this.receiptItems = response.items.map((item, index) => {
             const matchedCategory = item.category
               ? this.categories.find(
-                  (category) =>
-                    category.name.toLowerCase() === item.category!.toLowerCase(),
+                  (cat) => cat.name.toLowerCase() === item.category!.toLowerCase(),
                 )
               : undefined;
             const isUnknown = !matchedCategory;
@@ -233,36 +484,67 @@ export class Scan implements OnInit, OnDestroy {
             };
           });
 
-          this.scanState = 'result';
+          this.processingState = 'result';
         },
-        error: (error) => {
-          console.error(error);
+        error: () => {
           this.errorMessage = this.lang.t('scan.error.readFailed');
-          this.scanState = 'error';
+          this.processingState = 'error';
         },
       });
   }
 
-  resetScan(): void {
-    this.stopCamera();
-    this.scanState = 'upload';
-    this.receiptItems = [];
-    this.storeName = this.lang.t('scan.unknownStore');
-    this.receiptDate = null;
-    this.billImageKey = null;
+  private processItemScan(file: File): void {
+    this.currentFile = file;
+    this.processingState = 'scanning';
     this.errorMessage = null;
-    this.currentFile = null;
+
+    this.aiService
+      .analyzeImage(file)
+      .pipe(
+        map((response) => {
+          const parsed = parseSnapItemAnalysis(response, this.categories);
+          if (parsed) {
+            return { extraction: parsed, source: 'ai' as const };
+          }
+          return {
+            extraction: buildMockSnapItemExtraction(file, this.categories),
+            source: 'mock' as const,
+          };
+        }),
+        catchError(() =>
+          of({
+            extraction: buildMockSnapItemExtraction(file, this.categories),
+            source: 'mock' as const,
+          }),
+        ),
+      )
+      .subscribe({
+        next: ({ extraction }) => {
+          this.manualForm.patchValue({
+            title: extraction.itemName,
+            amount: extraction.estimatedAmount,
+            category: extraction.category ?? '',
+            date: extraction.date.slice(0, 10),
+            note: extraction.note,
+          });
+          this.processingState = 'result';
+        },
+        error: () => {
+          this.errorMessage = this.lang.t('scan.error.itemFailed');
+          this.processingState = 'error';
+        },
+      });
   }
 
+  // ─── Receipt Confirm ─────────────────────────────────────────────────────────
   confirmScan(): void {
     const hasUnknownCategory = this.receiptItems.some((item) => !item.categoryId);
-
     if (hasUnknownCategory) {
       this.toast.error(this.lang.t('scan.toast.selectCategory'));
       return;
     }
 
-    this.scanState = 'saving';
+    this.processingState = 'saving';
 
     const requestData: CreateTransactionFromBillDto = {
       merchantName: this.storeName,
@@ -281,16 +563,68 @@ export class Scan implements OnInit, OnDestroy {
     this.transactionService.createFromBill(requestData, this.currentFile).subscribe({
       next: () => {
         this.toast.success(this.lang.t('scan.toast.saved'));
-        this.resetScan();
+        this.resetAll();
+        this.loadRecentScans();
       },
-      error: (error) => {
-        console.error(error);
+      error: () => {
         this.toast.error(this.lang.t('scan.toast.saveFailed'));
-        this.scanState = 'result';
+        this.processingState = 'result';
       },
     });
   }
 
+  // ─── Item / Manual Form Save ─────────────────────────────────────────────────
+  saveItemTransaction(): void {
+    if (this.manualForm.invalid) {
+      this.manualForm.markAllAsTouched();
+      return;
+    }
+
+    const { title, amount, category, date, paymentMethod, note, isExpense } =
+      this.manualForm.getRawValue();
+
+    if (amount === null) {
+      return;
+    }
+
+    this.isSaving = true;
+
+    const saveCall =
+      this.scanMode === 'item' && this.currentFile
+        ? this.transactionService.createFromAnalyze(
+            {
+              itemName: title,
+              estimatedPriceVND: amount,
+              quantity: 1,
+              category: category || null,
+              unit: 'cái',
+            },
+            this.currentFile,
+          )
+        : this.transactionService.createTransactionEntry({
+            title,
+            amount,
+            category: category || null,
+            transactionDate: date,
+            paymentMethod,
+            note: note || null,
+            isExpense,
+            source: 'manual',
+          });
+
+    saveCall.subscribe({
+      next: () => {
+        this.toast.success(this.lang.t('scan.toast.saved'));
+        void this.router.navigateByUrl('/user/dashboard');
+      },
+      error: () => {
+        this.isSaving = false;
+        this.toast.error(this.lang.t('scan.toast.saveFailed'));
+      },
+    });
+  }
+
+  // ─── Category / Price Updates ────────────────────────────────────────────────
   updateCategory(itemId: number, event: Event): void {
     const select = event.target as HTMLSelectElement;
     const newCategoryId = select.value === 'null' ? null : Number(select.value);
@@ -298,19 +632,13 @@ export class Scan implements OnInit, OnDestroy {
     if (newCategoryId === null) {
       this.receiptItems = this.receiptItems.map((item) =>
         item.id === itemId
-          ? {
-              ...item,
-              categoryId: null,
-              categoryLabel: 'Unknown',
-              categoryClass: 'category-pill--amber',
-            }
+          ? { ...item, categoryId: null, categoryLabel: 'Unknown', categoryClass: 'category-pill--amber' }
           : item,
       );
       return;
     }
 
-    const matchedCategory = this.categories.find((category) => category.id === newCategoryId);
-
+    const matchedCategory = this.categories.find((cat) => cat.id === newCategoryId);
     if (!matchedCategory) {
       return;
     }
@@ -335,7 +663,6 @@ export class Scan implements OnInit, OnDestroy {
       if (item.id !== itemId) {
         return item;
       }
-
       const newUnitPrice = item.quantity > 0 ? numericValue / item.quantity : numericValue;
       return { ...item, price: numericValue, unitPrice: newUnitPrice };
     });
@@ -346,6 +673,38 @@ export class Scan implements OnInit, OnDestroy {
     this.storeName = input.value;
   }
 
+  // ─── Reset ───────────────────────────────────────────────────────────────────
+  resetCaptureState(): void {
+    this.clearAutoCaptureTimer();
+    this.clearPreview();
+    this.processingState = 'idle';
+    this.errorMessage = null;
+    this.receiptItems = [];
+    this.storeName = '';
+    this.receiptDate = null;
+    this.billImageKey = null;
+    this.currentFile = null;
+    this.isSaving = false;
+    this.manualForm.reset({
+      title: '',
+      amount: null,
+      category: '',
+      date: getTodayInputValue(),
+      paymentMethod: PAYMENT_METHOD_OPTIONS[0],
+      note: '',
+      isExpense: true,
+    });
+  }
+
+  resetAll(): void {
+    this.stopCamera();
+    this.resetCaptureState();
+    if (this.scanMode !== 'manual') {
+      void this.initCamera();
+    }
+  }
+
+  // ─── Formatting ──────────────────────────────────────────────────────────────
   formatCurrency(value: number): string {
     return `${new Intl.NumberFormat(this.lang.locale()).format(value)} VND`;
   }
@@ -358,16 +717,26 @@ export class Scan implements OnInit, OnDestroy {
     if (!name || name.toLowerCase() === 'unknown') {
       return this.lang.t('scan.category.unassigned');
     }
-
     const normalizedName = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
     const key = `dashboard.category.${normalizedName}`;
     const translated = this.lang.t(key);
-
     return translated === key ? name : translated;
   }
 
-  ngOnDestroy(): void {
-    this.stopCamera();
+  // ─── Private Helpers ─────────────────────────────────────────────────────────
+  private setPreview(file: File): void {
+    this.clearPreview();
+    this.currentFile = file;
+    this.previewUrl = URL.createObjectURL(file);
+    this.captureState = 'preview';
+  }
+
+  private clearPreview(): void {
+    if (this.previewUrl) {
+      URL.revokeObjectURL(this.previewUrl);
+      this.previewUrl = null;
+    }
+    this.captureState = 'live';
   }
 
   private getCategoryClass(category: string): string {
