@@ -1,0 +1,700 @@
+<section class="analysis-page">
+  <div class="analysis-page__content">
+
+    <!-- ─── HEADER & FILTERS ──────────────────────────────────────── -->
+    <header class="analysis-header">
+      <div class="analysis-header__info">
+        <h1 class="analysis-header__title">{{ language.t('analysis.title') }}</h1>
+        <p class="analysis-header__subtitle">{{ language.t('analysis.subtitle') }}</p>
+      </div>
+
+      <div class="analysis-header__filters">
+        <!-- Time Filter Dropdown -->
+        <div class="filter-dropdown-wrapper">
+          <button class="btn-filter" (click)="showPeriodDropdown = !showPeriodDropdown; showAccountDropdown = false">
+            <span class="material-symbols-outlined btn-filter__icon">calendar_month</span>
+            <span>{{ getPeriodLabel(activePeriod()) }}</span>
+            <span class="material-symbols-outlined btn-filter__chevron">expand_more</span>
+          </button>
+          
+          @if (showPeriodDropdown) {
+            <div class="filter-dropdown-menu">
+              <button class="filter-dropdown-item" [class.active]="activePeriod() === '7days'" (click)="selectPeriod('7days')">{{ getPeriodLabel('7days') }}</button>
+              <button class="filter-dropdown-item" [class.active]="activePeriod() === '30days'" (click)="selectPeriod('30days')">{{ getPeriodLabel('30days') }}</button>
+              <button class="filter-dropdown-item" [class.active]="activePeriod() === 'thisMonth'" (click)="selectPeriod('thisMonth')">{{ getPeriodLabel('thisMonth') }}</button>
+              <button class="filter-dropdown-item" [class.active]="activePeriod() === 'lastMonth'" (click)="selectPeriod('lastMonth')">{{ getPeriodLabel('lastMonth') }}</button>
+              <button class="filter-dropdown-item" [class.active]="activePeriod() === '3months'" (click)="selectPeriod('3months')">{{ getPeriodLabel('3months') }}</button>
+              <button class="filter-dropdown-item" [class.active]="activePeriod() === '6months'" (click)="selectPeriod('6months')">{{ getPeriodLabel('6months') }}</button>
+              <button class="filter-dropdown-item" [class.active]="activePeriod() === 'thisYear'" (click)="selectPeriod('thisYear')">{{ getPeriodLabel('thisYear') }}</button>
+              <button class="filter-dropdown-item filter-dropdown-item--custom" [class.active]="activePeriod() === 'custom'" (click)="selectPeriod('custom')">{{ getPeriodLabel('custom') }}</button>
+            </div>
+          }
+        </div>
+
+        <!-- Account Filter Dropdown -->
+        @if (report && report.accounts.length > 0) {
+          <div class="filter-dropdown-wrapper">
+            <button class="btn-filter" (click)="showAccountDropdown = !showAccountDropdown; showPeriodDropdown = false">
+              <span class="material-symbols-outlined btn-filter__icon">account_balance_wallet</span>
+              <span>{{ getAccountLabel(activeAccount()) }}</span>
+              <span class="material-symbols-outlined btn-filter__chevron">expand_more</span>
+            </button>
+            
+            @if (showAccountDropdown) {
+              <div class="filter-dropdown-menu">
+                <button class="filter-dropdown-item" [class.active]="activeAccount() === 'all'" (click)="selectAccount('all')">
+                  {{ language.t('analysis.allAccounts') }}
+                </button>
+                @for (acc of report.accounts; track acc) {
+                  <button class="filter-dropdown-item" [class.active]="activeAccount() === acc" (click)="selectAccount(acc)">
+                    {{ acc }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Export Button -->
+        <button class="btn-export" (click)="exportReport($event)" [disabled]="isLoading || hasError || !report">
+          <span class="material-symbols-outlined">download</span>
+          <span class="btn-export__text">{{ language.t('analysis.exportReport') }}</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Custom Date Range Dialog Modal -->
+    @if (showCustomDatePicker) {
+      <div class="custom-date-modal" (click)="cancelCustomDates()">
+        <div class="custom-date-modal__content" (click)="$event.stopPropagation()">
+          <h3>{{ language.currentLang() === 'vi' ? 'Ch\u1ecdn kho\u1ea3ng th\u1eddi gian' : 'Select Date Range' }}</h3>
+          <div class="date-inputs">
+            <div class="date-group">
+              <label>{{ language.currentLang() === 'vi' ? 'T\u1eeb ng\u00e0y' : 'From Date' }}</label>
+              <input type="date" [(ngModel)]="customStartDate" class="date-field" />
+            </div>
+            <div class="date-group">
+              <label>{{ language.currentLang() === 'vi' ? '\u0110\u1ebfn ng\u00e0y' : 'To Date' }}</label>
+              <input type="date" [(ngModel)]="customEndDate" class="date-field" />
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-cancel" (click)="cancelCustomDates()">{{ language.t('common.cancel') }}</button>
+            <button class="btn-apply" (click)="applyCustomDates()" [disabled]="!customStartDate() || !customEndDate()">{{ language.t('common.save') }}</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ─── LOADING STATE (SKELETONS) ──────────────────────────────── -->
+    @if (isLoading) {
+      <div class="analysis-skeletons">
+        <!-- KPI Cards Skeleton -->
+        <div class="kpis-grid">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="skeleton-card skeleton-kpi">
+              <div class="skeleton-icon"></div>
+              <div class="skeleton-line short"></div>
+              <div class="skeleton-line medium"></div>
+              <div class="skeleton-line sparkline"></div>
+            </div>
+          }
+        </div>
+        <!-- Chart Skeleton -->
+        <div class="skeleton-card skeleton-chart-large">
+          <div class="skeleton-header">
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-line tab"></div>
+          </div>
+          <div class="skeleton-body"></div>
+        </div>
+        <!-- Side Grid Skeleton -->
+        <div class="dashboard-grid">
+          <div class="skeleton-card skeleton-chart-donut"></div>
+          <div class="skeleton-card skeleton-budget-list"></div>
+        </div>
+      </div>
+    }
+
+    <!-- ─── ERROR STATE ────────────────────────────────────────────── -->
+    @else if (hasError) {
+      <div class="analysis-state-card analysis-state-card--error">
+        <span class="material-symbols-outlined state-icon">error_outline</span>
+        <h2>{{ language.t('analysis.states.errorTitle') }}</h2>
+        <p>{{ language.t('analysis.states.errorDesc') }}</p>
+        <button class="snap-button snap-button--primary" (click)="loadData()">
+          <span class="material-symbols-outlined">refresh</span>
+          {{ language.t('analysis.states.errorBtn') }}
+        </button>
+      </div>
+    }
+
+    <!-- ─── EMPTY STATE ────────────────────────────────────────────── -->
+    @else if (!report || (report.kpis.income.value === 0 && report.kpis.expense.value === 0)) {
+      <div class="analysis-state-card analysis-state-card--empty">
+        <span class="material-symbols-outlined state-icon">bar_chart_4_bars</span>
+        <h2>{{ language.t('analysis.states.emptyTitle') }}</h2>
+        <p>{{ language.t('analysis.states.emptyDesc') }}</p>
+        <div class="empty-actions">
+          <button class="snap-button snap-button--primary" routerLink="/user/manual-entry">
+            <span class="material-symbols-outlined">add</span>
+            {{ language.t('analysis.states.emptyBtnTx') }}
+          </button>
+          <button class="snap-button snap-button--ghost" routerLink="/user/scan">
+            <span class="material-symbols-outlined">qr_code_scanner</span>
+            {{ language.t('analysis.states.emptyBtnScan') }}
+          </button>
+          <button class="snap-button" routerLink="/user/budget">
+            <span class="material-symbols-outlined">account_balance_wallet</span>
+            {{ language.t('analysis.states.emptyBtnBudget') }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ─── MAIN CONTENT (DATA PRESENT) ──────────────────────────────── -->
+    @else {
+      <!-- 1. KPI Summary Cards -->
+      <section class="kpis-grid" aria-label="Financial summaries">
+        <!-- Income KPI -->
+        <article class="kpi-card-analysis">
+          <div class="kpi-card-analysis__header">
+            <div class="kpi-icon-wrap kpi-icon-wrap--green">
+              <span class="material-symbols-outlined">trending_up</span>
+            </div>
+            <div class="kpi-info-label-wrap">
+              <span class="kpi-card-analysis__label">{{ language.t('analysis.kpi.income') }}</span>
+              <div class="tooltip-wrap">
+                <span class="material-symbols-outlined kpi-tooltip-icon">info</span>
+                <span class="tooltip-text">{{ language.t('analysis.kpi.incomeTooltip') }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-card-analysis__body">
+            <h2 class="kpi-card-analysis__value">{{ formatCurrency(report.kpis.income.value) }}</h2>
+            <div class="kpi-card-analysis__trend">
+              <span class="trend-pill" [class.trend-pill--up]="report.kpis.income.percentageChange >= 0" [class.trend-pill--down]="report.kpis.income.percentageChange < 0">
+                <span class="material-symbols-outlined trend-arrow">
+                  {{ report.kpis.income.percentageChange >= 0 ? 'arrow_upward' : 'arrow_downward' }}
+                </span>
+                {{ report.kpis.income.percentageChange >= 0 ? '+' : '' }}{{ report.kpis.income.percentageChange }}%
+              </span>
+              <span class="trend-compare-text">{{ language.t('analysis.compareLabel') }}</span>
+            </div>
+          </div>
+          <div class="kpi-card-analysis__sparkline">
+            <svg class="spark-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+              <path class="spark-path spark-path--income" 
+                [attr.d]="getSparklinePath(report.kpis.income.sparklineData)" 
+                fill="none" stroke-width="2"/>
+            </svg>
+          </div>
+        </article>
+
+        <!-- Expense KPI -->
+        <article class="kpi-card-analysis">
+          <div class="kpi-card-analysis__header">
+            <div class="kpi-icon-wrap kpi-icon-wrap--red">
+              <span class="material-symbols-outlined">trending_down</span>
+            </div>
+            <div class="kpi-info-label-wrap">
+              <span class="kpi-card-analysis__label">{{ language.t('analysis.kpi.expense') }}</span>
+              <div class="tooltip-wrap">
+                <span class="material-symbols-outlined kpi-tooltip-icon">info</span>
+                <span class="tooltip-text">{{ language.t('analysis.kpi.expenseTooltip') }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-card-analysis__body">
+            <h2 class="kpi-card-analysis__value">{{ formatCurrency(report.kpis.expense.value) }}</h2>
+            <div class="kpi-card-analysis__trend">
+              <!-- isBetter triggers color change (green/emerald for positive outcome, red for negative) -->
+              <span class="trend-pill" [class.trend-pill--up]="report.kpis.expense.percentageChange >= 0" [class.trend-pill--down]="report.kpis.expense.percentageChange < 0" [class.trend-pill--better]="report.kpis.expense.isBetter" [class.trend-pill--worse]="!report.kpis.expense.isBetter">
+                <span class="material-symbols-outlined trend-arrow">
+                  {{ report.kpis.expense.percentageChange >= 0 ? 'arrow_upward' : 'arrow_downward' }}
+                </span>
+                {{ report.kpis.expense.percentageChange >= 0 ? '+' : '' }}{{ report.kpis.expense.percentageChange }}%
+              </span>
+              <span class="trend-compare-text">{{ language.t('analysis.compareLabel') }}</span>
+            </div>
+          </div>
+          <div class="kpi-card-analysis__sparkline">
+            <svg class="spark-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+              <path class="spark-path spark-path--expense" 
+                [attr.d]="getSparklinePath(report.kpis.expense.sparklineData)" 
+                fill="none" stroke-width="2"/>
+            </svg>
+          </div>
+        </article>
+
+        <!-- Net Savings KPI -->
+        <article class="kpi-card-analysis">
+          <div class="kpi-card-analysis__header">
+            <div class="kpi-icon-wrap kpi-icon-wrap--indigo">
+              <span class="material-symbols-outlined">savings</span>
+            </div>
+            <div class="kpi-info-label-wrap">
+              <span class="kpi-card-analysis__label">{{ language.t('analysis.kpi.savings') }}</span>
+              <div class="tooltip-wrap">
+                <span class="material-symbols-outlined kpi-tooltip-icon">info</span>
+                <span class="tooltip-text">{{ language.t('analysis.kpi.savingsTooltip') }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-card-analysis__body">
+            <h2 class="kpi-card-analysis__value" [class.kpi-card-analysis__value--negative]="report.kpis.savings.value < 0">
+              {{ formatCurrency(report.kpis.savings.value) }}
+            </h2>
+            <div class="kpi-card-analysis__trend">
+              <span class="trend-pill" [class.trend-pill--up]="report.kpis.savings.percentageChange >= 0" [class.trend-pill--down]="report.kpis.savings.percentageChange < 0" [class.trend-pill--better]="report.kpis.savings.isBetter" [class.trend-pill--worse]="!report.kpis.savings.isBetter">
+                <span class="material-symbols-outlined trend-arrow">
+                  {{ report.kpis.savings.percentageChange >= 0 ? 'arrow_upward' : 'arrow_downward' }}
+                </span>
+                {{ report.kpis.savings.percentageChange >= 0 ? '+' : '' }}{{ report.kpis.savings.percentageChange }}%
+              </span>
+              <span class="trend-compare-text">{{ language.t('analysis.compareLabel') }}</span>
+            </div>
+          </div>
+          <div class="kpi-card-analysis__sparkline">
+            <svg class="spark-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+              <path class="spark-path spark-path--savings" 
+                [attr.d]="getSparklinePath(report.kpis.savings.sparklineData)" 
+                fill="none" stroke-width="2"/>
+            </svg>
+          </div>
+        </article>
+
+        <!-- Savings Rate KPI -->
+        <article class="kpi-card-analysis">
+          <div class="kpi-card-analysis__header">
+            <div class="kpi-icon-wrap kpi-icon-wrap--violet">
+              <span class="material-symbols-outlined">donut_large</span>
+            </div>
+            <div class="kpi-info-label-wrap">
+              <span class="kpi-card-analysis__label">{{ language.t('analysis.kpi.rate') }}</span>
+              <div class="tooltip-wrap">
+                <span class="material-symbols-outlined kpi-tooltip-icon">info</span>
+                <span class="tooltip-text">{{ language.t('analysis.kpi.rateTooltip') }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-card-analysis__body">
+            <h2 class="kpi-card-analysis__value">{{ report.kpis.rate.value }}%</h2>
+            <div class="kpi-card-analysis__trend">
+              <span class="trend-pill" [class.trend-pill--up]="report.kpis.rate.percentageChange >= 0" [class.trend-pill--down]="report.kpis.rate.percentageChange < 0" [class.trend-pill--better]="report.kpis.rate.isBetter" [class.trend-pill--worse]="!report.kpis.rate.isBetter">
+                <span class="material-symbols-outlined trend-arrow">
+                  {{ report.kpis.rate.percentageChange >= 0 ? 'arrow_upward' : 'arrow_downward' }}
+                </span>
+                {{ report.kpis.rate.percentageChange >= 0 ? '+' : '' }}{{ report.kpis.rate.percentageChange }}%
+              </span>
+              <span class="trend-compare-text">{{ language.t('analysis.compareLabel') }}</span>
+            </div>
+          </div>
+          <div class="kpi-card-analysis__sparkline">
+            <svg class="spark-svg" viewBox="0 0 100 24" preserveAspectRatio="none">
+              <path class="spark-path spark-path--rate" 
+                [attr.d]="getSparklinePath(report.kpis.rate.sparklineData)" 
+                fill="none" stroke-width="2"/>
+            </svg>
+          </div>
+        </article>
+      </section>
+
+      <!-- 2. Cash Flow Area/Line Chart -->
+      <section class="analysis-card cashflow-section">
+        <div class="card-header">
+          <div class="card-header__info">
+            <h3 class="card-title">{{ language.t('analysis.cashFlow.title') }}</h3>
+          </div>
+          <div class="chart-controls">
+            <button class="btn-toggle-view" [class.active]="cashFlowViewMode === 'daily'" (click)="setCashFlowMode('daily')">
+              {{ language.t('analysis.cashFlow.daily') }}
+            </button>
+            <button class="btn-toggle-view" [class.active]="cashFlowViewMode === 'weekly'" (click)="setCashFlowMode('weekly')">
+              {{ language.t('analysis.cashFlow.weekly') }}
+            </button>
+            <button class="btn-toggle-view" [class.active]="cashFlowViewMode === 'monthly'" (click)="setCashFlowMode('monthly')">
+              {{ language.t('analysis.cashFlow.monthly') }}
+            </button>
+          </div>
+        </div>
+        <div class="chart-container-wrap">
+          <apx-chart
+            [series]="cashFlowSeries"
+            [chart]="cashFlowChartOptions.chart"
+            [stroke]="cashFlowChartOptions.stroke"
+            [colors]="cashFlowChartOptions.colors"
+            [fill]="cashFlowChartOptions.fill"
+            [xaxis]="cashFlowChartOptions.xaxis"
+            [yaxis]="cashFlowChartOptions.yaxis"
+            [grid]="cashFlowChartOptions.grid"
+            [legend]="cashFlowChartOptions.legend"
+            [tooltip]="cashFlowChartOptions.tooltip"
+            [markers]="cashFlowChartOptions.markers"
+          ></apx-chart>
+        </div>
+      </section>
+
+      <!-- 3. Category Spending and Budget Performance Side-by-Side -->
+      <div class="dashboard-grid">
+        <!-- Category spending donut breakdown -->
+        <section class="analysis-card category-card">
+          <h3 class="card-title">{{ language.t('analysis.categorySpending.title') }}</h3>
+          
+          <div class="category-spending-layout">
+            @if (report.categorySpending.length === 0) {
+              <div class="empty-small-state">
+                <span class="material-symbols-outlined">donut_large</span>
+                <p>{{ language.t('analysis.categorySpending.noData') }}</p>
+              </div>
+            } @else {
+              <div class="category-donut-chart">
+                <apx-chart
+                  [series]="categorySeries"
+                  [chart]="categoryChartOptions.chart"
+                  [labels]="categoryChartOptions.labels"
+                  [colors]="categoryChartOptions.colors"
+                  [stroke]="categoryChartOptions.stroke"
+                  [legend]="categoryChartOptions.legend"
+                  [plotOptions]="categoryChartOptions.plotOptions"
+                  [dataLabels]="categoryChartOptions.dataLabels"
+                  [tooltip]="categoryChartOptions.tooltip"
+                ></apx-chart>
+              </div>
+              
+              <div class="category-legend-list">
+                @for (cat of report.categorySpending; track cat.name) {
+                  <div 
+                    class="category-item" 
+                    [class.category-item--active]="selectedCategoryFilter === cat.name"
+                    (click)="toggleCategoryFilter(cat.name)"
+                    role="button"
+                    tabindex="0"
+                  >
+                    <div class="category-item__meta">
+                      <div class="category-item__icon-wrapper" [style.background-color]="cat.color + '1c'" [style.color]="cat.color">
+                        <span class="material-symbols-outlined">{{ cat.icon }}</span>
+                      </div>
+                      <div class="category-item__copy">
+                        <p class="category-item__name">{{ language.t(cat.categoryKey) }}</p>
+                        <span class="category-item__percentage">{{ cat.percentage }}%</span>
+                      </div>
+                    </div>
+                    
+                    <div class="category-item__values">
+                      <p class="category-item__amount">{{ formatCurrency(cat.amount) }}</p>
+                      <span class="category-item__trend-pill" [class.up]="cat.isUp" [class.down]="!cat.isUp">
+                        <span class="material-symbols-outlined">
+                          {{ cat.isUp ? 'expand_less' : 'expand_more' }}
+                        </span>
+                        {{ cat.percentageChange }}%
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- Budget performance progress list -->
+        <section class="analysis-card budget-performance-card">
+          <div class="card-header">
+            <h3 class="card-title">{{ language.t('analysis.budgetPerformance.title') }}</h3>
+            <button class="snap-button snap-button--ghost" routerLink="/user/budget" style="padding: 6px 12px; border-radius: 12px; font-size: 0.75rem;">
+              {{ language.t('analysis.budgetPerformance.viewAll') }}
+            </button>
+          </div>
+
+          <div class="budget-performance-list">
+            @if (report.budgets.length === 0) {
+              <div class="empty-small-state">
+                <span class="material-symbols-outlined">account_balance_wallet</span>
+                <p>{{ language.t('analysis.budgetPerformance.noBudgets') }}</p>
+                <button class="snap-button snap-button--primary" routerLink="/user/budget" style="margin-top: 10px; font-size: 0.75rem; padding: 6px 12px;">
+                  T\u1ea1o ng\u00e2n s\u00e1ch
+                </button>
+              </div>
+            } @else {
+              @for (b of report.budgets; track b.name) {
+                <div class="budget-meter">
+                  <div class="budget-meter__header">
+                    <div class="budget-meter__name-wrap">
+                      <p class="budget-meter__name">{{ b.name }}</p>
+                      <span class="budget-status-badge" [class.budget-status-badge--safe]="b.status === 'safe'" [class.budget-status-badge--warning]="b.status === 'warning'" [class.budget-status-badge--danger]="b.status === 'danger'">
+                        {{ language.t('analysis.budgetPerformance.' + b.status) }}
+                      </span>
+                    </div>
+                    <div class="budget-meter__limits">
+                      <span>{{ formatCurrency(b.spent) }}</span>
+                      <span class="budget-meter__divider">/</span>
+                      <span class="budget-meter__limit-val">{{ formatCurrency(b.limit) }}</span>
+                    </div>
+                  </div>
+
+                  <div class="budget-meter__track">
+                    <div class="budget-meter__fill" [style.width.%]="b.percentage" [class.budget-meter__fill--warning]="b.status === 'warning'" [class.budget-meter__fill--danger]="b.status === 'danger'"></div>
+                  </div>
+
+                  <div class="budget-meter__footer">
+                    <span>{{ b.percentage }}% {{ language.currentLang() === 'vi' ? '\u0111\u00e3 s\u1eed d\u1ee5ng' : 'used' }}</span>
+                    @if (b.spent > b.limit) {
+                      <span class="budget-calc text-danger">{{ language.t('analysis.budgetPerformance.over') }} {{ formatCurrency(b.spent - b.limit) }}</span>
+                    } @else {
+                      <span class="budget-calc text-muted">{{ language.t('analysis.budgetPerformance.remaining') }} {{ formatCurrency(b.remaining) }}</span>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </section>
+      </div>
+
+      <!-- 4. AI Smart Insights (Smart Analysis) -->
+      <section class="insights-section">
+        <h3 class="insights-section__title">{{ language.t('analysis.insights.title') }}</h3>
+        
+        <div class="insights-list-grid">
+          @for (insight of report.insights; track insight.id) {
+            <article class="insight-item-card" [class.insight-item-card--danger]="insight.type === 'danger'" [class.insight-item-card--warning]="insight.type === 'warning'" [class.insight-item-card--success]="insight.type === 'success'" [class.insight-item-card--info]="insight.type === 'info'">
+              <div class="insight-item-card__header">
+                <div class="insight-priority-badge" [class.insight-priority-badge--high]="insight.priority === 'high'" [class.insight-priority-badge--medium]="insight.priority === 'medium'" [class.insight-priority-badge--low]="insight.priority === 'low'">
+                  {{ language.t('analysis.insights.' + insight.priority) }}
+                </div>
+                <div class="insight-icon-wrap" [class.danger]="insight.type === 'danger'" [class.warning]="insight.type === 'warning'" [class.success]="insight.type === 'success'" [class.info]="insight.type === 'info'">
+                  <span class="material-symbols-outlined">
+                    {{ insight.type === 'danger' ? 'report' : insight.type === 'warning' ? 'trending_up' : insight.type === 'success' ? 'savings' : 'info' }}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="insight-item-card__body">
+                <h4 class="insight-item-card__title">{{ insight.title }}</h4>
+                <p class="insight-item-card__desc">{{ insight.description }}</p>
+              </div>
+
+              <div class="insight-item-card__footer">
+                <button class="btn-insight-action" (click)="handleInsightAction(insight)">
+                  <span>{{ language.t(insight.actionKey) }}</span>
+                  <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+
+      <!-- 5. Period Comparison Chart & Recurring Subscriptions Side-by-Side -->
+      <div class="dashboard-grid">
+        <!-- Spending comparison double column chart -->
+        <section class="analysis-card comparison-card">
+          <div class="card-header">
+            <h3 class="card-title">{{ language.t('analysis.comparison.title') }}</h3>
+          </div>
+
+          <div class="comparison-conclusion">
+            <span class="material-symbols-outlined conclusion-icon">auto_awesome</span>
+            <p>{{ report.comparison.conclusion }}</p>
+          </div>
+
+          <div class="comparison-chart">
+            <apx-chart
+              [series]="comparisonSeries"
+              [chart]="comparisonChartOptions.chart"
+              [xaxis]="comparisonChartOptions.xaxis"
+              [yaxis]="comparisonChartOptions.yaxis"
+              [colors]="comparisonChartOptions.colors"
+              [stroke]="comparisonChartOptions.stroke"
+              [plotOptions]="comparisonChartOptions.plotOptions"
+              [fill]="comparisonChartOptions.fill"
+              [grid]="comparisonChartOptions.grid"
+              [legend]="comparisonChartOptions.legend"
+              [tooltip]="comparisonChartOptions.tooltip"
+            ></apx-chart>
+          </div>
+        </section>
+
+        <!-- Recurring subscriptions costs -->
+        <section class="analysis-card recurring-card">
+          <h3 class="card-title">{{ language.t('analysis.recurring.title') }}</h3>
+          
+          <div class="recurring-summary-cost">
+            <span class="recurring-summary-cost__label">{{ language.t('analysis.recurring.monthlyTotal') }}</span>
+            <h2 class="recurring-summary-cost__value">{{ formatCurrency(report.recurring.totalMonthly) }}</h2>
+          </div>
+
+          <div class="recurring-items-list">
+            @for (rec of report.recurring.items; track rec.name) {
+              <div class="recurring-item-row">
+                <div class="recurring-item-row__meta">
+                  <div class="rec-icon-wrapper" [class]="rec.colorClass">
+                    <span class="material-symbols-outlined">{{ rec.icon }}</span>
+                  </div>
+                  <div class="recurring-item-row__copy">
+                    <p class="rec-name">{{ rec.name }}</p>
+                    <span class="rec-billing">{{ rec.period }} &bull; {{ language.t('analysis.recurring.nextPay') }} {{ formatDate(rec.nextPaymentDate) }}</span>
+                  </div>
+                </div>
+                <div class="recurring-item-row__cost">
+                  <p class="rec-amount">{{ formatCurrency(rec.amount) }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      </div>
+
+      <!-- 6. Top Merchants & Notable Transactions table -->
+      <div class="dashboard-grid dashboard-grid--notable">
+        <!-- Top Merchants List -->
+        <section class="analysis-card merchants-card">
+          <h3 class="card-title">{{ language.t('analysis.merchants.title') }}</h3>
+
+          <div class="merchants-list">
+            @for (merch of report.merchants; track merch.name) {
+              <div class="merchant-row">
+                <div class="merchant-row__meta">
+                  <div class="merchant-avatar" [class]="merch.colorClass">
+                    {{ merch.logoInitials }}
+                  </div>
+                  <div class="merchant-row__copy">
+                    <p class="merchant-name">{{ merch.name }}</p>
+                    <span class="merchant-tx-count">{{ language.t('analysis.merchants.txsCount', { count: merch.transactionsCount }) }}</span>
+                  </div>
+                </div>
+                
+                <div class="merchant-row__values">
+                  <p class="merchant-amount">{{ formatCurrency(merch.totalAmount) }}</p>
+                  <span class="merchant-trend" [class.up]="merch.isUp" [class.down]="!merch.isUp">
+                    <span class="material-symbols-outlined">
+                      {{ merch.isUp ? 'trending_up' : 'trending_down' }}
+                    </span>
+                    {{ merch.percentageChange }}%
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- Notable Transactions Filterable Table -->
+        <section class="analysis-card notable-txs-card" id="notable-txs-card">
+          <div class="card-header">
+            <h3 class="card-title">{{ language.t('analysis.transactions.title') }}</h3>
+          </div>
+
+          <!-- Tabs menu selectors -->
+          <div class="notable-tabs-bar" role="tablist">
+            <button class="tab-btn" [class.active]="activeNotableTab === 'all'" (click)="setNotableTab('all')" role="tab">{{ language.t('analysis.transactions.tabAll') }}</button>
+            <button class="tab-btn" [class.active]="activeNotableTab === 'high'" (click)="setNotableTab('high')" role="tab">{{ language.t('analysis.transactions.tabHigh') }}</button>
+            <button class="tab-btn" [class.active]="activeNotableTab === 'unusual'" (click)="setNotableTab('unusual')" role="tab">{{ language.t('analysis.transactions.tabUnusual') }}</button>
+            <button class="tab-btn" [class.active]="activeNotableTab === 'uncategorized'" (click)="setNotableTab('uncategorized')" role="tab">{{ language.t('analysis.transactions.tabUnclassified') }}</button>
+            <button class="tab-btn" [class.active]="activeNotableTab === 'bills'" (click)="setNotableTab('bills')" role="tab">{{ language.t('analysis.transactions.tabBills') }}</button>
+          </div>
+
+          <!-- Selected Category Drill-down active alert indicator -->
+          @if (selectedCategoryFilter) {
+            <div class="drilldown-active-alert">
+              <span>{{ language.currentLang() === 'vi' ? 'Đang lọc danh mục: ' : 'Filtering category: ' }} <strong>{{ selectedCategoryFilter }}</strong></span>
+              <button class="btn-clear-filter" (click)="selectedCategoryFilter = null">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+          }
+
+          <div class="notable-txs-wrapper">
+            @if (filteredNotableTransactions.length === 0) {
+              <div class="empty-small-state" style="padding: 40px 0;">
+                <span class="material-symbols-outlined">receipt_long</span>
+                <p>{{ language.currentLang() === 'vi' ? 'Không tìm thấy giao dịch tương ứng' : 'No matching transactions found' }}</p>
+              </div>
+            } @else {
+              <!-- Desktop Table Layout -->
+              <table class="notable-table">
+                <thead>
+                  <tr>
+                    <th>{{ language.t('analysis.transactions.colTx') }}</th>
+                    <th>{{ language.t('analysis.transactions.colCategory') }}</th>
+                    <th>{{ language.t('analysis.transactions.colAccount') }}</th>
+                    <th>{{ language.t('analysis.transactions.colDate') }}</th>
+                    <th>{{ language.t('analysis.transactions.colSource') }}</th>
+                    <th class="align-right">{{ language.t('analysis.transactions.colAmount') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (t of filteredNotableTransactions; track t.id) {
+                    <tr class="notable-row" (click)="openTransactionDetail(t)">
+                      <td>
+                        <div class="tx-cell-copy">
+                          <p class="tx-cell-name">{{ t.name || 'Giao d\u1ecbch kh\u00f4ng t\u00ean' }}</p>
+                          @if (t.note) { <span class="tx-cell-note">{{ t.note }}</span> }
+                        </div>
+                      </td>
+                      <td>
+                        <span class="notable-category-pill">
+                          {{ getCategoryLabel(t) }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="tx-payment-method">{{ t.paymentMethod || 'Ví mặc định' }}</span>
+                      </td>
+                      <td>
+                        <span class="tx-date-val">{{ formatDate(t.transactionDate) }}</span>
+                      </td>
+                      <td>
+                        <div class="notable-source-chip" [class]="getNotableSourceClass(t)">
+                          <span class="material-symbols-outlined chip-icon">{{ getNotableIcon(t) }}</span>
+                          <span class="chip-label">{{ getNotableSourceLabel(t.source) }}</span>
+                        </div>
+                      </td>
+                      <td class="align-right">
+                        <span class="tx-amount-val" [class.expense]="t.isExpense" [class.income]="!t.isExpense">
+                          {{ t.isExpense ? '-' : '+' }}{{ formatCurrency(t.totalAmount) }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+
+              <!-- Mobile List Layout (replaces table on smaller screens) -->
+              <div class="notable-mobile-list">
+                @for (t of filteredNotableTransactions; track t.id) {
+                  <div class="mobile-tx-card" (click)="openTransactionDetail(t)">
+                    <div class="mobile-tx-card__header">
+                      <div class="mobile-tx-card__title-wrap">
+                        <p class="mobile-tx-card__title">{{ t.name || 'Giao d\u1ecbch kh\u00f4ng t\u00ean' }}</p>
+                        <span class="mobile-tx-card__date">{{ formatDate(t.transactionDate) }}</span>
+                      </div>
+                      <span class="mobile-tx-card__amount" [class.expense]="t.isExpense" [class.income]="!t.isExpense">
+                        {{ t.isExpense ? '-' : '+' }}{{ formatCurrency(t.totalAmount) }}
+                      </span>
+                    </div>
+
+                    <div class="mobile-tx-card__body">
+                      <span class="notable-category-pill">{{ getCategoryLabel(t) }}</span>
+                      <span class="mobile-tx-card__account">{{ t.paymentMethod || 'Ví mặc định' }}</span>
+                      <div class="notable-source-chip" [class]="getNotableSourceClass(t)">
+                        <span class="material-symbols-outlined chip-icon">{{ getNotableIcon(t) }}</span>
+                        <span class="chip-label">{{ getNotableSourceLabel(t.source) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      </div>
+    }
+  </div>
+
+  <!-- Shared Transaction Detail Drawer overlay component -->
+  @if (selectedTransaction) {
+    <app-transaction-detail-modal
+      [transaction]="selectedTransaction"
+      (closeModal)="closeTransactionDetail()"
+    ></app-transaction-detail-modal>
+  }
+</section>

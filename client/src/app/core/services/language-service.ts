@@ -33,6 +33,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       account: 'T\u00e0i kho\u1ea3n',
       settings: 'C\u00e0i \u0111\u1eb7t',
       logout: '\u0110\u0103ng xu\u1ea5t',
+      analysis: 'Ph\u00e2n t\u00edch',
     },
     header: {
       greeting: 'Xin ch\u00e0o, {{name}}',
@@ -432,6 +433,115 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       placeholder: 'H\u1ecfi Snaptics AI...',
       hint: 'AI c\u00f3 th\u1ec3 m\u1eafc l\u1ed7i. H\u00e3y ki\u1ec3m tra l\u1ea1i th\u00f4ng tin quan tr\u1ecdng.',
     },
+    analysis: {
+      title: 'Ph\u00e2n t\u00edch chi ti\u00eau',
+      subtitle: 'Hi\u1ec3u r\u00f5 d\u00f2ng ti\u1ec1n v\u00e0 th\u00f3i quen chi ti\u00eau c\u1ee7a b\u1ea1n',
+      exportReport: 'Xu\u1ea5t b\u00e1o c\u00e1o',
+      allAccounts: 'T\u1ea5t c\u1ea3 t\u00e0i kho\u1ea3n',
+      compareLabel: 'So s\u00e1nh v\u1edbi k\u1ef3 tr\u01b0\u1edbc',
+      categories: {
+        food: '\u0102n u\u1ed1ng',
+        housing: 'Nh\u00e0 \u1edf',
+        travel: 'Di chuy\u1ec3n',
+        shopping: 'Mua s\u1eafm',
+        entertainment: 'Gi\u1ea3i tr\u00ed',
+        bills: 'H\u00f3a \u0111\u01a1n & Ti\u1ec7n \u00edch',
+        drinks: '\u0110\u1ed3 u\u1ed1ng',
+        animals: 'Th\u00fa c\u01b0ng',
+        electronics: '\u0110i\u1ec7n t\u1eed',
+        household: 'Gia d\u1ee5ng',
+        other: 'Kh\u00e1c'
+      },
+      kpi: {
+        income: 'T\u1ed5ng thu nh\u1eadp',
+        expense: 'T\u1ed5ng chi ti\u00eau',
+        savings: 'Ti\u1ebft ki\u1ec7m r\u00f2ng',
+        rate: 'T\u1ef7 l\u1ec7 ti\u1ebft ki\u1ec7m',
+        incomeTooltip: 'T\u1ed5ng t\u1ea5t c\u1ea3 c\u00e1c giao d\u1ecbch thu nh\u1eadp trong k\u1ef3',
+        expenseTooltip: 'T\u1ed5ng t\u1ea5t c\u1ea3 c\u00e1c giao d\u1ecbch chi ti\u00eau trong k\u1ef3',
+        savingsTooltip: 'Hi\u1ec7u s\u1ed1 gi\u1eefa Thu nh\u1eadp v\u00e0 Chi ti\u00eau (Thu nh\u1eadp - Chi ti\u00eau)',
+        rateTooltip: 'Ph\u1ea7n tr\u0103m thu nh\u1eadp \u0111\u01b0\u1ee3c gi\u1eef l\u1ea1i \u0111\u1ec3 ti\u1ebft ki\u1ec7m (Ti\u1ebft ki\u1ec7m r\u00f2ng / Thu nh\u1eadp)'
+      },
+      cashFlow: {
+        title: 'D\u00f2ng ti\u1ec1n',
+        income: 'Thu nh\u1eadp',
+        expense: 'Chi ti\u00eau',
+        net: 'S\u1ed1 d\u01b0 r\u00f2ng',
+        daily: 'Theo ng\u00e0y',
+        weekly: 'Theo tu\u1ea7n',
+        monthly: 'Theo th\u00e1ng'
+      },
+      categorySpending: {
+        title: 'Chi ti\u00eau theo danh m\u1ee5c',
+        noData: 'Ch\u01b0a c\u00f3 d\u1eef li\u1ec7u chi ti\u00eau danh m\u1ee5c'
+      },
+      budgetPerformance: {
+        title: 'Hi\u1ec5u su\u1ea5t ng\u00e2n s\u00e1ch',
+        safe: 'An to\u00e0n',
+        warning: 'S\u1eafp \u0111\u1ea1t gi\u1edbi h\u1ea1n',
+        danger: 'V\u01b0\u1ee3t ng\u00e2n s\u00e1ch',
+        remaining: 'c\u00f2n l\u1ea1i',
+        over: 'v\u01b0\u1ee3t',
+        viewAll: 'Xem t\u1ea5t c\u1ea3 ng\u00e2n s\u00e1ch',
+        noBudgets: 'Ch\u01b0a thi\u1ebft l\u1eadp ng\u00e2n s\u00e1ch n\u00e0o'
+      },
+      insights: {
+        title: 'Ph\u00e2n t\u00edch th\u00f4ng minh',
+        high: 'Cao',
+        medium: 'Trung b\u00ecnh',
+        low: 'Th\u1ea5p',
+        actions: {
+          viewTx: 'Xem giao d\u1ecbch',
+          adjust: '\u0110i\u1ec1u ch\u1ec9nh v\u00ed',
+          goal: 'T\u1ea1o m\u1ee5c ti\u00eau',
+          detail: 'Xem chi ti\u1ebft'
+        }
+      },
+      comparison: {
+        title: 'So s\u00e1nh chi ti\u00eau',
+        byCategory: 'Theo danh m\u1ee5c',
+        byWeek: 'Theo tu\u1ea7n',
+        byAccount: 'Theo t\u00e0i kho\u1ea3n'
+      },
+      recurring: {
+        title: 'Chi ph\u00ed \u0111\u1ecbnh k\u1ef3',
+        monthlyTotal: 'T\u1ed5ng chi \u0111\u1ecbnh k\u1ef3 / th\u00e1ng',
+        nextPay: 'H\u1ea1n ti\u1ebfp theo'
+      },
+      merchants: {
+        title: 'N\u01a1i b\u1ea1n chi ti\u00eau nhi\u1ec1u nh\u1ea5t',
+        txsCount: '{{count}} giao d\u1ecbch'
+      },
+      transactions: {
+        title: 'Giao d\u1ecbch \u0111\u00e1ng ch\u00fa \u00fd',
+        tabAll: 'T\u1ea5t c\u1ea3',
+        tabHigh: 'Gi\u00e1 tr\u1ecb cao',
+        tabUnusual: 'B\u1ea5t th\u01b0\u1eddng',
+        tabUnclassified: 'Ch\u01b0a ph\u00e2n lo\u1ea1i',
+        tabBills: 'T\u1eeb h\u00f3a \u0111\u01a1n',
+        colTx: 'Giao d\u1ecbch',
+        colCategory: 'Danh m\u1ee5c',
+        colAccount: 'T\u00e0i kho\u1ea3n',
+        colDate: 'Ng\u00e0y',
+        colSource: 'Ngu\u1ed3n',
+        colAmount: 'S\u1ed1 ti\u1ec1n',
+        colStatus: 'Tr\u1ea1ng th\u00e1i',
+        sourceManual: 'Nh\u1eadp th\u1ee7 c\u00f4ng',
+        sourceScan: 'Qu\u00e9t h\u00f3a \u0111\u01a1n',
+        sourceSync: '\u0110\u1ed3ng b\u1ed9 ng\u00e2n h\u00e0ng'
+      },
+      states: {
+        loading: '\u0110ang t\u1ea3i d\u1eef li\u1ec7u ph\u00e2n t\u00edch...',
+        emptyTitle: 'Ch\u01b0a c\u00f3 \u0111\u1ee7 d\u1eef li\u1ec7u \u0111\u1ec3 ph\u00e2n t\u00edch',
+        emptyDesc: 'H\u00e3y th\u00eam giao d\u1ecbch ho\u1eb7c qu\u00e9t h\u00f3a \u0111\u01a1n \u0111\u1ec3 b\u1ea3t \u0111\u1ea7u theo d\u00f5i t\u00e0i ch\u00ednh.',
+        emptyBtnTx: 'Th\u00eam giao d\u1ecbch',
+        emptyBtnScan: 'Qu\u00e9t h\u00f3a \u0111\u01a1n',
+        emptyBtnBudget: 'T\u1ea1o ng\u00e2n s\u00e1ch',
+        errorTitle: 'Kh\u00f4ng th\u1ec3 t\u1ea3i d\u1eef li\u1ec7u ph\u00e2n t\u00edch',
+        errorDesc: '\u0110\u00e3 x\u1ea3y ra l\u1ed7i trong qu\u00e1 tr\u00ecnh x\u1eed l\u00fd s\u1ed1 li\u1ec7u.',
+        errorBtn: 'Th\u1eed l\u1ea1i'
+      }
+    },
   },
   en: {
     common: {
@@ -455,6 +565,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       account: 'Account',
       settings: 'Settings',
       logout: 'Logout',
+      analysis: 'Analysis',
     },
     header: {
       greeting: 'Hello, {{name}}',
@@ -839,6 +950,115 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       today: 'Today',
       placeholder: 'Ask Snaptics AI...',
       hint: 'AI may make mistakes. Please verify important information.',
+    },
+    analysis: {
+      title: 'Spend Analysis',
+      subtitle: 'Understand your cash flow and spending habits',
+      exportReport: 'Export report',
+      allAccounts: 'All accounts',
+      compareLabel: 'Compare with previous period',
+      categories: {
+        food: 'Food & Dining',
+        housing: 'Housing',
+        travel: 'Travel',
+        shopping: 'Shopping',
+        entertainment: 'Entertainment',
+        bills: 'Bills & Utilities',
+        drinks: 'Drinks',
+        animals: 'Pets',
+        electronics: 'Electronics',
+        household: 'Household',
+        other: 'Other'
+      },
+      kpi: {
+        income: 'Total Income',
+        expense: 'Total Expense',
+        savings: 'Net Savings',
+        rate: 'Savings Rate',
+        incomeTooltip: 'Sum of all positive cash flow in the period',
+        expenseTooltip: 'Sum of all negative cash flow in the period',
+        savingsTooltip: 'Net cash flow (Income - Expense)',
+        rateTooltip: 'Percentage of income retained for savings (Net Savings / Income)'
+      },
+      cashFlow: {
+        title: 'Cash Flow',
+        income: 'Income',
+        expense: 'Expense',
+        net: 'Net Balance',
+        daily: 'Daily',
+        weekly: 'Weekly',
+        monthly: 'Monthly'
+      },
+      categorySpending: {
+        title: 'Spending by Category',
+        noData: 'No category spending data yet'
+      },
+      budgetPerformance: {
+        title: 'Budget Performance',
+        safe: 'Safe',
+        warning: 'Near limit',
+        danger: 'Over budget',
+        remaining: 'remaining',
+        over: 'over',
+        viewAll: 'View all budgets',
+        noBudgets: 'No budgets set up yet'
+      },
+      insights: {
+        title: 'Smart Insights',
+        high: 'High',
+        medium: 'Medium',
+        low: 'Low',
+        actions: {
+          viewTx: 'View transactions',
+          adjust: 'Adjust wallet',
+          goal: 'Create goal',
+          detail: 'View details'
+        }
+      },
+      comparison: {
+        title: 'Spending Comparison',
+        byCategory: 'By category',
+        byWeek: 'By week',
+        byAccount: 'By account'
+      },
+      recurring: {
+        title: 'Recurring Expenses',
+        monthlyTotal: 'Total monthly recurring',
+        nextPay: 'Next payment'
+      },
+      merchants: {
+        title: 'Where you spend the most',
+        txsCount: '{{count}} transactions'
+      },
+      transactions: {
+        title: 'Notable Transactions',
+        tabAll: 'All',
+        tabHigh: 'High value',
+        tabUnusual: 'Unusual',
+        tabUnclassified: 'Unclassified',
+        tabBills: 'From bills',
+        colTx: 'Transaction',
+        colCategory: 'Category',
+        colAccount: 'Account',
+        colDate: 'Date',
+        colSource: 'Source',
+        colAmount: 'Amount',
+        colStatus: 'Status',
+        sourceManual: 'Manual entry',
+        sourceScan: 'Receipt scan',
+        sourceSync: 'Bank sync'
+      },
+      states: {
+        loading: 'Loading analytical data...',
+        emptyTitle: 'Not enough data to analyze yet',
+        emptyDesc: 'Add transactions or scan receipts to start tracking your finances.',
+        emptyBtnTx: 'Add transaction',
+        emptyBtnScan: 'Scan receipt',
+        emptyBtnBudget: 'Create budget',
+        errorTitle: 'Unable to load analysis',
+        errorDesc: 'An error occurred during data processing.',
+        errorBtn: 'Retry'
+      }
     },
   },
 };

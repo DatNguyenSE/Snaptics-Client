@@ -89,6 +89,11 @@ export const routes: Routes = [
           import('./user-page/user-features/transaction/transaction').then((m) => m.Transaction),
       },
       {
+        path: 'analysis',
+        loadComponent: () =>
+          import('./user-page/user-features/analysis/analysis').then((m) => m.Analysis),
+      },
+      {
         path: 'scan',
         loadComponent: () =>
           import('./user-page/user-features/scan/scan').then((m) => m.Scan),

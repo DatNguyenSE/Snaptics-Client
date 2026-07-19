@@ -52,6 +52,12 @@ export class Nav {
       route: '/user/transactions',
     },
     {
+      id: 'analysis',
+      labelKey: 'nav.analysis',
+      icon: 'analytics',
+      route: '/user/analysis',
+    },
+    {
       id: 'scan',
       labelKey: 'nav.scan',
       icon: 'qr_code_scanner',

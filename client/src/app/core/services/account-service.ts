@@ -132,9 +132,9 @@ export class AccountService {
 
   login(creds: LoginCreds) {
     // Mock login: chỉ kích hoạt khi USE_MOCK_AUTH=true và KHÔNG phải production
-    // if (USE_MOCK_AUTH) {
-    //   return this.mockLogin(creds);
-    // }
+    if (USE_MOCK_AUTH) {
+      return this.mockLogin(creds);
+    }
 
     // Real API login (không thay đổi)
     return this.http
@@ -206,7 +206,7 @@ export class AccountService {
           let parsedResponse: any = response;
           try {
             parsedResponse = JSON.parse(response);
-          } catch (e) {}
+          } catch (e) { }
 
           if (parsedResponse && typeof parsedResponse === 'object' && (parsedResponse.email || parsedResponse.id || parsedResponse.token)) {
             this.setCurrentUser(parsedResponse as User);
