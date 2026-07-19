@@ -1,0 +1,39 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Page Container Layout */
+.ai-page-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--sw-background);
+}
+
+/* Desktop Sidebar Offset */
+@media (min-width: 1024px) {
+  .ai-page-container {
+    padding-left: 240px; /* Offset the main application sidebar */
+  }
+}
+
+/* Tablet & Mobile Layout Adjustment */
+@media (max-width: 1023px) {
+  .ai-page-container {
+    height: calc(100dvh - 80px);
+    height: calc(100vh - 80px); /* Fallback for older browsers */
+  }
+
+  /* When conversation list is open as an overlay on smaller screens */
+  app-conversation-history {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 500;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.15);
+  }
+}

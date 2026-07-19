@@ -1,0 +1,42 @@
+<div class="ai-page-container">
+  <!-- Conversation History Sidebar -->
+  <app-conversation-history
+    [conversations]="chatStorage.conversations()"
+    [activeId]="activeConversationId()"
+    [isCollapsed]="isHistoryCollapsed()"
+    (selected)="selectConversation($event)"
+    (newChat)="createNewChat()"
+    (rename)="openRenameDialog($event)"
+    (delete)="openDeleteDialog($event)"
+    (togglePin)="togglePin($event)"
+    (collapsedChange)="isHistoryCollapsed.set($event)"
+  ></app-conversation-history>
+
+  <!-- Chat Workspace -->
+  <app-chat-workspace
+    [conversation]="activeConversation"
+    [isAiResponding]="isAiResponding()"
+    [isHistoryClosed]="isHistoryCollapsed()"
+    (toggleHistory)="isHistoryCollapsed.set(!isHistoryCollapsed())"
+    (messageSent)="sendMessage($event)"
+    (stopRequested)="cancelAiRequest()"
+    (newChat)="createNewChat()"
+    (clearAllChats)="clearAllChats()"
+    (regenerateRequested)="regenerateResponse($event)"
+  ></app-chat-workspace>
+</div>
+
+<!-- Modals -->
+<app-rename-conversation-dialog
+  [isOpen]="isRenameOpen"
+  [conversationTitle]="conversationToRename ? conversationToRename.title : ''"
+  (save)="saveRename($event)"
+  (cancel)="closeRenameDialog()"
+></app-rename-conversation-dialog>
+
+<app-delete-conversation-dialog
+  [isOpen]="isDeleteOpen"
+  [conversationTitle]="conversationToDelete ? conversationToDelete.title : ''"
+  (confirm)="confirmDelete()"
+  (cancel)="closeDeleteDialog()"
+></app-delete-conversation-dialog>

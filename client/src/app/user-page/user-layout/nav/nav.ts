@@ -76,6 +76,12 @@ export class Nav {
       icon: 'notifications',
       route: '/user/reminders',
     },
+    {
+      id: 'snaptics-ai',
+      labelKey: 'nav.snapticsAi',
+      icon: 'smart_toy',
+      route: '/user/snaptics-ai',
+    },
   ];
 
   readonly languages: LanguageOption[] = [

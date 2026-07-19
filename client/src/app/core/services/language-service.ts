@@ -562,6 +562,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       manualEntry: 'Manual Entry',
       transactions: 'Transactions',
       reminders: 'Reminders',
+      snapticsAi: 'Snaptics AI',
       account: 'Account',
       settings: 'Settings',
       logout: 'Logout',

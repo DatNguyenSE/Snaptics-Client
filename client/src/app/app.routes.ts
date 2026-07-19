@@ -117,6 +117,11 @@ export const routes: Routes = [
         pathMatch: 'full',
       },
       {
+        path: 'snaptics-ai',
+        loadComponent: () =>
+          import('./user-page/user-features/snaptics-ai/snaptics-ai').then((m) => m.SnapticsAIPage),
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',
