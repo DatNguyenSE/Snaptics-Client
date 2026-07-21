@@ -63,9 +63,9 @@ export class AccountService {
   protected baseUrl = environment.apiUrl;
 
   setCurrentUser(user: User) {
-    if (user.token) {
+    if (user && user.token) {
       user.roles = this.getRolesFromToken(user);
-    } else {
+    } else if (user) {
       user.roles = user.roles || [];
     }
     this.currentUser.set(user);
@@ -132,9 +132,9 @@ export class AccountService {
 
   login(creds: LoginCreds) {
     // Mock login: chỉ kích hoạt khi USE_MOCK_AUTH=true và KHÔNG phải production
-    if (USE_MOCK_AUTH) {
-      return this.mockLogin(creds);
-    }
+    // if (USE_MOCK_AUTH) {
+    //   return this.mockLogin(creds);
+    // }
 
     // Real API login (không thay đổi)
     return this.http

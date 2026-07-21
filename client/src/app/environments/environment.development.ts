@@ -9,4 +9,4 @@ export const environment = {
     // Bật true để xem giao diện Transaction với dữ liệu mẫu, không cần backend.
     // Luôn false trên production (xem environment.ts).
     useMockTransactions: true,
-};
+};

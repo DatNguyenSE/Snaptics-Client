@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild, inject, signal, Input, OnChanges, SimpleChanges, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, inject, signal, Input, Output, EventEmitter, OnChanges, SimpleChanges, OnInit } from '@angular/core';
 import { AccountService } from '../../../core/services/account-service';
 import { LanguageService } from '../../../core/services/language-service';
 import { NotificationService } from '../../../core/services/notification-service';
@@ -26,6 +26,14 @@ export class UserHeader {
   displayTitle = '';
   displaySubtitle = '';
   isFading = false;
+  isTyping = false;
+  private typingTimeout: any;
+
+  @Output() avatarClick = new EventEmitter<void>();
+
+  onAvatarClick(): void {
+    this.avatarClick.emit();
+  }
 
   ngOnInit(): void {
     this.displayTitle = `${this.greeting}, ${this.userName}!`;
@@ -48,12 +56,30 @@ export class UserHeader {
   }
 
   private applyContent(response: { title: string, subtitle: string } | null): void {
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+    
     if (response) {
       this.displayTitle = response.title;
-      this.displaySubtitle = response.subtitle;
+      this.displaySubtitle = '';
+      this.isTyping = true;
+      this.typeText(response.subtitle, 0);
     } else {
+      this.isTyping = false;
       this.displayTitle = `${this.greeting}, ${this.userName}!`;
       this.displaySubtitle = this.funnySlogan;
+    }
+  }
+
+  private typeText(text: string, index: number): void {
+    if (index < text.length) {
+      this.displaySubtitle += text.charAt(index);
+      this.typingTimeout = setTimeout(() => {
+        this.typeText(text, index + 1);
+      }, 15); // Faster 15ms per character
+    } else {
+      this.isTyping = false;
     }
   }
 

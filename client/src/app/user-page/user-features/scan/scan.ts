@@ -556,12 +556,6 @@ export class Scan implements OnInit, OnDestroy {
 
   // ─── Receipt Confirm ─────────────────────────────────────────────────────────
   confirmScan(): void {
-    const hasUnknownCategory = this.receiptItems.some((item) => !item.categoryId);
-    if (hasUnknownCategory) {
-      this.toast.error(this.lang.t('scan.toast.selectCategory'));
-      return;
-    }
-
     this.processingState = 'saving';
 
     const requestData: CreateTransactionFromBillDto = {

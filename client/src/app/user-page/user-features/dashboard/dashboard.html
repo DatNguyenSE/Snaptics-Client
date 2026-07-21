@@ -1,6 +1,6 @@
 <section class="user-dashboard">
   <div class="user-dashboard__content">
-    <app-user-header [aiResponse]="currentAiResponse"></app-user-header>
+    <app-user-header [aiResponse]="currentAiResponse" (avatarClick)="resetAiResponse()"></app-user-header>
 
     <!-- ── AI SEARCH COMPONENT ─────────────────────────────────────────── -->
     <div class="ai-search-container">
@@ -318,5 +318,3 @@
   (close)="closeTrendSummaryModal()">
 </app-trend-summary-modal>
 
-<!-- ── AI ASSISTANT CHAT BOX ────────────────────────────────────────────── -->
-<app-ai-assistant></app-ai-assistant>

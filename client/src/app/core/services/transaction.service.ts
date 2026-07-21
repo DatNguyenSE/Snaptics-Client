@@ -54,7 +54,9 @@ export class TransactionService {
       take(1),
       map((transactions) => transactions.find((transaction) => transaction.id === id) ?? null),
       switchMap((transaction) =>
-        transaction ? of(transaction) : this.http.get<TransactionDto>(`${this.apiUrl}/${id}`),
+        transaction ? of(transaction) : this.http.get<TransactionDto>(`${this.apiUrl}/${id}`).pipe(
+          map(t => this.sanitizeTransaction(t))
+        ),
       ),
     );
   }
@@ -175,15 +177,27 @@ export class TransactionService {
         }),
       )
       .subscribe((transactions) => {
-        this.remoteTransactionsSubject.next(this.sortTransactions(transactions));
+        const sanitized = transactions.map(t => this.sanitizeTransaction(t));
+        this.remoteTransactionsSubject.next(this.sortTransactions(sanitized));
       });
   }
 
+  private sanitizeTransaction(t: TransactionDto): TransactionDto {
+    const copy = { ...t };
+    if (copy.name && copy.name.toLowerCase() === 'ai assistant') {
+      if (copy.transactionDetails && copy.transactionDetails.length > 0) {
+        copy.name = copy.transactionDetails[0].itemName || copy.name;
+      }
+    }
+    return copy;
+  }
+
   private upsertRemoteTransaction(transaction: TransactionDto): void {
+    const sanitized = this.sanitizeTransaction(transaction);
     const nextTransactions = this.sortTransactions([
-      transaction,
+      sanitized,
       ...this.remoteTransactionsSubject.value.filter(
-        (existingTransaction) => existingTransaction.id !== transaction.id,
+        (existingTransaction) => existingTransaction.id !== sanitized.id,
       ),
     ]);
 
@@ -195,7 +209,7 @@ export class TransactionService {
     const user = this.accountService.currentUser();
     const transactionId = -timestamp;
 
-    return {
+    const transaction: TransactionDto = {
       id: transactionId,
       name: data.title.trim(),
       userId: user?.id || user?.email || 'local-user',
@@ -224,6 +238,8 @@ export class TransactionService {
         },
       ],
     };
+
+    return this.sanitizeTransaction(transaction);
   }
 
   private mergeTransactions(

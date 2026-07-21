@@ -13,7 +13,7 @@ import { BudgetService, BudgetDto } from '../../../core/services/budget.service'
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { CategorySummaryModal } from './category-summary-modal/category-summary-modal';
 import { TrendSummaryModal } from './trend-summary-modal/trend-summary-modal';
-import { AiAssistant } from '../ai-assistant/ai-assistant';
+import { AiService } from '../../../core/services/ai.service';
 import { SpendingComparisonResponseDto, SpendingPeriodDto } from '../../../models/dashboard.dto';
 import type {
   ApexNonAxisChartSeries,
@@ -59,7 +59,7 @@ export interface UserBudget {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, UserHeader, DatePipe, TransactionDetailModal, NgApexchartsModule, FormsModule, CategorySummaryModal, TrendSummaryModal, AiAssistant],
+  imports: [RouterLink, UserHeader, DatePipe, TransactionDetailModal, NgApexchartsModule, FormsModule, CategorySummaryModal, TrendSummaryModal],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -68,6 +68,7 @@ export class Dashboard implements OnInit {
   private readonly transactionService = inject(TransactionService);
   private readonly budgetService = inject(BudgetService);
   private readonly dashboardService = inject(DashboardService);
+  private readonly aiService = inject(AiService);
   
   totalBudget = 5_000_000;
   isCategorySummaryModalOpen = false;
@@ -94,23 +95,9 @@ export class Dashboard implements OnInit {
   aiSuggestions: string[] = [];
   currentAiResponse: { title: string, subtitle: string } | null = null;
   
-  private mockAiResponses = [
-    {
-      keywords: ["chi tiêu", "tháng này", "bao nhiêu", "spend", "this month"],
-      title: "Chi tiêu tháng này của bạn nè 👀",
-      subtitle: "Tháng này xài dữ quá, hết 20.350.000đ lận, nhiều nhất là ăn uống (35%) đó nha."
-    },
-    {
-      keywords: ["so sánh", "tháng trước", "compare", "last month"],
-      title: "So với tháng trước bạn nè 📊",
-      subtitle: "Chi nhiều hơn 12%, tương đương +2.180.000đ so với tháng trước đó nha."
-    },
-    {
-      keywords: ["tiết kiệm", "gợi ý", "saving", "tips"],
-      title: "Mẹo tiết kiệm cho bạn 💡",
-      subtitle: "Bạn có thể bớt ăn ngoài lại, tự nấu ăn sẽ tiết kiệm được khoảng 2.000.000đ mỗi tháng đấy!"
-    }
-  ];
+  resetAiResponse(): void {
+    this.currentAiResponse = null;
+  }
 
   // ─── KPI ─────────────────────────────────────────────────────────────────
   get currentMonthTransactions(): TransactionDto[] {
@@ -260,33 +247,31 @@ export class Dashboard implements OnInit {
     this.aiQuery = suggestion;
   }
 
-  async submitAiQuery(): Promise<void> {
+  submitAiQuery(): void {
     if (!this.aiQuery.trim()) return;
     
     this.isAiLoading = true;
     const query = this.aiQuery;
     
-    try {
-      // Simulate AI processing delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const lower = query.toLowerCase();
-      const match = this.mockAiResponses.find(r => r.keywords.some(k => lower.includes(k)));
-      
-      if (match) {
-        this.currentAiResponse = { title: match.title, subtitle: match.subtitle };
-      } else {
+    this.aiService.ask(query).subscribe({
+      next: (response) => {
         this.currentAiResponse = { 
-          title: `Kết quả cho: "${query}"`, 
-          subtitle: "Mình chưa có đủ dữ liệu để trả lời chính xác câu này." 
+          title: "Trợ lý Roni 🤖", 
+          subtitle: response.reply 
         };
+      },
+      error: (err) => {
+        console.error(err);
+        this.currentAiResponse = { 
+          title: "Lỗi kết nối", 
+          subtitle: "Roni đang bận hoặc có lỗi xảy ra, bạn thử lại sau nhé." 
+        };
+      },
+      complete: () => {
+        this.isAiLoading = false;
+        this.aiQuery = '';
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      this.isAiLoading = false;
-      this.aiQuery = '';
-    }
+    });
   }
 
   private loadSpendingComparison(): void {

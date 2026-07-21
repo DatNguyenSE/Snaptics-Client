@@ -1,5 +1,5 @@
 <header class="user-header">
-  <div class="user-header__avatar-wrapper">
+  <div class="user-header__avatar-wrapper" (click)="onAvatarClick()" style="cursor: pointer;">
     <video 
       src="/Roni_AI/Roni_hi_video.mp4" 
       [autoplay]="true" 
@@ -13,7 +13,12 @@
   <div class="user-header__text-container">
     <div class="user-header__text" [class.fade-out]="isFading">
       <h3>{{ displayTitle }}</h3>
-      <p class="subtitle-text" [title]="displaySubtitle">{{ displaySubtitle }}</p>
+      <p class="subtitle-text" [title]="displaySubtitle">
+        {{ displaySubtitle }}
+        @if (isTyping) {
+          <span class="typing-cursor"></span>
+        }
+      </p>
     </div>
   </div>
 

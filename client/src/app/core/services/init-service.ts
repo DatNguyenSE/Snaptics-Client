@@ -27,11 +27,10 @@ export class InitService {
           this.accountService.setCurrentUser(user);
           this.accountService.startTokenRefreshInterval();
         }
-      }),
-      catchError((error) => {
+      }),catchError((error) => {
         console.log('Không thể làm mới token:', error);
         return of(null); 
       })
     );
   }
-}
+}
