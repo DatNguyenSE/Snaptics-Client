@@ -10,9 +10,11 @@
     ></video>
   </div>
 
-  <div class="user-header__text">
-    <h3>{{ greeting }}, {{ userName }}!</h3>
-    <p>{{ funnySlogan }}</p>
+  <div class="user-header__text-container">
+    <div class="user-header__text" [class.fade-out]="isFading">
+      <h3>{{ displayTitle }}</h3>
+      <p class="subtitle-text" [title]="displaySubtitle">{{ displaySubtitle }}</p>
+    </div>
   </div>
 
   <div class="user-header__actions">

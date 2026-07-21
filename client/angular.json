@@ -34,7 +34,11 @@
               }
             ],
             "styles": [
+              "node_modules/@tabler/core/dist/css/tabler.min.css",
               "src/styles.css"
+            ],
+            "scripts": [
+              "node_modules/@tabler/core/dist/js/tabler.min.js"
             ]
           },
           "configurations": {
@@ -102,7 +106,11 @@
               }
             ],
             "styles": [
+              "node_modules/@tabler/core/dist/css/tabler.min.css",
               "src/styles.css"
+            ],
+            "scripts": [
+              "node_modules/@tabler/core/dist/js/tabler.min.js"
             ]
           }
         }

@@ -173,10 +173,4 @@ export class Nav {
     return fullName.toLowerCase().replace(/\s+/g, '');
   }
 
-  handleItemClick(event: MouseEvent, item: AppNavItem, isActive: boolean): void {
-    if (item.isScanItem && isActive) {
-      event.preventDefault();
-      window.dispatchEvent(new CustomEvent('nav-shutter-click'));
-    }
-  }
 }

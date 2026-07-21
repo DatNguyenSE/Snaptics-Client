@@ -88,6 +88,30 @@ export class Dashboard implements OnInit {
   selectedTransaction: TransactionDto | null = null;
   private allTransactions: TransactionDto[] = [];
 
+  // ─── AI Search State ─────────────────────────────────────────────────────
+  aiQuery = '';
+  isAiLoading = false;
+  aiSuggestions: string[] = [];
+  currentAiResponse: { title: string, subtitle: string } | null = null;
+  
+  private mockAiResponses = [
+    {
+      keywords: ["chi tiêu", "tháng này", "bao nhiêu", "spend", "this month"],
+      title: "Chi tiêu tháng này của bạn nè 👀",
+      subtitle: "Tháng này xài dữ quá, hết 20.350.000đ lận, nhiều nhất là ăn uống (35%) đó nha."
+    },
+    {
+      keywords: ["so sánh", "tháng trước", "compare", "last month"],
+      title: "So với tháng trước bạn nè 📊",
+      subtitle: "Chi nhiều hơn 12%, tương đương +2.180.000đ so với tháng trước đó nha."
+    },
+    {
+      keywords: ["tiết kiệm", "gợi ý", "saving", "tips"],
+      title: "Mẹo tiết kiệm cho bạn 💡",
+      subtitle: "Bạn có thể bớt ăn ngoài lại, tự nấu ăn sẽ tiết kiệm được khoảng 2.000.000đ mỗi tháng đấy!"
+    }
+  ];
+
   // ─── KPI ─────────────────────────────────────────────────────────────────
   get currentMonthTransactions(): TransactionDto[] {
     const now = new Date();
@@ -217,10 +241,52 @@ export class Dashboard implements OnInit {
   }
 
   ngOnInit(): void {
+    this.initAiSuggestions();
     this.loadTransactions();
     this.loadActiveBudget();
     this.loadTopCategory();
     this.loadSpendingComparison();
+  }
+
+  private initAiSuggestions(): void {
+    this.aiSuggestions = [
+      this.language.t('dashboard.aiSuggestions.howMuch'),
+      this.language.t('dashboard.aiSuggestions.compare'),
+      this.language.t('dashboard.aiSuggestions.savings')
+    ];
+  }
+
+  fillAiQuery(suggestion: string): void {
+    this.aiQuery = suggestion;
+  }
+
+  async submitAiQuery(): Promise<void> {
+    if (!this.aiQuery.trim()) return;
+    
+    this.isAiLoading = true;
+    const query = this.aiQuery;
+    
+    try {
+      // Simulate AI processing delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const lower = query.toLowerCase();
+      const match = this.mockAiResponses.find(r => r.keywords.some(k => lower.includes(k)));
+      
+      if (match) {
+        this.currentAiResponse = { title: match.title, subtitle: match.subtitle };
+      } else {
+        this.currentAiResponse = { 
+          title: `Kết quả cho: "${query}"`, 
+          subtitle: "Mình chưa có đủ dữ liệu để trả lời chính xác câu này." 
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.isAiLoading = false;
+      this.aiQuery = '';
+    }
   }
 
   private loadSpendingComparison(): void {

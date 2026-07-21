@@ -29,6 +29,7 @@
     "@angular/forms": "^20.2.0",
     "@angular/platform-browser": "^20.2.0",
     "@angular/router": "^20.2.0",
+    "@tabler/core": "^1.0.0-beta.20",
     "apexcharts": "^5.3.2",
     "chart.js": "^4.5.1",
     "jwt-decode": "^4.0.0",

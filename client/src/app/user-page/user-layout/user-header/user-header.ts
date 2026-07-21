@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, inject, signal, Input, OnChanges, SimpleChanges, OnInit } from '@angular/core';
 import { AccountService } from '../../../core/services/account-service';
 import { LanguageService } from '../../../core/services/language-service';
 import { NotificationService } from '../../../core/services/notification-service';
@@ -21,6 +21,41 @@ export class UserHeader {
 
   @ViewChild('notificationShell', { static: true })
   private notificationShell?: ElementRef<HTMLElement>;
+
+  @Input() aiResponse: { title: string, subtitle: string } | null = null;
+  displayTitle = '';
+  displaySubtitle = '';
+  isFading = false;
+
+  ngOnInit(): void {
+    this.displayTitle = `${this.greeting}, ${this.userName}!`;
+    this.displaySubtitle = this.funnySlogan;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['aiResponse']) {
+      const response = changes['aiResponse'].currentValue;
+      if (!changes['aiResponse'].firstChange) {
+        this.isFading = true;
+        setTimeout(() => {
+          this.applyContent(response);
+          this.isFading = false;
+        }, 150);
+      } else {
+        this.applyContent(response);
+      }
+    }
+  }
+
+  private applyContent(response: { title: string, subtitle: string } | null): void {
+    if (response) {
+      this.displayTitle = response.title;
+      this.displaySubtitle = response.subtitle;
+    } else {
+      this.displayTitle = `${this.greeting}, ${this.userName}!`;
+      this.displaySubtitle = this.funnySlogan;
+    }
+  }
 
   get userName(): string {
     return this.accountService.currentUser()?.displayName?.trim() || 'bạn';

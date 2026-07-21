@@ -1,7 +1,37 @@
 <section class="user-dashboard">
   <div class="user-dashboard__content">
-    <app-user-header></app-user-header>
+    <app-user-header [aiResponse]="currentAiResponse"></app-user-header>
 
+    <!-- ── AI SEARCH COMPONENT ─────────────────────────────────────────── -->
+    <div class="ai-search-container">
+      <div class="ai-search-box">
+        <span class="material-symbols-outlined ai-search-icon">auto_awesome</span>
+        <input 
+          type="text" 
+          [(ngModel)]="aiQuery" 
+          (keydown.enter)="submitAiQuery()"
+          [placeholder]="language.t('dashboard.aiSearchPlaceholder')" 
+          class="ai-search-input"
+        />
+        <button class="ai-search-mic">
+          <span class="material-symbols-outlined">mic</span>
+        </button>
+        <button class="ai-search-submit" (click)="submitAiQuery()" [disabled]="isAiLoading">
+          @if (isAiLoading) {
+            <span class="material-symbols-outlined spinner-icon">hourglass_top</span>
+          } @else {
+            <span class="material-symbols-outlined">arrow_upward</span>
+          }
+        </button>
+      </div>
+      <div class="ai-search-suggestions">
+        @for (suggestion of aiSuggestions; track suggestion) {
+          <button class="ai-search-chip" (click)="fillAiQuery(suggestion)">
+            {{ suggestion }}
+          </button>
+        }
+      </div>
+    </div>
 
     <!-- ── STAT CARDS ──────────────────────────────────────────── -->
     <section class="dashboard-summary-grid">
@@ -127,22 +157,7 @@
       </div>
     </section>
 
-    <!-- ── AI COMPANION ───────────────────────────────────────── -->
-    <section class="ai-insight-card ai-insight-card--dynamic">
-      <div class="ai-companion">
-        <div class="ai-companion__avatar">
-          <span class="ai-companion__pulse"></span>
-          <span class="material-symbols-outlined">smart_toy</span>
-        </div>
-      </div>
-      <div class="ai-insight-card__content">
-        <p class="ai-insight-card__eyebrow">
-          <span class="material-symbols-outlined" style="font-size:0.75rem;vertical-align:middle">auto_awesome</span>
-          {{ language.t('dashboard.aiInsights') }}
-        </p>
-        <p class="ai-insight-card__copy">{{ aiMessage }}</p>
-      </div>
-    </section>
+
 
     <!-- ── ANALYTICS ──────────────────────────────────────────── -->
     <section class="analytics-section">

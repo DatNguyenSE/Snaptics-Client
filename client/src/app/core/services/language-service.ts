@@ -117,8 +117,15 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       usageTitle: '\u0110\u00e1nh gi\u00e1 m\u00f3n \u0111\u1ed3 \u0111\u00e3 mua',
       usageHint: '1 m\u00f3n c\u1ea7n \u0111\u01b0\u1ee3c \u0111\u00e1nh gi\u00e1 theo m\u1ee9c \u0111\u1ed9 s\u1eed d\u1ee5ng',
       recentTransactions: 'Giao d\u1ecbch g\u1ea7n \u0111\u00e2y',
+      noTransactions: 'Chưa có giao dịch nào',
       viewAll: 'Xem t\u1ea5t c\u1ea3',
       aiGen: 'AI GEN',
+      aiSearchPlaceholder: 'Bạn muốn tìm gì? Hỏi mình về chi tiêu, ngân sách...',
+      aiSuggestions: {
+        howMuch: 'Tháng này tôi chi bao nhiêu?',
+        compare: 'So sánh với tháng trước',
+        savings: 'Gợi ý tiết kiệm'
+      },
       weeklySpending: 'Chi tiêu tuần này',
       byCategory: 'Theo danh mục',
       quickAction: {
@@ -228,8 +235,8 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         label: 'Chế độ quét',
       },
       mode: {
-        receipt: 'Quét hóa đơn',
-        item: 'Quét món đồ',
+        receipt: 'Hóa đơn',
+        item: 'Đồ vật',
       },
       instruction: {
         receipt: 'Căn chỉnh hóa đơn vào giữa khung hình để quét',
@@ -649,8 +656,15 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       usageTitle: 'Rate Purchased Items',
       usageHint: '1 item needs to be rated based on usage level',
       recentTransactions: 'Recent Transactions',
+      noTransactions: 'No transactions yet',
       viewAll: 'View All',
       aiGen: 'AI GEN',
+      aiSearchPlaceholder: 'What are you looking for? Ask about spending, budgets...',
+      aiSuggestions: {
+        howMuch: 'How much did I spend this month?',
+        compare: 'Compare to last month',
+        savings: 'Savings tips'
+      },
       weeklySpending: 'Weekly Spending',
       byCategory: 'By Category',
       quickAction: {

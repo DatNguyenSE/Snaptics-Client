@@ -134,16 +134,12 @@
               <div class="camera-guide-overlay" [class.camera-guide-overlay--receipt]="scanMode === 'receipt'" [class.camera-guide-overlay--item]="scanMode === 'item'">
                 <div class="camera-guide-cutout">
                   <div class="camera-guide-cutout-inner"></div>
-                  @if (scanMode === 'receipt') {
-                    <div class="camera-guide-icon">
-                      <span class="material-symbols-outlined">receipt_long</span>
-                    </div>
-                  } @else {
-                    <div class="camera-guide-icon">
-                      <span class="material-symbols-outlined">image_search</span>
-                    </div>
-                  }
                 </div>
+              </div>
+              
+              <!-- Helper Text -->
+              <div class="camera-guide-helper">
+                {{ lang.currentLang() === 'vi' ? (scanMode === 'receipt' ? 'Đặt hóa đơn vừa khung hình' : 'Đặt đồ vật vừa khung hình') : (scanMode === 'receipt' ? 'Align receipt within the frame' : 'Align item within the frame') }}
               </div>
 
               <!-- Auto-Capture Countdown Overlay -->
@@ -174,17 +170,7 @@
                     </span>
                   </button>
                 }
-                @if (hasMultipleCameras) {
-                  <button
-                    class="camera-ctrl-btn"
-                    type="button"
-                    (click)="flipCamera()"
-                    aria-label="Flip camera"
-                    id="btn-flip-camera"
-                  >
-                    <span class="material-symbols-outlined">flip_camera_ios</span>
-                  </button>
-                }
+
               </div>
             </div>
           }
@@ -436,42 +422,6 @@
       @if (captureState === 'live' && processingState === 'idle') {
         <div class="scan-workspace__bottom-controls">
           
-          <!-- Desktop Actions (Hidden on Mobile) -->
-          <div class="desktop-actions">
-            <button class="desktop-action-btn desktop-action-btn--primary" type="button" (click)="capturePhoto()">
-              <span class="material-symbols-outlined">photo_camera</span>
-              {{ lang.currentLang() === 'vi' ? 'Chụp ảnh' : 'Capture' }}
-            </button>
-            <button class="desktop-action-btn desktop-action-btn--secondary" type="button" (click)="triggerUpload()">
-              <span class="material-symbols-outlined">photo_library</span>
-              {{ lang.currentLang() === 'vi' ? 'Chọn ảnh' : 'Upload' }}
-            </button>
-          </div>
-
-          <!-- Mobile Capture Bar (Visible on Mobile) -->
-          <div class="capture-bar mobile-only">
-            <div class="capture-bar__spacer"></div>
-            <button
-              class="capture-btn"
-              type="button"
-              (click)="capturePhoto()"
-              [disabled]="!isCameraActive"
-              aria-label="Take photo"
-            >
-              <div class="capture-btn__ring"></div>
-              <div class="capture-btn__inner"></div>
-            </button>
-            <button
-              class="capture-bar__upload"
-              type="button"
-              (click)="triggerUpload()"
-              [disabled]="isProcessing"
-            >
-              <span class="material-symbols-outlined">photo_library</span>
-              <span class="capture-bar__upload-label">{{ lang.currentLang() === 'vi' ? 'Chọn ảnh' : 'Upload' }}</span>
-            </button>
-          </div>
-
           <!-- Mode Tabs Selector -->
           <div class="scan-mode-tabs-pill">
             <button
@@ -481,7 +431,7 @@
               (click)="setScanMode('receipt')"
               id="mode-tab-receipt"
             >
-              <span class="material-symbols-outlined">receipt_long</span>
+              <i class="ti ti-receipt text-[1.25rem]"></i>
               <span>{{ lang.t('scan.mode.receipt') }}</span>
             </button>
             <button
@@ -496,19 +446,58 @@
             </button>
           </div>
 
-          <!-- Floating Gallery Upload Trigger -->
-          <div class="floating-upload-wrapper">
-            <button
-              class="floating-upload-btn"
-              type="button"
-              (click)="triggerUpload()"
-              [disabled]="isProcessing"
-              title="{{ lang.t('scan.gallery') }}"
-              id="btn-upload-gallery"
-            >
-              <span class="material-symbols-outlined">photo_library</span>
+          <!-- Desktop Actions (Hidden on Mobile) -->
+          <div class="desktop-actions">
+            <button class="desktop-action-btn desktop-action-btn--primary" type="button" (click)="capturePhoto()">
+              <span class="material-symbols-outlined">photo_camera</span>
+              {{ lang.currentLang() === 'vi' ? 'Chụp ảnh' : 'Capture' }}
             </button>
-            <span class="floating-upload-label">{{ lang.currentLang() === 'vi' ? 'Chọn ảnh' : 'Gallery' }}</span>
+            <button class="desktop-action-btn desktop-action-btn--secondary" type="button" (click)="triggerUpload()">
+              <span class="material-symbols-outlined">photo_library</span>
+              {{ lang.currentLang() === 'vi' ? 'Chọn ảnh' : 'Upload' }}
+            </button>
+          </div>
+
+          <!-- Mobile Capture Bar (Visible on Mobile) -->
+          <div class="capture-bar mobile-only">
+            <!-- Left: Upload -->
+            <div class="capture-bar__action-wrapper">
+              <button
+                class="capture-bar__action-btn"
+                type="button"
+                (click)="triggerUpload()"
+                [disabled]="isProcessing"
+                title="{{ lang.currentLang() === 'vi' ? 'Chọn ảnh' : 'Upload' }}"
+              >
+                <span class="material-symbols-outlined">photo_library</span>
+              </button>
+            </div>
+
+            <!-- Center: Capture -->
+            <button
+              class="capture-btn"
+              type="button"
+              (click)="capturePhoto()"
+              [disabled]="!isCameraActive"
+              aria-label="Take photo"
+            >
+              <div class="capture-btn__ring"></div>
+              <div class="capture-btn__inner"></div>
+            </button>
+
+            <!-- Right: Flip Camera -->
+            <div class="capture-bar__action-wrapper">
+              @if (hasMultipleCameras) {
+                <button
+                  class="capture-bar__action-btn"
+                  type="button"
+                  (click)="flipCamera()"
+                  aria-label="Flip camera"
+                >
+                  <span class="material-symbols-outlined">flip_camera_ios</span>
+                </button>
+              }
+            </div>
           </div>
 
 
