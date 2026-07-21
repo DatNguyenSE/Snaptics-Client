@@ -341,6 +341,15 @@
   background: var(--sw-primary-soft);
 }
 
+.account-dropdown__item--admin {
+  color: var(--sw-primary);
+  font-weight: 700;
+}
+
+.account-dropdown__item--admin:hover {
+  background: rgba(91, 123, 250, 0.12);
+}
+
 .account-dropdown__item--danger {
   color: #dc2626;
 }

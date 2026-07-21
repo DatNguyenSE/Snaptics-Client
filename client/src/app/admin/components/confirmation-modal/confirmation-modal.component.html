@@ -1,0 +1,64 @@
+<div class="modal-backdrop" (click)="onBackdropClick($event)" role="dialog" aria-modal="true" [attr.aria-labelledby]="'modal-title'">
+  <div class="modal" [class.modal--danger]="config.isDangerous">
+    <!-- Header -->
+    <div class="modal__header">
+      <div class="modal__icon" [class.modal__icon--danger]="config.isDangerous">
+        <span class="material-symbols-outlined">
+          {{ config.isDangerous ? 'warning' : 'help' }}
+        </span>
+      </div>
+      <div>
+        <h2 class="modal__title" id="modal-title">{{ config.title }}</h2>
+        @if (config.targetName) {
+          <p class="modal__target">{{ config.targetName }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="modal__body">
+      <p class="modal__description">{{ config.description }}</p>
+
+      @if (config.requireReason) {
+        <div class="modal__field">
+          <label class="modal__label" for="modal-reason">Reason <span class="modal__required">*</span></label>
+          <textarea
+            id="modal-reason"
+            class="modal__textarea"
+            [(ngModel)]="reason"
+            placeholder="Please provide a reason for this action..."
+            rows="3"
+            [attr.aria-required]="true"
+          ></textarea>
+        </div>
+      }
+
+      @if (config.requireCheckbox) {
+        <label class="modal__checkbox-wrap">
+          <input type="checkbox" [(ngModel)]="checkboxChecked" class="modal__checkbox" />
+          <span class="modal__checkbox-label">{{ config.checkboxLabel ?? 'I understand this action may affect the user\'s access.' }}</span>
+        </label>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="modal__footer">
+      <button type="button" class="modal__btn modal__btn--cancel" (click)="onCancel()" [disabled]="loading">
+        {{ config.cancelLabel ?? 'Cancel' }}
+      </button>
+      <button
+        type="button"
+        class="modal__btn"
+        [class.modal__btn--confirm]="!config.isDangerous"
+        [class.modal__btn--danger]="config.isDangerous"
+        [disabled]="!canConfirm"
+        (click)="onConfirm()"
+      >
+        @if (loading) {
+          <span class="modal__spinner"></span>
+        }
+        {{ config.confirmLabel ?? 'Confirm' }}
+      </button>
+    </div>
+  </div>
+</div>

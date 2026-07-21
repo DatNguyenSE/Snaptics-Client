@@ -1,0 +1,129 @@
+<div class="audit-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Audit Logs</h1>
+      <p class="page-subtitle">Immutable record of all administrative actions. Every action is tracked and timestamped.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn--ghost">
+        <span class="material-symbols-outlined">download</span>
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="filter-search">
+      <span class="material-symbols-outlined filter-search__icon">search</span>
+      <input type="search" class="filter-search__input" placeholder="Search admin, action or target..." [(ngModel)]="filter.search" (ngModelChange)="onFilterChange()" />
+    </div>
+    <select class="filter-select" [(ngModel)]="filter.role" (ngModelChange)="onFilterChange()">
+      @for (opt of roleOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+    <select class="filter-select" [(ngModel)]="filter.riskLevel" (ngModelChange)="onFilterChange()">
+      @for (opt of riskOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+    <select class="filter-select" [(ngModel)]="filter.status" (ngModelChange)="onFilterChange()">
+      <option value="">All Status</option>
+      <option value="success">Success</option>
+      <option value="failed">Failed</option>
+    </select>
+  </div>
+
+  <div class="table-card">
+    @if (loading) {
+      <app-loading-skeleton [count]="10" [showAvatar]="false" />
+    } @else if (result.data.length === 0) {
+      <app-empty-state icon="fact_check" title="No logs found" description="No audit logs match your filter criteria." />
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Admin</th>
+              <th>Role</th>
+              <th>Action</th>
+              <th>Target</th>
+              <th>Status</th>
+              <th>Risk</th>
+              <th>IP</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (log of result.data; track log.id) {
+              <tr class="data-table__row" (click)="openDetail(log)" style="cursor: pointer;">
+                <td class="td-time">{{ formatTime(log.timestamp) }}</td>
+                <td class="td-name">{{ log.admin }}</td>
+                <td><app-status-badge [variant]="getRoleVariant(log.adminRole)" [label]="log.adminRole" /></td>
+                <td class="td-action">{{ log.action }}</td>
+                <td class="td-target">{{ log.target }}</td>
+                <td><app-status-badge [variant]="getStatusVariant(log.status)" [label]="log.status" /></td>
+                <td><app-status-badge [variant]="getRiskVariant(log.riskLevel)" [label]="log.riskLevel" /></td>
+                <td class="td-ip">{{ log.ipAddress }}</td>
+                <td>
+                  <button type="button" class="action-btn" title="View Details" (click)="openDetail(log); $event.stopPropagation()">
+                    <span class="material-symbols-outlined">visibility</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <app-pagination [page]="currentPage" [total]="result.total" [pageSize]="pageSize" (pageChange)="onPageChange($event)" />
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Log Detail Drawer -->
+<app-admin-drawer
+  [open]="drawerOpen"
+  [title]="'Log Details'"
+  [subtitle]="selectedLog?.action"
+  (closed)="closeDrawer()"
+>
+  @if (selectedLog) {
+    <dl class="detail-list">
+      <div class="detail-item"><dt>Log ID</dt><dd class="dd-mono">{{ selectedLog.id }}</dd></div>
+      <div class="detail-item"><dt>Timestamp</dt><dd>{{ formatTime(selectedLog.timestamp) }}</dd></div>
+      <div class="detail-item"><dt>Admin</dt><dd>{{ selectedLog.admin }}</dd></div>
+      <div class="detail-item"><dt>Admin Role</dt><dd><app-status-badge [variant]="getRoleVariant(selectedLog.adminRole)" [label]="selectedLog.adminRole" /></dd></div>
+      <div class="detail-item"><dt>Action</dt><dd>{{ selectedLog.action }}</dd></div>
+      <div class="detail-item"><dt>Target</dt><dd>{{ selectedLog.target }}</dd></div>
+      @if (selectedLog.targetId) {
+        <div class="detail-item"><dt>Target ID</dt><dd class="dd-mono">{{ selectedLog.targetId }}</dd></div>
+      }
+      <div class="detail-item"><dt>Status</dt><dd><app-status-badge [variant]="getStatusVariant(selectedLog.status)" [label]="selectedLog.status" /></dd></div>
+      <div class="detail-item"><dt>Risk Level</dt><dd><app-status-badge [variant]="getRiskVariant(selectedLog.riskLevel)" [label]="selectedLog.riskLevel" /></dd></div>
+      <div class="detail-item"><dt>IP Address</dt><dd class="dd-mono">{{ selectedLog.ipAddress }}</dd></div>
+      <div class="detail-item"><dt>Device</dt><dd>{{ selectedLog.device }}</dd></div>
+      <div class="detail-item"><dt>Request ID</dt><dd class="dd-mono">{{ selectedLog.requestId }}</dd></div>
+      <div class="detail-item detail-item--block"><dt>Reason</dt><dd class="dd-reason">{{ selectedLog.reason }}</dd></div>
+      @if (selectedLog.beforeValue) {
+        <div class="detail-item detail-item--block">
+          <dt>Before</dt>
+          <dd class="dd-json">{{ selectedLog.beforeValue | json }}</dd>
+        </div>
+      }
+      @if (selectedLog.afterValue) {
+        <div class="detail-item detail-item--block">
+          <dt>After</dt>
+          <dd class="dd-json">{{ selectedLog.afterValue | json }}</dd>
+        </div>
+      }
+    </dl>
+    <div class="detail-notice">
+      <span class="material-symbols-outlined">lock</span>
+      <p>Audit logs are immutable and cannot be modified or deleted.</p>
+    </div>
+  }
+</app-admin-drawer>

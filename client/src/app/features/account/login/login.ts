@@ -103,7 +103,13 @@ export class Login implements OnDestroy {
        
         this.isLoading = false;
         if (this.accountService.currentUser()) {
-          this.router.navigate(['/user/dashboard']);
+          const user = this.accountService.currentUser();
+          const roles = user?.roles ?? [];
+          if (roles.includes('ADMIN') || roles.includes('SUPER_ADMIN')) {
+            this.router.navigate(['/admin']);
+          } else {
+            this.router.navigate(['/user/dashboard']);
+          }
         } else {
           this.isOtpStep = true;
           this.successMessage = 'Please check your email for the OTP code.';

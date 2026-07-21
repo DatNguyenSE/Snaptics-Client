@@ -1,0 +1,210 @@
+<div class="categories-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Categories</h1>
+      <p class="page-subtitle">Manage income and expense categories across Snaptics.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn--ghost">
+        <span class="material-symbols-outlined">download</span>
+        Export
+      </button>
+      <button type="button" class="btn btn--primary" (click)="openAddDrawer()">
+        <span class="material-symbols-outlined">add</span>
+        Add Category
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <span class="material-symbols-outlined summary-card__icon summary-card__icon--primary">category</span>
+      <div><p class="summary-card__value">{{ totalCats }}</p><p class="summary-card__label">Total Categories</p></div>
+    </div>
+    <div class="summary-card">
+      <span class="material-symbols-outlined summary-card__icon summary-card__icon--red">trending_down</span>
+      <div><p class="summary-card__value">{{ expenseCats }}</p><p class="summary-card__label">Expense</p></div>
+    </div>
+    <div class="summary-card">
+      <span class="material-symbols-outlined summary-card__icon summary-card__icon--green">trending_up</span>
+      <div><p class="summary-card__value">{{ incomeCats }}</p><p class="summary-card__label">Income</p></div>
+    </div>
+    <div class="summary-card">
+      <span class="material-symbols-outlined summary-card__icon summary-card__icon--muted">visibility_off</span>
+      <div><p class="summary-card__value">{{ inactiveCats }}</p><p class="summary-card__label">Inactive</p></div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="filter-search">
+      <span class="material-symbols-outlined filter-search__icon">search</span>
+      <input type="search" class="filter-search__input" placeholder="Search categories..." [(ngModel)]="searchQuery" />
+    </div>
+    <select class="filter-select" [(ngModel)]="typeFilter">
+      @for (opt of typeOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    @if (loading) {
+      <app-loading-skeleton [count]="8" [showAvatar]="true" />
+    } @else if (filtered.length === 0) {
+      <app-empty-state icon="category" title="No categories found" description="Try adjusting your search." />
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Icon</th>
+              <th>Vietnamese Name</th>
+              <th>English Name</th>
+              <th>Type</th>
+              <th class="th-num">Usage</th>
+              <th class="th-num">Order</th>
+              <th>Default</th>
+              <th>Status</th>
+              <th>Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cat of filtered; track cat.id) {
+              <tr class="data-table__row">
+                <td>
+                  <div class="cat-icon">
+                    <span class="material-symbols-outlined">{{ cat.icon }}</span>
+                  </div>
+                </td>
+                <td class="td-name">{{ cat.nameVi }}</td>
+                <td class="td-muted">{{ cat.nameEn }}</td>
+                <td><app-status-badge [variant]="getTypeVariant(cat.type)" [label]="cat.type" /></td>
+                <td class="td-num">{{ cat.usageCount }}</td>
+                <td class="td-num">{{ cat.displayOrder }}</td>
+                <td>
+                  @if (cat.isDefault) {
+                    <span class="default-badge"><span class="material-symbols-outlined">check</span> Default</span>
+                  } @else {
+                    <span class="td-muted">—</span>
+                  }
+                </td>
+                <td><app-status-badge [variant]="getStatusVariant(cat.isActive)" [label]="cat.isActive ? 'Active' : 'Inactive'" /></td>
+                <td class="td-muted">{{ formatDate(cat.updatedAt) }}</td>
+                <td>
+                  <div class="actions">
+                    <button type="button" class="action-btn" (click)="openEditDrawer(cat)" title="Edit">
+                      <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="action-btn"
+                      [class.action-btn--danger]="cat.isActive"
+                      [class.action-btn--success]="!cat.isActive"
+                      (click)="openToggleConfirm(cat)"
+                      [title]="cat.isActive ? 'Disable' : 'Enable'"
+                    >
+                      <span class="material-symbols-outlined">{{ cat.isActive ? 'visibility_off' : 'visibility' }}</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Drawer -->
+<app-admin-drawer
+  [open]="drawerOpen"
+  [title]="editingCategory ? 'Edit Category' : 'Add Category'"
+  [subtitle]="editingCategory?.nameVi"
+  (closed)="closeDrawer()"
+>
+  <div class="drawer-form">
+    <div class="form-field">
+      <label class="form-label">Vietnamese Name <span class="form-required">*</span></label>
+      <input type="text" class="form-input" [(ngModel)]="formData.nameVi" placeholder="Ăn uống" />
+    </div>
+    <div class="form-field">
+      <label class="form-label">English Name <span class="form-required">*</span></label>
+      <input type="text" class="form-input" [(ngModel)]="formData.nameEn" placeholder="Food & Dining" />
+    </div>
+    <div class="form-field">
+      <label class="form-label">Type</label>
+      <select class="form-select" [(ngModel)]="formData.type">
+        <option value="expense">Expense</option>
+        <option value="income">Income</option>
+        <option value="both">Both</option>
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Icon</label>
+      <div class="icon-picker">
+        @for (icon of iconOptions; track icon) {
+          <button
+            type="button"
+            class="icon-option"
+            [class.icon-option--selected]="formData.icon === icon"
+            (click)="formData.icon = icon"
+            [title]="icon"
+          >
+            <span class="material-symbols-outlined">{{ icon }}</span>
+          </button>
+        }
+      </div>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Description</label>
+      <textarea class="form-textarea" [(ngModel)]="formData.description" rows="2" placeholder="Optional description"></textarea>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Display Order</label>
+      <input type="number" class="form-input" [(ngModel)]="formData.displayOrder" min="1" />
+    </div>
+    <div class="form-toggles">
+      <label class="toggle-label">
+        <input type="checkbox" [(ngModel)]="formData.isDefault" class="toggle-checkbox" />
+        <span class="toggle-text">Set as Default</span>
+      </label>
+      <label class="toggle-label">
+        <input type="checkbox" [(ngModel)]="formData.isActive" class="toggle-checkbox" />
+        <span class="toggle-text">Active</span>
+      </label>
+    </div>
+    <!-- Preview -->
+    @if (formData.icon && formData.nameVi) {
+      <div class="form-preview">
+        <div class="preview-cat-icon">
+          <span class="material-symbols-outlined">{{ formData.icon }}</span>
+        </div>
+        <div>
+          <p class="preview-cat-name">{{ formData.nameVi }}</p>
+          <p class="preview-cat-sub">{{ formData.nameEn }}</p>
+        </div>
+      </div>
+    }
+    <div class="form-actions">
+      <button type="button" class="btn btn--cancel" (click)="closeDrawer()">Cancel</button>
+      <button type="button" class="btn btn--save" (click)="saveCategory()">
+        <span class="material-symbols-outlined">save</span>
+        Save
+      </button>
+    </div>
+  </div>
+</app-admin-drawer>
+
+@if (confirmModal.open) {
+  <app-confirmation-modal
+    [config]="confirmModal.config"
+    [loading]="confirmModal.loading"
+    (confirmed)="onModalConfirm($event)"
+    (cancelled)="onModalCancel()"
+  />
+}

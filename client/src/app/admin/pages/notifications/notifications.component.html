@@ -1,0 +1,127 @@
+<div class="notifications-page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Notifications</h1>
+      <p class="page-subtitle">Send in-app broadcasts, email announcements, or push alerts to users.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn--primary" (click)="openDrawer()">
+        <span class="material-symbols-outlined">add</span>
+        New Notification
+      </button>
+    </div>
+  </div>
+
+  <div class="table-card">
+    @if (loading) {
+      <app-loading-skeleton [count]="6" />
+    } @else if (notifications.length === 0) {
+      <app-empty-state icon="notifications_off" title="No notifications" description="Click 'New Notification' to send an announcement." />
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Audience</th>
+              <th>Channel</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Sent / Scheduled</th>
+              <th class="th-num">Read Rate</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of notifications; track item.id) {
+              <tr class="data-table__row">
+                <td>
+                  <div class="notif-title-cell">
+                    <p class="notif-title">{{ item.title }}</p>
+                    <p class="notif-body-preview">{{ item.message }}</p>
+                  </div>
+                </td>
+                <td class="td-muted">{{ item.audience }}</td>
+                <td>
+                  <span class="channel-badge">
+                    @if (hasChannel(item.channel, 'email')) {
+                      <span class="material-symbols-outlined" title="Email">mail</span>
+                    }
+                    @if (hasChannel(item.channel, 'push')) {
+                      <span class="material-symbols-outlined" title="Push">notifications_active</span>
+                    }
+                    @if (hasChannel(item.channel, 'in_app')) {
+                      <span class="material-symbols-outlined" title="In-App">mark_chat_unread</span>
+                    }
+                  </span>
+                </td>
+                <td><app-status-badge [variant]="getStatusVariant(item.status)" [label]="item.status" /></td>
+                <td class="td-muted">{{ formatDate(item.createdAt) }}</td>
+                <td class="td-muted">{{ item.sentAt ? formatDate(item.sentAt) : (item.scheduledTime ? formatDate(item.scheduledTime) : '—') }}</td>
+                <td class="td-num">{{ item.readRate !== undefined ? item.readRate + '%' : '—' }}</td>
+                <td>
+                  <div class="actions">
+                    @if (item.status === 'draft' || item.status === 'scheduled') {
+                      <button type="button" class="action-btn action-btn--primary" title="Send Now" (click)="sendNow(item.id)">
+                        <span class="material-symbols-outlined">send</span>
+                      </button>
+                    }
+                    <button type="button" class="action-btn action-btn--danger" title="Delete" (click)="deleteNotif(item.id)">
+                      <span class="material-symbols-outlined">delete</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Create Notification Drawer -->
+<app-admin-drawer
+  [open]="drawerOpen"
+  [title]="'Create Notification'"
+  (closed)="closeDrawer()"
+>
+  <div class="drawer-form">
+    <div class="form-field">
+      <label class="form-label">Title <span class="form-required">*</span></label>
+      <input type="text" class="form-input" [(ngModel)]="formData.title" placeholder="System Maintenance Notice" />
+    </div>
+    <div class="form-field">
+      <label class="form-label">Message Body <span class="form-required">*</span></label>
+      <textarea class="form-textarea" [(ngModel)]="formData.message" rows="4" placeholder="Enter message text..."></textarea>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Audience</label>
+      <select class="form-select" [(ngModel)]="formData.audience">
+        @for (opt of audienceOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Channel</label>
+      <select class="form-select" [(ngModel)]="selectedChannel">
+        @for (opt of channelOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="form-field">
+      <label class="form-label">Schedule Time (Optional)</label>
+      <input type="datetime-local" class="form-input" [(ngModel)]="formData.scheduledTime" />
+      <span class="form-hint">Leave blank to send manually.</span>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn--cancel" (click)="closeDrawer()">Cancel</button>
+      <button type="button" class="btn btn--save" (click)="createNotification()">
+        <span class="material-symbols-outlined">add</span>
+        Create Draft
+      </button>
+    </div>
+  </div>
+</app-admin-drawer>

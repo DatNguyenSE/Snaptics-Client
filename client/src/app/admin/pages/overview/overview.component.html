@@ -1,0 +1,194 @@
+<div class="overview">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Overview</h1>
+      <p class="page-subtitle">Monitor Snaptics users, AI performance and system activity.</p>
+    </div>
+    <div class="page-header__actions">
+      <div class="date-filter">
+        @for (f of filterOptions; track f.id) {
+          <button
+            type="button"
+            class="date-filter__btn"
+            [class.date-filter__btn--active]="dateFilter === f.id"
+            (click)="setDateFilter(f.id)"
+          >{{ f.label }}</button>
+        }
+      </div>
+      <button type="button" class="btn btn--ghost" (click)="refresh()">
+        <span class="material-symbols-outlined">refresh</span>
+        Refresh
+      </button>
+      <button type="button" class="btn btn--primary">
+        <span class="material-symbols-outlined">download</span>
+        Export
+      </button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="kpi-grid">
+      @for (n of [1,2,3,4,5,6]; track n) {
+        <div class="skeleton-card"></div>
+      }
+    </div>
+  } @else {
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      @for (card of kpis; track card.id) {
+        <app-stat-card [card]="card" />
+      }
+    </div>
+  }
+
+  <!-- Charts Row -->
+  <div class="charts-row">
+    <!-- System Health -->
+    <div class="card">
+      <div class="card__header">
+        <h2 class="card__title">System Health</h2>
+        <span class="card__subtitle">{{ avgResponseTime }}ms avg</span>
+      </div>
+      <div class="health-list">
+        @for (item of systemHealth; track item.service) {
+          <div class="health-item">
+            <div class="health-item__info">
+              <span class="health-item__service">{{ item.service }}</span>
+              @if (item.responseTime !== undefined) {
+                <span class="health-item__latency">{{ item.responseTime }}ms</span>
+              }
+            </div>
+            <app-status-badge
+              [variant]="getHealthBadgeVariant(item.status)"
+              [label]="getHealthBadgeLabel(item.status)"
+            />
+          </div>
+        }
+        <div class="health-item health-item--total">
+          <span class="health-item__service">Average Response Time</span>
+          <strong class="health-item__avg">{{ avgResponseTime }} ms</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scan Performance -->
+    <div class="card">
+      <div class="card__header">
+        <h2 class="card__title">Scan Performance</h2>
+      </div>
+      <div class="scan-perf">
+        <div class="scan-perf__item scan-perf__item--success">
+          <div class="scan-perf__bar-wrap">
+            <div class="scan-perf__bar" [style.width.%]="scanPerformance.successful"></div>
+          </div>
+          <div class="scan-perf__meta">
+            <span class="scan-perf__label">
+              <span class="material-symbols-outlined">check_circle</span>
+              Successful
+            </span>
+            <strong>{{ scanPerformance.successful }}%</strong>
+          </div>
+        </div>
+        <div class="scan-perf__item scan-perf__item--warn">
+          <div class="scan-perf__bar-wrap">
+            <div class="scan-perf__bar" [style.width.%]="scanPerformance.lowConfidence"></div>
+          </div>
+          <div class="scan-perf__meta">
+            <span class="scan-perf__label">
+              <span class="material-symbols-outlined">warning</span>
+              Low Confidence
+            </span>
+            <strong>{{ scanPerformance.lowConfidence }}%</strong>
+          </div>
+        </div>
+        <div class="scan-perf__item scan-perf__item--danger">
+          <div class="scan-perf__bar-wrap">
+            <div class="scan-perf__bar" [style.width.%]="scanPerformance.failed"></div>
+          </div>
+          <div class="scan-perf__meta">
+            <span class="scan-perf__label">
+              <span class="material-symbols-outlined">cancel</span>
+              Failed
+            </span>
+            <strong>{{ scanPerformance.failed }}%</strong>
+          </div>
+        </div>
+        <div class="scan-perf__stats">
+          <div class="scan-perf__stat">
+            <span class="scan-perf__stat-label">Avg Processing Time</span>
+            <span class="scan-perf__stat-value">{{ scanPerformance.avgProcessingTime }}</span>
+          </div>
+          <div class="scan-perf__stat">
+            <span class="scan-perf__stat-label">Avg Confidence</span>
+            <span class="scan-perf__stat-value">{{ scanPerformance.avgConfidence }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity & Errors Row -->
+  <div class="activity-row">
+    <!-- Recent Admin Activity -->
+    <div class="card">
+      <div class="card__header">
+        <h2 class="card__title">Recent Admin Activity</h2>
+      </div>
+      <div class="activity-table-wrap">
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>Admin</th>
+              <th>Action</th>
+              <th>Target</th>
+              <th>Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of recentActivity; track item.id) {
+              <tr>
+                <td class="activity-table__admin">{{ item.admin }}</td>
+                <td class="activity-table__action">{{ item.action }}</td>
+                <td class="activity-table__target">{{ item.target }}</td>
+                <td class="activity-table__time">{{ formatTime(item.time) }}</td>
+                <td>
+                  <app-status-badge
+                    [variant]="getActivityStatusVariant(item.status)"
+                    [label]="item.status"
+                  />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Recent Errors -->
+    <div class="card">
+      <div class="card__header">
+        <h2 class="card__title">Recent Errors</h2>
+      </div>
+      <div class="error-list">
+        @for (err of recentErrors; track err.id) {
+          <div class="error-item">
+            <div class="error-item__icon" [class]="'error-item__icon--' + err.severity">
+              <span class="material-symbols-outlined">
+                {{ err.severity === 'critical' ? 'error' : err.severity === 'high' ? 'warning' : 'info' }}
+              </span>
+            </div>
+            <div class="error-item__content">
+              <p class="error-item__msg">{{ err.message }}</p>
+              <div class="error-item__meta">
+                <app-status-badge [variant]="getSeverityVariant(err.severity)" [label]="getSeverityLabel(err.severity)" />
+                <span class="error-item__count">{{ err.count }} occurrences</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

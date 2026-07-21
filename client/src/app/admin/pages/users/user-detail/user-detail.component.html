@@ -1,0 +1,206 @@
+<div class="user-detail">
+  @if (loading) {
+    <div class="loading-wrap">
+      <div class="loading-spinner"></div>
+      <p>Loading user details...</p>
+    </div>
+  } @else if (!user) {
+    <app-empty-state icon="person_off" title="User not found" description="The requested user could not be found." />
+  } @else {
+    <!-- Header -->
+    <div class="detail-header">
+      <button type="button" class="back-btn" (click)="goBack()" aria-label="Back to users">
+        <span class="material-symbols-outlined">arrow_back</span>
+        <span>Back</span>
+      </button>
+      <div class="detail-header__profile">
+        <div class="detail-header__avatar">{{ getInitials(user.displayName) }}</div>
+        <div class="detail-header__info">
+          <h1 class="detail-header__name">{{ user.displayName }}</h1>
+          <p class="detail-header__email">{{ user.email }}</p>
+          <div class="detail-header__badges">
+            <app-status-badge [variant]="getRoleVariant(user.role)" [label]="user.role" />
+            <app-status-badge [variant]="getStatusVariant(user.status)" [label]="user.status" />
+            <app-status-badge [variant]="getStatusVariant(user.verification)" [label]="user.verification" />
+          </div>
+        </div>
+      </div>
+      <div class="detail-header__actions">
+        @if (user.status === 'active') {
+          <button type="button" class="btn btn--danger" (click)="openLockModal()">
+            <span class="material-symbols-outlined">lock</span>
+            Lock Account
+          </button>
+        } @else if (user.status === 'locked') {
+          <button type="button" class="btn btn--success" (click)="openUnlockModal()">
+            <span class="material-symbols-outlined">lock_open</span>
+            Unlock Account
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <nav class="tabs" aria-label="User detail tabs">
+      @for (tab of tabs; track tab.id) {
+        <button
+          type="button"
+          class="tab"
+          [class.tab--active]="activeTab === tab.id"
+          (click)="setTab(tab.id)"
+          [attr.aria-current]="activeTab === tab.id ? 'page' : null"
+        >
+          <span class="material-symbols-outlined">{{ tab.icon }}</span>
+          {{ tab.label }}
+        </button>
+      }
+    </nav>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+
+      <!-- Overview Tab -->
+      @if (activeTab === 'overview') {
+        <div class="overview-grid">
+          <div class="info-card">
+            <h2 class="info-card__title">Profile Information</h2>
+            <dl class="info-list">
+              <div class="info-item"><dt>Full Name</dt><dd>{{ user.displayName }}</dd></div>
+              <div class="info-item"><dt>Email</dt><dd>{{ user.email }}</dd></div>
+              <div class="info-item"><dt>Role</dt><dd><app-status-badge [variant]="getRoleVariant(user.role)" [label]="user.role" /></dd></div>
+              <div class="info-item"><dt>Status</dt><dd><app-status-badge [variant]="getStatusVariant(user.status)" [label]="user.status" /></dd></div>
+              <div class="info-item"><dt>Verification</dt><dd><app-status-badge [variant]="getStatusVariant(user.verification)" [label]="user.verification" /></dd></div>
+              <div class="info-item"><dt>Created</dt><dd>{{ formatDate(user.createdAt) }}</dd></div>
+              <div class="info-item"><dt>Last Login</dt><dd>{{ formatDate(user.lastLogin) }}</dd></div>
+              <div class="info-item"><dt>Currency</dt><dd>{{ user.currency }}</dd></div>
+              <div class="info-item"><dt>Language</dt><dd>{{ user.language }}</dd></div>
+              <div class="info-item"><dt>Timezone</dt><dd>{{ user.timezone }}</dd></div>
+            </dl>
+          </div>
+
+          <div class="usage-stats">
+            <div class="usage-stat-card">
+              <span class="material-symbols-outlined usage-stat-card__icon">receipt_long</span>
+              <p class="usage-stat-card__value">{{ user.totalTransactions }}</p>
+              <p class="usage-stat-card__label">Transactions</p>
+            </div>
+            <div class="usage-stat-card">
+              <span class="material-symbols-outlined usage-stat-card__icon">account_balance_wallet</span>
+              <p class="usage-stat-card__value">{{ user.totalBudgets }}</p>
+              <p class="usage-stat-card__label">Budgets</p>
+            </div>
+            <div class="usage-stat-card">
+              <span class="material-symbols-outlined usage-stat-card__icon">document_scanner</span>
+              <p class="usage-stat-card__value">{{ user.totalScans }}</p>
+              <p class="usage-stat-card__label">Scans</p>
+            </div>
+            <div class="usage-stat-card">
+              <span class="material-symbols-outlined usage-stat-card__icon">smart_toy</span>
+              <p class="usage-stat-card__value">{{ user.aiRequests }}</p>
+              <p class="usage-stat-card__label">AI Requests</p>
+            </div>
+          </div>
+
+          <!-- Privacy notice -->
+          <div class="privacy-notice">
+            <span class="material-symbols-outlined privacy-notice__icon">shield</span>
+            <p>Sensitive financial data is protected. Access requires a support reason and will be recorded in Audit Logs.</p>
+          </div>
+        </div>
+      }
+
+      <!-- Account Activity Tab -->
+      @if (activeTab === 'activity') {
+        <div class="timeline">
+          @for (item of activityMock; track item.id) {
+            <div class="timeline-item">
+              <div class="timeline-item__dot" [class.timeline-item__dot--success]="item.variant === 'success'" [class.timeline-item__dot--failed]="item.variant === 'failed'">
+                <span class="material-symbols-outlined">{{ item.icon }}</span>
+              </div>
+              <div class="timeline-item__content">
+                <p class="timeline-item__event">{{ item.event }}</p>
+                <p class="timeline-item__time">{{ formatDate(item.time) }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Usage Tab -->
+      @if (activeTab === 'usage') {
+        <div class="usage-cards">
+          <div class="usage-card">
+            <p class="usage-card__label">Total Transactions</p>
+            <p class="usage-card__value">{{ user.totalTransactions }}</p>
+          </div>
+          <div class="usage-card">
+            <p class="usage-card__label">Total Budgets</p>
+            <p class="usage-card__value">{{ user.totalBudgets }}</p>
+          </div>
+          <div class="usage-card">
+            <p class="usage-card__label">Total Scans</p>
+            <p class="usage-card__value">{{ user.totalScans }}</p>
+          </div>
+          <div class="usage-card">
+            <p class="usage-card__label">AI Requests</p>
+            <p class="usage-card__value">{{ user.aiRequests }}</p>
+          </div>
+        </div>
+        <div class="privacy-notice">
+          <span class="material-symbols-outlined privacy-notice__icon">lock</span>
+          <p>Transaction amounts, notes, and AI chat content are hidden by default to protect user privacy.</p>
+        </div>
+      }
+
+      <!-- Security Tab -->
+      @if (activeTab === 'security') {
+        <div class="info-card">
+          <h2 class="info-card__title">Security Information</h2>
+          <dl class="info-list">
+            <div class="info-item"><dt>Email Verification</dt><dd><app-status-badge [variant]="getStatusVariant(user.verification)" [label]="user.verification" /></dd></div>
+            <div class="info-item"><dt>Failed Login Attempts</dt><dd>{{ user.failedLoginAttempts }}</dd></div>
+            <div class="info-item"><dt>Active Sessions</dt><dd>{{ user.activeSessions }}</dd></div>
+          </dl>
+          @if (user.activeSessions > 0) {
+            <div class="security-actions">
+              <button type="button" class="btn btn--danger" (click)="openRevokeModal()">
+                <span class="material-symbols-outlined">logout</span>
+                Revoke All Sessions
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Admin History Tab -->
+      @if (activeTab === 'history') {
+        @if (auditLogs.length === 0) {
+          <app-empty-state icon="history" title="No admin actions" description="No administrative actions have been recorded for this user." />
+        } @else {
+          <div class="audit-list">
+            @for (log of auditLogs; track log.id) {
+              <div class="audit-item">
+                <div class="audit-item__header">
+                  <span class="audit-item__action">{{ log.action }}</span>
+                  <span class="audit-item__time">{{ formatDate(log.timestamp) }}</span>
+                </div>
+                <p class="audit-item__admin">By <strong>{{ log.admin }}</strong> ({{ log.adminRole }})</p>
+                <p class="audit-item__reason">{{ log.reason }}</p>
+                <app-status-badge [variant]="log.riskLevel" [label]="log.riskLevel" />
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+</div>
+
+@if (confirmModal.open) {
+  <app-confirmation-modal
+    [config]="confirmModal.config"
+    [loading]="confirmModal.loading"
+    (confirmed)="onModalConfirm($event)"
+    (cancelled)="onModalCancel()"
+  />
+}

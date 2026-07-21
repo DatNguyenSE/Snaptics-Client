@@ -121,6 +121,16 @@ export class Nav {
     this.isAccountMenuOpen = false;
   }
 
+  get isAdmin(): boolean {
+    const roles = this.accountService.currentUser()?.roles ?? [];
+    return roles.includes('ADMIN') || roles.includes('SUPER_ADMIN');
+  }
+
+  openAdminConsole(): void {
+    this.closeMenus();
+    void this.router.navigateByUrl('/admin');
+  }
+
   setLanguage(lang: AppLanguage): void {
     this.language.setLanguage(lang);
   }

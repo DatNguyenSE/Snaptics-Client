@@ -97,6 +97,18 @@
                 </div>
               </div>
 
+              @if (isAdmin) {
+                <button class="account-dropdown__item account-dropdown__item--admin" type="button" (click)="openAdminConsole()">
+                  <span class="account-dropdown__item-main">
+                    <span class="material-symbols-outlined">shield</span>
+                    <span>{{ language.currentLang() === 'vi' ? 'Trang quản trị' : 'Admin Console' }}</span>
+                  </span>
+                  <span class="material-symbols-outlined account-dropdown__item-arrow">
+                    chevron_right
+                  </span>
+                </button>
+              }
+
               <button class="account-dropdown__item" type="button" (click)="openSettings()">
                 <span class="account-dropdown__item-main">
                   <span class="material-symbols-outlined">settings</span>
@@ -209,6 +221,18 @@
                 </button>
               </div>
             </div>
+
+            @if (isAdmin) {
+              <button class="account-dropdown__item account-dropdown__item--admin" type="button" (click)="openAdminConsole()">
+                <span class="account-dropdown__item-main">
+                  <span class="material-symbols-outlined">shield</span>
+                  <span>{{ language.currentLang() === 'vi' ? 'Trang quản trị' : 'Admin Console' }}</span>
+                </span>
+                <span class="material-symbols-outlined account-dropdown__item-arrow">
+                  chevron_right
+                </span>
+              </button>
+            }
 
             <button class="account-dropdown__item" type="button" (click)="openSettings()">
               <span class="account-dropdown__item-main">

@@ -1,0 +1,196 @@
+<div class="user-list">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Users</h1>
+      <p class="page-subtitle">Manage accounts, verification status and user access.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn--ghost">
+        <span class="material-symbols-outlined">download</span>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <span class="material-symbols-outlined summary-card__icon summary-card__icon--primary">group</span>
+      <div>
+        <p class="summary-card__value">{{ totalUsers | number }}</p>
+        <p class="summary-card__label">Total Users</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <span class="material-symbols-outlined summary-card__icon summary-card__icon--green">person_check</span>
+      <div>
+        <p class="summary-card__value">{{ activeUsers | number }}</p>
+        <p class="summary-card__label">Active Users</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <span class="material-symbols-outlined summary-card__icon summary-card__icon--red">lock</span>
+      <div>
+        <p class="summary-card__value">{{ lockedUsers }}</p>
+        <p class="summary-card__label">Locked Accounts</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <span class="material-symbols-outlined summary-card__icon summary-card__icon--yellow">mark_email_unread</span>
+      <div>
+        <p class="summary-card__value">{{ unverifiedUsers }}</p>
+        <p class="summary-card__label">Unverified Accounts</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-bar__search">
+      <span class="material-symbols-outlined filter-bar__search-icon">search</span>
+      <input
+        type="search"
+        class="filter-bar__search-input"
+        placeholder="Search by name or email..."
+        [(ngModel)]="filter.search"
+        (ngModelChange)="onSearchChange()"
+        aria-label="Search users"
+      />
+    </div>
+    <select class="filter-bar__select" [(ngModel)]="filter.status" (ngModelChange)="onFilterChange()" aria-label="Filter by status">
+      @for (opt of statusOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+    <select class="filter-bar__select" [(ngModel)]="filter.verification" (ngModelChange)="onFilterChange()" aria-label="Filter by verification">
+      @for (opt of verificationOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+    <select class="filter-bar__select" [(ngModel)]="filter.role" (ngModelChange)="onFilterChange()" aria-label="Filter by role">
+      @for (opt of roleOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+    @if (filter.search || filter.status || filter.verification || filter.role) {
+      <button type="button" class="btn btn--ghost btn--sm" (click)="clearFilters()">
+        <span class="material-symbols-outlined">close</span>
+        Clear
+      </button>
+    }
+  </div>
+
+  <!-- Bulk actions -->
+  @if (selectedIds.size > 0) {
+    <div class="bulk-actions">
+      <span class="bulk-actions__count">{{ selectedIds.size }} selected</span>
+      <button type="button" class="btn btn--ghost btn--sm">
+        <span class="material-symbols-outlined">lock</span>
+        Lock
+      </button>
+      <button type="button" class="btn btn--ghost btn--sm">
+        <span class="material-symbols-outlined">lock_open</span>
+        Unlock
+      </button>
+      <button type="button" class="btn btn--ghost btn--sm">
+        <span class="material-symbols-outlined">download</span>
+        Export
+      </button>
+    </div>
+  }
+
+  <!-- Table -->
+  <div class="table-card">
+    @if (loading) {
+      <app-loading-skeleton [count]="8" [showAvatar]="true" [showAction]="true" />
+    } @else if (result.data.length === 0) {
+      <app-empty-state icon="person_off" title="No users found" description="Try adjusting your search or filter criteria." />
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table" aria-label="Users table">
+          <thead>
+            <tr>
+              <th class="th-check">
+                <input type="checkbox" [checked]="allSelected" (change)="toggleSelectAll()" aria-label="Select all" />
+              </th>
+              <th>User</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Verification</th>
+              <th class="th-num">Transactions</th>
+              <th class="th-num">Scans</th>
+              <th>Last Login</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of result.data; track user.id; let i = $index) {
+              <tr class="data-table__row" [class.data-table__row--selected]="selectedIds.has(user.id)">
+                <td class="td-check">
+                  <input type="checkbox" [checked]="selectedIds.has(user.id)" (change)="toggleSelect(user.id)" [attr.aria-label]="'Select ' + user.displayName" />
+                </td>
+                <td>
+                  <div class="user-cell" (click)="viewDetail(user.id)" role="button" tabindex="0" [attr.aria-label]="'View ' + user.displayName + ' details'">
+                    <div class="user-cell__avatar">{{ getInitials(user.displayName) }}</div>
+                    <div class="user-cell__info">
+                      <p class="user-cell__name">{{ user.displayName }}</p>
+                      <p class="user-cell__id">{{ user.id }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td><app-status-badge [variant]="getRoleVariant(user.role)" [label]="user.role" /></td>
+                <td><app-status-badge [variant]="getStatusVariant(user.status)" [label]="user.status" /></td>
+                <td><app-status-badge [variant]="getVerificationVariant(user.verification)" [label]="user.verification" /></td>
+                <td class="td-num">{{ user.totalTransactions }}</td>
+                <td class="td-num">{{ user.totalScans }}</td>
+                <td class="td-muted">{{ formatDate(user.lastLogin) }}</td>
+                <td class="td-muted">{{ formatDate(user.createdAt) }}</td>
+                <td>
+                  <div class="actions">
+                    <button type="button" class="action-btn" (click)="viewDetail(user.id)" title="View Details" aria-label="View user details">
+                      <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                    @if (user.status === 'active') {
+                      <button type="button" class="action-btn action-btn--danger" (click)="openLockModal(user)" title="Lock Account" aria-label="Lock account">
+                        <span class="material-symbols-outlined">lock</span>
+                      </button>
+                    } @else if (user.status === 'locked') {
+                      <button type="button" class="action-btn action-btn--success" (click)="openUnlockModal(user)" title="Unlock Account" aria-label="Unlock account">
+                        <span class="material-symbols-outlined">lock_open</span>
+                      </button>
+                    }
+                    @if (user.status !== 'deleted') {
+                      <button type="button" class="action-btn action-btn--danger" (click)="openDeleteModal(user)" title="Delete Account" aria-label="Delete account">
+                        <span class="material-symbols-outlined">delete</span>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <app-pagination
+          [page]="currentPage"
+          [total]="result.total"
+          [pageSize]="pageSize"
+          (pageChange)="onPageChange($event)"
+        />
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+@if (confirmModal.open) {
+  <app-confirmation-modal
+    [config]="confirmModal.config"
+    [loading]="confirmModal.loading"
+    (confirmed)="onModalConfirm($event)"
+    (cancelled)="onModalCancel()"
+  />
+}

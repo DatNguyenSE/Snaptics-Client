@@ -1,0 +1,295 @@
+:host {
+  display: block;
+}
+
+.admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--ac-header-height);
+  background: var(--ac-surface);
+  border-bottom: 1px solid var(--ac-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  backdrop-filter: blur(10px);
+}
+
+/* ── Mobile menu button ──────────────────────────────────────────────────────── */
+.admin-header__menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: var(--ac-surface-2);
+  color: var(--ac-foreground-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.18s;
+}
+
+.admin-header__menu-btn:hover {
+  background: var(--ac-primary-soft);
+  color: var(--ac-primary);
+}
+
+.admin-header__menu-btn .material-symbols-outlined {
+  font-size: 22px;
+}
+
+/* ── Breadcrumb ──────────────────────────────────────────────────────────────── */
+.admin-header__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.admin-header__breadcrumb-root {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ac-foreground-muted);
+}
+
+.admin-header__breadcrumb-sep {
+  font-size: 16px;
+  color: var(--ac-border-strong);
+}
+
+.admin-header__breadcrumb-page {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ac-foreground);
+}
+
+/* ── Spacer ──────────────────────────────────────────────────────────────────── */
+.admin-header__spacer {
+  flex: 1;
+}
+
+/* ── Search ──────────────────────────────────────────────────────────────────── */
+.admin-header__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-header__search-icon {
+  position: absolute;
+  left: 10px;
+  font-size: 18px;
+  color: var(--ac-foreground-muted);
+  pointer-events: none;
+}
+
+.admin-header__search-input {
+  width: 260px;
+  height: 36px;
+  padding: 0 12px 0 36px;
+  border: 1px solid var(--ac-border);
+  border-radius: 10px;
+  background: var(--ac-surface-2);
+  color: var(--ac-foreground);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.18s, width 0.24s;
+}
+
+.admin-header__search-input::placeholder {
+  color: var(--ac-foreground-muted);
+}
+
+.admin-header__search-input:focus {
+  border-color: var(--ac-primary);
+  width: 300px;
+}
+
+/* ── Actions ─────────────────────────────────────────────────────────────────── */
+.admin-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-header__icon-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--ac-border);
+  border-radius: 10px;
+  background: var(--ac-surface-2);
+  color: var(--ac-foreground-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.admin-header__icon-btn:hover {
+  background: var(--ac-primary-soft);
+  color: var(--ac-primary);
+  border-color: var(--ac-primary);
+}
+
+.admin-header__icon-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* ── Avatar ──────────────────────────────────────────────────────────────────── */
+.admin-header__avatar-wrap {
+  position: relative;
+}
+
+.admin-header__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #5b7bfa, #7c3aed);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.18s;
+}
+
+.admin-header__avatar:hover {
+  box-shadow: 0 0 0 3px var(--ac-primary-soft);
+}
+
+.admin-header__avatar--lg {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  cursor: default;
+}
+
+.admin-header__avatar-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-border);
+  border-radius: 14px;
+  box-shadow: var(--ac-shadow-lg);
+  overflow: hidden;
+  animation: menuFadeIn 0.16s ease;
+  z-index: 200;
+}
+
+@keyframes menuFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-header__avatar-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  background: var(--ac-surface-2);
+  border-bottom: 1px solid var(--ac-border);
+}
+
+.admin-header__avatar-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ac-foreground);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-header__avatar-role {
+  font-size: 0.75rem;
+  color: var(--ac-foreground-muted);
+  margin: 0;
+}
+
+.admin-header__avatar-divider {
+  height: 1px;
+  background: var(--ac-border);
+  margin: 4px 0;
+}
+
+.admin-header__avatar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 14px;
+  border: none;
+  background: transparent;
+  color: var(--ac-foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.16s;
+}
+
+.admin-header__avatar-item:hover {
+  background: var(--ac-primary-soft);
+}
+
+.admin-header__avatar-item--danger:hover {
+  background: var(--ac-danger-soft);
+  color: var(--ac-danger);
+}
+
+.admin-header__avatar-item .material-symbols-outlined {
+  font-size: 18px;
+  color: var(--ac-foreground-muted);
+}
+
+.admin-header__avatar-item--danger:hover .material-symbols-outlined {
+  color: var(--ac-danger);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .admin-header__menu-btn {
+    display: flex;
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-header__search-input {
+    width: 180px;
+  }
+
+  .admin-header__search-input:focus {
+    width: 220px;
+  }
+}
+
+@media (max-width: 639px) {
+  .admin-header {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .admin-header__breadcrumb-root {
+    display: none;
+  }
+
+  .admin-header__breadcrumb-sep {
+    display: none;
+  }
+
+  .admin-header__search {
+    display: none;
+  }
+}

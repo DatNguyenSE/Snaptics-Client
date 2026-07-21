@@ -1,0 +1,229 @@
+<div class="ai-ops">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">AI &amp; Scan Operations</h1>
+      <p class="page-subtitle">Monitor AI requests, OCR performance and processing errors.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn--ghost">
+        <span class="material-symbols-outlined">refresh</span>
+        Refresh
+      </button>
+      <button type="button" class="btn btn--ghost">
+        <span class="material-symbols-outlined">download</span>
+        Export Logs
+      </button>
+    </div>
+  </div>
+
+  <!-- Overview Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <span class="material-symbols-outlined kpi-card__icon kpi-card__icon--primary">smart_toy</span>
+      <div>
+        <p class="kpi-card__value">{{ totalRequests | number }}</p>
+        <p class="kpi-card__label">AI Requests</p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <span class="material-symbols-outlined kpi-card__icon kpi-card__icon--blue">receipt_long</span>
+      <div>
+        <p class="kpi-card__value">{{ receiptScans | number }}</p>
+        <p class="kpi-card__label">Receipt Scans</p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <span class="material-symbols-outlined kpi-card__icon kpi-card__icon--purple">qr_code_scanner</span>
+      <div>
+        <p class="kpi-card__value">{{ productScans | number }}</p>
+        <p class="kpi-card__label">Product Scans</p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <span class="material-symbols-outlined kpi-card__icon kpi-card__icon--green">verified</span>
+      <div>
+        <p class="kpi-card__value">{{ successRate }}%</p>
+        <p class="kpi-card__label">Success Rate</p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <span class="material-symbols-outlined kpi-card__icon kpi-card__icon--yellow">timer</span>
+      <div>
+        <p class="kpi-card__value">{{ avgLatencyMs / 1000 }}s</p>
+        <p class="kpi-card__label">Avg Latency</p>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <span class="material-symbols-outlined kpi-card__icon kpi-card__icon--red">attach_money</span>
+      <div>
+        <p class="kpi-card__value">${{ estimatedCostUsd }}</p>
+        <p class="kpi-card__label">Est. AI Cost</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Failure Reasons -->
+  <div class="card" style="margin-bottom: 16px;">
+    <div class="card__header">
+      <h2 class="card__title">Top Failure Reasons</h2>
+    </div>
+    <div class="failure-list">
+      @for (reason of failureReasons; track reason.reason) {
+        <div class="failure-item">
+          <span class="failure-item__reason">{{ reason.reason }}</span>
+          <div class="failure-item__bar-wrap">
+            <div class="failure-item__bar" [style.width.%]="reason.percentage"></div>
+          </div>
+          <div class="failure-item__meta">
+            <span>{{ reason.count }}</span>
+            <span class="failure-item__pct">{{ reason.percentage }}%</span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Filter & Table -->
+  <div class="filter-bar">
+    <div class="filter-search">
+      <span class="material-symbols-outlined filter-search__icon">search</span>
+      <input type="search" class="filter-search__input" placeholder="Search request ID or user..." [(ngModel)]="filter.search" (ngModelChange)="onFilterChange()" />
+    </div>
+    <select class="filter-select" [(ngModel)]="filter.type" (ngModelChange)="onFilterChange()">
+      @for (opt of typeOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+    <select class="filter-select" [(ngModel)]="filter.status" (ngModelChange)="onFilterChange()">
+      @for (opt of statusOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="table-card">
+    @if (loading) {
+      <app-loading-skeleton [count]="8" />
+    } @else if (result.data.length === 0) {
+      <app-empty-state icon="manage_search" title="No requests found" description="Try adjusting your search criteria." />
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>Time</th>
+              <th>User</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th class="th-num">Time</th>
+              <th class="th-num">Confidence</th>
+              <th>Model</th>
+              <th>Error</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (req of result.data; track req.id) {
+              <tr class="data-table__row" (click)="openDetail(req)" style="cursor: pointer;">
+                <td class="td-id">{{ req.id }}</td>
+                <td class="td-muted">{{ formatTime(req.timestamp) }}</td>
+                <td class="td-masked">{{ req.maskedUser }}</td>
+                <td>
+                  <span class="type-badge">
+                    <span class="material-symbols-outlined">{{ getTypeIcon(req.type) }}</span>
+                    {{ getTypeLabel(req.type) }}
+                  </span>
+                </td>
+                <td><app-status-badge [variant]="getStatusVariant(req.status)" [label]="req.status" /></td>
+                <td class="td-num">{{ formatMs(req.processingTime) }}</td>
+                <td class="td-num">{{ req.confidence !== undefined ? req.confidence + '%' : '—' }}</td>
+                <td class="td-muted">{{ req.modelVersion }}</td>
+                <td class="td-muted">{{ req.errorCode ?? '—' }}</td>
+                <td>
+                  <div class="actions" (click)="$event.stopPropagation()">
+                    <button type="button" class="action-btn" title="View Details" (click)="openDetail(req)">
+                      <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                    @if (req.status === 'failed' || req.status === 'low_confidence') {
+                      <button type="button" class="action-btn" title="Retry" (click)="retryRequest(req, $event)">
+                        <span class="material-symbols-outlined">replay</span>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <app-pagination [page]="currentPage" [total]="result.total" [pageSize]="pageSize" (pageChange)="onPageChange($event)" />
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Request Detail Drawer -->
+<app-admin-drawer
+  [open]="drawerOpen"
+  [title]="'Request Details'"
+  [subtitle]="selectedRequest?.id"
+  (closed)="closeDrawer()"
+>
+  @if (selectedRequest) {
+    <div class="request-detail">
+      <dl class="detail-list">
+        <div class="detail-item"><dt>Request ID</dt><dd class="dd-mono">{{ selectedRequest.id }}</dd></div>
+        <div class="detail-item"><dt>Timestamp</dt><dd>{{ formatTime(selectedRequest.timestamp) }}</dd></div>
+        <div class="detail-item"><dt>Type</dt><dd>{{ getTypeLabel(selectedRequest.type) }}</dd></div>
+        <div class="detail-item"><dt>User</dt><dd class="dd-masked">{{ selectedRequest.maskedUser }}</dd></div>
+        <div class="detail-item"><dt>Model</dt><dd>{{ selectedRequest.modelVersion }}</dd></div>
+        <div class="detail-item"><dt>Status</dt><dd><app-status-badge [variant]="getStatusVariant(selectedRequest.status)" [label]="selectedRequest.status" /></dd></div>
+        <div class="detail-item"><dt>Processing Time</dt><dd>{{ formatMs(selectedRequest.processingTime) }}</dd></div>
+        @if (selectedRequest.confidence !== undefined) {
+          <div class="detail-item"><dt>Confidence</dt><dd>{{ selectedRequest.confidence }}%</dd></div>
+        }
+        @if (selectedRequest.tokenUsage !== undefined) {
+          <div class="detail-item"><dt>Token Usage</dt><dd>{{ selectedRequest.tokenUsage }}</dd></div>
+        }
+        <div class="detail-item"><dt>Retry Count</dt><dd>{{ selectedRequest.retryCount }}</dd></div>
+        @if (selectedRequest.errorCode) {
+          <div class="detail-item"><dt>Error Code</dt><dd class="dd-error">{{ selectedRequest.errorCode }}</dd></div>
+          <div class="detail-item"><dt>Error Message</dt><dd>{{ selectedRequest.errorMessage }}</dd></div>
+        }
+      </dl>
+
+      @if (selectedRequest.stages?.length) {
+        <h3 class="detail-section-title">Processing Stages</h3>
+        <div class="stages">
+          @for (stage of selectedRequest.stages; track stage.name) {
+            <div class="stage" [class.stage--failed]="stage.status === 'failed'">
+              <span class="material-symbols-outlined">{{ stage.status === 'success' ? 'check_circle' : 'error' }}</span>
+              <span class="stage__name">{{ stage.name }}</span>
+              <span class="stage__time">{{ formatMs(stage.duration) }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="detail-privacy">
+        <span class="material-symbols-outlined">lock</span>
+        <p>Financial data and receipt images are hidden by default. Use "Request temporary access" for audit purposes.</p>
+      </div>
+
+      <div class="detail-actions">
+        @if (selectedRequest.status === 'failed' || selectedRequest.status === 'low_confidence') {
+          <button type="button" class="btn btn--primary" (click)="retryRequest(selectedRequest!, $event)">
+            <span class="material-symbols-outlined">replay</span>
+            Retry Request
+          </button>
+          <button type="button" class="btn btn--ghost" (click)="markResolved(selectedRequest!)">
+            <span class="material-symbols-outlined">check</span>
+            Mark Resolved
+          </button>
+        }
+      </div>
+    </div>
+  }
+</app-admin-drawer>

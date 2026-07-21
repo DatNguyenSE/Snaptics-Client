@@ -1,0 +1,83 @@
+<header class="admin-header" (click)="closeAvatarMenu()">
+  <!-- Mobile menu button -->
+  <button
+    type="button"
+    class="admin-header__menu-btn"
+    (click)="openMobileMenu.emit(); $event.stopPropagation()"
+    aria-label="Open navigation menu"
+  >
+    <span class="material-symbols-outlined">menu</span>
+  </button>
+
+  <!-- Breadcrumb -->
+  <div class="admin-header__breadcrumb">
+    <span class="admin-header__breadcrumb-root">Admin Console</span>
+    <span class="material-symbols-outlined admin-header__breadcrumb-sep">chevron_right</span>
+    <span class="admin-header__breadcrumb-page">{{ breadcrumb }}</span>
+  </div>
+
+  <!-- Spacer -->
+  <div class="admin-header__spacer"></div>
+
+  <!-- Search -->
+  <div class="admin-header__search">
+    <span class="material-symbols-outlined admin-header__search-icon">search</span>
+    <input
+      type="search"
+      class="admin-header__search-input"
+      placeholder="Search users, requests or logs..."
+      [(ngModel)]="searchQuery"
+      aria-label="Search admin console"
+    />
+  </div>
+
+  <!-- Actions -->
+  <div class="admin-header__actions">
+    <!-- Theme toggle -->
+    <button
+      type="button"
+      class="admin-header__icon-btn"
+      (click)="theme.toggleTheme(); $event.stopPropagation()"
+      [attr.aria-label]="theme.currentTheme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+      [title]="theme.currentTheme() === 'dark' ? 'Light mode' : 'Dark mode'"
+    >
+      <span class="material-symbols-outlined">
+        {{ theme.currentTheme() === 'dark' ? 'light_mode' : 'dark_mode' }}
+      </span>
+    </button>
+
+    <!-- Avatar dropdown -->
+    <div class="admin-header__avatar-wrap">
+      <button
+        type="button"
+        class="admin-header__avatar"
+        (click)="toggleAvatarMenu($event)"
+        aria-haspopup="menu"
+        [attr.aria-expanded]="avatarMenuOpen"
+      >
+        {{ account.initials }}
+      </button>
+
+      @if (avatarMenuOpen) {
+        <div class="admin-header__avatar-menu" role="menu" (click)="$event.stopPropagation()">
+          <div class="admin-header__avatar-info">
+            <div class="admin-header__avatar admin-header__avatar--lg">{{ account.initials }}</div>
+            <div>
+              <p class="admin-header__avatar-name">{{ account.name }}</p>
+              <p class="admin-header__avatar-role">{{ account.role }}</p>
+            </div>
+          </div>
+          <div class="admin-header__avatar-divider"></div>
+          <button type="button" class="admin-header__avatar-item" role="menuitem" (click)="goToUserDashboard()">
+            <span class="material-symbols-outlined">person</span>
+            <span>User Dashboard</span>
+          </button>
+          <button type="button" class="admin-header__avatar-item admin-header__avatar-item--danger" role="menuitem" (click)="logout()">
+            <span class="material-symbols-outlined">logout</span>
+            <span>Sign out</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</header>

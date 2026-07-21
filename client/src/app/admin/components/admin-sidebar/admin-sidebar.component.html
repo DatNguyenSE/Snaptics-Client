@@ -1,0 +1,213 @@
+<aside
+  class="sidebar"
+  [class.sidebar--collapsed]="collapsed"
+  [class.sidebar--mobile-open]="mobileOpen"
+  aria-label="Admin navigation"
+>
+  <!-- Brand -->
+  <div class="sidebar__brand">
+    <div class="sidebar__brand-icon">
+      <span class="material-symbols-outlined">shield</span>
+    </div>
+    @if (!collapsed) {
+      <div class="sidebar__brand-text">
+        <span class="sidebar__brand-name">Snaptics</span>
+        <span class="sidebar__brand-sub">Admin Console</span>
+      </div>
+    }
+    <button
+      type="button"
+      class="sidebar__collapse-btn"
+      (click)="toggleCollapse.emit()"
+      [attr.aria-label]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+      [title]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+    >
+      <span class="material-symbols-outlined">
+        {{ collapsed ? 'menu_open' : 'menu' }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Main nav -->
+  <nav class="sidebar__nav" aria-label="Main admin navigation">
+    @if (!collapsed) {
+      <p class="sidebar__section-label">Management</p>
+    }
+    @for (item of mainNavItems; track item.id) {
+      <a
+        class="sidebar__item"
+        [routerLink]="item.route"
+        routerLinkActive="sidebar__item--active"
+        [routerLinkActiveOptions]="{ exact: false }"
+        [title]="collapsed ? item.label : ''"
+        (click)="onNavClick()"
+      >
+        <span class="material-symbols-outlined sidebar__item-icon">{{ item.icon }}</span>
+        @if (!collapsed) {
+          <span class="sidebar__item-label">{{ item.label }}</span>
+        }
+      </a>
+    }
+
+    <div class="sidebar__divider"></div>
+
+    @if (!collapsed) {
+      <p class="sidebar__section-label">System</p>
+    }
+    @for (item of systemNavItems; track item.id) {
+      <a
+        class="sidebar__item"
+        [class.sidebar__item--disabled]="item.id === 'settings' && !isSuperAdmin"
+        [routerLink]="item.route"
+        routerLinkActive="sidebar__item--active"
+        [routerLinkActiveOptions]="{ exact: false }"
+        [title]="collapsed ? item.label : (item.id === 'settings' && !isSuperAdmin ? 'Super Admin only' : '')"
+        (click)="onNavClick()"
+      >
+        <span class="material-symbols-outlined sidebar__item-icon">{{ item.icon }}</span>
+        @if (!collapsed) {
+          <span class="sidebar__item-label">{{ item.label }}</span>
+          @if (item.id === 'settings' && !isSuperAdmin) {
+            <span class="sidebar__item-lock">
+              <span class="material-symbols-outlined">lock</span>
+            </span>
+          }
+        }
+      </a>
+    }
+  </nav>
+
+  <!-- Footer / User Account Dropdown -->
+  <div class="sidebar__footer">
+    <div class="sidebar__account">
+      <div class="account-dropdown">
+        <button
+          class="sidebar__account-trigger"
+          type="button"
+          aria-haspopup="menu"
+          [attr.aria-expanded]="isAccountMenuOpen"
+          (click)="toggleAccountMenu($event)"
+        >
+          <span class="account-dropdown__avatar">{{ account.initials }}</span>
+          @if (!collapsed) {
+            <div class="sidebar__account-copy">
+              <p class="sidebar__account-name">{{ account.fullName }}</p>
+              <span class="sidebar__account-username">&#64;{{ account.username }}</span>
+            </div>
+            <span
+              class="material-symbols-outlined sidebar__account-chevron"
+              [class.sidebar__account-chevron--open]="isAccountMenuOpen"
+            >
+              expand_more
+            </span>
+          }
+        </button>
+
+        @if (isAccountMenuOpen) {
+          <div
+            class="account-dropdown__panel"
+            role="menu"
+            (click)="$event.stopPropagation()"
+          >
+            <div class="account-dropdown__actions account-dropdown__actions--compact">
+              <!-- Ngôn ngữ -->
+              <div class="account-dropdown__language-row">
+                <span class="account-dropdown__language-label">{{ language.currentLang() === 'vi' ? 'Ngôn ngữ' : 'Language' }}</span>
+                <div
+                  class="language-switch language-switch--panel"
+                  aria-label="Language switch"
+                  role="group"
+                >
+                  @for (option of languages; track option.code) {
+                    <button
+                      class="language-switch__button"
+                      type="button"
+                      [class.language-switch__button--active]="language.currentLang() === option.code"
+                      (click)="setLanguage(option.code)"
+                    >
+                      {{ option.label }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Giao diện / Theme -->
+              <div class="account-dropdown__language-row">
+                <span class="account-dropdown__language-label">{{ language.currentLang() === 'vi' ? 'Giao diện' : 'Theme' }}</span>
+                <div class="theme-segmented-control" role="group">
+                  <button
+                    type="button"
+                    class="theme-segmented-btn"
+                    [class.theme-segmented-btn--active]="theme.currentTheme() === 'system'"
+                    (click)="theme.setTheme('system')"
+                    aria-label="System Theme"
+                    title="System"
+                  >
+                    <span class="material-symbols-outlined">desktop_windows</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="theme-segmented-btn"
+                    [class.theme-segmented-btn--active]="theme.currentTheme() === 'light'"
+                    (click)="theme.setTheme('light')"
+                    aria-label="Light Theme"
+                    title="Light"
+                  >
+                    <span class="material-symbols-outlined">light_mode</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="theme-segmented-btn"
+                    [class.theme-segmented-btn--active]="theme.currentTheme() === 'dark'"
+                    (click)="theme.setTheme('dark')"
+                    aria-label="Dark Theme"
+                    title="Dark"
+                  >
+                    <span class="material-symbols-outlined">dark_mode</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Giao diện người dùng / User App -->
+              <button class="account-dropdown__item" type="button" (click)="openUserApp()">
+                <span class="account-dropdown__item-main">
+                  <span class="material-symbols-outlined">space_dashboard</span>
+                  <span>{{ language.currentLang() === 'vi' ? 'Giao diện người dùng' : 'User App' }}</span>
+                </span>
+                <span class="material-symbols-outlined account-dropdown__item-arrow">
+                  chevron_right
+                </span>
+              </button>
+
+              <!-- Cài đặt -->
+              <button class="account-dropdown__item" type="button" (click)="openSettings()">
+                <span class="account-dropdown__item-main">
+                  <span class="material-symbols-outlined">settings</span>
+                  <span>{{ language.currentLang() === 'vi' ? 'Cài đặt' : 'Settings' }}</span>
+                </span>
+                <span class="material-symbols-outlined account-dropdown__item-arrow">
+                  chevron_right
+                </span>
+              </button>
+
+              <!-- Đăng xuất -->
+              <button
+                class="account-dropdown__item account-dropdown__item--danger"
+                type="button"
+                (click)="logout()"
+              >
+                <span class="account-dropdown__item-main">
+                  <span class="material-symbols-outlined">logout</span>
+                  <span>{{ language.currentLang() === 'vi' ? 'Đăng xuất' : 'Logout' }}</span>
+                </span>
+                <span class="material-symbols-outlined account-dropdown__item-arrow">
+                  chevron_right
+                </span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</aside>
