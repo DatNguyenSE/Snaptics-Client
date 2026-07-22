@@ -2,103 +2,261 @@
   <div class="budget-page__content">
     <app-user-header></app-user-header>
 
+    <!-- ── Header ── -->
     <header class="budget-header">
       <div class="budget-header__title">
         <h1>Ví của bạn</h1>
         <p>Quản lý chi tiêu và tích lũy hiệu quả</p>
       </div>
-      <button class="btn-primary" (click)="openModal()">
-        <span class="material-symbols-outlined">add</span>
-        Thêm mới
-      </button>
+      <div class="budget-header__actions">
+        <button class="btn-primary" (click)="openModal()" id="btn-add-personal-budget">
+          <span class="material-symbols-outlined">add</span>
+          Thêm mới
+        </button>
+        <button class="btn-shared" (click)="openSharedModal()" id="btn-create-shared-wallet">
+          <span class="material-symbols-outlined">group_add</span>
+          Ví dùng chung
+        </button>
+      </div>
     </header>
 
-    <main class="budget-list-container">
-      @if (isLoading) {
-        <div class="state-container">
-          <span class="material-symbols-outlined spin state-icon">progress_activity</span>
-          <p>Đang tải ngân sách...</p>
-        </div>
-      } @else if (hasError) {
-        <div class="state-container state-container--error">
-          <span class="material-symbols-outlined state-icon">error_outline</span>
-          <p>Không thể tải dữ liệu. Vui lòng thử lại sau.</p>
-        </div>
-      } @else if (budgets.length === 0) {
-        <div class="state-container">
-          <span class="material-symbols-outlined state-icon">account_balance_wallet</span>
-          <p>Bạn chưa có ngân sách nào.</p>
-        </div>
-      } @else {
-        <div class="budget-grid">
-          @for (budget of budgets; track budget.id) {
-            <article class="budget-card" [class.budget-card--saving]="budget.type === 1">
-              <div class="budget-card__header">
-                <div class="budget-card__title-wrap">
-                  <div class="budget-icon-wrap">
-                    <span class="material-symbols-outlined">
-                      {{ budget.type === 1 ? 'savings' : 'account_balance_wallet' }}
-                    </span>
-                  </div>
-                  <div class="budget-title-details">
-                    <h3 class="budget-name">{{ budget.name }}</h3>
-                    <span class="budget-period">
-                      {{ budget.startDate | date:'dd/MM' }} - {{ budget.endDate | date:'dd/MM' }}
-                    </span>
-                  </div>
-                </div>
-                <div class="budget-card__actions">
-                  <button class="btn-icon" aria-label="Edit budget" (click)="openModal(budget)">
-                    <span class="material-symbols-outlined">edit</span>
-                  </button>
-                  <button class="btn-icon btn-icon--danger" aria-label="Delete budget" (click)="deleteBudget(budget.id)">
-                    <span class="material-symbols-outlined">delete</span>
-                  </button>
-                </div>
-              </div>
+    <!-- ── Tabs ── -->
+    <div class="budget-tabs" role="tablist" aria-label="Loại ví">
+      <button
+        class="budget-tab"
+        role="tab"
+        [class.budget-tab--active]="activeTab === 'personal'"
+        (click)="setTab('personal')"
+        id="tab-personal"
+        [attr.aria-selected]="activeTab === 'personal'"
+      >
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        Ví cá nhân
+        @if (!isLoading && budgets.length > 0) {
+          <span class="tab-count">{{ budgets.length }}</span>
+        }
+      </button>
+      <button
+        class="budget-tab"
+        role="tab"
+        [class.budget-tab--active]="activeTab === 'shared'"
+        (click)="setTab('shared')"
+        id="tab-shared"
+        [attr.aria-selected]="activeTab === 'shared'"
+      >
+        <span class="material-symbols-outlined">group</span>
+        Ví dùng chung
+        @if (!isLoadingShared && sharedBudgets.length > 0) {
+          <span class="tab-count tab-count--shared">{{ sharedBudgets.length }}</span>
+        }
+      </button>
+    </div>
 
-              <div class="budget-card__body">
-                <div class="budget-amounts">
-                  <div class="amount-group">
-                    <span class="amount-label">
-                      {{ budget.type === 1 ? 'Đã tích lũy' : 'Đã sử dụng' }}
-                    </span>
-                    <p class="amount-value" [class.text-saving]="budget.type === 1 && getSpentAmount(budget) >= 0" [class.text-danger]="getSpentAmount(budget) < 0">
-                      {{ formatCurrency(getSpentAmount(budget)) }}
-                    </p>
-                  </div>
-                  <div class="amount-group align-right">
-                    <span class="amount-label">Tổng ngân sách</span>
-                    <p class="amount-value" [class.text-danger]="budget.amount < 0">{{ formatCurrency(budget.amount) }}</p>
-                  </div>
-                </div>
-
-                <div class="budget-progress-container">
-                  <div class="progress-bar-bg" [class.bg-saving]="budget.type === 1">
-                    <div 
-                      class="progress-bar-fill" 
-                      [style.width.%]="getBudgetSpentPercent(budget)"
-                      [class.fill-saving]="budget.type === 1"
-                      [class.fill-danger]="budget.type !== 1 && getBudgetSpentPercent(budget) >= 90">
+    <!-- ════ PERSONAL TAB ════ -->
+    @if (activeTab === 'personal') {
+      <main class="budget-list-container">
+        @if (isLoading) {
+          <div class="state-container">
+            <span class="material-symbols-outlined spin state-icon">progress_activity</span>
+            <p>Đang tải ngân sách...</p>
+          </div>
+        } @else if (hasError) {
+          <div class="state-container state-container--error">
+            <span class="material-symbols-outlined state-icon">error_outline</span>
+            <p>Không thể tải dữ liệu. Vui lòng thử lại sau.</p>
+          </div>
+        } @else if (budgets.length === 0) {
+          <div class="state-container">
+            <span class="material-symbols-outlined state-icon">account_balance_wallet</span>
+            <p>Bạn chưa có ngân sách cá nhân nào.</p>
+            <button class="btn-primary" (click)="openModal()" id="btn-add-first-budget">
+              <span class="material-symbols-outlined">add</span>
+              Thêm ngân sách đầu tiên
+            </button>
+          </div>
+        } @else {
+          <div class="budget-grid">
+            @for (budget of budgets; track budget.id) {
+              <article class="budget-card" [class.budget-card--saving]="budget.type === 1">
+                <div class="budget-card__header">
+                  <div class="budget-card__title-wrap">
+                    <div class="budget-icon-wrap">
+                      <span class="material-symbols-outlined">
+                        {{ budget.type === 1 ? 'savings' : 'account_balance_wallet' }}
+                      </span>
+                    </div>
+                    <div class="budget-title-details">
+                      <h3 class="budget-name">{{ budget.name }}</h3>
+                      <span class="budget-period">
+                        {{ budget.startDate | date:'dd/MM' }} - {{ budget.endDate | date:'dd/MM' }}
+                      </span>
                     </div>
                   </div>
-                  <div class="progress-footer">
-                    <span>{{ getBudgetSpentPercent(budget) }}%</span>
-                    @if (budget.isDefault) {
-                      <span class="badge badge-default">Mặc định</span>
+                  <div class="budget-card__actions">
+                    <button class="btn-icon" aria-label="Sửa ngân sách" (click)="openModal(budget)">
+                      <span class="material-symbols-outlined">edit</span>
+                    </button>
+                    <button class="btn-icon btn-icon--danger" aria-label="Xóa ngân sách" (click)="deleteBudget(budget.id)">
+                      <span class="material-symbols-outlined">delete</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="budget-card__body">
+                  <div class="budget-amounts">
+                    <div class="amount-group">
+                      <span class="amount-label">{{ budget.type === 1 ? 'Đã tích lũy' : 'Đã sử dụng' }}</span>
+                      <p class="amount-value"
+                        [class.text-saving]="budget.type === 1 && getSpentAmount(budget) >= 0"
+                        [class.text-danger]="getSpentAmount(budget) < 0"
+                      >
+                        {{ formatCurrency(getSpentAmount(budget)) }}
+                      </p>
+                    </div>
+                    <div class="amount-group align-right">
+                      <span class="amount-label">Tổng ngân sách</span>
+                      <p class="amount-value" [class.text-danger]="budget.amount < 0">{{ formatCurrency(budget.amount) }}</p>
+                    </div>
+                  </div>
+
+                  <div class="budget-progress-container">
+                    <div class="progress-bar-bg" [class.bg-saving]="budget.type === 1">
+                      <div
+                        class="progress-bar-fill"
+                        [style.width.%]="getBudgetSpentPercent(budget)"
+                        [class.fill-saving]="budget.type === 1"
+                        [class.fill-danger]="budget.type !== 1 && getBudgetSpentPercent(budget) >= 90"
+                      ></div>
+                    </div>
+                    <div class="progress-footer">
+                      <span>{{ getBudgetSpentPercent(budget) }}%</span>
+                      @if (budget.isDefault) {
+                        <span class="badge badge-default">Mặc định</span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </main>
+    }
+
+    <!-- ════ SHARED TAB ════ -->
+    @if (activeTab === 'shared') {
+      <main class="budget-list-container">
+        @if (isLoadingShared) {
+          <div class="state-container">
+            <span class="material-symbols-outlined spin state-icon">progress_activity</span>
+            <p>Đang tải ví dùng chung...</p>
+          </div>
+        } @else if (hasErrorShared) {
+          <div class="state-container state-container--error">
+            <span class="material-symbols-outlined state-icon">error_outline</span>
+            <p>Không thể tải ví dùng chung. Vui lòng thử lại.</p>
+          </div>
+        } @else if (sharedBudgets.length === 0) {
+          <div class="state-container">
+            <span class="material-symbols-outlined state-icon">group</span>
+            <p>Bạn chưa tham gia ví dùng chung nào.</p>
+            <p class="state-hint">Tạo ví gia đình hoặc chờ lời mời từ thành viên khác.</p>
+            <button class="btn-shared btn-shared--lg" (click)="openSharedModal()" id="btn-create-first-shared">
+              <span class="material-symbols-outlined">group_add</span>
+              Tạo ví dùng chung
+            </button>
+          </div>
+        } @else {
+          <div class="budget-grid">
+            @for (budget of sharedBudgets; track budget.id) {
+              <article
+                class="budget-card budget-card--shared"
+                (click)="navigateToSharedBudget(budget)"
+                role="button"
+                tabindex="0"
+                (keydown.enter)="navigateToSharedBudget(budget)"
+                [attr.aria-label]="'Mở ví ' + budget.name"
+              >
+                <!-- Shared badge -->
+                <div class="shared-card-badge">
+                  <span class="badge badge-shared">
+                    <span class="material-symbols-outlined">group</span>
+                    Dùng chung
+                  </span>
+                  <span class="badge" [class.badge-owner]="budget.currentUserRole === 'OWNER'" [class.badge-member]="budget.currentUserRole === 'MEMBER'">
+                    {{ budget.currentUserRole === 'OWNER' ? 'Chủ ví' : 'Thành viên' }}
+                  </span>
+                </div>
+
+                <div class="budget-card__header">
+                  <div class="budget-card__title-wrap">
+                    <div class="budget-icon-wrap budget-icon-wrap--shared">
+                      <span class="material-symbols-outlined">group</span>
+                    </div>
+                    <div class="budget-title-details">
+                      <h3 class="budget-name">{{ budget.name }}</h3>
+                      <span class="budget-period">
+                        {{ budget.startDate | date:'dd/MM' }} - {{ budget.endDate | date:'dd/MM' }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Member avatars -->
+                  <div class="member-chips">
+                    @for (member of getDisplayedMembers(budget); track member.userId; let i = $index) {
+                      <div class="member-chip" [style.z-index]="10 - i" [title]="member.displayName">
+                        @if (member.imageUrl) {
+                          <img [src]="member.imageUrl" [alt]="member.displayName" />
+                        } @else {
+                          <span>{{ getInitials(member.displayName) }}</span>
+                        }
+                      </div>
+                    }
+                    @if ((budget.memberCount ?? 0) > 3) {
+                      <div class="member-chip member-chip--more">+{{ (budget.memberCount ?? 0) - 3 }}</div>
                     }
                   </div>
                 </div>
-              </div>
-            </article>
-          }
-        </div>
-      }
-    </main>
+
+                <div class="budget-card__body">
+                  <div class="budget-amounts">
+                    <div class="amount-group">
+                      <span class="amount-label">Đã chi</span>
+                      <p class="amount-value amount-value--spent">{{ formatCurrency(getSharedSpentAmount(budget)) }}</p>
+                    </div>
+                    <div class="amount-group align-right">
+                      <span class="amount-label">Ngân sách</span>
+                      <p class="amount-value">{{ formatCurrency(budget.amount) }}</p>
+                    </div>
+                  </div>
+
+                  <div class="budget-progress-container">
+                    <div class="progress-bar-bg">
+                      <div
+                        class="progress-bar-fill progress-bar-fill--shared"
+                        [style.width.%]="getSharedSpentPercent(budget)"
+                        [class.fill-danger]="getSharedSpentPercent(budget) >= 90"
+                      ></div>
+                    </div>
+                    <div class="progress-footer">
+                      <span>{{ getSharedSpentPercent(budget) }}%</span>
+                      <span class="member-count-label">
+                        <span class="material-symbols-outlined" style="font-size:0.875rem">group</span>
+                        {{ budget.memberCount }} thành viên
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </main>
+    }
   </div>
 </section>
 
-<!-- ── MODAL ── -->
+<!-- ── Personal Budget Modal ── -->
 @if (isModalOpen) {
   <div class="modal-overlay" (click)="closeModal()">
     <div class="modal-content" (click)="stopPropagation($event)">
@@ -118,13 +276,12 @@
       </div>
 
       <form [formGroup]="budgetForm" (ngSubmit)="onSubmit()" class="modal-form">
-        <!-- Tên ngân sách -->
         <div class="form-group">
           <label>Tên ngân sách</label>
-          <input type="text" formControlName="name" placeholder="VD: Mua xe máy, Chi tiêu sinh hoạt..." class="form-control" [class.is-invalid]="budgetForm.get('name')?.invalid && budgetForm.get('name')?.touched" />
+          <input type="text" formControlName="name" placeholder="VD: Mua xe máy, Chi tiêu sinh hoạt..." class="form-control"
+            [class.is-invalid]="budgetForm.get('name')?.invalid && budgetForm.get('name')?.touched" />
         </div>
 
-        <!-- Loại & Số tiền -->
         <div class="form-row">
           <div class="form-group">
             <label>Loại ngân sách</label>
@@ -135,13 +292,11 @@
           </div>
           <div class="form-group">
             <label>Số tiền (VND)</label>
-            <input type="text" [value]="displayAmount" (input)="onAmountChange($event)" placeholder="0" class="form-control" [class.is-invalid]="budgetForm.get('amount')?.invalid && budgetForm.get('amount')?.touched" />
+            <input type="text" [value]="displayAmount" (input)="onAmountChange($event)" placeholder="0" class="form-control"
+              [class.is-invalid]="budgetForm.get('amount')?.invalid && budgetForm.get('amount')?.touched" />
           </div>
         </div>
 
-
-
-        <!-- Ngày -->
         <div class="form-row">
           <div class="form-group">
             <label>Ngày bắt đầu</label>
@@ -153,12 +308,9 @@
           </div>
         </div>
 
-        <!-- Nút hành động -->
         <div class="modal-actions">
-          <button type="button" class="btn-ghost" (click)="closeModal()" [disabled]="isSubmitting">
-            Hủy
-          </button>
-          <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+          <button type="button" class="btn-ghost" (click)="closeModal()" [disabled]="isSubmitting">Hủy</button>
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting" id="btn-submit-personal-budget">
             @if (isSubmitting) {
               <span class="material-symbols-outlined spin">progress_activity</span>
               Đang lưu...
@@ -171,4 +323,12 @@
       </form>
     </div>
   </div>
+}
+
+<!-- ── Shared Budget Modal ── -->
+@if (isSharedModalOpen) {
+  <app-create-shared-budget-modal
+    (created)="onSharedBudgetCreated($event)"
+    (closed)="closeSharedModal()"
+  />
 }

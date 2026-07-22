@@ -1,0 +1,235 @@
+<section class="detail-page">
+  <div class="detail-page__content">
+    <app-user-header></app-user-header>
+
+    <!-- Back nav -->
+    <div class="back-nav">
+      <button class="btn-back" (click)="goBack()" id="btn-back-to-budgets">
+        <span class="material-symbols-outlined">arrow_back</span>
+        Danh sách ví
+      </button>
+    </div>
+
+    <!-- Loading state -->
+    @if (isLoading) {
+      <div class="state-container">
+        <span class="material-symbols-outlined spin state-icon">progress_activity</span>
+        <p>Đang tải thông tin ví...</p>
+      </div>
+    }
+
+    <!-- Error state -->
+    @else if (hasError) {
+      <div class="state-container state-container--error">
+        <span class="material-symbols-outlined state-icon">error_outline</span>
+        <p>Không thể tải thông tin ví. Vui lòng thử lại.</p>
+        <button class="btn-primary" (click)="loadBudget()">Thử lại</button>
+      </div>
+    }
+
+    @else if (budget) {
+      <!-- ── Budget Header Card ─────────────────────────────── -->
+      <div class="budget-hero" [class.budget-hero--over]="isOverBudget" [class.budget-hero--near]="isNearLimit">
+        <div class="budget-hero__top">
+          <div class="budget-hero__title-area">
+            <div class="budget-hero__badges">
+              <span class="wallet-badge wallet-badge--shared">
+                <span class="material-symbols-outlined">group</span>
+                Ví dùng chung
+              </span>
+              <span class="wallet-badge" [class.wallet-badge--owner]="isOwner" [class.wallet-badge--member]="!isOwner">
+                {{ isOwner ? 'Chủ ví' : 'Thành viên' }}
+              </span>
+            </div>
+            <h1 class="budget-hero__name">{{ budget.name }}</h1>
+            @if (budget.description) {
+              <p class="budget-hero__desc">{{ budget.description }}</p>
+            }
+          </div>
+
+          <div class="budget-hero__actions">
+            <button
+              class="btn-members"
+              (click)="openMemberModal()"
+              id="btn-open-member-modal"
+              [attr.aria-label]="'Quản lý thành viên - ' + budget.memberCount + ' người'"
+            >
+              <div class="member-avatars">
+                @for (member of displayedMembers; track member.userId; let i = $index) {
+                  <div class="member-avatar-chip" [style.z-index]="10 - i" [title]="member.displayName">
+                    @if (member.imageUrl) {
+                      <img [src]="member.imageUrl" [alt]="member.displayName" />
+                    } @else {
+                      <span>{{ getInitials(member.displayName) }}</span>
+                    }
+                  </div>
+                }
+                @if ((budget.memberCount ?? 0) > 4) {
+                  <div class="member-avatar-chip member-avatar-chip--more">
+                    +{{ (budget.memberCount ?? 0) - 4 }}
+                  </div>
+                }
+              </div>
+              <span class="btn-members__label">{{ budget.memberCount }} thành viên</span>
+            </button>
+
+            @if (isOwner) {
+              <button
+                class="btn-icon-action btn-icon-action--danger"
+                (click)="openDeleteConfirm()"
+                title="Xóa ví"
+                id="btn-delete-wallet"
+                aria-label="Xóa ví dùng chung"
+              >
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="budget-stats">
+          <div class="stat-card">
+            <span class="stat-label">Ngân sách tháng</span>
+            <p class="stat-value">{{ formatCurrency(budget.amount) }}</p>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Đã chi</span>
+            <p class="stat-value stat-value--spent">{{ formatCurrency(spentAmount) }}</p>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Còn lại</span>
+            <p class="stat-value" [class.stat-value--danger]="isOverBudget" [class.stat-value--warn]="isNearLimit && !isOverBudget">
+              {{ formatCurrency(remainingAmount) }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="budget-progress">
+          <div class="progress-track">
+            <div
+              class="progress-fill"
+              [style.width.%]="spentPercent"
+              [class.progress-fill--danger]="isOverBudget"
+              [class.progress-fill--warn]="isNearLimit && !isOverBudget"
+            ></div>
+          </div>
+          <div class="progress-footer">
+            <span class="progress-pct">{{ spentPercent }}% đã dùng</span>
+            @if (isOverBudget) {
+              <span class="progress-alert progress-alert--danger">
+                <span class="material-symbols-outlined">warning</span>
+                Vượt ngân sách!
+              </span>
+            } @else if (isNearLimit) {
+              <span class="progress-alert progress-alert--warn">
+                <span class="material-symbols-outlined">warning</span>
+                Gần đạt hạn mức
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Transactions ─────────────────────────────── -->
+      <section class="transactions-section">
+        <div class="section-header">
+          <h2 class="section-title">Giao dịch gần đây</h2>
+        </div>
+
+        @if (isLoadingTransactions) {
+          <div class="state-container">
+            <span class="material-symbols-outlined spin state-icon">progress_activity</span>
+            <p>Đang tải giao dịch...</p>
+          </div>
+        } @else if (hasTransactionError) {
+          <div class="state-container state-container--error">
+            <span class="material-symbols-outlined state-icon">error_outline</span>
+            <p>Không thể tải giao dịch</p>
+          </div>
+        } @else if (transactions.length === 0) {
+          <div class="state-container">
+            <span class="material-symbols-outlined state-icon">receipt_long</span>
+            <p>Ví chưa có giao dịch nào.</p>
+            <p class="state-hint">Thêm giao dịch đầu tiên để bắt đầu theo dõi chi tiêu cùng nhau.</p>
+          </div>
+        } @else {
+          <div class="transaction-list">
+            @for (t of transactions; track t.id) {
+              <div class="tx-item" [class.tx-item--income]="!t.isExpense">
+                <!-- Creator avatar -->
+                <div class="tx-creator-avatar" [title]="getCreatorDisplay(t)">
+                  @if (getCreatorImageUrl(t)) {
+                    <img [src]="getCreatorImageUrl(t)!" [alt]="getCreatorDisplay(t)" />
+                  } @else {
+                    <span>{{ getCreatorInitials(t) }}</span>
+                  }
+                </div>
+
+                <!-- Info -->
+                <div class="tx-info">
+                  <p class="tx-name">{{ t.name || getCategoryLabel(t) }}</p>
+                  <div class="tx-meta">
+                    <span class="tx-creator">{{ getCreatorDisplay(t) }}</span>
+                    <span class="tx-dot">·</span>
+                    <span class="tx-category">{{ getCategoryLabel(t) }}</span>
+                    <span class="tx-dot">·</span>
+                    <span class="tx-date">{{ t.transactionDate | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                  @if (t.note) {
+                    <p class="tx-note">{{ t.note }}</p>
+                  }
+                </div>
+
+                <!-- Amount -->
+                <p class="tx-amount" [class.tx-amount--income]="!t.isExpense">
+                  {{ t.isExpense ? '-' : '+' }}{{ formatCurrency(t.totalAmount) }}
+                </p>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+</section>
+
+<!-- ── Member Modal ─── -->
+@if (isMemberModalOpen && budget) {
+  <app-budget-member-modal
+    [budgetId]="budget.id"
+    [budgetName]="budget.name"
+    [currentUserRole]="budget.currentUserRole"
+    [currentUserId]="currentUserId"
+    (closed)="closeMemberModal()"
+    (membersChanged)="onMembersChanged()"
+  />
+}
+
+<!-- ── Delete Confirm ─── -->
+@if (isDeleteConfirmOpen) {
+  <div class="modal-overlay" (click)="closeDeleteConfirm()">
+    <div class="confirm-modal" (click)="$event.stopPropagation()">
+      <div class="confirm-modal__icon">
+        <span class="material-symbols-outlined">warning</span>
+      </div>
+      <h3>Xóa ví dùng chung?</h3>
+      <p>Hành động này sẽ xóa vĩnh viễn ví <strong>{{ budget?.name }}</strong> và tất cả dữ liệu liên quan. Không thể hoàn tác.</p>
+      <div class="confirm-modal__actions">
+        <button class="btn-ghost" (click)="closeDeleteConfirm()" [disabled]="isDeleting" id="btn-cancel-delete">
+          Hủy
+        </button>
+        <button class="btn-danger" (click)="confirmDelete()" [disabled]="isDeleting" id="btn-confirm-delete">
+          @if (isDeleting) {
+            <span class="material-symbols-outlined spin">progress_activity</span>
+            Đang xóa...
+          } @else {
+            <span class="material-symbols-outlined">delete</span>
+            Xóa ví
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

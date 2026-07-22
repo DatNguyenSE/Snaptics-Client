@@ -25,6 +25,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
     },
     nav: {
       dashboard: 'T\u1ed5ng quan',
+      budget: 'Qu\u1ea3n l\u00fd v\u00ed',
       scan: 'Scan',
       snapItem: 'Ch\u1ee5p m\u00f3n \u0111\u1ed3',
       manualEntry: 'Nh\u1eadp th\u1ee7 c\u00f4ng',
@@ -565,6 +566,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
     },
     nav: {
       dashboard: 'Dashboard',
+      budget: 'Wallet Management',
       scan: 'Scan',
       snapItem: 'Snap Item',
       manualEntry: 'Manual Entry',

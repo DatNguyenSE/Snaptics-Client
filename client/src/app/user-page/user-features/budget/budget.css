@@ -513,3 +513,224 @@
   background: #fef2f2;
   color: #dc2626;
 }
+
+/* ─── Header Actions ─── */
+.budget-header__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-shared {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  color: #ffffff;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.22);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+}
+
+.btn-shared:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.32);
+}
+
+.btn-shared--lg {
+  padding: 12px 24px;
+  font-size: 0.9375rem;
+}
+
+.btn-shared .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+/* ─── Tabs ─── */
+.budget-tabs {
+  display: flex;
+  gap: 4px;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 16px;
+}
+
+.budget-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 13px;
+  border: none;
+  background: transparent;
+  color: var(--sw-muted-foreground, #64748b);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.budget-tab:hover {
+  background: rgba(255,255,255,0.6);
+  color: var(--sw-foreground, #0f172a);
+}
+
+.budget-tab--active {
+  background: var(--sw-card, #ffffff);
+  color: var(--sw-foreground, #0f172a);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.budget-tab .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #6366f1;
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 800;
+}
+
+.tab-count--shared {
+  background: #0ea5e9;
+}
+
+/* ─── Shared Card ─── */
+.budget-card--shared {
+  cursor: pointer;
+  background: linear-gradient(160deg, #ffffff 0%, #f0f4ff 200%);
+  border-color: #e0e7ff;
+  position: relative;
+}
+
+.budget-card--shared::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1, #0ea5e9);
+  border-radius: 24px 24px 0 0;
+}
+
+.budget-card--shared:hover {
+  border-color: #a5b4fc;
+  box-shadow: 0 12px 32px rgba(99, 102, 241, 0.1);
+}
+
+.shared-card-badge {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: -4px;
+}
+
+.badge-shared {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #ddd6fe;
+}
+
+.badge-shared .material-symbols-outlined {
+  font-size: 0.875rem;
+}
+
+.badge-owner {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.badge-member {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.budget-icon-wrap--shared {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+/* ─── Member chips ─── */
+.member-chips {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.member-chip {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: linear-gradient(135deg, #6366f1, #7c3aed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -8px;
+  overflow: hidden;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.member-chip:first-child {
+  margin-left: 0;
+}
+
+.member-chip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.member-chip--more {
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.625rem;
+}
+
+.amount-value--spent {
+  color: #f59e0b;
+}
+
+.progress-bar-fill--shared {
+  background: linear-gradient(90deg, #6366f1, #0ea5e9);
+}
+
+.member-count-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.75rem;
+  color: var(--sw-muted-foreground, #64748b);
+  font-weight: 500;
+}
+
+.state-hint {
+  font-size: 0.8125rem;
+  color: var(--sw-muted-foreground, #94a3b8);
+  margin: -4px 0 0;
+}

@@ -165,6 +165,12 @@ export class TransactionService {
     );
   }
 
+  getBudgetTransactions(budgetId: number): Observable<TransactionDto[]> {
+    return this.http
+      .get<TransactionDto[]>(`${this.apiUrl}/budget/${budgetId}`)
+      .pipe(map((transactions) => transactions.map((t) => this.sanitizeTransaction(t))));
+  }
+
   private ensureTransactionsLoaded(): void {
     if (this.hasLoadedRemoteTransactions || this.isLoadingRemoteTransactions) {
       return;

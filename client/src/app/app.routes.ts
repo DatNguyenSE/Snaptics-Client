@@ -84,6 +84,13 @@ export const routes: Routes = [
           import('./user-page/user-features/budget/budget').then((m) => m.Budget),
       },
       {
+        path: 'budget/:budgetId',
+        loadComponent: () =>
+          import('./user-page/user-features/budget/shared-budget-detail/shared-budget-detail').then(
+            (m) => m.SharedBudgetDetail
+          ),
+      },
+      {
         path: 'transactions',
         loadComponent: () =>
           import('./user-page/user-features/transaction/transaction').then((m) => m.Transaction),

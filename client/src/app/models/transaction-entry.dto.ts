@@ -11,6 +11,7 @@ export interface CreateTransactionEntryDto {
   isAiEstimated?: boolean;
   isExpense: boolean;
   source: TransactionEntrySource;
+  budgetId?: number | null;
 }
 
 export interface SnapItemExtractionDto {

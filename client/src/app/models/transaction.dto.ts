@@ -10,6 +10,12 @@ export interface TransactionDetailDto {
   estimatedCalories: number | null;
 }
 
+export interface TransactionCreatorDto {
+  userId: string;
+  displayName: string;
+  imageUrl?: string | null;
+}
+
 export interface TransactionDto {
   id: number;
   name: string | null;
@@ -26,4 +32,8 @@ export interface TransactionDto {
   imagePreviewUrl?: string | null;
   source?: 'receipt' | 'manual' | 'snap';
   transactionDetails: TransactionDetailDto[];
+  // Shared wallet fields
+  budgetId?: number | null;
+  createdByUserId?: string | null;
+  createdByUser?: TransactionCreatorDto | null;
 }

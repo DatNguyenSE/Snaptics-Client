@@ -1,0 +1,167 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="stopPropagation($event)">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-icon">
+        <span class="material-symbols-outlined">group</span>
+      </div>
+      <div class="modal-titles">
+        <h3>Thành viên</h3>
+        <p>{{ budgetName }}</p>
+      </div>
+      <button class="btn-close" (click)="onClose()" aria-label="Đóng">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Confirm Dialog -->
+    @if (confirmAction) {
+      <div class="confirm-box">
+        <div class="confirm-box__icon">
+          <span class="material-symbols-outlined">warning</span>
+        </div>
+        <p class="confirm-box__message">{{ confirmAction.message }}</p>
+        <div class="confirm-box__actions">
+          <button class="btn-ghost" (click)="cancelConfirm()" [disabled]="isConfirming" id="btn-confirm-cancel">
+            Hủy
+          </button>
+          <button class="btn-danger" (click)="executeConfirm()" [disabled]="isConfirming" id="btn-confirm-execute">
+            @if (isConfirming) {
+              <span class="material-symbols-outlined spin">progress_activity</span>
+              Đang xử lý...
+            } @else {
+              @if (confirmAction.type === 'leave') { Rời ví }
+              @else if (confirmAction.type === 'remove') { Xóa thành viên }
+              @else { Chuyển quyền }
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Add Member (OWNER only) -->
+    @if (isOwner) {
+      <div class="invite-section">
+        <label class="invite-label">Thêm thành viên bằng email</label>
+        <div class="invite-row">
+          <input
+            id="member-invite-email"
+            type="email"
+            [(ngModel)]="inviteEmail"
+            placeholder="email@example.com"
+            class="form-control"
+            (keydown)="onInviteKeydown($event)"
+            [disabled]="isInviting"
+          />
+          <button
+            id="btn-invite-member"
+            class="btn-invite"
+            (click)="onInvite()"
+            [disabled]="isInviting || !inviteEmail.trim()"
+          >
+            @if (isInviting) {
+              <span class="material-symbols-outlined spin">progress_activity</span>
+            } @else {
+              <span class="material-symbols-outlined">person_add</span>
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Member List -->
+    <div class="member-list-section">
+      @if (isLoading) {
+        <div class="state-box">
+          <span class="material-symbols-outlined spin">progress_activity</span>
+          <span>Đang tải...</span>
+        </div>
+      } @else if (hasError) {
+        <div class="state-box state-box--error">
+          <span class="material-symbols-outlined">error_outline</span>
+          <span>Không thể tải danh sách</span>
+        </div>
+      } @else if (members.length === 0) {
+        <div class="state-box">
+          <span class="material-symbols-outlined">group_off</span>
+          <span>Ví chưa có thành viên</span>
+        </div>
+      } @else {
+        <ul class="member-list" role="list">
+          @for (member of members; track member.userId) {
+            <li class="member-item">
+              <div class="member-avatar" [attr.aria-label]="member.displayName">
+                @if (member.imageUrl) {
+                  <img [src]="member.imageUrl" [alt]="member.displayName" class="avatar-img" />
+                } @else {
+                  <span class="avatar-initials">{{ getInitials(member.displayName) }}</span>
+                }
+              </div>
+
+              <div class="member-info">
+                <span class="member-name">
+                  {{ member.displayName }}
+                  @if (member.userId === currentUserId) {
+                    <span class="you-badge">Bạn</span>
+                  }
+                </span>
+                <span class="member-email">{{ member.email }}</span>
+                <span class="member-joined">Tham gia {{ member.joinedAt | date:'dd/MM/yyyy' }}</span>
+              </div>
+
+              <div class="member-meta">
+                <span class="role-badge" [class.role-badge--owner]="member.role === 'OWNER'">
+                  {{ member.role === 'OWNER' ? 'Chủ ví' : 'Thành viên' }}
+                </span>
+
+                <!-- OWNER actions on other members -->
+                @if (isOwner && member.userId !== currentUserId && member.role !== 'OWNER') {
+                  <div class="member-actions">
+                    <button
+                      class="btn-action btn-action--transfer"
+                      (click)="confirmTransferOwner(member)"
+                      title="Chuyển quyền chủ ví"
+                      [attr.aria-label]="'Chuyển quyền chủ ví cho ' + member.displayName"
+                    >
+                      <span class="material-symbols-outlined">swap_horiz</span>
+                    </button>
+                    <button
+                      class="btn-action btn-action--remove"
+                      (click)="confirmRemove(member)"
+                      title="Xóa thành viên"
+                      [attr.aria-label]="'Xóa ' + member.displayName"
+                    >
+                      <span class="material-symbols-outlined">person_remove</span>
+                    </button>
+                  </div>
+                }
+
+                <!-- MEMBER: leave button for themselves -->
+                @if (!isOwner && member.userId === currentUserId) {
+                  <button
+                    id="btn-leave-wallet"
+                    class="btn-leave"
+                    (click)="confirmLeave()"
+                  >
+                    Rời ví
+                  </button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- MEMBER leave button (bottom) -->
+    @if (!isOwner) {
+      <div class="footer-actions">
+        <button id="btn-leave-wallet-footer" class="btn-leave-footer" (click)="confirmLeave()">
+          <span class="material-symbols-outlined">logout</span>
+          Rời khỏi ví
+        </button>
+      </div>
+    }
+  </div>
+</div>

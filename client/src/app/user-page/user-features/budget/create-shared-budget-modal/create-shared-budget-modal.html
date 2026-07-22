@@ -1,0 +1,139 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="stopPropagation($event)">
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-icon modal-icon--shared">
+        <span class="material-symbols-outlined">group</span>
+      </div>
+      <div class="modal-titles">
+        <h3>Tạo ví dùng chung</h3>
+        <p>Ví gia đình để cùng quản lý chi tiêu</p>
+      </div>
+      <button class="btn-close" (click)="onClose()" aria-label="Đóng" [disabled]="isSubmitting">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-form">
+      <!-- Tên ví -->
+      <div class="form-group">
+        <label class="form-label">Tên ví <span class="required-star">*</span></label>
+        <input
+          id="shared-wallet-name"
+          type="text"
+          formControlName="name"
+          placeholder="VD: Chi tiêu gia đình, Du lịch hè 2025..."
+          class="form-control"
+          [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+        />
+        @if (form.get('name')?.errors?.['required'] && form.get('name')?.touched) {
+          <span class="field-error">Vui lòng nhập tên ví</span>
+        }
+        @if (form.get('name')?.errors?.['maxlength'] && form.get('name')?.touched) {
+          <span class="field-error">Tên ví tối đa 100 ký tự</span>
+        }
+      </div>
+
+      <!-- Mô tả -->
+      <div class="form-group">
+        <label class="form-label">Mô tả</label>
+        <textarea
+          id="shared-wallet-desc"
+          formControlName="description"
+          placeholder="Mô tả ngắn về mục tiêu của ví..."
+          class="form-control form-control--textarea"
+          rows="2"
+        ></textarea>
+      </div>
+
+      <!-- Số tiền & Tiền tệ -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Ngân sách tháng (VND) <span class="required-star">*</span></label>
+          <input
+            id="shared-wallet-amount"
+            type="text"
+            [value]="displayAmount"
+            (input)="onAmountChange($event)"
+            placeholder="0"
+            class="form-control"
+            [class.is-invalid]="form.get('amount')?.invalid && form.get('amount')?.touched"
+          />
+          @if (form.get('amount')?.errors?.['min'] && form.get('amount')?.touched) {
+            <span class="field-error">Ngân sách phải lớn hơn 0</span>
+          }
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tiền tệ</label>
+          <select id="shared-wallet-currency" formControlName="currency" class="form-control">
+            <option value="VND">VND – Việt Nam Đồng</option>
+            <option value="USD">USD – US Dollar</option>
+            <option value="EUR">EUR – Euro</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Ngày -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Ngày bắt đầu</label>
+          <input id="shared-wallet-start" type="date" formControlName="startDate" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ngày kết thúc</label>
+          <input id="shared-wallet-end" type="date" formControlName="endDate" class="form-control" />
+        </div>
+      </div>
+
+      <!-- Mời thành viên -->
+      <div class="form-group">
+        <label class="form-label">Mời thành viên ban đầu</label>
+        <div class="member-invite-row">
+          <input
+            id="shared-wallet-invite-email"
+            type="email"
+            [(ngModel)]="memberEmailInput"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Nhập email thành viên..."
+            class="form-control"
+            (keydown)="onMemberEmailKeydown($event)"
+          />
+          <button type="button" class="btn-add-member" (click)="addMemberEmail()" id="btn-add-member-invite">
+            <span class="material-symbols-outlined">person_add</span>
+          </button>
+        </div>
+        <p class="form-hint">Nhấn Enter hoặc nút + để thêm. Thành viên sẽ được thêm trực tiếp.</p>
+
+        @if (memberEmails.length > 0) {
+          <div class="member-tags">
+            @for (email of memberEmails; track email) {
+              <div class="member-tag">
+                <span class="material-symbols-outlined">person</span>
+                <span>{{ email }}</span>
+                <button type="button" class="member-tag__remove" (click)="removeMemberEmail(email)" [attr.aria-label]="'Xóa ' + email">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" (click)="onClose()" [disabled]="isSubmitting">
+          Hủy
+        </button>
+        <button type="submit" class="btn-primary btn-primary--shared" [disabled]="isSubmitting" id="btn-create-shared-wallet">
+          @if (isSubmitting) {
+            <span class="material-symbols-outlined spin">progress_activity</span>
+            Đang tạo...
+          } @else {
+            <span class="material-symbols-outlined">group_add</span>
+            Tạo ví dùng chung
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

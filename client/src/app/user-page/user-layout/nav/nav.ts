@@ -46,6 +46,12 @@ export class Nav {
       route: '/user/dashboard',
     },
     {
+      id: 'budget',
+      labelKey: 'nav.budget',
+      icon: 'account_balance_wallet',
+      route: '/user/budget',
+    },
+    {
       id: 'transactions',
       labelKey: 'nav.transactions',
       icon: 'receipt_long',
@@ -64,7 +70,6 @@ export class Nav {
       route: '/user/scan',
       isScanItem: true,
     },
-
     {
       id: 'reminders',
       labelKey: 'nav.reminders',
