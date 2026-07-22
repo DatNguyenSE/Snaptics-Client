@@ -132,6 +132,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         scan: 'Qu\u00e9t h\u00f3a \u0111\u01a1n',
         capture: 'Ch\u1ee5p m\u00f3n \u0111\u1ed3',
         manual: 'Nh\u1eadp th\u1ee7 c\u00f4ng',
+        review: '\u0110\u00e1nh gi\u00e1',
         createBudget: 'Quản lý ví',
       },
       category: {
@@ -671,6 +672,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         scan: 'Scan Receipt',
         capture: 'Snap Item',
         manual: 'Manual Entry',
+        review: 'Review',
         createBudget: 'Create Budget',
       },
       category: {

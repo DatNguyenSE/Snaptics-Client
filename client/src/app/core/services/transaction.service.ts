@@ -47,6 +47,11 @@ export class TransactionService {
     return this.transactions$;
   }
 
+  refreshTransactions(): void {
+    this.hasLoadedRemoteTransactions = false;
+    this.ensureTransactionsLoaded();
+  }
+
   getTransaction(id: number): Observable<TransactionDto> {
     this.ensureTransactionsLoaded();
 

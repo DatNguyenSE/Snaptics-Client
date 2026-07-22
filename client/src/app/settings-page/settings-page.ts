@@ -83,8 +83,8 @@ export class SettingsPage {
 
   get profile() {
     const currentUser = this.accountService.currentUser();
-    const fullName = currentUser?.displayName?.trim() || 'Minh Nguyen';
-    const email = currentUser?.email?.trim() || 'minh@gmail.com';
+    const fullName = currentUser?.displayName?.trim() || 'Người dùng mới';
+    const email = currentUser?.email?.trim() || 'nguoidungmoi@gmail.com';
 
     return {
       fullName,

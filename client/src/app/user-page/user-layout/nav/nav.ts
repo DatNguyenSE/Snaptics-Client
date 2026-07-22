@@ -64,12 +64,7 @@ export class Nav {
       route: '/user/scan',
       isScanItem: true,
     },
-    {
-      id: 'manual-entry',
-      labelKey: 'nav.manualEntry',
-      icon: 'edit_square',
-      route: '/user/manual-entry',
-    },
+
     {
       id: 'reminders',
       labelKey: 'nav.reminders',
@@ -91,8 +86,8 @@ export class Nav {
 
   get account(): AccountSummary {
     const currentUser = this.accountService.currentUser();
-    const fullName = currentUser?.displayName?.trim() || 'Minh Nguyen';
-    const email = currentUser?.email?.trim() || 'minh@gmail.com';
+    const fullName = currentUser?.displayName?.trim() || 'Người dùng mới';
+    const email = currentUser?.email?.trim() || 'nguoidungmoi@gmail.com';
 
     return {
       fullName,

@@ -209,13 +209,13 @@ export class Dashboard implements OnInit {
   readonly quickActions: QuickAction[] = [
     { id: 'scan', labelKey: 'dashboard.quickAction.scan', icon: 'receipt_long', iconClass: 'quick-action__icon--blue', route: '/user/scan' },
     { id: 'capture', labelKey: 'dashboard.quickAction.capture', icon: 'photo_camera', iconClass: 'quick-action__icon--violet', route: '/user/scan' },
-    { id: 'manual', labelKey: 'dashboard.quickAction.manual', icon: 'edit_square', iconClass: 'quick-action__icon--amber', route: '/user/manual-entry' },
+    { id: 'analysis', labelKey: 'dashboard.quickAction.review', icon: 'edit_square', iconClass: 'quick-action__icon--amber', route: '/user/analysis' },
     { id: 'create-budget', labelKey: 'dashboard.quickAction.createBudget', icon: 'account_balance_wallet', iconClass: 'quick-action__icon--emerald', route: '/user/budget' },
   ];
 
   // ─── Spending Comparison ──────────────────────────────────────────────────
   spendingComparison: SpendingComparisonResponseDto | null = null;
-  selectedSpendingTab: 'week' | 'month' | 'year' = 'month';
+  selectedSpendingTab: 'week' | 'month' | 'year' = 'week';
 
   get currentSpendingPeriod(): SpendingPeriodDto | null {
     if (!this.spendingComparison) return null;
@@ -256,9 +256,15 @@ export class Dashboard implements OnInit {
     this.aiService.ask(query).subscribe({
       next: (response) => {
         this.currentAiResponse = { 
-          title: "Trợ lý Roni 🤖", 
+          title: "Trợ lý Roni ", 
           subtitle: response.reply 
         };
+        
+        // Refresh the dashboard data so the new transaction/changes are visible
+        this.transactionService.refreshTransactions();
+        this.loadActiveBudget();
+        this.loadTopCategory();
+        this.loadSpendingComparison();
       },
       error: (err) => {
         console.error(err);

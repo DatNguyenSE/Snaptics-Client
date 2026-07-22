@@ -225,7 +225,7 @@ export class Transaction implements OnInit {
 
   // ─── Display Helpers (preserved) ─────────────────────────────────────────────
   get initials(): string {
-    const fullName = this.accountService.currentUser()?.displayName?.trim() || 'Minh Nguyen';
+    const fullName = this.accountService.currentUser()?.displayName?.trim() || 'Người dùng mới';
     const parts = fullName
       .split(/\s+/)
       .map((part) => part.trim())

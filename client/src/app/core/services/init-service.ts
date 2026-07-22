@@ -13,12 +13,7 @@ export class InitService {
   private router = inject(Router);
 
   init() {
-    // Thử restore mock session trước (nếu mock mode đang bật và có session)
-    // Nếu thành công, bỏ qua refreshToken API để tránh lỗi khi backend không chạy
-    const mockRestored = this.accountService.tryRestoreMockSession();
-    if (mockRestored) {
-      return of(null);
-    }
+
 
     // Luồng thật: gọi refreshToken để restore session từ cookie HTTP-only
     return this.accountService.refreshToken().pipe(
