@@ -337,9 +337,7 @@
   filter: blur(24px);
 }
 
-.landing-hero__word,
-.landing-section--scan-word::after,
-.landing-section--clarity-word::after {
+.landing-hero__word {
   position: absolute;
   color: rgba(226, 232, 240, 0.55);
   font-size: clamp(5rem, 16vw, 13rem);
@@ -348,9 +346,6 @@
   line-height: 1;
   pointer-events: none;
   user-select: none;
-}
-
-.landing-hero__word {
   top: 190px;
   left: 50%;
   transform: translateX(-50%);
@@ -1368,16 +1363,47 @@
   background: #f8fafc;
 }
 
-.landing-section--scan-word::after {
-  right: 0;
-  bottom: 26px;
-  content: 'SCAN';
+.landing-section--scan-word,
+.landing-section--clarity-word {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
 }
 
-.landing-section--clarity-word::after {
+.landing-bg-text {
+  position: absolute;
+  z-index: 0;
+  bottom: -2rem;
+  font-size: clamp(3.5rem, 15vw, 15rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: #f1f5f9;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.landing-bg-text--left {
   left: 0;
-  bottom: -12px;
-  content: 'CLARITY';
+}
+
+.landing-bg-text--right {
+  right: 0;
+}
+
+@media (max-width: 1024px) {
+  .landing-bg-text {
+    font-size: clamp(3rem, 14vw, 10rem);
+    bottom: -1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-bg-text {
+    font-size: clamp(2.25rem, 12vw, 5rem);
+    bottom: -0.75rem;
+  }
 }
 
 .landing-section__header {
