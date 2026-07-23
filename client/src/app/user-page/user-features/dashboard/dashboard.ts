@@ -70,7 +70,7 @@ export class Dashboard implements OnInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly aiService = inject(AiService);
   
-  totalBudget = 5_000_000;
+  totalBudget = 0;
   isCategorySummaryModalOpen = false;
   isTrendSummaryModalOpen = false;
   topCategoryName = '—';
@@ -207,8 +207,8 @@ export class Dashboard implements OnInit {
 
   // ─── Quick Actions ────────────────────────────────────────────────────────
   readonly quickActions: QuickAction[] = [
-    { id: 'scan', labelKey: 'dashboard.quickAction.scan', icon: 'receipt_long', iconClass: 'quick-action__icon--blue', route: '/user/scan' },
-    { id: 'capture', labelKey: 'dashboard.quickAction.capture', icon: 'photo_camera', iconClass: 'quick-action__icon--violet', route: '/user/scan' },
+    { id: 'scan', labelKey: 'dashboard.quickAction.resources', icon: 'payments', iconClass: 'quick-action__icon--blue', route: '/user/in-come-source' },
+    { id: 'capture', labelKey: 'dashboard.quickAction.capture', icon: 'analytics', iconClass: 'quick-action__icon--violet', route: '/user/scan' },
     { id: 'analysis', labelKey: 'dashboard.quickAction.review', icon: 'edit_square', iconClass: 'quick-action__icon--amber', route: '/user/analysis' },
     { id: 'create-budget', labelKey: 'dashboard.quickAction.createBudget', icon: 'account_balance_wallet', iconClass: 'quick-action__icon--emerald', route: '/user/budget' },
   ];
@@ -361,11 +361,11 @@ export class Dashboard implements OnInit {
           }
         } else {
           this.activeBudget = null;
-          this.totalBudget = 5_000_000;
+          this.totalBudget = 0;
         }
       },
       error: () => {
-        this.totalBudget = 5_000_000;
+        this.totalBudget = 0;
         this.activeBudget = null;
         this.allBudgets = [];
       }
@@ -467,19 +467,31 @@ export class Dashboard implements OnInit {
     return null;
   }
 
-  getIcon(t: TransactionDto): string {
-    if (t.source === 'manual') return 'edit_square';
-    if (t.source === 'snap') return 'photo_camera';
-    if (t.transactionDetails?.length > 1) return 'receipt_long';
-    if (t.transactionDetails?.length === 1) {
-      const name = t.transactionDetails[0].itemName?.toLowerCase() || '';
-      if (name.includes('coffee') || name.includes('tea') || name.includes('drink')) return 'local_cafe';
-      if (name.includes('noodle') || name.includes('food') || name.includes('rice')) return 'lunch_dining';
-      return 'photo_camera';
+  getIcon(transaction: TransactionDto): string {
+    if (transaction.transactionDetails && transaction.transactionDetails.length > 1) {
+      return 'ti-receipt'; // Quét bill (nhiều món)
     }
-    if (t.name?.toLowerCase().includes('coffee')) return 'local_cafe';
-    if (t.name?.toLowerCase().includes('ride') || t.name?.toLowerCase().includes('grab')) return 'directions_car';
-    return 'receipt_long';
+
+    let searchString = '';
+    if (transaction.transactionDetails && transaction.transactionDetails.length === 1) {
+      searchString = (transaction.transactionDetails[0].categoryName || transaction.transactionDetails[0].itemName || transaction.name || '').toLowerCase();
+    } else {
+      searchString = (transaction.name || '').toLowerCase();
+    }
+
+    if (searchString.includes('ăn uống') || searchString.includes('food') || searchString.includes('noodle') || searchString.includes('rice') || searchString.includes('phở') || searchString.includes('bún')) return 'ti-soup';
+    if (searchString.includes('cà phê') || searchString.includes('coffee') || searchString.includes('trà') || searchString.includes('tea') || searchString.includes('drink') || searchString.includes('nước')) return 'ti-coffee';
+    if (searchString.includes('mua sắm') || searchString.includes('shopping') || searchString.includes('siêu thị')) return 'ti-shopping-cart';
+    if (searchString.includes('di chuyển') || searchString.includes('xe') || searchString.includes('ride') || searchString.includes('grab') || searchString.includes('taxi')) return 'ti-car';
+    if (searchString.includes('giải trí') || searchString.includes('phim') || searchString.includes('entertainment')) return 'ti-device-gamepad';
+    if (searchString.includes('y tế') || searchString.includes('sức khỏe') || searchString.includes('health') || searchString.includes('thuốc')) return 'ti-first-aid-kit';
+    if (searchString.includes('giáo dục') || searchString.includes('học') || searchString.includes('education')) return 'ti-book';
+    if (searchString.includes('nhà cửa') || searchString.includes('home') || searchString.includes('điện') || searchString.includes('nước')) return 'ti-home';
+
+    if (transaction.source === 'snap') return 'ti-camera';
+    if (transaction.source === 'manual') return 'ti-edit';
+    
+    return 'ti-receipt';
   }
 
   getMediaClass(t: TransactionDto): string {

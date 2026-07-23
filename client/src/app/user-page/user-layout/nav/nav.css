@@ -721,6 +721,11 @@
     display: none;
   }
 
+  .bottom-nav__item--budget,
+  .bottom-nav__item--analysis {
+    display: none !important;
+  }
+
   .bottom-nav__item--manual-entry {
     display: none !important;
   }
@@ -728,23 +733,25 @@
 
 @media (max-width: 639px) {
   .bottom-nav__inner {
-    gap: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    max-width: 420px;
+    gap: 2px;
     padding-inline: 8px;
-    justify-content: space-around;
   }
 
   .bottom-nav__item,
   .bottom-nav__item-wrapper,
   .account-dropdown--mobile {
     min-width: 0;
-    flex: 1;
+    width: 100%;
+    flex: none;
     display: flex;
     justify-content: center;
   }
 
   .bottom-nav__item {
     padding-inline: 4px;
-    width: 100%;
   }
 
   .bottom-nav__label {

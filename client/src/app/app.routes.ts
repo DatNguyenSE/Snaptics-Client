@@ -114,6 +114,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'in-come-source',
+        loadComponent: () =>
+          import('./user-page/user-features/in-come-source/in-come-source').then(
+            (m) => m.InComeSource,
+          ),
+      },
+      {
         path: 'reminders',
         loadComponent: () =>
           import('./user-page/user-features/reminder/reminder').then((m) => m.Reminder),

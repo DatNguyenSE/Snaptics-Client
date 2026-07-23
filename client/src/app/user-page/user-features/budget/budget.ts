@@ -41,10 +41,19 @@ export class Budget implements OnInit {
   isSubmitting = false;
   modalMode: 'ADD' | 'EDIT' = 'ADD';
   editingBudgetId: number | null = null;
+  editingBudget: BudgetDto | null = null;
   budgetForm!: FormGroup;
 
   // ─── Shared Budget Modal ───────────────────────────────────────────────────
   isSharedModalOpen = false;
+
+  // ─── Confirm Modal ─────────────────────────────────────────────────────────
+  isConfirmModalOpen = false;
+  confirmModalTitle = '';
+  confirmModalMessage = '';
+  confirmAction: (() => void) | null = null;
+  confirmBtnClass = 'btn-primary-modal';
+  confirmBtnText = 'Xác nhận';
 
   ngOnInit(): void {
     this.initForm();
@@ -94,6 +103,46 @@ export class Budget implements OnInit {
     input.value = display;
   }
 
+  currentCycle: number = 0;
+
+  onCycleChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.currentCycle = parseInt(select.value, 10);
+    this.updateEndDate();
+  }
+
+  onStartDateChange(): void {
+    this.updateEndDate();
+  }
+
+  onEndDateChange(): void {
+    // If user manually changes end date, set cycle to custom (0)
+    this.currentCycle = 0;
+  }
+
+  private updateEndDate(): void {
+    const endDateControl = this.budgetForm.get('endDate');
+    if (this.currentCycle === 36500) {
+      this.budgetForm.patchValue({ endDate: '' });
+      endDateControl?.clearValidators();
+      endDateControl?.disable();
+    } else {
+      endDateControl?.enable();
+      endDateControl?.setValidators([Validators.required]);
+      if (this.currentCycle > 0) {
+        const start = this.budgetForm.get('startDate')?.value;
+        if (start) {
+          const date = new Date(start);
+          date.setDate(date.getDate() + this.currentCycle);
+          this.budgetForm.patchValue({
+            endDate: date.toISOString().split('T')[0]
+          });
+        }
+      }
+    }
+    endDateControl?.updateValueAndValidity();
+  }
+
   loadBudgets(): void {
     this.isLoading = true;
     this.hasError = false;
@@ -135,9 +184,17 @@ export class Budget implements OnInit {
   openModal(budget?: BudgetDto): void {
     this.isModalOpen = true;
     this.isSubmitting = false;
+    this.currentCycle = 0;
+    
+    // Reset control states before patching
+    this.budgetForm.get('endDate')?.enable();
+    this.budgetForm.get('endDate')?.setValidators([Validators.required]);
+    this.budgetForm.get('endDate')?.updateValueAndValidity();
+
     if (budget) {
       this.modalMode = 'EDIT';
       this.editingBudgetId = budget.id;
+      this.editingBudget = budget;
       let start = '';
       if (budget.startDate) {
         const d = new Date(budget.startDate);
@@ -147,6 +204,12 @@ export class Budget implements OnInit {
       if (budget.endDate) {
         const d = new Date(budget.endDate);
         if (!isNaN(d.getTime())) end = d.toISOString().split('T')[0];
+      } else {
+        // If no end date, it is forever
+        this.currentCycle = 36500;
+        this.budgetForm.get('endDate')?.clearValidators();
+        this.budgetForm.get('endDate')?.disable();
+        this.budgetForm.get('endDate')?.updateValueAndValidity();
       }
       this.budgetForm.patchValue({
         name: budget.name,
@@ -159,6 +222,7 @@ export class Budget implements OnInit {
     } else {
       this.modalMode = 'ADD';
       this.editingBudgetId = null;
+      this.editingBudget = null;
       this.budgetForm.reset({
         name: '',
         amount: 0,
@@ -172,6 +236,8 @@ export class Budget implements OnInit {
 
   closeModal(): void {
     this.isModalOpen = false;
+    this.editingBudgetId = null;
+    this.editingBudget = null;
   }
 
   @HostListener('document:keydown.escape', ['$event'])
@@ -188,6 +254,17 @@ export class Budget implements OnInit {
     event.stopPropagation();
   }
 
+  closeConfirmModal(): void {
+    this.isConfirmModalOpen = false;
+    this.confirmAction = null;
+  }
+
+  executeConfirmAction(): void {
+    if (this.confirmAction) {
+      this.confirmAction();
+    }
+  }
+
   onSubmit(): void {
     if (this.budgetForm.invalid) {
       this.budgetForm.markAllAsTouched();
@@ -195,22 +272,34 @@ export class Budget implements OnInit {
     }
     this.isSubmitting = true;
     const formVal = this.budgetForm.getRawValue();
-    const payload: CreateBudgetRequest = {
-      id: this.modalMode === 'EDIT' && this.editingBudgetId ? this.editingBudgetId : 0,
+    let payload: any = {
       name: formVal.name,
       amount: formVal.amount,
       type: Number(formVal.type),
       startDate: formVal.startDate
         ? new Date(formVal.startDate).toISOString()
         : new Date().toISOString(),
-      endDate: formVal.endDate
-        ? new Date(formVal.endDate).toISOString()
-        : new Date().toISOString(),
+      endDate: (this.currentCycle === 36500 || !formVal.endDate)
+        ? null
+        : new Date(formVal.endDate).toISOString(),
       categoryId: null,
       note: '',
       isDefault: formVal.isDefault || false,
       isActive: true,
     };
+
+    if (this.modalMode === 'EDIT' && this.editingBudget) {
+      const difference = formVal.amount - this.editingBudget.amount;
+      const originalCurrentAmount = this.editingBudget.currentAmount !== undefined ? this.editingBudget.currentAmount : this.editingBudget.amount;
+      payload = {
+        ...this.editingBudget,
+        ...payload,
+        id: this.editingBudget.id,
+        currentAmount: originalCurrentAmount + difference
+      };
+    } else {
+      payload.id = 0;
+    }
 
     if (this.modalMode === 'ADD') {
       this.budgetService.createBudget(payload).subscribe({
@@ -240,16 +329,51 @@ export class Budget implements OnInit {
   }
 
   deleteBudget(id: number): void {
-    if (!confirm('Bạn có chắc chắn muốn xóa ngân sách này không?')) return;
-    this.budgetService.deleteBudget(id).subscribe({
-      next: () => {
-        this.toast.success('Xóa ngân sách thành công');
-        this.loadBudgets();
-      },
-      error: (err) => {
-        this.toast.error(err.error?.message || 'Không thể xóa ngân sách');
-      },
-    });
+    this.confirmModalTitle = 'Xác nhận xóa';
+    this.confirmModalMessage = 'Bạn có chắc chắn muốn xóa ngân sách này không? Hành động này không thể hoàn tác.';
+    this.confirmBtnClass = 'btn-primary-modal'; // You can style a separate danger class later
+    this.confirmBtnText = 'Xóa';
+    this.confirmAction = () => {
+      this.budgetService.deleteBudget(id).subscribe({
+        next: () => {
+          this.toast.success('Xóa ngân sách thành công');
+          this.loadBudgets();
+          this.closeConfirmModal();
+        },
+        error: (err: any) => {
+          this.toast.error(err.error?.message || 'Không thể xóa ngân sách');
+          this.closeConfirmModal();
+        },
+      });
+    };
+    this.isConfirmModalOpen = true;
+  }
+
+  setDefaultBudget(budget: BudgetDto): void {
+    if (budget.isDefault) return;
+    this.confirmModalTitle = 'Đặt làm ví mặc định';
+    this.confirmModalMessage = `Bạn có chắc chắn muốn đặt "${budget.name}" làm ví mặc định không?\n- Ví này sẽ trừ tiền khi thực hiện giao dịch mới.`;
+    this.confirmBtnClass = 'btn-primary-modal';
+    this.confirmBtnText = 'Đồng ý';
+    this.confirmAction = () => {
+      const payload = {
+        ...budget,
+        isDefault: true
+      };
+
+      this.budgetService.updateBudget(budget.id, payload as any).subscribe({
+        next: () => {
+          this.toast.success(`Đã đặt "${budget.name}" làm ví mặc định`);
+          this.loadBudgets();
+          this.closeConfirmModal();
+        },
+        error: (err: any) => {
+          this.toast.error(err.error?.message || 'Có lỗi xảy ra khi cập nhật ví mặc định');
+          this.closeConfirmModal();
+        }
+      });
+    };
+    this.isConfirmModalOpen = true;
   }
 
   // ─── Shared Budget ─────────────────────────────────────────────────────────

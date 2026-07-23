@@ -5,8 +5,9 @@
     <!-- ── Header ── -->
     <header class="budget-header">
       <div class="budget-header__title">
+        <p class="section-eyebrow">Quản lý chi tiêu</p>
         <h1>Ví của bạn</h1>
-        <p>Quản lý chi tiêu và tích lũy hiệu quả</p>
+        <p class="budget-header-subtitle">Theo dõi và kiểm soát ngân sách hiệu quả</p>
       </div>
       <div class="budget-header__actions">
         <button class="btn-primary" (click)="openModal()" id="btn-add-personal-budget">
@@ -80,7 +81,7 @@
               <article class="budget-card" [class.budget-card--saving]="budget.type === 1">
                 <div class="budget-card__header">
                   <div class="budget-card__title-wrap">
-                    <div class="budget-icon-wrap">
+                    <div class="budget-icon-wrap" [class.budget-icon-wrap--saving]="budget.type === 1">
                       <span class="material-symbols-outlined">
                         {{ budget.type === 1 ? 'savings' : 'account_balance_wallet' }}
                       </span>
@@ -93,6 +94,9 @@
                     </div>
                   </div>
                   <div class="budget-card__actions">
+                    <button class="btn-icon" [class.btn-icon--active]="budget.isDefault" aria-label="Đặt làm mặc định" (click)="setDefaultBudget(budget)" [title]="budget.isDefault ? 'Đang là ví mặc định' : 'Đặt làm mặc định'" [style.color]="budget.isDefault ? '#fbbf24' : ''">
+                      <span class="material-symbols-outlined" [style.font-variation-settings]="budget.isDefault ? '&quot;FILL&quot; 1' : '&quot;FILL&quot; 0'">star</span>
+                    </button>
                     <button class="btn-icon" aria-label="Sửa ngân sách" (click)="openModal(budget)">
                       <span class="material-symbols-outlined">edit</span>
                     </button>
@@ -129,7 +133,7 @@
                       ></div>
                     </div>
                     <div class="progress-footer">
-                      <span>{{ getBudgetSpentPercent(budget) }}%</span>
+                      <span class="progress-percent">{{ getBudgetSpentPercent(budget) }}%</span>
                       @if (budget.isDefault) {
                         <span class="badge badge-default">Mặc định</span>
                       }
@@ -188,7 +192,7 @@
                   </span>
                 </div>
 
-                <div class="budget-card__header">
+                <div class="budget-card__header mt-3">
                   <div class="budget-card__title-wrap">
                     <div class="budget-icon-wrap budget-icon-wrap--shared">
                       <span class="material-symbols-outlined">group</span>
@@ -239,9 +243,9 @@
                       ></div>
                     </div>
                     <div class="progress-footer">
-                      <span>{{ getSharedSpentPercent(budget) }}%</span>
+                      <span class="progress-percent">{{ getSharedSpentPercent(budget) }}%</span>
                       <span class="member-count-label">
-                        <span class="material-symbols-outlined" style="font-size:0.875rem">group</span>
+                        <span class="material-symbols-outlined">group</span>
                         {{ budget.memberCount }} thành viên
                       </span>
                     </div>
@@ -263,12 +267,12 @@
       <div class="modal-header">
         <div class="modal-icon">
           <span class="material-symbols-outlined">
-            {{ modalMode === 'ADD' ? 'add_circle' : 'edit' }}
+            {{ budgetForm.get('type')?.value == 1 ? 'savings' : 'account_balance_wallet' }}
           </span>
         </div>
         <div class="modal-titles">
           <h3>{{ modalMode === 'ADD' ? 'Thêm ngân sách' : 'Chỉnh sửa ngân sách' }}</h3>
-          <p>{{ modalMode === 'ADD' ? 'Thiết lập mục tiêu quản lý tài chính' : 'Cập nhật lại thông tin mục tiêu' }}</p>
+          <p>{{ modalMode === 'ADD' ? 'Thiết lập mục tiêu quản lý tài chính mới' : 'Cập nhật lại thông tin mục tiêu' }}</p>
         </div>
         <button class="btn-close" (click)="closeModal()" aria-label="Close">
           <span class="material-symbols-outlined">close</span>
@@ -291,32 +295,45 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Số tiền (VND)</label>
+            <label>{{ budgetForm.get('type')?.value == 1 ? 'Số tiền mục tiêu (VND)' : 'Số tiền (VND)' }}</label>
             <input type="text" [value]="displayAmount" (input)="onAmountChange($event)" placeholder="0" class="form-control"
               [class.is-invalid]="budgetForm.get('amount')?.invalid && budgetForm.get('amount')?.touched" />
           </div>
         </div>
 
         <div class="form-row">
-          <div class="form-group">
-            <label>Ngày bắt đầu</label>
-            <input type="date" formControlName="startDate" class="form-control" />
-          </div>
-          <div class="form-group">
-            <label>Ngày kết thúc</label>
-            <input type="date" formControlName="endDate" class="form-control" />
+          <div class="form-group" style="grid-column: span 2;">
+            <label>Chu kỳ</label>
+            <select class="form-control" (change)="onCycleChange($event)" [value]="currentCycle">
+              <option value="0">Tùy chỉnh</option>
+              <option value="7">1 Tuần</option>
+              <option value="30">1 Tháng</option>
+              <option value="365">1 Năm</option>
+              <option value="36500">Vĩnh viễn</option>
+            </select>
           </div>
         </div>
 
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ngày bắt đầu</label>
+            <input type="date" formControlName="startDate" class="form-control" (change)="onStartDateChange()" />
+          </div>
+          <div class="form-group">
+            <label>Ngày kết thúc</label>
+            <input type="date" formControlName="endDate" class="form-control" (input)="onEndDateChange()" />
+          </div>
+        </div>
+
+
         <div class="modal-actions">
           <button type="button" class="btn-ghost" (click)="closeModal()" [disabled]="isSubmitting">Hủy</button>
-          <button type="submit" class="btn-primary" [disabled]="isSubmitting" id="btn-submit-personal-budget">
+          <button type="submit" class="btn-primary-modal" [disabled]="isSubmitting" id="btn-submit-personal-budget">
             @if (isSubmitting) {
               <span class="material-symbols-outlined spin">progress_activity</span>
-              Đang lưu...
+              Đang xử lý...
             } @else {
-              <span class="material-symbols-outlined">save</span>
-              Lưu ngân sách
+              Lưu
             }
           </button>
         </div>
@@ -331,4 +348,30 @@
     (created)="onSharedBudgetCreated($event)"
     (closed)="closeSharedModal()"
   />
+}
+
+<!-- ── Confirm Modal ── -->
+@if (isConfirmModalOpen) {
+  <div class="modal-overlay" (click)="closeConfirmModal()">
+    <div class="modal-content modal-content--confirm" (click)="stopPropagation($event)">
+      <button class="btn-close btn-close--absolute" (click)="closeConfirmModal()" aria-label="Close">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <div class="modal-header modal-header--confirm">
+        <div class="modal-icon modal-icon--lg" [class.modal-icon--warning]="confirmBtnText === 'Xóa'" [class.modal-icon--info]="confirmBtnText !== 'Xóa'">
+          <span class="material-symbols-outlined">{{ confirmBtnText === 'Xóa' ? 'warning' : 'help' }}</span>
+        </div>
+        <div class="modal-titles modal-titles--center">
+          <h3>{{ confirmModalTitle }}</h3>
+          <p>{{ confirmModalMessage }}</p>
+        </div>
+      </div>
+
+      <div class="modal-actions modal-actions--confirm">
+        <button type="button" class="btn-ghost" (click)="closeConfirmModal()">Hủy</button>
+        <button type="button" class="btn-primary-modal" (click)="executeConfirmAction()" [style.background-color]="confirmBtnText === 'Xóa' ? '#ef4444' : ''" [style.color]="confirmBtnText === 'Xóa' ? '#fff' : ''">{{ confirmBtnText }}</button>
+      </div>
+    </div>
+  </div>
 }

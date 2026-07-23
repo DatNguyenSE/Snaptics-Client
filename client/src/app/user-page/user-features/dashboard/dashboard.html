@@ -266,7 +266,7 @@
                 @if (isAnalyzedImage(transaction)) {
                   <img [src]="getImageUrl(transaction)!" alt="transaction" />
                 } @else {
-                  <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
+                  <i class="ti {{ getIcon(transaction) }}" style="font-size: 1.5rem;"></i>
                 }
               </div>
               <div class="transaction-body">
@@ -281,7 +281,7 @@
                 </div>
                 <div class="transaction-meta">
                   <span class="category-pill" [class]="getCategoryClass(transaction)">
-                    <span class="material-symbols-outlined">{{ getIcon(transaction) }}</span>
+                    <i class="ti {{ getIcon(transaction) }}"></i>
                     {{ language.t(getCategoryKey(transaction)) }}
                   </span>
                   <span class="transaction-time">{{ transaction.transactionDate | date:'HH:mm' }}</span>

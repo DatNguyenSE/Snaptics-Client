@@ -1,0 +1,71 @@
+<div class="income-container">
+  <div class="header">
+    <h2>Quản lý Nguồn tiền</h2>
+    <button class="btn-primary" (click)="openAddModal()">+ Thêm Nguồn Tiền</button>
+  </div>
+
+  <div class="income-list">
+    <div class="income-card" *ngFor="let source of incomeSources">
+      <div class="card-info">
+        <h3>{{ source.name }}</h3>
+        <p class="amount">{{ source.amount | number:'1.0-0' }} đ</p>
+        <span class="badge" [class.active]="source.isActive">
+          {{ source.isActive ? 'Đang hoạt động' : 'Tạm ngưng' }}
+        </span>
+        <p class="recurring" *ngIf="source.isRecurring">
+          Định kỳ
+        </p>
+      </div>
+      <div class="card-wallet">
+        <p><strong>Nạp vào ví:</strong> {{ getBudgetName(source.budgetId) }}</p>
+      </div>
+      <div class="card-actions">
+        <button class="btn-icon edit" (click)="openEditModal(source)">Sửa</button>
+        <button class="btn-icon delete" (click)="deleteIncomeSource(source.id)">Xóa</button>
+      </div>
+    </div>
+    
+    <div *ngIf="incomeSources.length === 0" class="empty-state">
+      <p>Chưa có nguồn tiền nào. Hãy thêm nguồn tiền mới!</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ editingId ? 'Sửa Nguồn Tiền' : 'Thêm Nguồn Tiền' }}</h3>
+      <button class="close-btn" (click)="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Tên nguồn tiền</label>
+        <input type="text" [(ngModel)]="formData.name" placeholder="VD: Lương tháng, Freelance..." class="form-control" />
+      </div>
+      <div class="form-group">
+        <label>Số tiền</label>
+        <input type="number" [(ngModel)]="formData.amount" placeholder="Nhập số tiền" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label>Ví nhận tiền</label>
+        <select [(ngModel)]="formData.budgetId" class="form-control">
+          <option [ngValue]="0" disabled>-- Chọn ví --</option>
+          <option *ngFor="let budget of budgets" [ngValue]="budget.id">{{ budget.name }}</option>
+        </select>
+      </div>
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="isRecurring" [(ngModel)]="formData.isRecurring" />
+        <label for="isRecurring">Nguồn tiền định kỳ</label>
+      </div>
+      <div class="form-group checkbox-group" *ngIf="editingId">
+        <input type="checkbox" id="isActive" [(ngModel)]="formData.isActive" />
+        <label for="isActive">Đang hoạt động</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeModal()">Hủy</button>
+      <button class="btn-primary" (click)="saveIncomeSource()">Lưu</button>
+    </div>
+  </div>
+</div>

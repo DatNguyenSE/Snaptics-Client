@@ -25,12 +25,6 @@
             
             <div class="header-total-amount-row">
               <span class="total-amount-large">{{ formatCurrency(transaction.totalAmount) }}</span>
-              @if (transaction.isAiEstimated) {
-                <div class="ai-estimated-badge">
-                  <span class="material-symbols-outlined">smart_toy</span>
-                  <span>{{ language.t('dashboard.aiGen') }}</span>
-                </div>
-              }
             </div>
           </div>
         </header>
@@ -79,7 +73,6 @@
       <!-- Right side -->
       <div class="modal-right-panel">
         <div class="detail-section">
-          <h3>{{ language.t('nav.transactions') }}</h3>
           <ul class="item-list">
             @for (item of transaction.transactionDetails; track item.id) {
               <li class="item-row">

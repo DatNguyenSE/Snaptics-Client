@@ -131,7 +131,8 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       byCategory: 'Theo danh mục',
       quickAction: {
         scan: 'Qu\u00e9t h\u00f3a \u0111\u01a1n',
-        capture: 'Ch\u1ee5p m\u00f3n \u0111\u1ed3',
+        resources: 'Tài nguyên',
+        capture: 'Ph\u00e2n t\u00edch',
         manual: 'Nh\u1eadp th\u1ee7 c\u00f4ng',
         review: '\u0110\u00e1nh gi\u00e1',
         createBudget: 'Quản lý ví',
@@ -672,7 +673,8 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       byCategory: 'By Category',
       quickAction: {
         scan: 'Scan Receipt',
-        capture: 'Snap Item',
+        resources: 'Resources',
+        capture: 'Analysis',
         manual: 'Manual Entry',
         review: 'Review',
         createBudget: 'Create Budget',
