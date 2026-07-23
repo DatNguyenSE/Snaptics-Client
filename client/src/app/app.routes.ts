@@ -121,7 +121,7 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'reminders',
+        path: 'frequency',
         loadComponent: () =>
           import('./user-page/user-features/frequency/frequency').then((m) => m.Frequency),
       },
