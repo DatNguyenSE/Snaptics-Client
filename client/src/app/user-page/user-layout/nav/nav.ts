@@ -71,10 +71,10 @@ export class Nav {
       isScanItem: true,
     },
     {
-      id: 'reminders',
-      labelKey: 'nav.reminders',
-      icon: 'notifications',
-      route: '/user/reminders',
+      id: 'frequency',
+      labelKey: 'nav.frequency',
+      icon: 'monitoring',
+      route: '/user/frequency',
     },
   ];
 

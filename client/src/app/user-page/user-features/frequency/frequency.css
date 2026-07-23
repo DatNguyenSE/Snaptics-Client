@@ -1,0 +1,1193 @@
+/* ─── Host ──────────────────────────────────────────────────────────────── */
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* ─── Page shell ─────────────────────────────────────────────────────────── */
+.freq-page {
+  min-height: 100vh;
+  padding: 24px 24px calc(112px + env(safe-area-inset-bottom));
+}
+
+.freq-page__content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.freq-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+@media (min-width: 768px) {
+  .freq-header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+
+.freq-header__title {
+  margin: 4px 0;
+  font-size: 1.75rem;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: var(--sw-foreground);
+}
+
+.freq-header__subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--sw-muted-foreground);
+  font-weight: 500;
+}
+
+.freq-header__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ─── Filter dropdowns ───────────────────────────────────────────────────── */
+.filter-dropdown-wrapper {
+  position: relative;
+}
+
+.btn-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--sw-card);
+  border: 1px solid var(--sw-border);
+  border-radius: 16px;
+  color: var(--sw-foreground);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--sw-shadow-sm);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-filter:hover {
+  border-color: var(--sw-primary);
+  transform: translateY(-1px);
+}
+
+.btn-filter__icon {
+  font-size: 1.125rem;
+  color: var(--sw-primary);
+}
+
+.btn-filter__chevron {
+  font-size: 1rem;
+  color: var(--sw-muted-foreground);
+  transition: transform 0.2s ease;
+}
+
+.filter-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 200;
+  min-width: 200px;
+  padding: 8px;
+  background: var(--sw-card);
+  border: 1px solid var(--sw-border);
+  border-radius: 16px;
+  box-shadow: var(--sw-shadow-sm), 0 8px 32px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.filter-dropdown-item {
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  color: var(--sw-foreground);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.filter-dropdown-item:hover {
+  background: var(--sw-muted);
+}
+
+.filter-dropdown-item.active {
+  background: var(--sw-primary-soft);
+  color: var(--sw-primary);
+}
+
+/* ─── Custom date modal ──────────────────────────────────────────────────── */
+.custom-date-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.custom-date-modal {
+  width: min(480px, 100%);
+  padding: 28px;
+  background: var(--sw-card);
+  border: 1px solid var(--sw-border);
+  border-radius: 24px;
+  box-shadow: var(--sw-shadow-sm);
+}
+
+.custom-date-modal__title {
+  margin: 0 0 20px;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--sw-foreground);
+}
+
+.custom-date-modal__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.custom-date-modal__field label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--sw-muted-foreground);
+  margin-bottom: 6px;
+}
+
+.date-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--sw-muted);
+  border: 1px solid var(--sw-border);
+  border-radius: 12px;
+  color: var(--sw-foreground);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.custom-date-modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--sw-primary), #7c3aed);
+  border: 0;
+  border-radius: 14px;
+  color: #fff;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(91, 123, 250, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(91, 123, 250, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: var(--sw-muted);
+  border: 1px solid var(--sw-border);
+  border-radius: 14px;
+  color: var(--sw-foreground);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--sw-border);
+}
+
+/* ─── Card base ──────────────────────────────────────────────────────────── */
+.freq-card {
+  background: var(--sw-card);
+  border: 1px solid var(--sw-border);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: var(--sw-shadow-sm);
+}
+
+.freq-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.freq-card__head--wrap {
+  flex-wrap: wrap;
+}
+
+.freq-card__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--sw-foreground);
+  letter-spacing: -0.01em;
+}
+
+.freq-card__title-icon {
+  font-size: 1.25rem;
+  color: var(--sw-primary);
+}
+
+/* ─── KPI Grid ───────────────────────────────────────────────────────────── */
+.freq-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1023px) {
+  .freq-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 479px) {
+  .freq-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+.freq-kpi-card {
+  background: var(--sw-card);
+  border: 1px solid var(--sw-border);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: var(--sw-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.freq-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(91,123,250,0.14);
+}
+
+.freq-kpi-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.freq-kpi-card__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--sw-muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.freq-kpi-card__icon {
+  font-size: 1.125rem;
+  color: var(--sw-primary);
+  opacity: 0.7;
+}
+
+.freq-kpi-card__value {
+  font-size: 2rem;
+  font-weight: 850;
+  color: var(--sw-foreground);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.freq-kpi-card__value--text {
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.freq-kpi-card__sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-height: 20px;
+}
+
+.freq-kpi-card__trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.freq-kpi-card__trend .material-symbols-outlined {
+  font-size: 0.875rem;
+}
+
+.freq-kpi-card__trend--up {
+  color: #10b981;
+}
+
+.freq-kpi-card__trend--down {
+  color: #ef4444;
+}
+
+.freq-kpi-card__trend-label {
+  font-size: 0.75rem;
+  color: var(--sw-muted-foreground);
+  font-weight: 500;
+}
+
+/* ─── Chart ──────────────────────────────────────────────────────────────── */
+.freq-chart-wrap {
+  width: 100%;
+  min-height: 280px;
+}
+
+/* ─── View mode tabs ────────────────────────────────────────────────────── */
+.view-mode-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--sw-muted);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.view-mode-tab {
+  padding: 6px 14px;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--sw-muted-foreground);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.view-mode-tab--active {
+  background: var(--sw-card);
+  color: var(--sw-foreground);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* ─── Two column ─────────────────────────────────────────────────────────── */
+.freq-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 767px) {
+  .freq-two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Distribution ───────────────────────────────────────────────────────── */
+.freq-dist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.freq-dist-item__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.freq-dist-item__label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--sw-foreground);
+}
+
+.freq-dist-item__counts {
+  font-size: 0.75rem;
+  color: var(--sw-muted-foreground);
+  font-weight: 500;
+}
+
+.freq-dist-bar-track {
+  height: 8px;
+  background: var(--sw-muted);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.freq-dist-bar {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 4px;
+}
+
+.dist-bar--very-frequent { background: linear-gradient(90deg, #8b5cf6, #6d28d9); }
+.dist-bar--frequent      { background: linear-gradient(90deg, #10b981, #059669); }
+.dist-bar--occasional    { background: linear-gradient(90deg, #f59e0b, #d97706); }
+.dist-bar--rare          { background: var(--sw-muted-foreground); }
+.dist-bar--unused        { background: var(--sw-border); }
+
+/* ─── Frequent transactions ─────────────────────────────────────────────── */
+.freq-frequent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.freq-frequent-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  transition: background 0.15s ease;
+  cursor: default;
+}
+
+.freq-frequent-item:hover {
+  background: var(--sw-muted);
+}
+
+.freq-frequent-item__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--sw-primary-soft);
+  color: var(--sw-primary);
+  font-size: 0.875rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.freq-frequent-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.freq-frequent-item__name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--sw-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.freq-frequent-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--sw-muted-foreground);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.freq-sep {
+  color: var(--sw-border);
+}
+
+.freq-frequent-item__trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.freq-frequent-item__trend .material-symbols-outlined {
+  font-size: 0.875rem;
+}
+
+.freq-frequent-item__trend--up   { color: #10b981; }
+.freq-frequent-item__trend--down { color: #ef4444; }
+
+.freq-empty-text {
+  font-size: 0.875rem;
+  color: var(--sw-muted-foreground);
+  text-align: center;
+  padding: 20px 0;
+  margin: 0;
+}
+
+/* ─── Table ──────────────────────────────────────────────────────────────── */
+.freq-table-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.freq-search-wrap {
+  position: relative;
+}
+
+.freq-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: var(--sw-muted-foreground);
+  pointer-events: none;
+}
+
+.freq-search {
+  padding: 9px 14px 9px 36px;
+  background: var(--sw-muted);
+  border: 1px solid var(--sw-border);
+  border-radius: 12px;
+  color: var(--sw-foreground);
+  font: inherit;
+  font-size: 0.875rem;
+  width: 220px;
+  transition: border-color 0.2s ease;
+}
+
+.freq-search:focus {
+  outline: none;
+  border-color: var(--sw-primary);
+}
+
+.freq-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 767px) {
+  .freq-table-wrap {
+    display: none;
+  }
+}
+
+.freq-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.freq-table__th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--sw-muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--sw-border);
+}
+
+.freq-table__th--sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.freq-table__th--sortable:hover {
+  color: var(--sw-primary);
+}
+
+.sort-icon {
+  font-size: 0.875rem;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+.freq-table__row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.freq-table__row:hover {
+  background: var(--sw-muted);
+}
+
+.freq-table__td {
+  padding: 14px 16px;
+  color: var(--sw-foreground);
+  border-bottom: 1px solid var(--sw-border);
+  white-space: nowrap;
+}
+
+.freq-table__td--name {
+  font-weight: 700;
+}
+
+.freq-table__td--num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.freq-table__td--empty {
+  text-align: center;
+  color: var(--sw-muted-foreground);
+  padding: 32px;
+}
+
+.freq-cat-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.freq-cat-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--sw-primary-soft);
+  color: var(--sw-primary);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ─── Mobile cards ───────────────────────────────────────────────────────── */
+.freq-mobile-cards {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .freq-mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+.freq-mobile-card {
+  background: var(--sw-muted);
+  border-radius: 16px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.freq-mobile-card:hover {
+  background: var(--sw-border);
+}
+
+.freq-mobile-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.freq-mobile-card__name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--sw-foreground);
+}
+
+.freq-mobile-card__stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.freq-mobile-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.freq-mobile-stat__label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sw-muted-foreground);
+}
+
+.freq-mobile-stat__value {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--sw-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.freq-mobile-stat__value--up   { color: #10b981; }
+.freq-mobile-stat__value--down { color: #ef4444; }
+
+/* ─── Trend indicator ────────────────────────────────────────────────────── */
+.freq-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--sw-muted-foreground);
+}
+
+.freq-trend .material-symbols-outlined {
+  font-size: 0.875rem;
+}
+
+.freq-trend--up   { color: #10b981; }
+.freq-trend--down { color: #ef4444; }
+
+/* ─── Level badges ───────────────────────────────────────────────────────── */
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.level-badge--very-frequent {
+  background: rgba(139, 92, 246, 0.12);
+  color: #7c3aed;
+}
+
+.level-badge--frequent {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.level-badge--occasional {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.level-badge--rare {
+  background: var(--sw-muted);
+  color: var(--sw-muted-foreground);
+}
+
+.level-badge--unused {
+  background: var(--sw-muted);
+  color: var(--sw-muted-foreground);
+  opacity: 0.7;
+}
+
+/* ─── Insights ───────────────────────────────────────────────────────────── */
+.freq-insights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.freq-insight {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+}
+
+.freq-insight--info {
+  background: rgba(91, 123, 250, 0.06);
+  border-color: rgba(91, 123, 250, 0.16);
+}
+
+.freq-insight--warning {
+  background: rgba(245, 158, 11, 0.06);
+  border-color: rgba(245, 158, 11, 0.16);
+}
+
+.freq-insight--success {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: rgba(16, 185, 129, 0.16);
+}
+
+.freq-insight__icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.freq-insight--info    .freq-insight__icon { color: var(--sw-primary); }
+.freq-insight--warning .freq-insight__icon { color: #f59e0b; }
+.freq-insight--success .freq-insight__icon { color: #10b981; }
+
+.freq-insight__title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--sw-foreground);
+  margin-bottom: 4px;
+}
+
+.freq-insight__desc {
+  font-size: 0.875rem;
+  color: var(--sw-muted-foreground);
+  line-height: 1.5;
+}
+
+/* ─── State cards (empty / error) ────────────────────────────────────────── */
+.freq-state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 64px 24px;
+  background: var(--sw-card);
+  border: 1px solid var(--sw-border);
+  border-radius: 24px;
+  text-align: center;
+}
+
+.freq-state-card__icon {
+  font-size: 3rem;
+  color: var(--sw-primary);
+  opacity: 0.5;
+}
+
+.freq-state-card__icon--error {
+  color: #ef4444;
+  opacity: 0.7;
+}
+
+.freq-state-card__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--sw-foreground);
+}
+
+.freq-state-card__desc {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--sw-muted-foreground);
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+/* ─── Skeleton ───────────────────────────────────────────────────────────── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.freq-kpi-card--skeleton,
+.freq-card--skeleton {
+  pointer-events: none;
+}
+
+.skeleton {
+  background: var(--sw-muted);
+  border-radius: 8px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton--label  { height: 12px; width: 60%; margin-bottom: 12px; }
+.skeleton--value  { height: 36px; width: 40%; margin-bottom: 8px; border-radius: 10px; }
+.skeleton--sub    { height: 12px; width: 80%; }
+.skeleton--chart  { height: 280px; border-radius: 16px; }
+.skeleton--table  { height: 300px; border-radius: 16px; }
+
+/* ─── Category Detail Panel ──────────────────────────────────────────────── */
+.freq-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+@media (min-width: 640px) {
+  .freq-detail-backdrop {
+    align-items: stretch;
+  }
+}
+
+.freq-detail-panel {
+  width: min(480px, 100%);
+  height: 100%;
+  background: var(--sw-card);
+  border-left: 1px solid var(--sw-border);
+  display: flex;
+  flex-direction: column;
+  animation: slide-in-right 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+
+@media (max-width: 639px) {
+  .freq-detail-panel {
+    width: 100%;
+    height: auto;
+    max-height: 80dvh;
+    border-left: 0;
+    border-top: 1px solid var(--sw-border);
+    border-radius: 24px 24px 0 0;
+    animation: slide-in-up 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes slide-in-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.freq-detail-panel__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid var(--sw-border);
+  flex-shrink: 0;
+}
+
+.freq-detail-panel__title {
+  margin: 0 0 8px;
+  font-size: 1.375rem;
+  font-weight: 850;
+  color: var(--sw-foreground);
+  letter-spacing: -0.02em;
+}
+
+.freq-detail-close {
+  width: 36px;
+  height: 36px;
+  background: var(--sw-muted);
+  border: 0;
+  border-radius: 12px;
+  color: var(--sw-muted-foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.freq-detail-close:hover {
+  background: var(--sw-border);
+}
+
+.freq-detail-panel__body {
+  flex: 1;
+  padding: 20px 24px 32px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.freq-detail-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.freq-detail-stat {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  background: var(--sw-muted);
+  border-radius: 16px;
+}
+
+.freq-detail-stat__icon {
+  font-size: 1.25rem;
+  color: var(--sw-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.freq-detail-stat__value {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--sw-foreground);
+  letter-spacing: -0.02em;
+}
+
+.freq-detail-stat__label {
+  font-size: 0.75rem;
+  color: var(--sw-muted-foreground);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.freq-detail-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.freq-detail-trend--up {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.freq-detail-trend--down {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.freq-detail-trend .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+/* ─── Custom chart tooltip ───────────────────────────────────────────────── */
+:global(.freq-tooltip) {
+  padding: 10px 14px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.8125rem;
+  min-width: 160px;
+}
+
+:global(.freq-tooltip__date) {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+:global(.freq-tooltip__row) {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: inherit;
+  opacity: 0.8;
+}
+
+:global(.freq-tooltip__row--expense) { color: #ef4444; }
+:global(.freq-tooltip__row--income)  { color: #10b981; }
+
+/* ─── Dark mode overrides ────────────────────────────────────────────────── */
+:host-context(html.dark-theme) .level-badge--very-frequent {
+  background: rgba(139, 92, 246, 0.18);
+  color: #a78bfa;
+}
+
+:host-context(html.dark-theme) .level-badge--frequent {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+}
+
+:host-context(html.dark-theme) .level-badge--occasional {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+}
+
+:host-context(html.dark-theme) .freq-insight--info {
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+:host-context(html.dark-theme) .freq-insight--info .freq-insight__icon {
+  color: #a78bfa;
+}
+
+:host-context(html.dark-theme) .btn-primary {
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+}
+
+:host-context(html.dark-theme) .btn-primary:hover:not(:disabled) {
+  box-shadow: 0 12px 28px rgba(139, 92, 246, 0.4);
+}
+
+/* ─── Responsive tweaks ──────────────────────────────────────────────────── */
+@media (max-width: 479px) {
+  .freq-page {
+    padding: 16px 16px calc(100px + env(safe-area-inset-bottom));
+  }
+
+  .freq-header__title {
+    font-size: 1.375rem;
+  }
+
+  .freq-card {
+    padding: 16px;
+  }
+
+  .freq-kpi-card__value {
+    font-size: 1.625rem;
+  }
+
+  .view-mode-tabs {
+    gap: 2px;
+  }
+
+  .view-mode-tab {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+
+  .freq-search {
+    width: 180px;
+  }
+
+  .freq-detail-stats {
+    grid-template-columns: 1fr;
+  }
+}

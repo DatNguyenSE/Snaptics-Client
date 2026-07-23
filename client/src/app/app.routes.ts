@@ -123,12 +123,7 @@ export const routes: Routes = [
       {
         path: 'reminders',
         loadComponent: () =>
-          import('./user-page/user-features/reminder/reminder').then((m) => m.Reminder),
-      },
-      {
-        path: 'reminder',
-        redirectTo: 'reminders',
-        pathMatch: 'full',
+          import('./user-page/user-features/frequency/frequency').then((m) => m.Frequency),
       },
       {
         path: 'snaptics-ai',
@@ -152,7 +147,7 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'forgot-password', component: ForgotPassword },
 
-  
+
   {
     path: 'admin',
     loadChildren: () => import('./admin/admin.routes').then((m) => m.adminRoutes),

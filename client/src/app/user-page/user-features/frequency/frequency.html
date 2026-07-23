@@ -1,0 +1,608 @@
+<section class="freq-page" (click)="closeAllDropdowns()">
+  <div class="freq-page__content">
+
+    <!-- ─── HEADER & FILTERS ──────────────────────────────────────── -->
+    <header class="freq-header">
+      <div class="freq-header__info">
+        <p class="section-eyebrow">{{ language.t('frequency.eyebrow') }}</p>
+        <h1 class="freq-header__title">{{ language.t('frequency.title') }}</h1>
+        <p class="freq-header__subtitle">{{ language.t('frequency.subtitle') }}</p>
+      </div>
+
+      <div class="freq-header__filters" (click)="$event.stopPropagation()">
+
+        <!-- Period Filter -->
+        <div class="filter-dropdown-wrapper">
+          <button class="btn-filter" type="button"
+            (click)="showPeriodDropdown = !showPeriodDropdown; showTypeDropdown = false; showAccountDropdown = false">
+            <span class="material-symbols-outlined btn-filter__icon">calendar_month</span>
+            <span>{{ getPeriodLabel(activePeriod()) }}</span>
+            <span class="material-symbols-outlined btn-filter__chevron">expand_more</span>
+          </button>
+          @if (showPeriodDropdown) {
+            <div class="filter-dropdown-menu">
+              @for (p of periodOptions; track p) {
+                <button class="filter-dropdown-item" type="button"
+                  [class.active]="activePeriod() === p"
+                  (click)="selectPeriod(p)">
+                  {{ getPeriodLabel(p) }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Transaction Type Filter -->
+        <div class="filter-dropdown-wrapper">
+          <button class="btn-filter" type="button"
+            (click)="showTypeDropdown = !showTypeDropdown; showPeriodDropdown = false; showAccountDropdown = false">
+            <span class="material-symbols-outlined btn-filter__icon">swap_vert</span>
+            <span>{{ getTypeLabel(activeTransactionType()) }}</span>
+            <span class="material-symbols-outlined btn-filter__chevron">expand_more</span>
+          </button>
+          @if (showTypeDropdown) {
+            <div class="filter-dropdown-menu">
+              @for (type of typeOptions; track type) {
+                <button class="filter-dropdown-item" type="button"
+                  [class.active]="activeTransactionType() === type"
+                  (click)="selectTransactionType(type)">
+                  {{ getTypeLabel(type) }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Account Filter -->
+        @if (data && data.availableAccounts.length > 0) {
+          <div class="filter-dropdown-wrapper">
+            <button class="btn-filter" type="button"
+              (click)="showAccountDropdown = !showAccountDropdown; showPeriodDropdown = false; showTypeDropdown = false">
+              <span class="material-symbols-outlined btn-filter__icon">account_balance_wallet</span>
+              <span>{{ activeAccount() === 'all' ? language.t('frequency.filters.all') : activeAccount() }}</span>
+              <span class="material-symbols-outlined btn-filter__chevron">expand_more</span>
+            </button>
+            @if (showAccountDropdown) {
+              <div class="filter-dropdown-menu">
+                <button class="filter-dropdown-item" type="button"
+                  [class.active]="activeAccount() === 'all'"
+                  (click)="selectAccount('all')">
+                  {{ language.t('frequency.filters.all') }}
+                </button>
+                @for (acc of data.availableAccounts; track acc) {
+                  <button class="filter-dropdown-item" type="button"
+                    [class.active]="activeAccount() === acc"
+                    (click)="selectAccount(acc)">
+                    {{ acc }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </header>
+
+    <!-- Custom Date Picker Modal -->
+    @if (showCustomDate) {
+      <div class="custom-date-backdrop" (click)="cancelCustomDates()">
+        <div class="custom-date-modal" (click)="$event.stopPropagation()">
+          <h3 class="custom-date-modal__title">
+            {{ language.currentLang() === 'vi' ? 'Chọn khoảng thời gian' : 'Select Date Range' }}
+          </h3>
+          <div class="custom-date-modal__fields">
+            <div class="custom-date-modal__field">
+              <label>{{ language.currentLang() === 'vi' ? 'Từ ngày' : 'From' }}</label>
+              <input type="date" [(ngModel)]="customStartDate" class="date-input" />
+            </div>
+            <div class="custom-date-modal__field">
+              <label>{{ language.currentLang() === 'vi' ? 'Đến ngày' : 'To' }}</label>
+              <input type="date" [(ngModel)]="customEndDate" class="date-input" />
+            </div>
+          </div>
+          <div class="custom-date-modal__actions">
+            <button class="btn-secondary" type="button" (click)="cancelCustomDates()">
+              {{ language.t('common.cancel') }}
+            </button>
+            <button class="btn-primary" type="button"
+              [disabled]="!customStartDate || !customEndDate"
+              (click)="applyCustomDates()">
+              {{ language.currentLang() === 'vi' ? 'Áp dụng' : 'Apply' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ─── LOADING STATE ─────────────────────────────────────────── -->
+    @if (isLoading) {
+      <div class="freq-kpi-grid">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="freq-kpi-card freq-kpi-card--skeleton">
+            <div class="skeleton skeleton--label"></div>
+            <div class="skeleton skeleton--value"></div>
+            <div class="skeleton skeleton--sub"></div>
+          </div>
+        }
+      </div>
+      <div class="freq-card freq-card--skeleton">
+        <div class="skeleton skeleton--chart"></div>
+      </div>
+      <div class="freq-card freq-card--skeleton">
+        <div class="skeleton skeleton--table"></div>
+      </div>
+    }
+
+    <!-- ─── ERROR STATE ───────────────────────────────────────────── -->
+    @if (!isLoading && hasError) {
+      <div class="freq-state-card">
+        <span class="material-symbols-outlined freq-state-card__icon freq-state-card__icon--error">
+          cloud_off
+        </span>
+        <h2 class="freq-state-card__title">{{ language.t('frequency.error.title') }}</h2>
+        <p class="freq-state-card__desc">{{ language.t('frequency.error.description') }}</p>
+        <button class="btn-primary" type="button" (click)="loadData()">
+          {{ language.t('frequency.error.retry') }}
+        </button>
+      </div>
+    }
+
+    <!-- ─── EMPTY STATE ───────────────────────────────────────────── -->
+    @if (!isLoading && !hasError && data && data.summary.totalTransactions === 0) {
+      <div class="freq-state-card">
+        <span class="material-symbols-outlined freq-state-card__icon">
+          monitoring
+        </span>
+        <h2 class="freq-state-card__title">{{ language.t('frequency.empty.title') }}</h2>
+        <p class="freq-state-card__desc">{{ language.t('frequency.empty.description') }}</p>
+        <button class="btn-primary" type="button" (click)="goToManualEntry()">
+          <span class="material-symbols-outlined">add</span>
+          {{ language.t('frequency.empty.addTx') }}
+        </button>
+      </div>
+    }
+
+    <!-- ─── MAIN CONTENT ──────────────────────────────────────────── -->
+    @if (!isLoading && !hasError && data && data.summary.totalTransactions > 0) {
+
+      <!-- 4 KPI Cards -->
+      <div class="freq-kpi-grid">
+
+        <!-- Total Transactions -->
+        <div class="freq-kpi-card">
+          <div class="freq-kpi-card__header">
+            <span class="freq-kpi-card__label">{{ language.t('frequency.summary.totalTransactions') }}</span>
+            <span class="material-symbols-outlined freq-kpi-card__icon">receipt_long</span>
+          </div>
+          <div class="freq-kpi-card__value">{{ data.summary.totalTransactions }}</div>
+          <div class="freq-kpi-card__sub">
+            @if (data.summary.previousPeriodChange !== null) {
+              <span class="freq-kpi-card__trend"
+                [class.freq-kpi-card__trend--up]="data.summary.previousPeriodChange > 0"
+                [class.freq-kpi-card__trend--down]="data.summary.previousPeriodChange < 0">
+                <span class="material-symbols-outlined">
+                  {{ data.summary.previousPeriodChange > 0 ? 'trending_up' : data.summary.previousPeriodChange < 0 ? 'trending_down' : 'remove' }}
+                </span>
+                {{ formatTrend(data.summary.previousPeriodChange) }}
+              </span>
+              <span class="freq-kpi-card__trend-label">{{ language.t('frequency.summary.vsLastPeriod') }}</span>
+            }
+          </div>
+        </div>
+
+        <!-- Average Per Week -->
+        <div class="freq-kpi-card">
+          <div class="freq-kpi-card__header">
+            <span class="freq-kpi-card__label">{{ language.t('frequency.summary.avgPerWeek') }}</span>
+            <span class="material-symbols-outlined freq-kpi-card__icon">calendar_view_week</span>
+          </div>
+          <div class="freq-kpi-card__value">{{ data.summary.averagePerWeek }}</div>
+          <div class="freq-kpi-card__sub">
+            <span class="freq-kpi-card__trend-label">{{ language.t('frequency.summary.txsPerWeek') }}</span>
+          </div>
+        </div>
+
+        <!-- Top Category -->
+        <div class="freq-kpi-card">
+          <div class="freq-kpi-card__header">
+            <span class="freq-kpi-card__label">{{ language.t('frequency.summary.topCategory') }}</span>
+            <span class="material-symbols-outlined freq-kpi-card__icon">workspace_premium</span>
+          </div>
+          <div class="freq-kpi-card__value freq-kpi-card__value--text">
+            {{ data.summary.mostFrequentCategory ?? '—' }}
+          </div>
+          <div class="freq-kpi-card__sub">
+            @if (data.summary.mostFrequentCategoryCount > 0) {
+              <span class="freq-kpi-card__trend-label">
+                {{ data.summary.mostFrequentCategoryCount }} {{ language.t('frequency.summary.txsCount') }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <!-- Repeat Rate -->
+        <div class="freq-kpi-card">
+          <div class="freq-kpi-card__header">
+            <span class="freq-kpi-card__label">{{ language.t('frequency.summary.repeatRate') }}</span>
+            <span class="material-symbols-outlined freq-kpi-card__icon">repeat</span>
+          </div>
+          <div class="freq-kpi-card__value">{{ data.summary.repeatRate }}%</div>
+          <div class="freq-kpi-card__sub">
+            <span class="freq-kpi-card__trend-label">
+              {{ language.currentLang() === 'vi' ? 'giao dịch thuộc thói quen thường xuyên' : 'transactions from frequent habits' }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ─── TIMELINE CHART ─────────────────────────────────────── -->
+      <div class="freq-card">
+        <div class="freq-card__head">
+          <h2 class="freq-card__title">{{ language.t('frequency.chart.title') }}</h2>
+          <div class="view-mode-tabs">
+            @for (mode of chartModes; track mode) {
+              <button class="view-mode-tab" type="button"
+                [class.view-mode-tab--active]="chartViewMode() === mode"
+                (click)="setChartViewMode(mode)">
+                {{ language.t('frequency.filters.' + mode) }}
+              </button>
+            }
+          </div>
+        </div>
+        <div class="freq-chart-wrap">
+          <apx-chart
+            [series]="timelineSeries"
+            [chart]="timelineChartOptions.chart!"
+            [xaxis]="timelineChartOptions.xaxis!"
+            [yaxis]="timelineChartOptions.yaxis!"
+            [grid]="timelineChartOptions.grid!"
+            [tooltip]="timelineChartOptions.tooltip!"
+            [fill]="timelineChartOptions.fill!"
+            [plotOptions]="timelineChartOptions.plotOptions!"
+            [dataLabels]="timelineChartOptions.dataLabels!"
+            [stroke]="timelineChartOptions.stroke!"
+            [colors]="timelineChartOptions.colors!"
+          ></apx-chart>
+        </div>
+      </div>
+
+      <!-- ─── TWO-COLUMN SECTION ─────────────────────────────────── -->
+      <div class="freq-two-col">
+
+        <!-- Distribution Card -->
+        <div class="freq-card">
+          <div class="freq-card__head">
+            <h2 class="freq-card__title">{{ language.t('frequency.distribution.title') }}</h2>
+          </div>
+          <div class="freq-dist-list">
+            @for (bucket of data.distribution; track bucket.level) {
+              <div class="freq-dist-item">
+                <div class="freq-dist-item__meta">
+                  <span class="freq-dist-item__label">{{ getLevelLabel(bucket.level) }}</span>
+                  <span class="freq-dist-item__counts">
+                    {{ bucket.categoryCount }} {{ language.t('frequency.distribution.categories') }}
+                    &nbsp;·&nbsp;
+                    {{ bucket.transactionCount }} {{ language.t('frequency.distribution.txs') }}
+                  </span>
+                </div>
+                <div class="freq-dist-bar-track">
+                  <div
+                    class="freq-dist-bar {{ getDistributionColorClass(bucket.level) }}"
+                    [style.width.%]="getDistributionPercent(bucket)">
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Frequent Transactions -->
+        <div class="freq-card">
+          <div class="freq-card__head">
+            <h2 class="freq-card__title">{{ language.t('frequency.frequentTxs.title') }}</h2>
+          </div>
+          @if (data.frequentTransactions.length === 0) {
+            <p class="freq-empty-text">
+              {{ language.currentLang() === 'vi'
+                ? 'Chưa có giao dịch nào lặp lại từ 2 lần trở lên.'
+                : 'No transactions found with 2 or more occurrences.' }}
+            </p>
+          } @else {
+            <div class="freq-frequent-list">
+              @for (tx of data.frequentTransactions; track tx.name) {
+                <div class="freq-frequent-item">
+                  <div class="freq-frequent-item__avatar">
+                    {{ tx.name.charAt(0).toUpperCase() }}
+                  </div>
+                  <div class="freq-frequent-item__body">
+                    <div class="freq-frequent-item__name">{{ tx.name }}</div>
+                    <div class="freq-frequent-item__meta">
+                      <span>{{ tx.transactionCount }} {{ language.currentLang() === 'vi' ? 'lần' : 'times' }}</span>
+                      <span class="freq-sep">·</span>
+                      <span>{{ language.currentLang() === 'vi' ? 'TB' : 'Avg' }} {{ formatCurrency(tx.averageAmount) }}đ</span>
+                      @if (tx.averageGapDays !== null) {
+                        <span class="freq-sep">·</span>
+                        <span>~{{ tx.averageGapDays }} {{ language.currentLang() === 'vi' ? 'ngày/lần' : 'days/tx' }}</span>
+                      }
+                    </div>
+                  </div>
+                  @if (tx.trendPercent !== null && tx.trendPercent !== 0) {
+                    <span class="freq-frequent-item__trend"
+                      [class.freq-frequent-item__trend--up]="tx.trendPercent > 0"
+                      [class.freq-frequent-item__trend--down]="tx.trendPercent < 0">
+                      <span class="material-symbols-outlined">
+                        {{ tx.trendPercent > 0 ? 'arrow_upward' : 'arrow_downward' }}
+                      </span>
+                      {{ formatTrend(tx.trendPercent) }}
+                    </span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+      </div>
+
+      <!-- ─── CATEGORY TABLE ─────────────────────────────────────── -->
+      <div class="freq-card">
+        <div class="freq-card__head freq-card__head--wrap">
+          <h2 class="freq-card__title">{{ language.t('frequency.categories.title') }}</h2>
+          <div class="freq-table-controls">
+            <div class="freq-search-wrap">
+              <span class="material-symbols-outlined freq-search-icon">search</span>
+              <input
+                type="text"
+                class="freq-search"
+                [(ngModel)]="categorySearch"
+                [placeholder]="language.t('frequency.categories.searchPlaceholder')"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop Table -->
+        <div class="freq-table-wrap">
+          <table class="freq-table">
+            <thead>
+              <tr>
+                <th class="freq-table__th">{{ language.t('frequency.categories.category') }}</th>
+                <th class="freq-table__th freq-table__th--sortable"
+                  (click)="sortBy('transactionCount')">
+                  {{ language.t('frequency.categories.count') }}
+                  <span class="material-symbols-outlined sort-icon">
+                    {{ categorySortBy === 'transactionCount' ? (categorySortDir === 'desc' ? 'arrow_downward' : 'arrow_upward') : 'unfold_more' }}
+                  </span>
+                </th>
+                <th class="freq-table__th freq-table__th--sortable"
+                  (click)="sortBy('averagePerWeek')">
+                  {{ language.t('frequency.categories.avgPerWeek') }}
+                  <span class="material-symbols-outlined sort-icon">
+                    {{ categorySortBy === 'averagePerWeek' ? (categorySortDir === 'desc' ? 'arrow_downward' : 'arrow_upward') : 'unfold_more' }}
+                  </span>
+                </th>
+                <th class="freq-table__th freq-table__th--sortable"
+                  (click)="sortBy('totalAmount')">
+                  {{ language.t('frequency.categories.total') }}
+                  <span class="material-symbols-outlined sort-icon">
+                    {{ categorySortBy === 'totalAmount' ? (categorySortDir === 'desc' ? 'arrow_downward' : 'arrow_upward') : 'unfold_more' }}
+                  </span>
+                </th>
+                <th class="freq-table__th">{{ language.t('frequency.categories.avg') }}</th>
+                <th class="freq-table__th">{{ language.t('frequency.categories.lastAt') }}</th>
+                <th class="freq-table__th freq-table__th--sortable"
+                  (click)="sortBy('trendPercent')">
+                  {{ language.t('frequency.categories.trend') }}
+                  <span class="material-symbols-outlined sort-icon">
+                    {{ categorySortBy === 'trendPercent' ? (categorySortDir === 'desc' ? 'arrow_downward' : 'arrow_upward') : 'unfold_more' }}
+                  </span>
+                </th>
+                <th class="freq-table__th">{{ language.t('frequency.categories.level') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (cat of filteredCategories; track cat.categoryId) {
+                <tr class="freq-table__row" (click)="openCategoryDetail(cat)">
+                  <td class="freq-table__td freq-table__td--name">
+                    <div class="freq-cat-name">
+                      <div class="freq-cat-avatar">{{ cat.categoryName.charAt(0).toUpperCase() }}</div>
+                      {{ cat.categoryName }}
+                    </div>
+                  </td>
+                  <td class="freq-table__td freq-table__td--num">{{ cat.transactionCount }}</td>
+                  <td class="freq-table__td freq-table__td--num">{{ cat.averagePerWeek }}</td>
+                  <td class="freq-table__td freq-table__td--num">{{ formatCurrency(cat.totalAmount) }}đ</td>
+                  <td class="freq-table__td freq-table__td--num">{{ formatCurrency(cat.averageAmount) }}đ</td>
+                  <td class="freq-table__td">{{ formatRelDate(cat.lastTransactionAt) }}</td>
+                  <td class="freq-table__td">
+                    @if (cat.trendPercent !== null) {
+                      <span class="freq-trend"
+                        [class.freq-trend--up]="cat.trendPercent > 0"
+                        [class.freq-trend--down]="cat.trendPercent < 0">
+                        <span class="material-symbols-outlined">
+                          {{ cat.trendPercent > 0 ? 'arrow_upward' : cat.trendPercent < 0 ? 'arrow_downward' : 'remove' }}
+                        </span>
+                        {{ formatTrend(cat.trendPercent) }}
+                      </span>
+                    } @else {
+                      <span class="freq-trend">—</span>
+                    }
+                  </td>
+                  <td class="freq-table__td">
+                    <span class="level-badge {{ getLevelColorClass(cat.frequencyLevel) }}">
+                      {{ getLevelLabel(cat.frequencyLevel) }}
+                    </span>
+                  </td>
+                </tr>
+              }
+              @if (filteredCategories.length === 0) {
+                <tr>
+                  <td class="freq-table__td freq-table__td--empty" colspan="8">
+                    {{ language.currentLang() === 'vi' ? 'Không tìm thấy danh mục phù hợp.' : 'No categories match your search.' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Cards (shown instead of table) -->
+        <div class="freq-mobile-cards">
+          @for (cat of filteredCategories; track cat.categoryId) {
+            <div class="freq-mobile-card" (click)="openCategoryDetail(cat)">
+              <div class="freq-mobile-card__top">
+                <div class="freq-cat-name">
+                  <div class="freq-cat-avatar">{{ cat.categoryName.charAt(0).toUpperCase() }}</div>
+                  <span class="freq-mobile-card__name">{{ cat.categoryName }}</span>
+                </div>
+                <span class="level-badge {{ getLevelColorClass(cat.frequencyLevel) }}">
+                  {{ getLevelLabel(cat.frequencyLevel) }}
+                </span>
+              </div>
+              <div class="freq-mobile-card__stats">
+                <div class="freq-mobile-stat">
+                  <span class="freq-mobile-stat__label">{{ language.t('frequency.categories.count') }}</span>
+                  <span class="freq-mobile-stat__value">{{ cat.transactionCount }}</span>
+                </div>
+                <div class="freq-mobile-stat">
+                  <span class="freq-mobile-stat__label">{{ language.t('frequency.categories.total') }}</span>
+                  <span class="freq-mobile-stat__value">{{ formatCurrency(cat.totalAmount) }}đ</span>
+                </div>
+                <div class="freq-mobile-stat">
+                  <span class="freq-mobile-stat__label">{{ language.t('frequency.categories.trend') }}</span>
+                  <span class="freq-mobile-stat__value"
+                    [class.freq-mobile-stat__value--up]="(cat.trendPercent ?? 0) > 0"
+                    [class.freq-mobile-stat__value--down]="(cat.trendPercent ?? 0) < 0">
+                    {{ formatTrend(cat.trendPercent) }}
+                  </span>
+                </div>
+                <div class="freq-mobile-stat">
+                  <span class="freq-mobile-stat__label">{{ language.t('frequency.categories.lastAt') }}</span>
+                  <span class="freq-mobile-stat__value">{{ formatRelDate(cat.lastTransactionAt) }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ─── INSIGHTS ───────────────────────────────────────────── -->
+      @if (data.insights.length > 0) {
+        <div class="freq-card">
+          <div class="freq-card__head">
+            <h2 class="freq-card__title">{{ language.t('frequency.insights.title') }}</h2>
+            <span class="material-symbols-outlined freq-card__title-icon">auto_awesome</span>
+          </div>
+          <div class="freq-insights-list">
+            @for (insight of data.insights; track insight.id) {
+              <div class="freq-insight freq-insight--{{ insight.type }}">
+                <span class="material-symbols-outlined freq-insight__icon">
+                  {{ insight.type === 'warning' ? 'warning' : insight.type === 'success' ? 'check_circle' : 'info' }}
+                </span>
+                <div class="freq-insight__body">
+                  <div class="freq-insight__title">{{ insight.title }}</div>
+                  <div class="freq-insight__desc">{{ insight.description }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+    } <!-- /main content -->
+
+  </div>
+</section>
+
+<!-- ─── CATEGORY DETAIL PANEL ─────────────────────────────────── -->
+@if (selectedCategory) {
+  <div class="freq-detail-backdrop" (click)="closeCategoryDetail()">
+    <aside class="freq-detail-panel" (click)="$event.stopPropagation()">
+      <div class="freq-detail-panel__head">
+        <div>
+          <h2 class="freq-detail-panel__title">{{ selectedCategory.categoryName }}</h2>
+          <span class="level-badge {{ getLevelColorClass(selectedCategory.frequencyLevel) }}">
+            {{ getLevelLabel(selectedCategory.frequencyLevel) }}
+          </span>
+        </div>
+        <button class="freq-detail-close" type="button" (click)="closeCategoryDetail()"
+          [attr.aria-label]="language.currentLang() === 'vi' ? 'Đóng' : 'Close'">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="freq-detail-panel__body">
+
+        <div class="freq-detail-stats">
+          <div class="freq-detail-stat">
+            <span class="material-symbols-outlined freq-detail-stat__icon">receipt_long</span>
+            <div>
+              <div class="freq-detail-stat__value">{{ selectedCategory.transactionCount }}</div>
+              <div class="freq-detail-stat__label">
+                {{ language.t('frequency.detail.txsIn') }} {{ data?.periodDays }} {{ language.t('frequency.detail.days') }}
+              </div>
+            </div>
+          </div>
+
+          <div class="freq-detail-stat">
+            <span class="material-symbols-outlined freq-detail-stat__icon">calendar_view_week</span>
+            <div>
+              <div class="freq-detail-stat__value">{{ selectedCategory.averagePerWeek }}</div>
+              <div class="freq-detail-stat__label">{{ language.t('frequency.summary.txsPerWeek') }}</div>
+            </div>
+          </div>
+
+          @if (selectedCategory.averageGapDays !== null) {
+            <div class="freq-detail-stat">
+              <span class="material-symbols-outlined freq-detail-stat__icon">schedule</span>
+              <div>
+                <div class="freq-detail-stat__value">~{{ selectedCategory.averageGapDays }} {{ language.currentLang() === 'vi' ? 'ngày' : 'days' }}</div>
+                <div class="freq-detail-stat__label">{{ language.currentLang() === 'vi' ? 'giữa các lần' : 'between occurrences' }}</div>
+              </div>
+            </div>
+          }
+
+          <div class="freq-detail-stat">
+            <span class="material-symbols-outlined freq-detail-stat__icon">payments</span>
+            <div>
+              <div class="freq-detail-stat__value">{{ formatCurrency(selectedCategory.totalAmount) }}đ</div>
+              <div class="freq-detail-stat__label">{{ language.t('frequency.detail.total') }}</div>
+            </div>
+          </div>
+
+          <div class="freq-detail-stat">
+            <span class="material-symbols-outlined freq-detail-stat__icon">calculate</span>
+            <div>
+              <div class="freq-detail-stat__value">{{ formatCurrency(selectedCategory.averageAmount) }}đ</div>
+              <div class="freq-detail-stat__label">{{ language.t('frequency.detail.avgAmount') }}</div>
+            </div>
+          </div>
+
+          <div class="freq-detail-stat">
+            <span class="material-symbols-outlined freq-detail-stat__icon">event</span>
+            <div>
+              <div class="freq-detail-stat__value">{{ formatRelDate(selectedCategory.lastTransactionAt) }}</div>
+              <div class="freq-detail-stat__label">{{ language.t('frequency.detail.lastAt') }}</div>
+            </div>
+          </div>
+        </div>
+
+        @if (selectedCategory.trendPercent !== null) {
+          <div class="freq-detail-trend"
+            [class.freq-detail-trend--up]="selectedCategory.trendPercent > 0"
+            [class.freq-detail-trend--down]="selectedCategory.trendPercent < 0">
+            <span class="material-symbols-outlined">
+              {{ selectedCategory.trendPercent > 0 ? 'trending_up' : selectedCategory.trendPercent < 0 ? 'trending_down' : 'trending_flat' }}
+            </span>
+            <span>
+              {{ formatTrend(selectedCategory.trendPercent) }}
+              {{ language.t('frequency.summary.vsLastPeriod') }}
+            </span>
+          </div>
+        }
+
+      </div>
+    </aside>
+  </div>
+}
