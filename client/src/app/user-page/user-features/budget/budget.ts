@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { UserHeader } from '../../user-layout/user-header/user-header';
 import { BudgetService, BudgetDto, CreateBudgetRequest } from '../../../core/services/budget.service';
+import { BudgetMemberService } from '../../../core/services/budgetMember.service';
 import { LanguageService } from '../../../core/services/language-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { SharedBudgetDto, BudgetMemberDto } from '../../../models/shared-budget.dto';
@@ -18,6 +19,7 @@ import { CreateSharedBudgetModal } from './create-shared-budget-modal/create-sha
 })
 export class Budget implements OnInit {
   private readonly budgetService = inject(BudgetService);
+  private readonly budgetMemberService = inject(BudgetMemberService);
   protected readonly language = inject(LanguageService);
   private readonly fb = inject(FormBuilder);
   private readonly toast = inject(ToastService);
@@ -169,7 +171,7 @@ export class Budget implements OnInit {
   loadSharedBudgets(): void {
     this.isLoadingShared = true;
     this.hasErrorShared = false;
-    this.budgetService.getSharedBudgets().subscribe({
+    this.budgetMemberService.getSharedBudgets().subscribe({
       next: (data) => {
         this.sharedBudgets = data;
         this.isLoadingShared = false;
@@ -386,11 +388,9 @@ export class Budget implements OnInit {
     this.isSharedModalOpen = false;
   }
 
-  onSharedBudgetCreated(budget: SharedBudgetDto): void {
+  onMemberInvited(): void {
     this.closeSharedModal();
-    this.sharedBudgets = [budget, ...this.sharedBudgets];
-    this.activeTab = 'shared';
-    this.router.navigate(['/user/budget', budget.id]);
+    this.loadSharedBudgets(); // reload shared budgets to reflect new members if any
   }
 
   navigateToSharedBudget(budget: SharedBudgetDto): void {

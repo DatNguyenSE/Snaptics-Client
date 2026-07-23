@@ -164,8 +164,8 @@
 
 
 .dashboard-summary-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   align-items: stretch;
 }
@@ -187,7 +187,6 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
 }
 
 .stat-card__label,
@@ -665,7 +664,12 @@
 
 @media (min-width: 640px) {
   .dashboard-summary-grid {
-    grid-template-columns: 3fr 2fr;
+    flex-direction: row;
+  }
+  
+  .dashboard-summary-grid > * {
+    flex: 1;
+    min-width: 0; /* Prevents flex items from overflowing 50% */
   }
 }
 
@@ -1656,7 +1660,6 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
 .wallet-carousel-container {
@@ -1668,7 +1671,6 @@
   -ms-overflow-style: none; /* IE/Edge */
   border-radius: 24px;
   flex: 1;
-  height: 100%;
 }
 
 .wallet-carousel-container::-webkit-scrollbar {
@@ -1691,7 +1693,6 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
 }
 
 .wallet-carousel-wrapper--multi .stat-card--wallet-item {

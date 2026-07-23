@@ -76,12 +76,6 @@ export class Nav {
       icon: 'monitoring',
       route: '/user/frequency',
     },
-    {
-      id: 'snaptics-ai',
-      labelKey: 'nav.snapticsAi',
-      icon: 'auto_awesome',
-      route: '/user/snaptics-ai',
-    },
   ];
 
   readonly languages: LanguageOption[] = [

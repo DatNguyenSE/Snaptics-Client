@@ -345,7 +345,8 @@
 <!-- ── Shared Budget Modal ── -->
 @if (isSharedModalOpen) {
   <app-create-shared-budget-modal
-    (created)="onSharedBudgetCreated($event)"
+    [budgets]="budgets"
+    (invited)="onMemberInvited()"
     (closed)="closeSharedModal()"
   />
 }
