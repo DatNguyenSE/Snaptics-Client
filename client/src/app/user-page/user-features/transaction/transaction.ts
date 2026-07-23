@@ -109,6 +109,13 @@ export class Transaction implements OnInit {
     this.filterSource = source;
   }
 
+  getTransactionSource(t: TransactionDto): 'receipt' | 'manual' | 'snap' {
+    if (t.source) return t.source;
+    if (!t.imageKey && !t.imagePreviewUrl) return 'manual';
+    if (t.transactionDetails && t.transactionDetails.length > 1) return 'receipt';
+    return 'snap';
+  }
+
   // ─── Computed Data ───────────────────────────────────────────────────────────
   get filteredTransactions(): TransactionDto[] {
     let result = [...this.transactionHistory];
@@ -126,7 +133,7 @@ export class Transaction implements OnInit {
     }
 
     if (this.filterSource !== 'all') {
-      result = result.filter((t) => t.source === this.filterSource);
+      result = result.filter((t) => this.getTransactionSource(t) === this.filterSource);
     }
 
     if (this.filterMonth) {
@@ -163,9 +170,9 @@ export class Transaction implements OnInit {
     return {
       total: list.reduce((sum, t) => sum + t.totalAmount, 0),
       count: list.length,
-      receiptCount: list.filter((t) => t.source === 'receipt').length,
-      manualCount: list.filter((t) => t.source === 'manual').length,
-      snapCount: list.filter((t) => t.source === 'snap').length,
+      receiptCount: list.filter((t) => this.getTransactionSource(t) === 'receipt').length,
+      manualCount: list.filter((t) => this.getTransactionSource(t) === 'manual').length,
+      snapCount: list.filter((t) => this.getTransactionSource(t) === 'snap').length,
     };
   }
 

@@ -376,3 +376,63 @@ h1, h2, h3, p, span { margin: 0; }
 .retry-btn { background: #9b51e0; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; }
 .spin-icon { animation: spin 1s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .transaction-page {
+    padding: 24px 16px calc(112px + env(safe-area-inset-bottom));
+  }
+  
+  .transaction-page__hero {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+
+  .filter-bar {
+    border-radius: 20px;
+    padding: 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .filter-search {
+    width: 100%;
+    background: #f8f9fc;
+    border-radius: 12px;
+    padding: 8px 12px;
+    box-sizing: border-box;
+  }
+
+  .filter-search__input {
+    width: 100%;
+    flex: 1;
+  }
+
+  .filter-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .filter-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .filter-month-wrap {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .filter-month {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

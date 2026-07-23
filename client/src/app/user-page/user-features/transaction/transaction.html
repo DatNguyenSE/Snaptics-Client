@@ -99,14 +99,7 @@
             <span class="material-symbols-outlined">photo_camera</span>
             {{ language.t('transaction.filterSnap') }}
           </button>
-          <button
-            class="filter-chip"
-            [class.filter-chip--active]="filterSource === 'manual'"
-            (click)="setSourceFilter('manual')"
-            type="button">
-            <span class="material-symbols-outlined">edit</span>
-            {{ language.t('transaction.filterManual') }}
-          </button>
+
         </div>
 
         <div class="filter-month-wrap">
