@@ -1,7 +1,6 @@
 export const environment = {
     production: false,
-    apiUrl: 'http://13.229.232.103:8080/api/',
-    // apiUrl: '/api/',
+    apiUrl: '/api/',
     // khi dev phải dùng /api để tránh lỗi CORS, khi build sẽ tự động đổi thành http://
     // ─── Mock Auth ───────────────────────────────────────────────────────────
     // Bật true để đăng nhập bằng tài khoản mock mà không cần backend.
