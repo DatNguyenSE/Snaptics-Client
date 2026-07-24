@@ -1,6 +1,7 @@
 import { Component, Output, EventEmitter, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AccountService } from '../../../core/services/account-service';
+import { LanguageService } from '../../../core/services/language-service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +17,7 @@ export class AdminHeaderComponent {
   @Output() openMobileMenu = new EventEmitter<void>();
 
   protected readonly theme = inject(ThemeService);
+  protected readonly language = inject(LanguageService);
   private readonly accountService = inject(AccountService);
   private readonly router = inject(Router);
 
@@ -24,14 +26,14 @@ export class AdminHeaderComponent {
 
   get breadcrumb(): string {
     const url = this.router.url;
-    if (url.includes('/overview')) return 'Overview';
-    if (url.match(/\/users\/[^/]+/)) return 'User Detail';
-    if (url.includes('/users')) return 'Users';
-    if (url.includes('/categories')) return 'Categories';
-    if (url.includes('/ai-operations')) return 'AI & Scan';
-    if (url.includes('/audit-logs')) return 'Audit Logs';
-    if (url.includes('/notifications')) return 'Notifications';
-    if (url.includes('/settings')) return 'System Settings';
+    if (url.includes('/overview')) return this.language.t('admin.nav.overview');
+    if (url.match(/\/users\/[^/]+/)) return this.language.currentLang() === 'vi' ? 'Chi tiết người dùng' : 'User Detail';
+    if (url.includes('/users')) return this.language.t('admin.nav.users');
+    if (url.includes('/categories')) return this.language.t('admin.nav.categories');
+    if (url.includes('/ai-operations')) return this.language.t('admin.nav.aiOperations');
+    if (url.includes('/audit-logs')) return this.language.t('admin.nav.auditLogs');
+    if (url.includes('/notifications')) return this.language.t('admin.nav.notifications');
+    if (url.includes('/settings')) return this.language.t('admin.nav.systemSettings');
     return 'Admin';
   }
 

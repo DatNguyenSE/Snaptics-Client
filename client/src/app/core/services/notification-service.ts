@@ -76,7 +76,7 @@ export class NotificationService {
       .withAutomaticReconnect()
       .build();
 
-    this.hubConnection.start().catch(error => console.log('Error establishing SignalR connection', error));
+    this.hubConnection.start().catch((error: unknown) => console.log('Error establishing SignalR connection', error));
 
     this.hubConnection.on('ReceiveNotification', (notificationDto: any) => {
       const feType: NotificationType = notificationDto.type === 4 ? 'budget' : 'insight';

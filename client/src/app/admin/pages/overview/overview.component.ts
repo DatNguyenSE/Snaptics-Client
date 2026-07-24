@@ -7,6 +7,7 @@ import { LoadingSkeletonComponent } from '../../components/loading-skeleton/load
 import { RecentAdminActivity, RecentError, SystemHealthItem, KpiCard } from '../../models/admin.models';
 import { MOCK_USER_GROWTH_DATA, MOCK_AI_USAGE_DATA } from '../../data/admin-mock-data';
 import { BadgeVariant } from '../../components/status-badge/status-badge.component';
+import { LanguageService } from '../../../core/services/language-service';
 
 @Component({
   selector: 'app-overview',
@@ -17,6 +18,7 @@ import { BadgeVariant } from '../../components/status-badge/status-badge.compone
 })
 export class OverviewComponent implements OnInit, OnDestroy {
   private readonly dashboardService = inject(AdminDashboardService);
+  protected readonly language = inject(LanguageService);
   private subs: Subscription[] = [];
 
   loading = true;
@@ -28,11 +30,13 @@ export class OverviewComponent implements OnInit, OnDestroy {
 
   dateFilter: 'today' | '7d' | '30d' | 'custom' = '30d';
 
-  readonly filterOptions: Array<{ id: 'today' | '7d' | '30d' | 'custom'; label: string }> = [
-    { id: 'today', label: 'Today' },
-    { id: '7d', label: '7 Days' },
-    { id: '30d', label: '30 Days' },
-  ];
+  get filterOptions(): Array<{ id: 'today' | '7d' | '30d' | 'custom'; label: string }> {
+    return [
+      { id: 'today', label: this.language.t('admin.overview.today') },
+      { id: '7d', label: this.language.t('admin.overview.sevenDays') },
+      { id: '30d', label: this.language.t('admin.overview.thirtyDays') },
+    ];
+  }
 
   readonly scanPerformance = {
     successful: 93.8,
@@ -76,6 +80,22 @@ export class OverviewComponent implements OnInit, OnDestroy {
     this.subs.push(sub);
   }
 
+  getTranslatedCard(card: KpiCard): KpiCard {
+    const keyMap: Record<string, string> = {
+      'total-users': 'admin.overview.kpi.totalUsers',
+      'active-users': 'admin.overview.kpi.activeUsers',
+      'new-users': 'admin.overview.kpi.newUsers',
+      'ai-requests': 'admin.overview.kpi.aiRequests',
+      'total-scans': 'admin.overview.kpi.totalScans',
+      'scan-success': 'admin.overview.kpi.scanSuccessRate',
+    };
+    const key = keyMap[card.id];
+    return {
+      ...card,
+      label: key ? this.language.t(key) : card.label,
+    };
+  }
+
   getHealthBadgeVariant(status: string): BadgeVariant {
     if (status === 'operational') return 'operational';
     if (status === 'degraded') return 'degraded';
@@ -83,9 +103,9 @@ export class OverviewComponent implements OnInit, OnDestroy {
   }
 
   getHealthBadgeLabel(status: string): string {
-    if (status === 'operational') return 'Operational';
-    if (status === 'degraded') return 'Degraded';
-    return 'Outage';
+    if (status === 'operational') return this.language.t('admin.overview.systemHealth.operational');
+    if (status === 'degraded') return this.language.t('admin.overview.systemHealth.degraded');
+    return this.language.t('admin.overview.systemHealth.outage');
   }
 
   getSeverityVariant(severity: string): BadgeVariant {
@@ -93,7 +113,11 @@ export class OverviewComponent implements OnInit, OnDestroy {
   }
 
   getSeverityLabel(severity: string): string {
-    return severity.charAt(0).toUpperCase() + severity.slice(1);
+    if (severity === 'critical') return this.language.t('admin.overview.recentErrors.critical');
+    if (severity === 'high') return this.language.t('admin.overview.recentErrors.high');
+    if (severity === 'medium') return this.language.t('admin.overview.recentErrors.medium');
+    if (severity === 'low') return this.language.t('admin.overview.recentErrors.low');
+    return severity;
   }
 
   getActivityStatusVariant(status: string): BadgeVariant {
@@ -104,7 +128,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
 
   formatTime(iso: string): string {
     const d = new Date(iso);
-    return d.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleString(this.language.locale(), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
   }
 
   trackById(_: number, item: { id: string }): string {

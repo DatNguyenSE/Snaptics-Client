@@ -1,9 +1,10 @@
+@let _lang = language.lang();
 <div class="overview">
   <!-- Page Header -->
   <div class="page-header">
     <div>
-      <h1 class="page-title">Overview</h1>
-      <p class="page-subtitle">Monitor Snaptics users, AI performance and system activity.</p>
+      <h1 class="page-title">{{ language.t('admin.overview.title') }}</h1>
+      <p class="page-subtitle">{{ language.t('admin.overview.subtitle') }}</p>
     </div>
     <div class="page-header__actions">
       <div class="date-filter">
@@ -18,11 +19,11 @@
       </div>
       <button type="button" class="btn btn--ghost" (click)="refresh()">
         <span class="material-symbols-outlined">refresh</span>
-        Refresh
+        {{ language.t('admin.overview.refresh') }}
       </button>
       <button type="button" class="btn btn--primary">
         <span class="material-symbols-outlined">download</span>
-        Export
+        {{ language.t('admin.overview.export') }}
       </button>
     </div>
   </div>
@@ -37,7 +38,7 @@
     <!-- KPI Cards -->
     <div class="kpi-grid">
       @for (card of kpis; track card.id) {
-        <app-stat-card [card]="card" />
+        <app-stat-card [card]="getTranslatedCard(card)" />
       }
     </div>
   }
@@ -47,8 +48,8 @@
     <!-- System Health -->
     <div class="card">
       <div class="card__header">
-        <h2 class="card__title">System Health</h2>
-        <span class="card__subtitle">{{ avgResponseTime }}ms avg</span>
+        <h2 class="card__title">{{ language.t('admin.overview.systemHealth.title') }}</h2>
+        <span class="card__subtitle">{{ avgResponseTime }}ms {{ language.t('admin.overview.systemHealth.avgMs') }}</span>
       </div>
       <div class="health-list">
         @for (item of systemHealth; track item.service) {
@@ -66,7 +67,7 @@
           </div>
         }
         <div class="health-item health-item--total">
-          <span class="health-item__service">Average Response Time</span>
+          <span class="health-item__service">{{ language.t('admin.overview.systemHealth.avgResponseTime') }}</span>
           <strong class="health-item__avg">{{ avgResponseTime }} ms</strong>
         </div>
       </div>
@@ -75,7 +76,7 @@
     <!-- Scan Performance -->
     <div class="card">
       <div class="card__header">
-        <h2 class="card__title">Scan Performance</h2>
+        <h2 class="card__title">{{ language.t('admin.overview.scanPerformance.title') }}</h2>
       </div>
       <div class="scan-perf">
         <div class="scan-perf__item scan-perf__item--success">
@@ -85,7 +86,7 @@
           <div class="scan-perf__meta">
             <span class="scan-perf__label">
               <span class="material-symbols-outlined">check_circle</span>
-              Successful
+              {{ language.t('admin.overview.scanPerformance.successful') }}
             </span>
             <strong>{{ scanPerformance.successful }}%</strong>
           </div>
@@ -97,7 +98,7 @@
           <div class="scan-perf__meta">
             <span class="scan-perf__label">
               <span class="material-symbols-outlined">warning</span>
-              Low Confidence
+              {{ language.t('admin.overview.scanPerformance.lowConfidence') }}
             </span>
             <strong>{{ scanPerformance.lowConfidence }}%</strong>
           </div>
@@ -109,18 +110,18 @@
           <div class="scan-perf__meta">
             <span class="scan-perf__label">
               <span class="material-symbols-outlined">cancel</span>
-              Failed
+              {{ language.t('admin.overview.scanPerformance.failed') }}
             </span>
             <strong>{{ scanPerformance.failed }}%</strong>
           </div>
         </div>
         <div class="scan-perf__stats">
           <div class="scan-perf__stat">
-            <span class="scan-perf__stat-label">Avg Processing Time</span>
+            <span class="scan-perf__stat-label">{{ language.t('admin.overview.scanPerformance.avgProcessingTime') }}</span>
             <span class="scan-perf__stat-value">{{ scanPerformance.avgProcessingTime }}</span>
           </div>
           <div class="scan-perf__stat">
-            <span class="scan-perf__stat-label">Avg Confidence</span>
+            <span class="scan-perf__stat-label">{{ language.t('admin.overview.scanPerformance.avgConfidence') }}</span>
             <span class="scan-perf__stat-value">{{ scanPerformance.avgConfidence }}%</span>
           </div>
         </div>
@@ -133,17 +134,17 @@
     <!-- Recent Admin Activity -->
     <div class="card">
       <div class="card__header">
-        <h2 class="card__title">Recent Admin Activity</h2>
+        <h2 class="card__title">{{ language.t('admin.overview.recentActivity.title') }}</h2>
       </div>
       <div class="activity-table-wrap">
         <table class="activity-table">
           <thead>
             <tr>
-              <th>Admin</th>
-              <th>Action</th>
-              <th>Target</th>
-              <th>Time</th>
-              <th>Status</th>
+              <th>{{ language.t('admin.overview.recentActivity.admin') }}</th>
+              <th>{{ language.t('admin.overview.recentActivity.action') }}</th>
+              <th>{{ language.t('admin.overview.recentActivity.target') }}</th>
+              <th>{{ language.t('admin.overview.recentActivity.time') }}</th>
+              <th>{{ language.t('admin.overview.recentActivity.status') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -169,7 +170,7 @@
     <!-- Recent Errors -->
     <div class="card">
       <div class="card__header">
-        <h2 class="card__title">Recent Errors</h2>
+        <h2 class="card__title">{{ language.t('admin.overview.recentErrors.title') }}</h2>
       </div>
       <div class="error-list">
         @for (err of recentErrors; track err.id) {
@@ -183,7 +184,7 @@
               <p class="error-item__msg">{{ err.message }}</p>
               <div class="error-item__meta">
                 <app-status-badge [variant]="getSeverityVariant(err.severity)" [label]="getSeverityLabel(err.severity)" />
-                <span class="error-item__count">{{ err.count }} occurrences</span>
+                <span class="error-item__count">{{ err.count }} {{ language.t('admin.overview.recentErrors.occurrences') }}</span>
               </div>
             </div>
           </div>

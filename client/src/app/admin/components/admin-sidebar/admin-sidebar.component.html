@@ -1,3 +1,4 @@
+@let _lang = language.lang();
 <aside
   class="sidebar"
   [class.sidebar--collapsed]="collapsed"
@@ -12,7 +13,7 @@
     @if (!collapsed) {
       <div class="sidebar__brand-text">
         <span class="sidebar__brand-name">Snaptics</span>
-        <span class="sidebar__brand-sub">Admin Console</span>
+        <span class="sidebar__brand-sub">{{ language.t('admin.console') }}</span>
       </div>
     }
     <button
@@ -31,7 +32,7 @@
   <!-- Main nav -->
   <nav class="sidebar__nav" aria-label="Main admin navigation">
     @if (!collapsed) {
-      <p class="sidebar__section-label">Management</p>
+      <p class="sidebar__section-label">{{ language.t('admin.sections.management') }}</p>
     }
     @for (item of mainNavItems; track item.id) {
       <a
@@ -39,12 +40,12 @@
         [routerLink]="item.route"
         routerLinkActive="sidebar__item--active"
         [routerLinkActiveOptions]="{ exact: false }"
-        [title]="collapsed ? item.label : ''"
+        [title]="collapsed ? language.t(item.labelKey) : ''"
         (click)="onNavClick()"
       >
         <span class="material-symbols-outlined sidebar__item-icon">{{ item.icon }}</span>
         @if (!collapsed) {
-          <span class="sidebar__item-label">{{ item.label }}</span>
+          <span class="sidebar__item-label">{{ language.t(item.labelKey) }}</span>
         }
       </a>
     }
@@ -52,7 +53,7 @@
     <div class="sidebar__divider"></div>
 
     @if (!collapsed) {
-      <p class="sidebar__section-label">System</p>
+      <p class="sidebar__section-label">{{ language.t('admin.sections.system') }}</p>
     }
     @for (item of systemNavItems; track item.id) {
       <a
@@ -61,12 +62,12 @@
         [routerLink]="item.route"
         routerLinkActive="sidebar__item--active"
         [routerLinkActiveOptions]="{ exact: false }"
-        [title]="collapsed ? item.label : (item.id === 'settings' && !isSuperAdmin ? 'Super Admin only' : '')"
+        [title]="collapsed ? language.t(item.labelKey) : (item.id === 'settings' && !isSuperAdmin ? 'Super Admin only' : '')"
         (click)="onNavClick()"
       >
         <span class="material-symbols-outlined sidebar__item-icon">{{ item.icon }}</span>
         @if (!collapsed) {
-          <span class="sidebar__item-label">{{ item.label }}</span>
+          <span class="sidebar__item-label">{{ language.t(item.labelKey) }}</span>
           @if (item.id === 'settings' && !isSuperAdmin) {
             <span class="sidebar__item-lock">
               <span class="material-symbols-outlined">lock</span>

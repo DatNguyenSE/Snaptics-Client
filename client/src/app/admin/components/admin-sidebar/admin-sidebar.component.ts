@@ -6,7 +6,7 @@ import { ThemeService } from '../../../core/services/theme.service';
 
 interface SidebarNavItem {
   id: string;
-  label: string;
+  labelKey: string;
   icon: string;
   route: string;
   section?: 'main' | 'system';
@@ -40,16 +40,16 @@ export class AdminSidebarComponent {
   ];
 
   readonly mainNavItems: SidebarNavItem[] = [
-    { id: 'overview', label: 'Overview', icon: 'dashboard', route: '/admin/overview' },
-    { id: 'users', label: 'Users', icon: 'group', route: '/admin/users' },
-    { id: 'categories', label: 'Categories', icon: 'category', route: '/admin/categories' },
-    { id: 'ai-operations', label: 'AI & Scan', icon: 'smart_toy', route: '/admin/ai-operations' },
-    { id: 'audit-logs', label: 'Audit Logs', icon: 'fact_check', route: '/admin/audit-logs' },
+    { id: 'overview', labelKey: 'admin.nav.overview', icon: 'dashboard', route: '/admin/overview' },
+    { id: 'users', labelKey: 'admin.nav.users', icon: 'group', route: '/admin/users' },
+    { id: 'categories', labelKey: 'admin.nav.categories', icon: 'category', route: '/admin/categories' },
+    { id: 'ai-operations', labelKey: 'admin.nav.aiOperations', icon: 'smart_toy', route: '/admin/ai-operations' },
+    { id: 'audit-logs', labelKey: 'admin.nav.auditLogs', icon: 'fact_check', route: '/admin/audit-logs' },
   ];
 
   readonly systemNavItems: SidebarNavItem[] = [
-    { id: 'notifications', label: 'Notifications', icon: 'notifications', route: '/admin/notifications' },
-    { id: 'settings', label: 'System Settings', icon: 'settings', route: '/admin/settings' },
+    { id: 'notifications', labelKey: 'admin.nav.notifications', icon: 'notifications', route: '/admin/notifications' },
+    { id: 'settings', labelKey: 'admin.nav.systemSettings', icon: 'settings', route: '/admin/settings' },
   ];
 
   get account() {

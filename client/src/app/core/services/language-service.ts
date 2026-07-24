@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 
 export type AppLanguage = 'vi' | 'en';
 
@@ -643,6 +643,76 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         recentTxs: 'Giao d\u1ecbch g\u1ea7n \u0111\u00e2y',
       },
     },
+    admin: {
+      console: 'Admin Console',
+      sections: {
+        management: 'Quản lý',
+        system: 'Hệ thống',
+      },
+      nav: {
+        overview: 'Tổng quan',
+        users: 'Người dùng',
+        categories: 'Danh mục',
+        aiOperations: 'AI & Scan',
+        auditLogs: 'Nhật ký hệ thống',
+        notifications: 'Thông báo',
+        systemSettings: 'Cài đặt hệ thống',
+      },
+      header: {
+        searchPlaceholder: 'Tìm kiếm người dùng, yêu cầu hoặc nhật ký...',
+        userDashboard: 'Giao diện người dùng',
+        signOut: 'Đăng xuất',
+      },
+      overview: {
+        title: 'Tổng quan',
+        subtitle: 'Theo dõi người dùng Snaptics, hiệu suất AI và hoạt động hệ thống.',
+        today: 'Hôm nay',
+        sevenDays: '7 ngày',
+        thirtyDays: '30 ngày',
+        refresh: 'Làm mới',
+        export: 'Xuất dữ liệu',
+        kpi: {
+          totalUsers: 'Tổng người dùng',
+          activeUsers: 'Người dùng hoạt động',
+          newUsers: 'Người dùng mới',
+          aiRequests: 'Yêu cầu AI',
+          totalScans: 'Tổng số lượt quét',
+          scanSuccessRate: 'Tỷ lệ quét thành công',
+        },
+        systemHealth: {
+          title: 'Tình trạng hệ thống',
+          avgMs: 'trung bình',
+          avgResponseTime: 'Thời gian phản hồi trung bình',
+          operational: 'Hoạt động tốt',
+          degraded: 'Giảm hiệu năng',
+          outage: 'Dừng hoạt động',
+        },
+        scanPerformance: {
+          title: 'Hiệu suất quét',
+          successful: 'Thành công',
+          lowConfidence: 'Độ tin cậy thấp',
+          failed: 'Thất bại',
+          avgProcessingTime: 'Thời gian xử lý TB',
+          avgConfidence: 'Độ tin cậy TB',
+        },
+        recentActivity: {
+          title: 'Hoạt động Admin gần đây',
+          admin: 'Admin',
+          action: 'Hành động',
+          target: 'Mục tiêu',
+          time: 'Thời gian',
+          status: 'Trạng thái',
+        },
+        recentErrors: {
+          title: 'Lỗi gần đây',
+          occurrences: 'lần xuất hiện',
+          critical: 'Nghiêm trọng',
+          high: 'Cao',
+          medium: 'Trung bình',
+          low: 'Thấp',
+        },
+      },
+    },
   },
   en: {
     common: {
@@ -1262,6 +1332,76 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         recentTxs: 'Recent transactions',
       },
     },
+    admin: {
+      console: 'Admin Console',
+      sections: {
+        management: 'Management',
+        system: 'System',
+      },
+      nav: {
+        overview: 'Overview',
+        users: 'Users',
+        categories: 'Categories',
+        aiOperations: 'AI & Scan',
+        auditLogs: 'Audit Logs',
+        notifications: 'Notifications',
+        systemSettings: 'System Settings',
+      },
+      header: {
+        searchPlaceholder: 'Search users, requests or logs...',
+        userDashboard: 'User Dashboard',
+        signOut: 'Sign out',
+      },
+      overview: {
+        title: 'Overview',
+        subtitle: 'Monitor Snaptics users, AI performance and system activity.',
+        today: 'Today',
+        sevenDays: '7 Days',
+        thirtyDays: '30 Days',
+        refresh: 'Refresh',
+        export: 'Export',
+        kpi: {
+          totalUsers: 'Total Users',
+          activeUsers: 'Active Users',
+          newUsers: 'New Users',
+          aiRequests: 'AI Requests',
+          totalScans: 'Total Scans',
+          scanSuccessRate: 'Scan Success Rate',
+        },
+        systemHealth: {
+          title: 'System Health',
+          avgMs: 'avg',
+          avgResponseTime: 'Average Response Time',
+          operational: 'Operational',
+          degraded: 'Degraded',
+          outage: 'Outage',
+        },
+        scanPerformance: {
+          title: 'Scan Performance',
+          successful: 'Successful',
+          lowConfidence: 'Low Confidence',
+          failed: 'Failed',
+          avgProcessingTime: 'Avg Processing Time',
+          avgConfidence: 'Avg Confidence',
+        },
+        recentActivity: {
+          title: 'Recent Admin Activity',
+          admin: 'Admin',
+          action: 'Action',
+          target: 'Target',
+          time: 'Time',
+          status: 'Status',
+        },
+        recentErrors: {
+          title: 'Recent Errors',
+          occurrences: 'occurrences',
+          critical: 'Critical',
+          high: 'High',
+          medium: 'Medium',
+          low: 'Low',
+        },
+      },
+    },
   },
 };
 
@@ -1270,6 +1410,12 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
 })
 export class LanguageService {
   readonly currentLang = signal<AppLanguage>(this.getInitialLanguage());
+
+  /**
+   * Reactive computed alias — read this in templates so Angular tracks
+   * the signal dependency and re-renders when the language changes.
+   */
+  readonly lang = computed(() => this.currentLang());
 
   constructor() {
     this.applyDocumentLanguage(this.currentLang());
@@ -1286,12 +1432,26 @@ export class LanguageService {
   }
 
   locale(): string {
+    // Reads the reactive signal so callers inside computed/effect track it.
     return this.currentLang() === 'vi' ? 'vi-VN' : 'en-US';
   }
 
+  /**
+   * Translate a dot-notation key.
+   * NOTE: When called from a template expression, Angular only tracks signals
+   * read *directly* in the expression.  To make Angular re-evaluate this call
+   * on language change, include `language.lang()` somewhere in the same
+   * template expression, e.g. `{{ language.t('key') + (language.lang() && '') }}`
+   * — or, simpler, call `language.lang()` once at the top of the template
+   * inside a dummy `@let lang = language.lang();` block.
+   * The preferred pattern used in this app is to expose `t` as a computed
+   * bound to the current language below.
+   */
   t(key: string, params?: Record<string, string | number>): string {
+    // Read the signal so this call is reactive when used inside computed/effect.
+    const lang = this.currentLang();
     const template =
-      this.resolveTranslation(this.currentLang(), key) ??
+      this.resolveTranslation(lang, key) ??
       this.resolveTranslation('en', key) ??
       key;
 
