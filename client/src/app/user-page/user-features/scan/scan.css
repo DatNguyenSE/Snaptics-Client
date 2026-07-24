@@ -627,10 +627,6 @@
   letter-spacing: 0.04em;
 }
 
-.capture-bar__spacer {
-  /* Takes the left column to balance the grid */
-}
-
 .capture-btn {
   position: relative;
   flex: 0 0 72px;
