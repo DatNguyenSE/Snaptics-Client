@@ -86,6 +86,12 @@ export class Nav {
       icon: 'monitoring',
       route: '/user/frequency',
     },
+    {
+      id: 'support',
+      labelKey: 'nav.support',
+      icon: 'headset_mic',
+      route: '/user/support',
+    },
   ];
 
   readonly languages: LanguageOption[] = [

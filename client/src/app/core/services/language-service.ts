@@ -38,6 +38,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       analysis: 'Ph\u00e2n t\u00edch',
       snapticsAi: 'Snaptics AI',
       notifications: 'Thông báo',
+      support: 'Hỗ trợ',
     },
     header: {
       greeting: 'Xin ch\u00e0o, {{name}}',
@@ -741,6 +742,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       settings: 'Settings',
       logout: 'Logout',
       analysis: 'Analysis',
+      support: 'Support',
     },
     header: {
       greeting: 'Hello, {{name}}',

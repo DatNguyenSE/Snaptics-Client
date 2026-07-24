@@ -1,0 +1,788 @@
+<div class="support-page">
+  <!-- 1. Header Section -->
+  <header class="support-header">
+    <div class="support-header__content">
+      <nav class="support-breadcrumb" aria-label="Breadcrumb">
+        <ol class="support-breadcrumb__list">
+          <li class="support-breadcrumb__item">
+            <a class="support-breadcrumb__link" href="/user/dashboard">Trang chủ</a>
+          </li>
+          <li class="support-breadcrumb__separator">/</li>
+          <li class="support-breadcrumb__item support-breadcrumb__item--active">Hỗ trợ</li>
+        </ol>
+      </nav>
+
+      <div class="support-header__hero">
+        <div class="support-header__copy">
+          <h1 class="support-header__title">Trung tâm hỗ trợ</h1>
+          <p class="support-header__description">
+            Chúng tôi có thể giúp gì cho bạn? Tìm câu hỏi hoặc gửi yêu cầu để được hỗ trợ nhanh chóng.
+          </p>
+        </div>
+        <button class="support-btn support-btn--primary support-btn--lg" type="button" (click)="openCreateModal()">
+          <span class="material-symbols-outlined">add_comment</span>
+          <span>Tạo yêu cầu hỗ trợ</span>
+        </button>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="support-search">
+        <div class="support-search__wrapper">
+          <span class="material-symbols-outlined support-search__icon">search</span>
+          <input
+            type="text"
+            class="support-search__input"
+            placeholder="Tìm kiếm theo mã ticket, tiêu đề hoặc nội dung thắc mắc..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+          />
+          @if (searchQuery()) {
+            <button class="support-search__clear" type="button" (click)="searchQuery.set('')">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body Content -->
+  <div class="support-container">
+    <!-- 2. Summary Stats Cards -->
+    <section class="support-stats-grid" aria-label="Support Statistics">
+      <div
+        class="support-stat-card"
+        [class.support-stat-card--active]="activeStatusFilter() === 'all'"
+        (click)="setStatusFilter('all')"
+        role="button"
+        tabindex="0"
+      >
+        <div class="support-stat-card__icon support-stat-card__icon--total">
+          <span class="material-symbols-outlined">receipt_long</span>
+        </div>
+        <div class="support-stat-card__info">
+          <span class="support-stat-card__count">{{ supportService.stats().total }}</span>
+          <span class="support-stat-card__label">Tổng yêu cầu</span>
+        </div>
+      </div>
+
+      <div
+        class="support-stat-card"
+        [class.support-stat-card--active]="activeStatusFilter() === 'processing'"
+        (click)="setStatusFilter('processing')"
+        role="button"
+        tabindex="0"
+      >
+        <div class="support-stat-card__icon support-stat-card__icon--processing">
+          <span class="material-symbols-outlined">sync</span>
+        </div>
+        <div class="support-stat-card__info">
+          <span class="support-stat-card__count">{{ supportService.stats().processing }}</span>
+          <span class="support-stat-card__label">Đang xử lý</span>
+        </div>
+      </div>
+
+      <div
+        class="support-stat-card"
+        [class.support-stat-card--active]="activeStatusFilter() === 'awaiting_user'"
+        (click)="setStatusFilter('awaiting_user')"
+        role="button"
+        tabindex="0"
+      >
+        <div class="support-stat-card__icon support-stat-card__icon--awaiting">
+          <span class="material-symbols-outlined">mark_chat_unread</span>
+        </div>
+        <div class="support-stat-card__info">
+          <span class="support-stat-card__count">{{ supportService.stats().awaitingUser }}</span>
+          <span class="support-stat-card__label">Chờ phản hồi</span>
+        </div>
+      </div>
+
+      <div
+        class="support-stat-card"
+        [class.support-stat-card--active]="activeStatusFilter() === 'completed'"
+        (click)="setStatusFilter('completed')"
+        role="button"
+        tabindex="0"
+      >
+        <div class="support-stat-card__icon support-stat-card__icon--completed">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+        <div class="support-stat-card__info">
+          <span class="support-stat-card__count">{{ supportService.stats().completed }}</span>
+          <span class="support-stat-card__label">Đã hoàn thành</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Grid: Left side (Ticket List), Right side (FAQ & Contact) -->
+    <div class="support-layout">
+      <!-- Left Column: Tickets Section -->
+      <section class="support-tickets-section">
+        <div class="support-section-header">
+          <div class="support-section-header__title-group">
+            <h2 class="support-section-header__title">Yêu cầu hỗ trợ của bạn</h2>
+            <span class="support-section-header__badge">{{ filteredTickets().length }} ticket</span>
+          </div>
+
+          <!-- Filters Row -->
+          <div class="support-filters">
+            <!-- Tabs Filter -->
+            <div class="support-tabs" role="tablist">
+              <button
+                class="support-tab"
+                [class.support-tab--active]="activeStatusFilter() === 'all'"
+                (click)="setStatusFilter('all')"
+                role="tab"
+              >
+                Tất cả
+              </button>
+              <button
+                class="support-tab"
+                [class.support-tab--active]="activeStatusFilter() === 'processing'"
+                (click)="setStatusFilter('processing')"
+                role="tab"
+              >
+                Đang xử lý
+              </button>
+              <button
+                class="support-tab"
+                [class.support-tab--active]="activeStatusFilter() === 'awaiting_user'"
+                (click)="setStatusFilter('awaiting_user')"
+                role="tab"
+              >
+                Chờ phản hồi
+              </button>
+              <button
+                class="support-tab"
+                [class.support-tab--active]="activeStatusFilter() === 'completed'"
+                (click)="setStatusFilter('completed')"
+                role="tab"
+              >
+                Đã hoàn thành
+              </button>
+            </div>
+
+            <!-- Dropdown Filters -->
+            <div class="support-controls">
+              <select
+                class="support-select"
+                [ngModel]="selectedCategoryFilter()"
+                (ngModelChange)="setCategoryFilter($event)"
+              >
+                <option value="all">Tất cả danh mục</option>
+                @for (cat of categoryMap | keyvalue; track cat.key) {
+                  <option [value]="cat.key">{{ cat.value.label }}</option>
+                }
+              </select>
+
+              <select
+                class="support-select"
+                [ngModel]="selectedPriorityFilter()"
+                (ngModelChange)="setPriorityFilter($event)"
+              >
+                <option value="all">Tất cả độ ưu tiên</option>
+                @for (prio of priorityMap | keyvalue; track prio.key) {
+                  <option [value]="prio.key">{{ prio.value.label }}</option>
+                }
+              </select>
+
+              <button
+                class="support-btn-icon"
+                type="button"
+                [title]="sortDirection() === 'newest' ? 'Mới nhất xếp trước' : 'Cũ nhất xếp trước'"
+                (click)="toggleSort()"
+              >
+                <span class="material-symbols-outlined">swap_vert</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- State 1: Loading Skeleton -->
+        @if (supportService.isLoading()) {
+          <div class="support-skeleton-list">
+            @for (i of [1, 2, 3]; track i) {
+              <div class="support-skeleton-card">
+                <div class="support-skeleton-line support-skeleton-line--header"></div>
+                <div class="support-skeleton-line support-skeleton-line--body"></div>
+                <div class="support-skeleton-line support-skeleton-line--footer"></div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- State 2: Error State -->
+        @else if (supportService.error()) {
+          <div class="support-error-state">
+            <span class="material-symbols-outlined support-error-state__icon">warning</span>
+            <h3 class="support-error-state__title">Đã xảy ra lỗi</h3>
+            <p class="support-error-state__description">{{ supportService.error() }}</p>
+            <button class="support-btn support-btn--secondary" (click)="supportService.initData()">
+              <span class="material-symbols-outlined">refresh</span>
+              <span>Thử lại</span>
+            </button>
+          </div>
+        }
+
+        <!-- State 3: Empty State -->
+        @else if (filteredTickets().length === 0) {
+          <div class="support-empty-state">
+            <div class="support-empty-state__illustration">
+              <span class="material-symbols-outlined">headset_off</span>
+            </div>
+            <h3 class="support-empty-state__title">
+              @if (supportService.tickets().length === 0) {
+                Bạn chưa có yêu cầu hỗ trợ nào.
+              } @else {
+                Không tìm thấy yêu cầu hỗ trợ phù hợp.
+              }
+            </h3>
+            <p class="support-empty-state__description">
+              @if (supportService.tickets().length === 0) {
+                Nếu gặp bất kỳ vấn đề gì về tài khoản, giao dịch hay ví, hãy gửi yêu cầu hỗ trợ để được giải đáp.
+              } @else {
+                Hãy thử thay đổi từ khóa tìm kiếm hoặc đặt lại các bộ lọc danh mục và trạng thái.
+              }
+            </p>
+
+            @if (supportService.tickets().length === 0) {
+              <button class="support-btn support-btn--primary" (click)="openCreateModal()">
+                <span class="material-symbols-outlined">add</span>
+                <span>Tạo yêu cầu đầu tiên</span>
+              </button>
+            } @else {
+              <button
+                class="support-btn support-btn--secondary"
+                (click)="setStatusFilter('all'); setCategoryFilter('all'); setPriorityFilter('all'); searchQuery.set('')"
+              >
+                <span>Xóa bộ lọc</span>
+              </button>
+            }
+          </div>
+        }
+
+        <!-- State 4: List View -->
+        @else {
+          <div class="support-ticket-list">
+            @for (ticket of paginatedTickets(); track ticket.id) {
+              <div class="ticket-card" (click)="openTicketDetail(ticket)">
+                <div class="ticket-card__header">
+                  <div class="ticket-card__code-group">
+                    <span class="ticket-card__code">{{ ticket.ticketCode }}</span>
+                    <span class="ticket-card__category">
+                      <span class="material-symbols-outlined">{{ categoryMap[ticket.category].icon }}</span>
+                      {{ categoryMap[ticket.category].label }}
+                    </span>
+                  </div>
+
+                  <div class="ticket-card__badges">
+                    <span class="priority-badge {{ priorityMap[ticket.priority].class }}">
+                      <span class="material-symbols-outlined">{{ priorityMap[ticket.priority].icon }}</span>
+                      {{ priorityMap[ticket.priority].label }}
+                    </span>
+                    <span class="status-badge {{ statusMap[ticket.status].class }}">
+                      <span class="material-symbols-outlined">{{ statusMap[ticket.status].icon }}</span>
+                      {{ statusMap[ticket.status].label }}
+                    </span>
+                  </div>
+                </div>
+
+                <h3 class="ticket-card__title">{{ ticket.title }}</h3>
+                <p class="ticket-card__description">{{ ticket.description }}</p>
+
+                <div class="ticket-card__footer">
+                  <div class="ticket-card__meta">
+                    <span class="ticket-card__meta-item">
+                      <span class="material-symbols-outlined">calendar_today</span>
+                      {{ formatDate(ticket.createdAt) }}
+                    </span>
+                    @if (ticket.messages.length > 1) {
+                      <span class="ticket-card__meta-item">
+                        <span class="material-symbols-outlined">forum</span>
+                        {{ ticket.messages.length }} phản hồi
+                      </span>
+                    }
+                  </div>
+
+                  <button class="support-btn support-btn--ghost support-btn--sm" type="button">
+                    <span>Xem chi tiết</span>
+                    <span class="material-symbols-outlined">chevron_right</span>
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (hasMoreTickets()) {
+              <div class="support-load-more">
+                <button class="support-btn support-btn--secondary" (click)="loadMore()">
+                  <span>Tải thêm ticket</span>
+                  <span class="material-symbols-outlined">expand_more</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <!-- Right Column: Sidebar (FAQ & Quick Contact) -->
+      <aside class="support-sidebar-col">
+        <!-- 7. FAQ Section -->
+        <div class="support-card faq-card">
+          <div class="faq-card__header">
+            <h3 class="faq-card__title">
+              <span class="material-symbols-outlined">help</span>
+              Câu hỏi thường gặp
+            </h3>
+          </div>
+
+          <div class="faq-accordion">
+            @for (faq of faqs; track faq.id) {
+              <div class="faq-item" [class.faq-item--open]="faq.isExpanded">
+                <button class="faq-item__trigger" (click)="toggleFaq(faq)">
+                  <span class="faq-item__question">{{ faq.questionKey }}</span>
+                  <span class="material-symbols-outlined faq-item__chevron">
+                    {{ faq.isExpanded ? 'expand_less' : 'expand_more' }}
+                  </span>
+                </button>
+                @if (faq.isExpanded) {
+                  <div class="faq-item__answer">
+                    <p>{{ faq.answerKey }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <button class="faq-card__view-all" (click)="openFaqModal()">
+            <span>Xem tất cả câu hỏi</span>
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
+        </div>
+
+        <!-- 8. Quick Contact Card -->
+        <div class="support-card contact-card">
+          <div class="contact-card__header">
+            <h3 class="contact-card__title">Bạn vẫn cần trợ giúp?</h3>
+            <p class="contact-card__subtitle">
+              Đội ngũ chăm sóc khách hàng của Snaptics luôn sẵn sàng hỗ trợ bạn.
+            </p>
+          </div>
+
+          <div class="contact-options">
+            <button class="contact-option-btn" (click)="startLiveChat()">
+              <div class="contact-option-btn__icon contact-option-btn__icon--chat">
+                <span class="material-symbols-outlined">chat</span>
+              </div>
+              <div class="contact-option-btn__info">
+                <span class="contact-option-btn__title">Chat với hỗ trợ</span>
+                <span class="contact-option-btn__sub">Tư vấn trực tiếp 24/7</span>
+              </div>
+              <span class="material-symbols-outlined contact-option-btn__arrow">chevron_right</span>
+            </button>
+
+            <a [href]="'mailto:' + config.email" class="contact-option-btn">
+              <div class="contact-option-btn__icon contact-option-btn__icon--email">
+                <span class="material-symbols-outlined">mail</span>
+              </div>
+              <div class="contact-option-btn__info">
+                <span class="contact-option-btn__title">Gửi email</span>
+                <span class="contact-option-btn__sub">{{ config.email }}</span>
+              </div>
+              <span class="material-symbols-outlined contact-option-btn__arrow">open_in_new</span>
+            </a>
+
+            <a [href]="config.userGuideUrl" class="contact-option-btn" target="_blank">
+              <div class="contact-option-btn__icon contact-option-btn__icon--guide">
+                <span class="material-symbols-outlined">menu_book</span>
+              </div>
+              <div class="contact-option-btn__info">
+                <span class="contact-option-btn__title">Hướng dẫn sử dụng</span>
+                <span class="contact-option-btn__sub">Tài liệu tài chính chi tiết</span>
+              </div>
+              <span class="material-symbols-outlined contact-option-btn__arrow">open_in_new</span>
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ==================== MODALS & DRAWERS ==================== -->
+
+  <!-- 5. Create Ticket Modal -->
+  @if (isCreateModalOpen()) {
+    <div class="support-modal-backdrop" (click)="closeCreateModal()">
+      <div class="support-modal" (click)="$event.stopPropagation()" role="dialog" aria-labelledby="modal-title">
+        <div class="support-modal__header">
+          <div class="support-modal__title-group">
+            <h2 id="modal-title" class="support-modal__title">Tạo yêu cầu hỗ trợ mới</h2>
+            <p class="support-modal__subtitle">Điền thông tin vấn đề để nhận trợ giúp từ đội ngũ kỹ thuật.</p>
+          </div>
+          <button class="support-modal__close" (click)="closeCreateModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="support-modal__body">
+          <form (submit)="$event.preventDefault(); submitCreateTicket()">
+            <!-- Contact Email -->
+            <div class="form-group">
+              <label class="form-label" for="contactEmail">Email liên hệ</label>
+              <input
+                id="contactEmail"
+                type="email"
+                class="form-input"
+                [(ngModel)]="createForm.email"
+                name="email"
+                readonly
+              />
+              <span class="form-hint">Email được tự động lấy từ tài khoản đang đăng nhập của bạn.</span>
+            </div>
+
+            <!-- Title -->
+            <div class="form-group">
+              <label class="form-label" for="ticketTitle">Tiêu đề vấn đề <span class="text-danger">*</span></label>
+              <input
+                id="ticketTitle"
+                type="text"
+                class="form-input"
+                [class.form-input--error]="createForm.title.length > 0 && !isTitleValid()"
+                placeholder="VD: Không cập nhật được số dư ví gia đình"
+                [(ngModel)]="createForm.title"
+                name="title"
+                required
+              />
+              @if (createForm.title.length > 0 && !isTitleValid()) {
+                <span class="form-error">Tiêu đề bắt buộc có tối thiểu 5 ký tự.</span>
+              }
+            </div>
+
+            <!-- Row: Category & Priority -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="ticketCategory">Danh mục hỗ trợ</label>
+                <select id="ticketCategory" class="form-select" [(ngModel)]="createForm.category" name="category">
+                  @for (cat of categoryMap | keyvalue; track cat.key) {
+                    <option [value]="cat.key">{{ cat.value.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="ticketPriority">Mức độ ưu tiên</label>
+                <select id="ticketPriority" class="form-select" [(ngModel)]="createForm.priority" name="priority">
+                  <option value="low">Thấp</option>
+                  <option value="normal">Bình thường</option>
+                  <option value="high">Cao</option>
+                  <option value="urgent">Khẩn cấp</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+              <label class="form-label" for="ticketDescription">Nội dung mô tả chi tiết <span class="text-danger">*</span></label>
+              <textarea
+                id="ticketDescription"
+                rows="4"
+                class="form-textarea"
+                [class.form-input--error]="createForm.description.length > 0 && !isDescriptionValid()"
+                placeholder="Mô tả cụ thể vấn đề bạn gặp phải, các bước dẫn đến lỗi hoặc thông tin liên quan..."
+                [(ngModel)]="createForm.description"
+                name="description"
+                required
+              ></textarea>
+              @if (createForm.description.length > 0 && !isDescriptionValid()) {
+                <span class="form-error">Nội dung mô tả bắt buộc có tối thiểu 20 ký tự.</span>
+              }
+            </div>
+
+            <!-- File Attachment -->
+            <div class="form-group">
+              <label class="form-label">Tệp đính kèm (Hình ảnh, PDF, tài liệu)</label>
+              <div class="file-uploader">
+                <label class="file-uploader__dropzone">
+                  <input type="file" (change)="onFileSelected($event)" accept="image/*,.pdf,.doc,.docx" hidden />
+                  <span class="material-symbols-outlined file-uploader__icon">cloud_upload</span>
+                  <span class="file-uploader__text">Nhấn vào đây để tải tệp lên</span>
+                  <span class="file-uploader__sub">Dung lượng tối đa: 5MB (PNG, JPG, PDF)</span>
+                </label>
+              </div>
+
+              @if (fileUploadError()) {
+                <span class="form-error">{{ fileUploadError() }}</span>
+              }
+
+              <!-- Attachments List -->
+              @if (createForm.attachments.length > 0) {
+                <div class="attachment-chips">
+                  @for (att of createForm.attachments; track att.name; let i = $index) {
+                    <div class="attachment-chip">
+                      <span class="material-symbols-outlined attachment-chip__icon">attach_file</span>
+                      <span class="attachment-chip__name">{{ att.name }}</span>
+                      <span class="attachment-chip__size">({{ formatFileSize(att.size) }})</span>
+                      <button type="button" class="attachment-chip__remove" (click)="removeAttachment(i)">
+                        <span class="material-symbols-outlined">close</span>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Modal Footer Buttons -->
+            <div class="support-modal__footer">
+              <button class="support-btn support-btn--secondary" type="button" (click)="closeCreateModal()">
+                Hủy
+              </button>
+              <button
+                class="support-btn support-btn--primary"
+                type="submit"
+                [disabled]="!isFormValid() || isSubmittingTicket()"
+              >
+                @if (isSubmittingTicket()) {
+                  <span class="material-symbols-outlined animate-spin">progress_activity</span>
+                  <span>Đang gửi...</span>
+                } @else {
+                  <span class="material-symbols-outlined">send</span>
+                  <span>Gửi yêu cầu</span>
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- 6. Ticket Detail & Conversation Drawer -->
+  @if (isDetailDrawerOpen() && selectedTicket()) {
+    @let ticket = selectedTicket()!;
+    <div class="support-drawer-backdrop" (click)="closeTicketDetail()">
+      <div class="support-drawer" (click)="$event.stopPropagation()" role="dialog">
+        <!-- Drawer Header -->
+        <div class="support-drawer__header">
+          <div class="support-drawer__title-group">
+            <div class="support-drawer__code-row">
+              <span class="ticket-card__code">{{ ticket.ticketCode }}</span>
+              <span class="status-badge {{ statusMap[ticket.status].class }}">
+                <span class="material-symbols-outlined">{{ statusMap[ticket.status].icon }}</span>
+                {{ statusMap[ticket.status].label }}
+              </span>
+            </div>
+            <h2 class="support-drawer__title">{{ ticket.title }}</h2>
+          </div>
+
+          <div class="support-drawer__actions">
+            @if (ticket.status !== 'closed') {
+              <button
+                class="support-btn support-btn--ghost support-btn--danger-ghost"
+                (click)="promptCloseTicket(ticket.id)"
+                title="Đóng yêu cầu"
+              >
+                <span class="material-symbols-outlined">lock</span>
+                <span>Đóng ticket</span>
+              </button>
+            }
+            <button class="support-drawer__close" (click)="closeTicketDetail()">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Drawer Content Body -->
+        <div class="support-drawer__body">
+          <!-- Ticket Info Metadata Box -->
+          <div class="ticket-meta-box">
+            <div class="ticket-meta-grid">
+              <div class="ticket-meta-item">
+                <span class="ticket-meta-item__label">Danh mục</span>
+                <span class="ticket-meta-item__value">
+                  <span class="material-symbols-outlined">{{ categoryMap[ticket.category].icon }}</span>
+                  {{ categoryMap[ticket.category].label }}
+                </span>
+              </div>
+
+              <div class="ticket-meta-item">
+                <span class="ticket-meta-item__label">Độ ưu tiên</span>
+                <span class="priority-badge {{ priorityMap[ticket.priority].class }}">
+                  {{ priorityMap[ticket.priority].label }}
+                </span>
+              </div>
+
+              <div class="ticket-meta-item">
+                <span class="ticket-meta-item__label">Ngày tạo</span>
+                <span class="ticket-meta-item__value">{{ formatDate(ticket.createdAt) }}</span>
+              </div>
+
+              <div class="ticket-meta-item">
+                <span class="ticket-meta-item__label">Email liên hệ</span>
+                <span class="ticket-meta-item__value">{{ ticket.userEmail }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Closed Banner & Reopen Button -->
+          @if (ticket.status === 'closed') {
+            <div class="closed-ticket-banner">
+              <div class="closed-ticket-banner__info">
+                <span class="material-symbols-outlined">lock</span>
+                <span>Yêu cầu hỗ trợ này đã được đóng. Bạn không thể gửi thêm phản hồi trừ khi mở lại ticket.</span>
+              </div>
+              <button class="support-btn support-btn--secondary support-btn--sm" (click)="reopenCurrentTicket()">
+                <span class="material-symbols-outlined">lock_open</span>
+                <span>Mở lại yêu cầu</span>
+              </button>
+            </div>
+          }
+
+          <!-- Conversation Timeline Section -->
+          <div class="conversation-timeline">
+            <h3 class="conversation-timeline__title">Lịch sử trao đổi</h3>
+
+            <div class="message-feed">
+              @for (msg of ticket.messages; track msg.id) {
+                <div
+                  class="message-card"
+                  [class.message-card--user]="msg.senderType === 'user'"
+                  [class.message-card--support]="msg.senderType === 'support'"
+                >
+                  <div class="message-card__avatar">
+                    @if (msg.senderAvatar) {
+                      <img [src]="msg.senderAvatar" [alt]="msg.senderName" />
+                    } @else {
+                      <span class="material-symbols-outlined">
+                        {{ msg.senderType === 'user' ? 'person' : 'headset_mic' }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="message-card__content">
+                    <div class="message-card__header">
+                      <span class="message-card__sender">{{ msg.senderName }}</span>
+                      <span class="message-card__time">{{ formatDate(msg.createdAt) }}</span>
+                    </div>
+
+                    <div class="message-card__bubble">
+                      <p>{{ msg.message }}</p>
+
+                      @if (msg.attachments && msg.attachments.length > 0) {
+                        <div class="message-attachments">
+                          @for (att of msg.attachments; track att.name) {
+                            <a [href]="att.url" target="_blank" class="message-attachment-item">
+                              <span class="material-symbols-outlined">attach_file</span>
+                              <span>{{ att.name }}</span>
+                            </a>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Drawer Reply Box -->
+        <div class="support-drawer__footer" [class.support-drawer__footer--disabled]="ticket.status === 'closed'">
+          @if (ticket.status !== 'closed') {
+            <!-- Reply Attachments Preview -->
+            @if (replyAttachments().length > 0) {
+              <div class="reply-attachments-bar">
+                @for (att of replyAttachments(); track att.name; let i = $index) {
+                  <div class="reply-attachment-chip">
+                    <span class="material-symbols-outlined">attach_file</span>
+                    <span class="reply-attachment-chip__name">{{ att.name }}</span>
+                    <button (click)="removeReplyAttachment(i)">
+                      <span class="material-symbols-outlined">close</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="reply-input-box">
+              <label class="reply-attach-btn" title="Đính kèm tệp">
+                <input type="file" (change)="onReplyFileSelected($event)" accept="image/*,.pdf" hidden />
+                <span class="material-symbols-outlined">attach_file</span>
+              </label>
+
+              <textarea
+                class="reply-textarea"
+                rows="1"
+                placeholder="Nhập nội dung phản hồi cho bộ phận hỗ trợ..."
+                [ngModel]="replyText()"
+                (ngModelChange)="replyText.set($event)"
+                (keydown.enter)="$event.preventDefault(); sendReplyMessage()"
+              ></textarea>
+
+              <button
+                class="support-btn support-btn--primary reply-send-btn"
+                (click)="sendReplyMessage()"
+                [disabled]="!replyText().trim() && replyAttachments().length === 0"
+              >
+                <span class="material-symbols-outlined">send</span>
+              </button>
+            </div>
+          } @else {
+            <p class="reply-disabled-text">Không thể gửi tin nhắn khi ticket đã đóng.</p>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Confirmation Dialog for Closing Ticket -->
+  @if (isCloseConfirmModalOpen()) {
+    <div class="support-modal-backdrop" (click)="cancelCloseTicket()">
+      <div class="support-confirm-modal" (click)="$event.stopPropagation()">
+        <div class="support-confirm-modal__icon">
+          <span class="material-symbols-outlined">lock</span>
+        </div>
+        <h3 class="support-confirm-modal__title">Xác nhận đóng yêu cầu?</h3>
+        <p class="support-confirm-modal__desc">
+          Khi đóng yêu cầu hỗ trợ, bạn sẽ không thể tiếp tục gửi tin nhắn trừ khi nhấp vào "Mở lại yêu cầu".
+        </p>
+        <div class="support-confirm-modal__actions">
+          <button class="support-btn support-btn--secondary" (click)="cancelCloseTicket()">Hủy</button>
+          <button class="support-btn support-btn--danger" (click)="confirmCloseTicket()">Đồng ý đóng</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- FAQ Full Modal -->
+  @if (isFaqModalOpen()) {
+    <div class="support-modal-backdrop" (click)="closeFaqModal()">
+      <div class="support-modal support-modal--lg" (click)="$event.stopPropagation()">
+        <div class="support-modal__header">
+          <h2 class="support-modal__title">Tất cả câu hỏi thường gặp</h2>
+          <button class="support-modal__close" (click)="closeFaqModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="support-modal__body">
+          <div class="faq-accordion faq-accordion--full">
+            @for (faq of faqs; track faq.id) {
+              <div class="faq-item" [class.faq-item--open]="faq.isExpanded">
+                <button class="faq-item__trigger" (click)="toggleFaq(faq)">
+                  <span class="faq-item__question">{{ faq.questionKey }}</span>
+                  <span class="material-symbols-outlined faq-item__chevron">
+                    {{ faq.isExpanded ? 'expand_less' : 'expand_more' }}
+                  </span>
+                </button>
+                @if (faq.isExpanded) {
+                  <div class="faq-item__answer">
+                    <p>{{ faq.answerKey }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

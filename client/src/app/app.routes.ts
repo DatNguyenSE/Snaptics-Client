@@ -136,11 +136,21 @@ export const routes: Routes = [
           import('./user-page/user-features/snaptics-ai/snaptics-ai').then((m) => m.SnapticsAIPage),
       },
       {
+        path: 'support',
+        loadComponent: () =>
+          import('./user-page/user-features/support/support').then((m) => m.Support),
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',
       },
     ],
+  },
+  {
+    path: 'support',
+    redirectTo: 'user/support',
+    pathMatch: 'full',
   },
   {
     path: 'settings',
