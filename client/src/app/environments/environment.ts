@@ -1,7 +1,7 @@
 export const environment = {
     production: true,
-    apiUrl: 'http://54.179.181.67:8080/api/',
-    hubUrl: 'http://54.179.181.67:8080/hubs/',
+    apiUrl: '/api/',
+    hubUrl: '/hubs/',
     // Mock flags luôn tắt trên production
     useMockAuth: false,
     useMockTransactions: false,

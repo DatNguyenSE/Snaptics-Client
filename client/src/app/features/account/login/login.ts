@@ -115,15 +115,10 @@ export class Login implements OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Login failed:', error, this.model);
+        console.error('Login failed:', error);
         this.isLoading = false;
-        
-        let errorMsg = 'Failed to login. Please check your credentials and try again.';
-        if (error.error && typeof error.error === 'string') {
-          errorMsg = error.error;
-        } else if (error.error && error.error.message) {
-          errorMsg = error.error.message;
-        }
+
+        const errorMsg = this.getUserFacingError(error, 'Không thể đăng nhập lúc này. Vui lòng thử lại sau.');
 
         const lowerError = errorMsg.toLowerCase();
         if (lowerError.includes('not verified') || lowerError.includes('unverified') || lowerError.includes('verify') || lowerError.includes('xác thực')) {
@@ -153,17 +148,9 @@ export class Login implements OnDestroy {
         }
       },
       error: (error) => {
+        console.error('OTP verification failed:', error);
         this.isLoading = false;
-
-        if (error.error && typeof error.error === 'string') {
-          this.errorMessage = error.error;
-        } else if (error.error && error.error.text) {
-          this.errorMessage = error.error.text;
-        } else if (error.error && error.error.message) {
-          this.errorMessage = error.error.message;
-        } else {
-          this.errorMessage = 'Invalid OTP. Please try again.';
-        }
+        this.errorMessage = this.getUserFacingError(error, 'Mã xác thực không đúng hoặc đã hết hạn.');
       }
     });
   }
@@ -180,12 +167,9 @@ export class Login implements OnDestroy {
         this.startResendCountdown();
       },
       error: (error) => {
+        console.error('Resend OTP failed:', error);
         this.isLoading = false;
-        if (error.error && typeof error.error === 'string') {
-          this.errorMessage = error.error;
-        } else {
-          this.errorMessage = 'Failed to resend OTP. Please try again.';
-        }
+        this.errorMessage = this.getUserFacingError(error, 'Không thể gửi lại mã xác thực. Vui lòng thử lại sau.');
       }
     });
   }
@@ -201,5 +185,23 @@ export class Login implements OnDestroy {
         clearInterval(this.countdownInterval);
       }
     }, 1000);
+  }
+
+  private getUserFacingError(error: any, fallback: string): string {
+    const candidate =
+      typeof error?.error === 'string'
+        ? error.error
+        : error?.error?.message || error?.error?.text;
+
+    if (typeof candidate !== 'string' || this.isHtmlResponse(candidate)) {
+      return fallback;
+    }
+
+    const message = candidate.trim();
+    return message || fallback;
+  }
+
+  private isHtmlResponse(value: string): boolean {
+    return /<(!doctype|html|head|body)[\s>]/i.test(value);
   }
 }

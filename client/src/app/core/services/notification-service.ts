@@ -195,7 +195,9 @@ export class NotificationService {
 
   createHubConnection(): void {
     const token = this.accountService.currentUser()?.token;
-    const hubUrl = environment.apiUrl.replace('api/', 'hubs/notification');
+    const hubUrl = (environment as any).hubUrl 
+      ? (environment as any).hubUrl + 'notification'
+      : environment.apiUrl.replace('api/', 'hubs/notification');
 
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
