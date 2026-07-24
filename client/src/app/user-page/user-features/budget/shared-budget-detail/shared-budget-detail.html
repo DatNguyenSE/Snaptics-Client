@@ -55,22 +55,22 @@
               [attr.aria-label]="'Quản lý thành viên - ' + budget.memberCount + ' người'"
             >
               <div class="member-avatars">
-                @for (member of displayedMembers; track member.userId; let i = $index) {
-                  <div class="member-avatar-chip" [style.z-index]="10 - i" [title]="member.displayName">
+                @for (member of displayedMembers; track (member.memberId || member.userId || member.id); let i = $index) {
+                  <div class="member-avatar-chip" [style.z-index]="10 - i" [title]="getMemberName(member)">
                     @if (member.imageUrl) {
-                      <img [src]="member.imageUrl" [alt]="member.displayName" />
+                      <img [src]="member.imageUrl" [alt]="getMemberName(member)" />
                     } @else {
-                      <span>{{ getInitials(member.displayName) }}</span>
+                      <span>{{ getInitials(getMemberName(member)) }}</span>
                     }
                   </div>
                 }
-                @if ((budget.memberCount ?? 0) > 4) {
+                @if ((budget.members?.length ?? budget.memberCount ?? 0) > 4) {
                   <div class="member-avatar-chip member-avatar-chip--more">
-                    +{{ (budget.memberCount ?? 0) - 4 }}
+                    +{{ (budget.members?.length ?? budget.memberCount ?? 0) - 4 }}
                   </div>
                 }
               </div>
-              <span class="btn-members__label">{{ budget.memberCount }} thành viên</span>
+              <span class="btn-members__label">{{ budget.members?.length || budget.memberCount || 0 }} thành viên</span>
             </button>
 
             @if (isOwner) {
@@ -173,9 +173,7 @@
                   <div class="tx-meta">
                     <span class="tx-creator">{{ getCreatorDisplay(t) }}</span>
                     <span class="tx-dot">·</span>
-                    <span class="tx-category">{{ getCategoryLabel(t) }}</span>
-                    <span class="tx-dot">·</span>
-                    <span class="tx-date">{{ t.transactionDate | date:'dd/MM/yyyy' }}</span>
+                    <span class="tx-date">{{ t.transactionDate | date:'dd/MM/yyyy HH:mm' }}</span>
                   </div>
                   @if (t.note) {
                     <p class="tx-note">{{ t.note }}</p>

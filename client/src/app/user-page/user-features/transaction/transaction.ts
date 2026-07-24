@@ -25,7 +25,8 @@ export interface TransactionGroup {
 }
 
 export interface SummaryStats {
-  total: number;
+  totalExpense: number;
+  totalIncome: number;
   count: number;
   receiptCount: number;
   manualCount: number;
@@ -52,7 +53,9 @@ export class Transaction implements OnInit {
   // ─── Filter State ───────────────────────────────────────────────────────────
   searchQuery = '';
   filterSource: 'all' | 'receipt' | 'manual' | 'snap' = 'all';
+  filterDate = '';  // YYYY-MM-DD format
   filterMonth = ''; // YYYY-MM format
+  filterYear = '';  // YYYY format
 
   ngOnInit(): void {
     this.loadTransactions();
@@ -96,13 +99,41 @@ export class Transaction implements OnInit {
 
   // ─── Filter Helpers ──────────────────────────────────────────────────────────
   get hasActiveFilters(): boolean {
-    return !!(this.searchQuery.trim() || this.filterSource !== 'all' || this.filterMonth);
+    return !!(
+      this.searchQuery.trim() ||
+      this.filterSource !== 'all' ||
+      this.filterDate ||
+      this.filterMonth ||
+      this.filterYear
+    );
   }
 
   clearFilters(): void {
     this.searchQuery = '';
     this.filterSource = 'all';
+    this.filterDate = '';
     this.filterMonth = '';
+    this.filterYear = '';
+  }
+
+  clearDateFilters(): void {
+    this.filterDate = '';
+    this.filterMonth = '';
+    this.filterYear = '';
+  }
+
+  get availableYears(): number[] {
+    const years = new Set<number>();
+    const currentYear = new Date().getFullYear();
+    years.add(currentYear);
+    years.add(currentYear - 1);
+    years.add(currentYear - 2);
+    for (const t of this.transactionHistory) {
+      if (t.transactionDate) {
+        years.add(new Date(t.transactionDate).getFullYear());
+      }
+    }
+    return Array.from(years).sort((a, b) => b - a);
   }
 
   setSourceFilter(source: 'all' | 'receipt' | 'manual' | 'snap'): void {
@@ -136,11 +167,22 @@ export class Transaction implements OnInit {
       result = result.filter((t) => this.getTransactionSource(t) === this.filterSource);
     }
 
-    if (this.filterMonth) {
+    if (this.filterDate) {
+      result = result.filter((t) => {
+        const d = new Date(t.transactionDate);
+        const ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return ymd === this.filterDate;
+      });
+    } else if (this.filterMonth) {
       result = result.filter((t) => {
         const d = new Date(t.transactionDate);
         const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         return ym === this.filterMonth;
+      });
+    } else if (this.filterYear) {
+      result = result.filter((t) => {
+        const d = new Date(t.transactionDate);
+        return String(d.getFullYear()) === String(this.filterYear);
       });
     }
 
@@ -166,9 +208,19 @@ export class Transaction implements OnInit {
   }
 
   get summaryStats(): SummaryStats {
-    const list = this.transactionHistory;
+    const list = this.filteredTransactions;
+    let totalExpense = 0;
+    let totalIncome = 0;
+    for (const t of list) {
+      if (t.isExpense !== false) {
+        totalExpense += t.totalAmount;
+      } else {
+        totalIncome += t.totalAmount;
+      }
+    }
     return {
-      total: list.reduce((sum, t) => sum + t.totalAmount, 0),
+      totalExpense,
+      totalIncome,
       count: list.length,
       receiptCount: list.filter((t) => this.getTransactionSource(t) === 'receipt').length,
       manualCount: list.filter((t) => this.getTransactionSource(t) === 'manual').length,
@@ -269,40 +321,130 @@ export class Transaction implements OnInit {
   }
 
   getIcon(transaction: TransactionDto): string {
-    if (transaction.transactionDetails && transaction.transactionDetails.length > 1) {
-      return 'ti-receipt'; // Quét bill (nhiều món)
+    const details = transaction.transactionDetails;
+    let categories: string[] = [];
+
+    if (details && details.length > 0) {
+      for (const item of details) {
+        if (item.categoryName && item.categoryName.trim()) {
+          categories.push(item.categoryName.trim());
+        }
+      }
     }
 
-    let searchString = '';
-    if (transaction.transactionDetails && transaction.transactionDetails.length === 1) {
-      searchString = (transaction.transactionDetails[0].categoryName || transaction.transactionDetails[0].itemName || transaction.name || '').toLowerCase();
-    } else {
-      searchString = (transaction.name || '').toLowerCase();
+    // Combine category names or fallback to transaction name if no category in details
+    let searchString = categories.join(' ').toLowerCase();
+    if (!searchString && transaction.name) {
+      searchString = transaction.name.toLowerCase();
     }
 
-    if (searchString.includes('ăn uống') || searchString.includes('food') || searchString.includes('noodle') || searchString.includes('rice') || searchString.includes('phở') || searchString.includes('bún')) return 'ti-soup';
-    if (searchString.includes('cà phê') || searchString.includes('coffee') || searchString.includes('trà') || searchString.includes('tea') || searchString.includes('drink') || searchString.includes('nước')) return 'ti-coffee';
-    if (searchString.includes('mua sắm') || searchString.includes('shopping') || searchString.includes('siêu thị')) return 'ti-shopping-cart';
-    if (searchString.includes('di chuyển') || searchString.includes('xe') || searchString.includes('ride') || searchString.includes('grab') || searchString.includes('taxi')) return 'ti-car';
-    if (searchString.includes('giải trí') || searchString.includes('phim') || searchString.includes('entertainment')) return 'ti-device-gamepad';
-    if (searchString.includes('y tế') || searchString.includes('sức khỏe') || searchString.includes('health') || searchString.includes('thuốc')) return 'ti-first-aid-kit';
-    if (searchString.includes('giáo dục') || searchString.includes('học') || searchString.includes('education')) return 'ti-book';
-    if (searchString.includes('nhà cửa') || searchString.includes('home') || searchString.includes('điện') || searchString.includes('nước')) return 'ti-home';
+    // If category is null / empty, return 'ti-receipt'
+    if (!searchString.trim()) {
+      return 'ti-receipt';
+    }
 
-    if (transaction.source === 'snap') return 'ti-camera';
-    if (transaction.source === 'manual') return 'ti-edit';
-    
+    if (
+      searchString.includes('ăn uống') ||
+      searchString.includes('food') ||
+      searchString.includes('noodle') ||
+      searchString.includes('rice') ||
+      searchString.includes('phở') ||
+      searchString.includes('bún') ||
+      searchString.includes('cơm')
+    ) {
+      return 'ti-soup';
+    }
+
+    if (
+      searchString.includes('cà phê') ||
+      searchString.includes('coffee') ||
+      searchString.includes('trà') ||
+      searchString.includes('tea') ||
+      searchString.includes('drink') ||
+      searchString.includes('nước')
+    ) {
+      return 'ti-coffee';
+    }
+
+    if (
+      searchString.includes('mua sắm') ||
+      searchString.includes('shopping') ||
+      searchString.includes('siêu thị') ||
+      searchString.includes('tạp hóa')
+    ) {
+      return 'ti-shopping-cart';
+    }
+
+    if (
+      searchString.includes('di chuyển') ||
+      searchString.includes('xe') ||
+      searchString.includes('ride') ||
+      searchString.includes('grab') ||
+      searchString.includes('taxi') ||
+      searchString.includes('xăng') ||
+      searchString.includes('travel')
+    ) {
+      return 'ti-car';
+    }
+
+    if (
+      searchString.includes('giải trí') ||
+      searchString.includes('phim') ||
+      searchString.includes('entertainment') ||
+      searchString.includes('game')
+    ) {
+      return 'ti-device-gamepad';
+    }
+
+    if (
+      searchString.includes('y tế') ||
+      searchString.includes('sức khỏe') ||
+      searchString.includes('health') ||
+      searchString.includes('thuốc')
+    ) {
+      return 'ti-first-aid-kit';
+    }
+
+    if (
+      searchString.includes('giáo dục') ||
+      searchString.includes('học') ||
+      searchString.includes('education') ||
+      searchString.includes('sách')
+    ) {
+      return 'ti-book';
+    }
+
+    if (
+      searchString.includes('nhà cửa') ||
+      searchString.includes('home') ||
+      searchString.includes('điện') ||
+      searchString.includes('nước') ||
+      searchString.includes('tiền nhà')
+    ) {
+      return 'ti-home';
+    }
+
+    if (
+      searchString.includes('nạp tiền') ||
+      searchString.includes('lương') ||
+      searchString.includes('income') ||
+      searchString.includes('salary') ||
+      searchString.includes('thưởng')
+    ) {
+      return 'ti-wallet';
+    }
+
+    // Default icon when category is null / unmatched
     return 'ti-receipt';
   }
 
   getMediaClass(transaction: TransactionDto): string {
-    if (transaction.transactionDetails?.length > 1) return 'transaction-media--amber';
-    if (transaction.transactionDetails?.length === 1) return 'transaction-media--emerald';
-
-    if (transaction.name?.toLowerCase().includes('coffee') || transaction.name?.toLowerCase().includes('tea')) return 'transaction-media--blue';
-    if (transaction.name?.toLowerCase().includes('noodle') || transaction.name?.toLowerCase().includes('food')) return 'transaction-media--amber';
-    if (transaction.name?.toLowerCase().includes('ride') || transaction.name?.toLowerCase().includes('grab')) return 'transaction-media--emerald';
-    return 'transaction-media--blue';
+    const icon = this.getIcon(transaction);
+    if (icon === 'ti-coffee' || icon === 'ti-home') return 'transaction-media--blue';
+    if (icon === 'ti-soup' || icon === 'ti-shopping-cart') return 'transaction-media--amber';
+    if (icon === 'ti-car' || icon === 'ti-wallet') return 'transaction-media--emerald';
+    if (icon === 'ti-first-aid-kit' || icon === 'ti-device-gamepad') return 'transaction-media--rose';
+    return 'transaction-media--purple';
   }
 
   getCategoryClass(transaction: TransactionDto): string {

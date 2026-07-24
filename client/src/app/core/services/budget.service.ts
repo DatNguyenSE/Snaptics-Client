@@ -88,6 +88,10 @@ export class BudgetService {
     return this.http.get<SharedBudgetDto>(`${this.apiUrl}/${id}`);
   }
 
+  getBudgetHistory(id: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/history/${id}`);
+  }
+
   updateSharedBudget(id: number, data: Partial<CreateSharedBudgetRequest>): Observable<SharedBudgetDto> {
     return this.http.patch<SharedBudgetDto>(`${this.apiUrl}/${id}`, data);
   }

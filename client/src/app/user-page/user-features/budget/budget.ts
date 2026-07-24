@@ -2,6 +2,8 @@ import { Component, OnInit, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { UserHeader } from '../../user-layout/user-header/user-header';
 import { BudgetService, BudgetDto, CreateBudgetRequest } from '../../../core/services/budget.service';
 import { BudgetMemberService } from '../../../core/services/budgetMember.service';
@@ -34,8 +36,18 @@ export class Budget implements OnInit {
 
   // ─── Shared budgets ────────────────────────────────────────────────────────
   sharedBudgets: SharedBudgetDto[] = [];
+  ownedSharedBudgets: SharedBudgetDto[] = [];
   isLoadingShared = true;
   hasErrorShared = false;
+
+  get allSharedBudgets(): SharedBudgetDto[] {
+    const combined = [...this.sharedBudgets, ...this.ownedSharedBudgets];
+    const unique = new Map<number, SharedBudgetDto>();
+    combined.forEach(b => unique.set(b.id, b));
+    return Array.from(unique.values()).sort((a, b) => {
+      return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+    });
+  }
 
   // ─── Tab ───────────────────────────────────────────────────────────────────
   activeTab: 'personal' | 'shared' = 'personal';
@@ -155,8 +167,7 @@ export class Budget implements OnInit {
     this.hasError = false;
     this.budgetService.getBudgets().subscribe({
       next: (data) => {
-        // Filter out shared budgets (walletType === 'SHARED') from the personal list
-        this.budgets = data
+        const sortedBudgets = data
           .filter((b) => !b.isShared && b.walletType !== 'SHARED')
           .sort((a, b) => {
             const aDefault = a.isDefault ? 1 : 0;
@@ -164,7 +175,49 @@ export class Budget implements OnInit {
             if (aDefault !== bDefault) return bDefault - aDefault;
             return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
           });
-        this.isLoading = false;
+
+        if (sortedBudgets.length === 0) {
+          this.budgets = [];
+          this.isLoading = false;
+          return;
+        }
+
+        const requests$ = sortedBudgets.map((b) => {
+          return this.budgetMemberService.getMembers(b.id).pipe(
+            map((members) => ({ ...b, members })),
+            catchError(() => of({ ...b, members: [] }))
+          );
+        });
+
+        forkJoin(requests$).subscribe({
+          next: (budgetsWithMembers) => {
+            const purelyPersonal: BudgetDto[] = [];
+            const ownedShared: SharedBudgetDto[] = [];
+            const currentUserId = this.accountService.currentUser()?.id;
+
+            budgetsWithMembers.forEach(b => {
+              const hasOtherMembers = b.members?.some(m => (m.memberId || m.userId) !== currentUserId);
+              if (hasOtherMembers) {
+                ownedShared.push({
+                  ...b,
+                  walletType: 'SHARED',
+                  isShared: true,
+                  currentUserRole: 'OWNER'
+                } as unknown as SharedBudgetDto);
+              } else {
+                purelyPersonal.push(b);
+              }
+            });
+
+            this.budgets = purelyPersonal;
+            this.ownedSharedBudgets = ownedShared;
+            this.isLoading = false;
+          },
+          error: () => {
+            this.budgets = sortedBudgets;
+            this.isLoading = false;
+          },
+        });
       },
       error: () => {
         this.hasError = true;
@@ -177,21 +230,99 @@ export class Budget implements OnInit {
     this.isLoadingShared = true;
     this.hasErrorShared = false;
     this.budgetMemberService.getSharedBudgets().subscribe({
-      next: (data) => {
+      next: (data: any[]) => {
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          this.sharedBudgets = [];
+          this.isLoadingShared = false;
+          return;
+        }
+
         const currentUser = this.accountService.currentUser();
-        this.sharedBudgets = data.filter((budget) => {
-          const members = budget.members ?? [];
+
+        // 1. Filter active memberships (status === 1) or items with active members
+        const activeItems = data.filter((item: any) => {
+          if (item.status !== undefined && item.status !== null) {
+            return Number(item.status) === 1;
+          }
+          const members = item.members ?? [];
           const currentMember = members.find(
-            (member) =>
+            (member: any) =>
               member.userId === currentUser?.id ||
               member.email?.toLowerCase() === currentUser?.email?.toLowerCase()
           );
-
           return currentMember
             ? Number(currentMember.status) === 1
-            : members.some((member) => Number(member.status) === 1);
+            : members.some((member: any) => Number(member.status) === 1);
         });
-        this.isLoadingShared = false;
+
+        if (activeItems.length === 0) {
+          this.sharedBudgets = [];
+          this.isLoadingShared = false;
+          return;
+        }
+
+        // 2. Fetch full budget details & members for each shared budget using forkJoin
+        const requests$ = activeItems.map((item: any) => {
+          const budgetId = item.budgetId || item.id;
+
+          return forkJoin({
+            budget: this.budgetService.getBudgetById(budgetId).pipe(
+              catchError(() => of(null))
+            ),
+            members: this.budgetMemberService.getMembers(budgetId).pipe(
+              catchError(() => of([]))
+            ),
+          }).pipe(
+            map(({ budget, members }) => {
+              const currentMember = members.find(
+                (m) => (m.memberId || m.userId) === currentUser?.id
+              );
+
+              let userRole: 'OWNER' | 'MEMBER' = 'MEMBER';
+              if (currentMember) {
+                if (currentMember.isOwner === true || currentMember.role === 0 || currentMember.role === 'OWNER') {
+                  userRole = 'OWNER';
+                }
+              } else if (item.isOwner === true || item.role === 0 || item.role === 'OWNER') {
+                userRole = 'OWNER';
+              }
+
+              if (budget) {
+                return {
+                  ...budget,
+                  currentUserRole: userRole,
+                  members: members && members.length > 0 ? members : (budget.members || []),
+                };
+              }
+
+              const fallbackBudget: SharedBudgetDto = {
+                id: budgetId,
+                name: item.budgetName || item.name || 'Ví dùng chung',
+                amount: item.amount || 0,
+                currentAmount: item.currentAmount || 0,
+                startDate: item.startDate || item.createdAt || new Date().toISOString(),
+                endDate: item.endDate || new Date().toISOString(),
+                type: item.type || 0,
+                walletType: 'SHARED',
+                currentUserRole: userRole,
+                members: members || [],
+                isShared: true,
+              };
+              return fallbackBudget;
+            })
+          );
+        });
+
+        forkJoin(requests$).subscribe({
+          next: (budgets) => {
+            this.sharedBudgets = budgets;
+            this.isLoadingShared = false;
+          },
+          error: () => {
+            this.hasErrorShared = true;
+            this.isLoadingShared = false;
+          },
+        });
       },
       error: () => {
         this.hasErrorShared = true;
@@ -360,7 +491,7 @@ export class Budget implements OnInit {
   deleteBudget(id: number): void {
     this.confirmModalTitle = 'Xác nhận xóa';
     this.confirmModalMessage = 'Bạn có chắc chắn muốn xóa ngân sách này không? Hành động này không thể hoàn tác.';
-    this.confirmBtnClass = 'btn-primary-modal'; // You can style a separate danger class later
+    this.confirmBtnClass = 'btn-primary-modal';
     this.confirmBtnText = 'Xóa';
     this.confirmAction = () => {
       this.budgetService.deleteBudget(id).subscribe({
@@ -417,7 +548,11 @@ export class Budget implements OnInit {
 
   onMemberInvited(): void {
     this.closeSharedModal();
-    this.loadSharedBudgets(); // reload shared budgets to reflect new members if any
+    this.loadSharedBudgets();
+  }
+
+  navigateToBudget(budget: BudgetDto | SharedBudgetDto): void {
+    this.router.navigate(['/user/budget', budget.id]);
   }
 
   navigateToSharedBudget(budget: SharedBudgetDto): void {
@@ -459,13 +594,13 @@ export class Budget implements OnInit {
     return 0;
   }
 
-  getDisplayedMembers(budget: SharedBudgetDto): BudgetMemberDto[] {
+  getDisplayedMembers(budget: BudgetDto | SharedBudgetDto): BudgetMemberDto[] {
     return (budget.members ?? [])
       .filter((member) => Number(member.status) === 1)
       .slice(0, 3);
   }
 
-  getAcceptedMemberCount(budget: SharedBudgetDto): number {
+  getAcceptedMemberCount(budget: BudgetDto | SharedBudgetDto): number {
     return (budget.members ?? []).filter((member) => Number(member.status) === 1).length;
   }
 

@@ -723,7 +723,8 @@
 
   .bottom-nav__item--budget,
   .bottom-nav__item--analysis,
-  .bottom-nav__item--frequency {
+  .bottom-nav__item--frequency,
+  .bottom-nav__item--support {
     display: none !important;
   }
 

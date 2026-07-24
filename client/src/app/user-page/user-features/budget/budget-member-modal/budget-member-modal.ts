@@ -10,6 +10,7 @@ import {
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BudgetService } from '../../../../core/services/budget.service';
+import { BudgetMemberService } from '../../../../core/services/budgetMember.service';
 import { ToastService } from '../../../../core/services/toast-service';
 import { BudgetMemberDto, UserBudgetRole } from '../../../../models/shared-budget.dto';
 
@@ -22,6 +23,7 @@ import { BudgetMemberDto, UserBudgetRole } from '../../../../models/shared-budge
 })
 export class BudgetMemberModal implements OnInit {
   private readonly budgetService = inject(BudgetService);
+  private readonly budgetMemberService = inject(BudgetMemberService);
   private readonly toast = inject(ToastService);
 
   @Input({ required: true }) budgetId!: number;
@@ -59,9 +61,19 @@ export class BudgetMemberModal implements OnInit {
   loadMembers(): void {
     this.isLoading = true;
     this.hasError = false;
-    this.budgetService.getBudgetMembers(this.budgetId).subscribe({
+    this.budgetMemberService.getMembers(this.budgetId).subscribe({
       next: (members) => {
         this.members = members.filter((m) => Number(m.status) === 1);
+        const currentMember = this.members.find(
+          (m) => this.getMemberId(m) === this.currentUserId
+        );
+        if (currentMember) {
+          if (this.isMemberOwner(currentMember)) {
+            this.currentUserRole = 'OWNER';
+          } else {
+            this.currentUserRole = 'MEMBER';
+          }
+        }
         this.isLoading = false;
       },
       error: () => {
@@ -71,8 +83,24 @@ export class BudgetMemberModal implements OnInit {
     });
   }
 
+  getMemberId(m: BudgetMemberDto): string {
+    return m.memberId || m.userId || '';
+  }
+
+  getMemberName(m: BudgetMemberDto): string {
+    return m.memberName || m.displayName || m.memberEmail || m.email || 'Thành viên';
+  }
+
+  getMemberEmail(m: BudgetMemberDto): string {
+    return m.memberEmail || m.email || '';
+  }
+
+  isMemberOwner(m: BudgetMemberDto): boolean {
+    return m.isOwner === true || m.role === 0 || m.role === 'OWNER';
+  }
+
   getInitials(name: string): string {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
+    const parts = (name || '').trim().split(/\s+/).filter(Boolean);
     if (parts.length === 0) return '?';
     return parts
       .slice(0, 2)
@@ -89,9 +117,9 @@ export class BudgetMemberModal implements OnInit {
     }
 
     this.isInviting = true;
-    this.budgetService.addMember(this.budgetId, { email }).subscribe({
-      next: (member) => {
-        this.toast.success(`Đã thêm ${member.displayName || email} vào ví`);
+    this.budgetMemberService.inviteMember(this.budgetId, { emailOrUsername: email, role: 1 }).subscribe({
+      next: () => {
+        this.toast.success(`Đã gửi lời mời tới ${email}`);
         this.inviteEmail = '';
         this.isInviting = false;
         this.loadMembers();
@@ -113,20 +141,22 @@ export class BudgetMemberModal implements OnInit {
   }
 
   confirmRemove(member: BudgetMemberDto): void {
+    const name = this.getMemberName(member);
     this.confirmAction = {
       type: 'remove',
-      targetUserId: member.userId,
-      targetName: member.displayName,
-      message: `Bạn có chắc muốn xóa ${member.displayName} khỏi ví "${this.budgetName}"?`,
+      targetUserId: this.getMemberId(member),
+      targetName: name,
+      message: `Bạn có chắc muốn xóa ${name} khỏi ví "${this.budgetName}"?`,
     };
   }
 
   confirmTransferOwner(member: BudgetMemberDto): void {
+    const name = this.getMemberName(member);
     this.confirmAction = {
       type: 'transfer',
-      targetUserId: member.userId,
-      targetName: member.displayName,
-      message: `Chuyển quyền chủ ví cho ${member.displayName}? Bạn sẽ trở thành thành viên thường.`,
+      targetUserId: this.getMemberId(member),
+      targetName: name,
+      message: `Chuyển quyền chủ ví cho ${name}? Bạn sẽ trở thành thành viên thường.`,
     };
   }
 
@@ -144,7 +174,7 @@ export class BudgetMemberModal implements OnInit {
     const action = this.confirmAction;
 
     if (action.type === 'remove' && action.targetUserId) {
-      this.budgetService.removeMember(this.budgetId, action.targetUserId).subscribe({
+      this.budgetMemberService.removeMember(this.budgetId, action.targetUserId).subscribe({
         next: () => {
           this.toast.success(`Đã xóa ${action.targetName} khỏi ví`);
           this.confirmAction = null;
@@ -158,7 +188,7 @@ export class BudgetMemberModal implements OnInit {
         },
       });
     } else if (action.type === 'transfer' && action.targetUserId) {
-      this.budgetService.updateMemberRole(this.budgetId, action.targetUserId, { role: 'OWNER' }).subscribe({
+      this.budgetMemberService.updateMemberRole(this.budgetId, action.targetUserId, { role: 'OWNER' }).subscribe({
         next: () => {
           this.toast.success(`Đã chuyển quyền chủ ví cho ${action.targetName}`);
           this.confirmAction = null;
@@ -172,7 +202,7 @@ export class BudgetMemberModal implements OnInit {
         },
       });
     } else if (action.type === 'leave') {
-      this.budgetService.leaveBudget(this.budgetId).subscribe({
+      this.budgetMemberService.removeMember(this.budgetId, this.currentUserId).subscribe({
         next: () => {
           this.toast.success('Bạn đã rời khỏi ví');
           this.confirmAction = null;

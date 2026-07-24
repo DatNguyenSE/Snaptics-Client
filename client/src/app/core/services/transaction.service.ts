@@ -167,8 +167,11 @@ export class TransactionService {
 
   getBudgetTransactions(budgetId: number): Observable<TransactionDto[]> {
     return this.http
-      .get<TransactionDto[]>(`${this.apiUrl}/budget/${budgetId}`)
-      .pipe(map((transactions) => transactions.map((t) => this.sanitizeTransaction(t))));
+      .get<TransactionDto[]>(`${this.baseUrl}Budget/history/${budgetId}`)
+      .pipe(
+        map((transactions) => (transactions || []).map((t) => this.sanitizeTransaction(t))),
+        catchError(() => of([]))
+      );
   }
 
   private ensureTransactionsLoaded(): void {

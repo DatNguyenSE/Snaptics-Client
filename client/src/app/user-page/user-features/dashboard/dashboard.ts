@@ -207,9 +207,9 @@ export class Dashboard implements OnInit {
 
   // ─── Quick Actions ────────────────────────────────────────────────────────
   readonly quickActions: QuickAction[] = [
-    { id: 'scan', labelKey: 'dashboard.quickAction.resources', icon: 'payments', iconClass: 'quick-action__icon--blue', route: '/user/in-come-source' },
-    { id: 'capture', labelKey: 'dashboard.quickAction.capture', icon: 'analytics', iconClass: 'quick-action__icon--violet', route: '/user/scan' },
-    { id: 'analysis', labelKey: 'dashboard.quickAction.review', icon: 'edit_square', iconClass: 'quick-action__icon--amber', route: '/user/analysis' },
+    { id: 'resources', labelKey: 'dashboard.quickAction.resources', icon: 'payments', iconClass: 'quick-action__icon--blue', route: '/user/in-come-source' },
+    { id: 'analysis', labelKey: 'dashboard.quickAction.capture', icon: 'analytics', iconClass: 'quick-action__icon--violet', route: '/user/analysis' },
+    { id: 'review', labelKey: 'dashboard.quickAction.review', icon: 'edit_square', iconClass: 'quick-action__icon--amber', route: '#' },
     { id: 'create-budget', labelKey: 'dashboard.quickAction.createBudget', icon: 'account_balance_wallet', iconClass: 'quick-action__icon--emerald', route: '/user/budget' },
   ];
 

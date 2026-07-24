@@ -16,7 +16,7 @@
         </button>
         <button class="btn-shared" (click)="openSharedModal()" id="btn-create-shared-wallet">
           <span class="material-symbols-outlined">group_add</span>
-          Ví dùng chung
+          Mời vào ví
         </button>
       </div>
     </header>
@@ -47,8 +47,8 @@
       >
         <span class="material-symbols-outlined">group</span>
         Ví dùng chung
-        @if (!isLoadingShared && sharedBudgets.length > 0) {
-          <span class="tab-count tab-count--shared">{{ sharedBudgets.length }}</span>
+        @if (!isLoadingShared && allSharedBudgets.length > 0) {
+          <span class="tab-count tab-count--shared">{{ allSharedBudgets.length }}</span>
         }
       </button>
     </div>
@@ -78,7 +78,15 @@
         } @else {
           <div class="budget-grid">
             @for (budget of budgets; track budget.id) {
-              <article class="budget-card" [class.budget-card--saving]="budget.type === 1">
+              <article
+                class="budget-card"
+                [class.budget-card--saving]="budget.type === 1"
+                (click)="navigateToBudget(budget)"
+                role="button"
+                tabindex="0"
+                (keydown.enter)="navigateToBudget(budget)"
+                [attr.aria-label]="'Mở ví ' + budget.name"
+              >
                 <div class="budget-card__header">
                   <div class="budget-card__title-wrap">
                     <div class="budget-icon-wrap" [class.budget-icon-wrap--saving]="budget.type === 1">
@@ -93,13 +101,14 @@
                       </span>
                     </div>
                   </div>
-                  <div class="budget-card__actions dropdown-container">
-                    <!-- Default star button moved outside -->
-                    <button class="btn-icon" [class.btn-icon--active]="budget.isDefault" aria-label="Đặt làm mặc định" (click)="setDefaultBudget(budget)" [title]="budget.isDefault ? 'Đang là ví mặc định' : 'Đặt làm mặc định'" [style.color]="budget.isDefault ? '#fbbf24' : ''">
+
+                  <div class="budget-card__actions dropdown-container" (click)="$event.stopPropagation()">
+                    <!-- Default star button -->
+                    <button class="btn-icon" [class.btn-icon--active]="budget.isDefault" aria-label="Đặt làm mặc định" (click)="setDefaultBudget(budget); $event.stopPropagation()" [title]="budget.isDefault ? 'Đang là ví mặc định' : 'Đặt làm mặc định'" [style.color]="budget.isDefault ? '#fbbf24' : ''">
                       <span class="material-symbols-outlined" [style.font-variation-settings]="budget.isDefault ? '&quot;FILL&quot; 1' : '&quot;FILL&quot; 0'">star</span>
                     </button>
                     
-                    <button class="btn-icon" aria-label="Tùy chọn" (click)="toggleDropdown($event, budget.id)">
+                    <button class="btn-icon" aria-label="Tùy chọn" (click)="toggleDropdown($event, budget.id); $event.stopPropagation()">
                       <span class="material-symbols-outlined">more_vert</span>
                     </button>
                     
@@ -115,6 +124,24 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- Member chips for personal budget if members exist -->
+                @if (budget.members && budget.members.length > 0) {
+                  <div class="member-chips mt-2">
+                    @for (member of getDisplayedMembers(budget); track (member.memberId || member.userId || member.id); let i = $index) {
+                      <div class="member-chip" [style.z-index]="10 - i" [title]="member.memberName || member.displayName || member.memberEmail || member.email || 'Thành viên'">
+                        @if (member.imageUrl) {
+                          <img [src]="member.imageUrl" [alt]="member.memberName || member.displayName || 'Avatar'" />
+                        } @else {
+                          <span>{{ getInitials(member.memberName || member.displayName || member.memberEmail || member.email || 'TV') }}</span>
+                        }
+                      </div>
+                    }
+                    @if (getAcceptedMemberCount(budget) > 3) {
+                      <div class="member-chip member-chip--more">+{{ getAcceptedMemberCount(budget) - 3 }}</div>
+                    }
+                  </div>
+                }
 
                 <div class="budget-card__body">
                   <div class="budget-amounts">
@@ -170,7 +197,7 @@
             <span class="material-symbols-outlined state-icon">error_outline</span>
             <p>Không thể tải ví dùng chung. Vui lòng thử lại.</p>
           </div>
-        } @else if (sharedBudgets.length === 0) {
+        } @else if (allSharedBudgets.length === 0) {
           <div class="state-container">
             <span class="material-symbols-outlined state-icon">group</span>
             <p>Bạn chưa tham gia ví dùng chung nào.</p>
@@ -182,7 +209,7 @@
           </div>
         } @else {
           <div class="budget-grid">
-            @for (budget of sharedBudgets; track budget.id) {
+            @for (budget of allSharedBudgets; track budget.id) {
               <article
                 class="budget-card budget-card--shared"
                 (click)="navigateToSharedBudget(budget)"
@@ -217,12 +244,12 @@
 
                   <!-- Member avatars -->
                   <div class="member-chips">
-                    @for (member of getDisplayedMembers(budget); track member.userId; let i = $index) {
-                      <div class="member-chip" [style.z-index]="10 - i" [title]="member.displayName">
+                    @for (member of getDisplayedMembers(budget); track (member.memberId || member.userId || member.id); let i = $index) {
+                      <div class="member-chip" [style.z-index]="10 - i" [title]="member.memberName || member.displayName || member.memberEmail || member.email || 'Thành viên'">
                         @if (member.imageUrl) {
-                          <img [src]="member.imageUrl" [alt]="member.displayName" />
+                          <img [src]="member.imageUrl" [alt]="member.memberName || member.displayName || 'Avatar'" />
                         } @else {
-                          <span>{{ getInitials(member.displayName) }}</span>
+                          <span>{{ getInitials(member.memberName || member.displayName || member.memberEmail || member.email || 'TV') }}</span>
                         }
                       </div>
                     }

@@ -10,14 +10,20 @@ export type BudgetWalletType = 'PERSONAL' | 'SHARED';
 
 export interface BudgetMemberDto {
   id: number;
-  userId: string;
   budgetId: number;
-  displayName: string;
-  email: string;
+  budgetName?: string | null;
+  memberId: string;
+  userId?: string;
+  memberName?: string | null;
+  displayName?: string | null;
+  memberEmail?: string | null;
+  email?: string | null;
   imageUrl?: string | null;
-  role: UserBudgetRole;
+  role: number | UserBudgetRole; // 0 = OWNER, 1 = MEMBER
   status: UserBudgetStatus;
-  joinedAt: string;
+  createdAt?: string;
+  joinedAt?: string | null;
+  isOwner?: boolean;
 }
 
 // ─── Shared Budget ────────────────────────────────────────────────────────────

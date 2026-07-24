@@ -69,7 +69,9 @@
           (click)="setTab('unread')"
         >
           <span>{{ language.currentLang() === 'vi' ? 'Chưa đọc' : 'Unread' }}</span>
-          <span class="notification-tab__badge notification-tab__badge--unread">{{ getTabCount('unread') }}</span>
+          @if (getTabCount('unread') > 0) {
+            <span class="notification-tab__badge notification-tab__badge--unread">{{ getTabCount('unread') }}</span>
+          }
         </button>
 
         <button 

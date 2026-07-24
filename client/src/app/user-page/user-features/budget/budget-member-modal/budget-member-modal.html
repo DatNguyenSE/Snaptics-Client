@@ -89,40 +89,42 @@
         </div>
       } @else {
         <ul class="member-list" role="list">
-          @for (member of members; track member.userId) {
+          @for (member of members; track getMemberId(member)) {
             <li class="member-item">
-              <div class="member-avatar" [attr.aria-label]="member.displayName">
+              <div class="member-avatar" [attr.aria-label]="getMemberName(member)">
                 @if (member.imageUrl) {
-                  <img [src]="member.imageUrl" [alt]="member.displayName" class="avatar-img" />
+                  <img [src]="member.imageUrl" [alt]="getMemberName(member)" class="avatar-img" />
                 } @else {
-                  <span class="avatar-initials">{{ getInitials(member.displayName) }}</span>
+                  <span class="avatar-initials">{{ getInitials(getMemberName(member)) }}</span>
                 }
               </div>
 
               <div class="member-info">
                 <span class="member-name">
-                  {{ member.displayName }}
-                  @if (member.userId === currentUserId) {
+                  {{ getMemberName(member) }}
+                  @if (getMemberId(member) === currentUserId) {
                     <span class="you-badge">Bạn</span>
                   }
                 </span>
-                <span class="member-email">{{ member.email }}</span>
-                <span class="member-joined">Tham gia {{ member.joinedAt | date:'dd/MM/yyyy' }}</span>
+                <span class="member-email">{{ getMemberEmail(member) }}</span>
+                @if (member.joinedAt) {
+                  <span class="member-joined">Tham gia {{ member.joinedAt | date:'dd/MM/yyyy' }}</span>
+                }
               </div>
 
               <div class="member-meta">
-                <span class="role-badge" [class.role-badge--owner]="member.role === 'OWNER'">
-                  {{ member.role === 'OWNER' ? 'Chủ ví' : 'Thành viên' }}
+                <span class="role-badge" [class.role-badge--owner]="isMemberOwner(member)">
+                  {{ isMemberOwner(member) ? 'Chủ ví' : 'Thành viên' }}
                 </span>
 
                 <!-- OWNER actions on other members -->
-                @if (isOwner && member.userId !== currentUserId && member.role !== 'OWNER') {
+                @if (isOwner && getMemberId(member) !== currentUserId && !isMemberOwner(member)) {
                   <div class="member-actions">
                     <button
                       class="btn-action btn-action--transfer"
                       (click)="confirmTransferOwner(member)"
                       title="Chuyển quyền chủ ví"
-                      [attr.aria-label]="'Chuyển quyền chủ ví cho ' + member.displayName"
+                      [attr.aria-label]="'Chuyển quyền chủ ví cho ' + getMemberName(member)"
                     >
                       <span class="material-symbols-outlined">swap_horiz</span>
                     </button>
@@ -130,7 +132,7 @@
                       class="btn-action btn-action--remove"
                       (click)="confirmRemove(member)"
                       title="Xóa thành viên"
-                      [attr.aria-label]="'Xóa ' + member.displayName"
+                      [attr.aria-label]="'Xóa ' + getMemberName(member)"
                     >
                       <span class="material-symbols-outlined">person_remove</span>
                     </button>
@@ -138,7 +140,7 @@
                 }
 
                 <!-- MEMBER: leave button for themselves -->
-                @if (!isOwner && member.userId === currentUserId) {
+                @if (!isOwner && getMemberId(member) === currentUserId) {
                   <button
                     id="btn-leave-wallet"
                     class="btn-leave"

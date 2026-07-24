@@ -10,46 +10,41 @@
           {{ language.t('transaction.subtitle') }}
         </p>
       </div>
-      <div class="transaction-page__hero-avatar"
-           [attr.aria-label]="language.t('nav.transactions')"
-           role="img">
-        {{ initials }}
-      </div>
     </header>
 
     <!-- ─── Summary Cards ─────────────────────────────────────────────────── -->
     @if (!isLoading && !hasError && transactionHistory.length > 0) {
       <div class="summary-cards" role="region" aria-label="Transaction summary">
-        <!-- Total Spent -->
+        <!-- Total Spent (Chi tiêu) -->
         <div class="summary-card">
-          <div class="sc-icon-wrap sc-icon-wrap--purple">
-            <span class="material-symbols-outlined">account_balance_wallet</span>
+          <div class="sc-icon-wrap sc-icon-wrap--red">
+            <span class="material-symbols-outlined">trending_down</span>
           </div>
           <div class="summary-card__body">
             <p class="sc-title">{{ language.t('transaction.totalSpent') }}</p>
-            <p class="sc-value">{{ formatCurrency(summaryStats.total) }}</p>
+            <p class="sc-value sc-value--expense">-{{ formatCurrency(summaryStats.totalExpense) }}</p>
+          </div>
+        </div>
+
+        <!-- Total Income (Thu nhập) -->
+        <div class="summary-card">
+          <div class="sc-icon-wrap sc-icon-wrap--green">
+            <span class="material-symbols-outlined">trending_up</span>
+          </div>
+          <div class="summary-card__body">
+            <p class="sc-title">{{ language.t('transaction.totalIncome') }}</p>
+            <p class="sc-value sc-value--income">+{{ formatCurrency(summaryStats.totalIncome) }}</p>
           </div>
         </div>
 
         <!-- Transaction Count -->
         <div class="summary-card">
-          <div class="sc-icon-wrap sc-icon-wrap--green">
+          <div class="sc-icon-wrap sc-icon-wrap--purple">
             <span class="material-symbols-outlined">receipt_long</span>
           </div>
           <div class="summary-card__body">
             <p class="sc-title">{{ language.t('transaction.transactionCount') }}</p>
             <p class="sc-value">{{ summaryStats.count }}</p>
-          </div>
-        </div>
-
-        <!-- Source Breakdown -->
-        <div class="summary-card">
-          <div class="sc-icon-wrap sc-icon-wrap--purple-light">
-            <span class="material-symbols-outlined">layers</span>
-          </div>
-          <div class="summary-card__body">
-            <p class="sc-title">{{ language.t('transaction.sourceLabel') }}</p>
-            <p class="sc-value sc-value--empty">Chưa có dữ liệu</p>
           </div>
         </div>
       </div>
@@ -59,12 +54,12 @@
     @if (!isLoading && !hasError && transactionHistory.length > 0) {
       <div class="filter-bar" role="search">
         <div class="filter-search">
-          <span class="material-symbols-outlined search-icon">search</span>
           <input
             id="transaction-search"
             class="filter-search__input"
             type="search"
             [(ngModel)]="searchQuery"
+            placeholder="Tìm giao dịch..."
             autocomplete="off"
             aria-label="Search transactions"
           />
@@ -99,18 +94,54 @@
             <span class="material-symbols-outlined">photo_camera</span>
             {{ language.t('transaction.filterSnap') }}
           </button>
-
         </div>
 
-        <div class="filter-month-wrap">
-          <span class="material-symbols-outlined filter-month-icon">calendar_today</span>
-          <input
-            id="transaction-month-filter"
-            class="filter-month"
-            type="month"
-            [(ngModel)]="filterMonth"
-            placeholder="Chọn ngày"
-          />
+        <!-- Date / Month / Year Filters -->
+        <div class="filter-date-group">
+          <!-- Ngày -->
+          <div class="filter-date-input-wrap" [class.filter-date-input-wrap--active]="!!filterDate">
+            <span class="material-symbols-outlined filter-date-icon">event</span>
+            <input
+              id="transaction-date-filter"
+              class="filter-date-input"
+              type="date"
+              [(ngModel)]="filterDate"
+              title="Lọc theo ngày"
+            />
+          </div>
+
+          <!-- Tháng -->
+          <div class="filter-date-input-wrap" [class.filter-date-input-wrap--active]="!!filterMonth && !filterDate">
+            <span class="material-symbols-outlined filter-date-icon">calendar_month</span>
+            <input
+              id="transaction-month-filter"
+              class="filter-date-input"
+              type="month"
+              [(ngModel)]="filterMonth"
+              title="Lọc theo tháng"
+            />
+          </div>
+
+          <!-- Năm -->
+          <div class="filter-date-input-wrap" [class.filter-date-input-wrap--active]="!!filterYear && !filterMonth && !filterDate">
+            <span class="material-symbols-outlined filter-date-icon">calendar_today</span>
+            <select
+              id="transaction-year-filter"
+              class="filter-date-select"
+              [(ngModel)]="filterYear"
+              title="Lọc theo năm">
+              <option value="">Năm</option>
+              @for (year of availableYears; track year) {
+                <option [value]="year">{{ year }}</option>
+              }
+            </select>
+          </div>
+
+          @if (filterDate || filterMonth || filterYear) {
+            <button class="filter-date-clear-btn" (click)="clearDateFilters()" title="Xóa bộ lọc thời gian" type="button">
+              <span class="material-symbols-outlined">filter_alt_off</span>
+            </button>
+          }
         </div>
       </div>
     }
@@ -171,12 +202,14 @@
                               {{ transaction.transactionDate | date:'HH:mm' }}
                             </span>
                           </div>
+                          @if (transaction.note) {
+                            <p class="t-note">{{ transaction.note }}</p>
+                          }
                         </div>
 
                         <div class="t-card-right">
-                          <div class="t-price">{{ formatCurrency(transaction.totalAmount) }}</div>
-                          <div class="t-status-badge" [class]="getStatusBadge(transaction.status).cssClass">
-                            {{ getStatusBadge(transaction.status).label }}
+                          <div class="t-price" [class.t-price--expense]="transaction.isExpense !== false" [class.t-price--income]="transaction.isExpense === false">
+                            {{ transaction.isExpense !== false ? '-' : '+' }}{{ formatCurrency(transaction.totalAmount) }}
                           </div>
                         </div>
                       </article>

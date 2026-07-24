@@ -134,12 +134,21 @@
       <div class="quick-actions__grid">
         @for (action of quickActions; track action.id) {
           @if (action.route; as route) {
-            <a class="quick-action" [routerLink]="route" [id]="'quick-action-btn-' + action.id">
-              <span class="quick-action__icon" [class]="action.iconClass">
-                <span class="material-symbols-outlined">{{ action.icon }}</span>
-              </span>
-              <span class="quick-action__label">{{ language.t(action.labelKey) }}</span>
-            </a>
+            @if (route !== '#') {
+              <a class="quick-action" [routerLink]="route" [id]="'quick-action-btn-' + action.id">
+                <span class="quick-action__icon" [class]="action.iconClass">
+                  <span class="material-symbols-outlined">{{ action.icon }}</span>
+                </span>
+                <span class="quick-action__label">{{ language.t(action.labelKey) }}</span>
+              </a>
+            } @else {
+              <a class="quick-action" href="#" [id]="'quick-action-btn-' + action.id" (click)="$event.preventDefault()">
+                <span class="quick-action__icon" [class]="action.iconClass">
+                  <span class="material-symbols-outlined">{{ action.icon }}</span>
+                </span>
+                <span class="quick-action__label">{{ language.t(action.labelKey) }}</span>
+              </a>
+            }
           } @else {
             <button
               class="quick-action"
@@ -157,11 +166,9 @@
       </div>
     </section>
 
-
-
     <!-- ── ANALYTICS ──────────────────────────────────────────── -->
     <section class="analytics-section">
-      <p class="section-eyebrow">Analytics</p>
+      <p class="section-eyebrow">{{ language.t('dashboard.analytics') }}</p>
 
       <!-- KPI Cards -->
       <div class="kpi-grid">
@@ -227,94 +234,11 @@
         <span class="material-symbols-outlined">grade</span>
       </div>
       <div class="usage-review-card__copy">
-        <p>{{ language.t('dashboard.usageTitle') }}</p>
-        <span>{{ language.t('dashboard.usageHint') }}</span>
+        <h4>Đánh giá trải nghiệm ứng dụng</h4>
+        <p>Giúp chúng tôi cải thiện Antigravity bằng cách chia sẻ ý kiến của bạn</p>
       </div>
-      <span class="material-symbols-outlined usage-review-card__chevron">chevron_right</span>
+      <span class="material-symbols-outlined usage-review-card__arrow">arrow_forward</span>
     </button>
 
-    <!-- ── RECENT TRANSACTIONS ────────────────────────────────── -->
-    <section class="transactions-section">
-      <div class="transactions-section__header">
-        <h3>{{ language.t('dashboard.recentTransactions') }}</h3>
-        <button type="button" routerLink="/user/transactions">
-          {{ language.t('dashboard.viewAll') }}
-          <span class="material-symbols-outlined">chevron_right</span>
-        </button>
-      </div>
-
-      <div class="transaction-list">
-        @if (isLoading) {
-          <div class="transaction-list__state">
-            <span class="material-symbols-outlined">hourglass_empty</span>
-            <p>{{ language.t('common.loading') }}</p>
-          </div>
-        } @else if (hasError) {
-          <div class="transaction-list__state">
-            <span class="material-symbols-outlined">error_outline</span>
-            <p>{{ language.t('common.loadError') }}</p>
-          </div>
-        } @else if (recentTransactions.length === 0) {
-          <div class="transaction-list__state">
-            <span class="material-symbols-outlined">receipt_long</span>
-            <p>{{ language.t('dashboard.noTransactions') }}</p>
-          </div>
-        } @else {
-          @for (transaction of recentTransactions; track transaction.id) {
-            <article class="transaction-card" (click)="openTransactionDetail(transaction)" style="cursor:pointer">
-              <div class="transaction-media" [class]="getMediaClass(transaction)">
-                @if (isAnalyzedImage(transaction)) {
-                  <img [src]="getImageUrl(transaction)!" alt="transaction" />
-                } @else {
-                  <i class="ti {{ getIcon(transaction) }}" style="font-size: 1.5rem;"></i>
-                }
-              </div>
-              <div class="transaction-body">
-                <div class="transaction-title-row">
-                  <p class="transaction-title">{{ transaction.name }}</p>
-                  @if (transaction.isAiEstimated) {
-                    <span class="ai-badge">
-                      <span class="material-symbols-outlined">smart_toy</span>
-                      {{ language.t('dashboard.aiGen') }}
-                    </span>
-                  }
-                </div>
-                <div class="transaction-meta">
-                  <span class="category-pill" [class]="getCategoryClass(transaction)">
-                    <i class="ti {{ getIcon(transaction) }}"></i>
-                    {{ language.t(getCategoryKey(transaction)) }}
-                  </span>
-                  <span class="transaction-time">{{ transaction.transactionDate | date:'HH:mm' }}</span>
-                </div>
-              </div>
-              <p class="transaction-price">{{ formatCurrency(transaction.totalAmount) }}</p>
-            </article>
-          }
-        }
-      </div>
-    </section>
   </div>
 </section>
-
-<!-- ── TRANSACTION DETAIL MODAL ─────────────────────────────────────────── -->
-@if (selectedTransaction) {
-  <app-transaction-detail-modal
-    [transaction]="selectedTransaction"
-    (closeModal)="closeTransactionDetail()">
-  </app-transaction-detail-modal>
-}
-
-
-
-<!-- ── CATEGORY SUMMARY MODAL ──────────────────────────────────────────── -->
-<app-category-summary-modal
-  [isOpen]="isCategorySummaryModalOpen"
-  (close)="closeCategorySummaryModal()">
-</app-category-summary-modal>
-
-<!-- ── TREND SUMMARY MODAL ─────────────────────────────────────────────── -->
-<app-trend-summary-modal
-  [isOpen]="isTrendSummaryModalOpen"
-  (close)="closeTrendSummaryModal()">
-</app-trend-summary-modal>
-

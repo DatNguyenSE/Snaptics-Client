@@ -132,6 +132,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         savings: 'Gợi ý tiết kiệm'
       },
       weeklySpending: 'Chi tiêu tuần này',
+      analytics: 'Phân tích',
       byCategory: 'Theo danh mục',
       quickAction: {
         scan: 'Qu\u00e9t h\u00f3a \u0111\u01a1n',
@@ -399,8 +400,9 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       filterManual: 'Nh\u1eadp tay',
       filterSnap: 'Ch\u1ee5p m\u00f3n',
       resetFilters: 'X\u00f3a b\u1ed9 l\u1ecdc',
-      totalSpent: 'T\u1ed5ng chi',
-      transactionCount: 'Giao d\u1ecbch',
+      totalSpent: 'Tổng chi',
+      totalIncome: 'Tổng thu',
+      transactionCount: 'Giao dịch',
       filterMonth: 'Th\u00e1ng',
       sourceLabel: 'Ngu\u1ed3n',
       statusCompleted: 'Ho\u00e0n th\u00e0nh',
@@ -853,6 +855,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         savings: 'Savings tips'
       },
       weeklySpending: 'Weekly Spending',
+      analytics: 'Analytics',
       byCategory: 'By Category',
       quickAction: {
         scan: 'Scan Receipt',
@@ -1110,6 +1113,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       filterSnap: 'Snap',
       resetFilters: 'Reset filters',
       totalSpent: 'Total Spent',
+      totalIncome: 'Total Income',
       transactionCount: 'Transactions',
       filterMonth: 'Month',
       sourceLabel: 'Source',

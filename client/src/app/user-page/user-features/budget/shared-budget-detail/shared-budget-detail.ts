@@ -1,7 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { BudgetService } from '../../../../core/services/budget.service';
+import { BudgetMemberService } from '../../../../core/services/budgetMember.service';
 import { TransactionService } from '../../../../core/services/transaction.service';
 import { ToastService } from '../../../../core/services/toast-service';
 import { LanguageService } from '../../../../core/services/language-service';
@@ -22,6 +25,7 @@ export class SharedBudgetDetail implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly budgetService = inject(BudgetService);
+  private readonly budgetMemberService = inject(BudgetMemberService);
   private readonly transactionService = inject(TransactionService);
   private readonly toast = inject(ToastService);
   protected readonly language = inject(LanguageService);
@@ -72,7 +76,20 @@ export class SharedBudgetDetail implements OnInit {
   }
 
   get displayedMembers(): BudgetMemberDto[] {
-    return (this.budget?.members ?? []).slice(0, 4);
+    return (this.budget?.members ?? []).filter((m) => Number(m.status) === 1).slice(0, 4);
+  }
+
+  getMemberName(member: BudgetMemberDto): string {
+    return member.memberName || member.displayName || member.memberEmail || member.email || 'Thành viên';
+  }
+
+  getInitials(name: string): string {
+    const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '?';
+    return parts
+      .slice(0, 2)
+      .map((p) => p[0]?.toUpperCase() ?? '')
+      .join('');
   }
 
   ngOnInit(): void {
@@ -89,9 +106,38 @@ export class SharedBudgetDetail implements OnInit {
     this.isLoading = true;
     this.hasError = false;
 
-    this.budgetService.getBudgetById(this.budgetId).subscribe({
-      next: (budget) => {
-        this.budget = budget;
+    forkJoin({
+      budget: this.budgetService.getBudgetById(this.budgetId),
+      members: this.budgetMemberService.getMembers(this.budgetId).pipe(
+        catchError(() => of([]))
+      )
+    }).subscribe({
+      next: ({ budget, members }) => {
+        const memberList = members && members.length > 0 ? members : (budget.members || []);
+        const currentMember = memberList.find(
+          (m) => (m.memberId || m.userId) === this.currentUserId
+        );
+
+        let userRole: 'OWNER' | 'MEMBER' = budget.currentUserRole || 'MEMBER';
+        
+        // Ví gọi từ /Budget/user thường sẽ có isShared = false, hoặc ta xét dựa trên API members.
+        // Đối với ví chia sẻ, bắt buộc phân biệt qua API members.
+        if (currentMember) {
+          if (currentMember.isOwner === true || currentMember.role === 0 || currentMember.role === 'OWNER') {
+            userRole = 'OWNER';
+          } else {
+            userRole = 'MEMBER';
+          }
+        } else if (!budget.isShared) {
+          // Nếu không có thành viên (hoặc chưa kịp tải) mà là ví cá nhân thì mặc định là Chủ ví
+          userRole = 'OWNER';
+        }
+
+        this.budget = {
+          ...budget,
+          currentUserRole: userRole,
+          members: memberList
+        };
         this.isLoading = false;
         this.loadTransactions();
       },
@@ -166,15 +212,6 @@ export class SharedBudgetDetail implements OnInit {
     this.router.navigateByUrl('/user/budget');
   }
 
-  getInitials(name: string): string {
-    const parts = name.trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return '?';
-    return parts
-      .slice(0, 2)
-      .map((p) => p[0]?.toUpperCase() ?? '')
-      .join('');
-  }
-
   formatCurrency(value: number | undefined): string {
     if (value === null || value === undefined || isNaN(value)) return '0đ';
     return `${new Intl.NumberFormat(this.language.locale()).format(value)}đ`;
@@ -199,8 +236,11 @@ export class SharedBudgetDetail implements OnInit {
 
   getCreatorDisplay(t: TransactionDto): string {
     if (t.createdByUser?.displayName) return t.createdByUser.displayName;
-    const member = this.budget?.members?.find((m) => m.userId === (t.createdByUserId || t.userId));
-    return member?.displayName || 'Không rõ';
+    const creatorId = t.createdByUserId || t.userId;
+    const member = this.budget?.members?.find(
+      (m) => (m.memberId || m.userId) === creatorId
+    );
+    return member?.memberName || member?.displayName || member?.memberEmail || member?.email || 'Thành viên';
   }
 
   getCreatorInitials(t: TransactionDto): string {
@@ -209,7 +249,10 @@ export class SharedBudgetDetail implements OnInit {
 
   getCreatorImageUrl(t: TransactionDto): string | null {
     if (t.createdByUser?.imageUrl) return t.createdByUser.imageUrl;
-    const member = this.budget?.members?.find((m) => m.userId === (t.createdByUserId || t.userId));
+    const creatorId = t.createdByUserId || t.userId;
+    const member = this.budget?.members?.find(
+      (m) => (m.memberId || m.userId) === creatorId
+    );
     return member?.imageUrl ?? null;
   }
 }
