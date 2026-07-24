@@ -1774,3 +1774,449 @@
     display: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   MODERN RECEIPT SCANNER PROCESSING OVERLAY & CARDS
+   ═══════════════════════════════════════════════════════════════════ */
+.scan-processing-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+  animation: fadeInOverlay 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.scan-processing-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.scan-processing-dialog {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ── Centered Floating Receipt Image Card ─────────────────────────── */
+.scan-floating-card {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.scan-floating-card__image-wrap {
+  position: relative;
+  max-height: 44vh;
+  max-width: 320px;
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow:
+    0 24px 48px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+  background: #111113;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scan-floating-card__img {
+  width: 100%;
+  max-height: 44vh;
+  object-fit: contain;
+  display: block;
+}
+
+/* ── 4 Corner Brackets ───────────────────────────────────────────── */
+.scan-bracket {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--sw-primary, #5b7bfa);
+  border-style: solid;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.scan-bracket--tl {
+  top: 10px;
+  left: 10px;
+  border-width: 2.5px 0 0 2.5px;
+  border-top-left-radius: 6px;
+}
+
+.scan-bracket--tr {
+  top: 10px;
+  right: 10px;
+  border-width: 2.5px 2.5px 0 0;
+  border-top-right-radius: 6px;
+}
+
+.scan-bracket--bl {
+  bottom: 10px;
+  left: 10px;
+  border-width: 0 0 2.5px 2.5px;
+  border-bottom-left-radius: 6px;
+}
+
+.scan-bracket--br {
+  bottom: 10px;
+  right: 10px;
+  border-width: 0 2.5px 2.5px 0;
+  border-bottom-right-radius: 6px;
+}
+
+/* ── Scanning Line / Beam Animation ──────────────────────────────── */
+.scan-beam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(91, 123, 250, 0.4) 15%,
+    #ffffff 50%,
+    rgba(91, 123, 250, 0.4) 85%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 14px 2px rgba(91, 123, 250, 0.7),
+    0 0 28px 6px rgba(91, 123, 250, 0.35);
+  animation: scanBeamMove 2.2s ease-in-out infinite;
+}
+
+@keyframes scanBeamMove {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    top: 98%;
+    opacity: 0;
+  }
+}
+
+/* ── Floating Processing Card / Bottom Sheet ─────────────────────── */
+.scan-processing-card {
+  width: 100%;
+  background: var(--sw-card);
+  border: 1px solid var(--sw-border);
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  backdrop-filter: blur(12px);
+}
+
+/* ── Status Icon Morphing & Pulse ────────────────────────────────── */
+.scan-status-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scan-status-icon {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scan-status-icon--scanning {
+  background: var(--sw-primary-soft, rgba(91, 123, 250, 0.15));
+  color: var(--sw-primary, #5b7bfa);
+}
+
+.scan-status-icon--scanning .scan-status-icon__pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--sw-primary, #5b7bfa);
+  opacity: 0.4;
+  animation: pulseRing 1.8s ease-out infinite;
+}
+
+.scan-status-icon--success {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  animation: checkScaleIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.scan-status-icon .material-symbols-outlined {
+  font-size: 1.5rem;
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@keyframes checkScaleIn {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── Titles & Microcopy ─────────────────────────────────────────── */
+.scan-processing-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scan-processing-title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--sw-foreground);
+  letter-spacing: -0.01em;
+}
+
+.scan-processing-sub {
+  margin: 0;
+  font-size: 0.84375rem;
+  color: var(--sw-muted-foreground);
+  line-height: 1.45;
+}
+
+.scan-microcopy-phase {
+  font-size: 0.78125rem;
+  font-weight: 600;
+  color: var(--sw-primary, #5b7bfa);
+  margin-top: 4px;
+}
+
+/* ── Indeterminate Shimmer Progress Bar ─────────────────────────── */
+.scan-progress-bar-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sw-muted, rgba(148, 163, 184, 0.2));
+  overflow: hidden;
+  position: relative;
+  margin-top: 4px;
+}
+
+.scan-progress-bar-shimmer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 45%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--sw-primary, #5b7bfa) 50%,
+    transparent 100%
+  );
+  animation: indeterminateShimmer 1.8s ease-in-out infinite;
+}
+
+@keyframes indeterminateShimmer {
+  0% {
+    left: -45%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes fadeInOverlay {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOW CONFIDENCE BANNER & FIELD HIGHLIGHTS
+   ═══════════════════════════════════════════════════════════════════ */
+.warning-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 14px;
+  margin-bottom: 12px;
+}
+
+.warning-banner__icon {
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.warning-banner__content {
+  flex: 1;
+  text-align: left;
+}
+
+.warning-banner__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--sw-foreground);
+}
+
+.warning-banner__sub {
+  margin: 2px 0 0;
+  font-size: 0.78125rem;
+  color: var(--sw-muted-foreground);
+}
+
+.warning-banner__action {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+}
+
+.field-warning {
+  border: 1.5px solid #f59e0b !important;
+  border-radius: 8px;
+}
+
+.field-highlight-pulse {
+  animation: fieldHighlightPulse 2s ease-out;
+}
+
+@keyframes fieldHighlightPulse {
+  0% {
+    box-shadow: 0 0 0 3px rgba(91, 123, 250, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ERROR CARD WITH RETAINED THUMBNAIL
+   ═══════════════════════════════════════════════════════════════════ */
+.scan-error-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  background: var(--sw-card);
+  border: 1px solid var(--sw-border);
+  border-radius: 20px;
+  max-width: 440px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  box-shadow: var(--sw-shadow-sm);
+}
+
+.scan-error-thumbnail {
+  width: 110px;
+  height: 110px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--sw-border);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  background: #111;
+}
+
+.scan-error-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scan-error-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px;
+}
+
+.scan-error-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--sw-foreground);
+}
+
+.scan-error-sub {
+  margin: 6px 0 0;
+  font-size: 0.875rem;
+  color: var(--sw-muted-foreground);
+  line-height: 1.5;
+}
+
+.scan-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ACCESSIBILITY – PREFERS REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .scan-beam {
+    animation: none;
+    top: 50%;
+    opacity: 0.8;
+  }
+
+  .scan-status-icon__pulse,
+  .scan-progress-bar-shimmer,
+  .field-highlight-pulse {
+    animation: none;
+  }
+}

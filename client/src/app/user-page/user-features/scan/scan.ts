@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { catchError, finalize, map, of } from 'rxjs';
+import { catchError, finalize, map, of, Subscription, timeout } from 'rxjs';
 import { AiService } from '../../../core/services/ai.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { LanguageService } from '../../../core/services/language-service';
@@ -42,7 +42,7 @@ export type CameraPermission =
   | 'unavailable'
   | 'unsupported';
 export type CaptureState = 'live' | 'preview';
-export type ProcessingState = 'idle' | 'scanning' | 'result' | 'saving' | 'error';
+export type ProcessingState = 'idle' | 'scanning' | 'success' | 'result' | 'saving' | 'error';
 
 export interface ReceiptItem {
   id: number;
@@ -101,6 +101,15 @@ export class Scan implements OnInit, OnDestroy {
   captureState: CaptureState = 'live';
   processingState: ProcessingState = 'idle';
 
+  // Scanning Timer & Subscription Management
+  private scanSubscription: Subscription | null = null;
+  private scanTimer: any = null;
+  private successTimeout: any = null;
+  private highlightTimeout: any = null;
+  scanElapsedSeconds = 0;
+  isLowConfidence = false;
+  highlightFields = false;
+
   // Auto Capture & Scan History
   autoCaptureEnabled = false;
   countdownSeconds = 0;
@@ -150,7 +159,21 @@ export class Scan implements OnInit, OnDestroy {
   }
 
   get isProcessing(): boolean {
-    return this.processingState === 'scanning' || this.processingState === 'saving';
+    return (
+      this.processingState === 'scanning' ||
+      this.processingState === 'success' ||
+      this.processingState === 'saving'
+    );
+  }
+
+  get dynamicMicrocopy(): string {
+    if (this.scanElapsedSeconds < 3) {
+      return this.lang.t('scan.loadingStep1');
+    } else if (this.scanElapsedSeconds < 7) {
+      return this.lang.t('scan.loadingStep2');
+    } else {
+      return this.lang.t('scan.loadingStep3');
+    }
   }
 
   get isCameraActive(): boolean {
@@ -171,6 +194,23 @@ export class Scan implements OnInit, OnDestroy {
       : this.lang.t('scan.instruction.item');
   }
 
+  // ─── Timers ──────────────────────────────────────────────────────────────────
+  private startMicrocopyTimer(): void {
+    this.clearMicrocopyTimer();
+    this.scanElapsedSeconds = 0;
+    this.scanTimer = setInterval(() => {
+      this.scanElapsedSeconds++;
+      this.cdr.detectChanges();
+    }, 1000);
+  }
+
+  private clearMicrocopyTimer(): void {
+    if (this.scanTimer) {
+      clearInterval(this.scanTimer);
+      this.scanTimer = null;
+    }
+  }
+
   // ─── Lifecycle ───────────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.categoryService.getCategories().pipe(
@@ -186,6 +226,19 @@ export class Scan implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.scanSubscription) {
+      this.scanSubscription.unsubscribe();
+      this.scanSubscription = null;
+    }
+    this.clearMicrocopyTimer();
+    if (this.successTimeout) {
+      clearTimeout(this.successTimeout);
+      this.successTimeout = null;
+    }
+    if (this.highlightTimeout) {
+      clearTimeout(this.highlightTimeout);
+      this.highlightTimeout = null;
+    }
     this.stopCamera();
     this.clearPreview();
     this.clearAutoCaptureTimer();
@@ -453,6 +506,14 @@ export class Scan implements OnInit, OnDestroy {
   }
 
   // ─── Processing ──────────────────────────────────────────────────────────────
+  retryScan(): void {
+    if (this.currentFile) {
+      this.processFile(this.currentFile);
+    } else {
+      this.retakePhoto();
+    }
+  }
+
   private processFile(file: File): void {
     if (this.scanMode === 'receipt') {
       this.processBillScan(file);
@@ -462,95 +523,174 @@ export class Scan implements OnInit, OnDestroy {
   }
 
   private processBillScan(file: File): void {
+    if (
+      this.processingState === 'scanning' ||
+      this.processingState === 'success' ||
+      this.processingState === 'saving'
+    ) {
+      return;
+    }
+
+    if (this.scanSubscription) {
+      this.scanSubscription.unsubscribe();
+      this.scanSubscription = null;
+    }
+
     this.currentFile = file;
     this.processingState = 'scanning';
     this.errorMessage = null;
+    this.isLowConfidence = false;
+    this.startMicrocopyTimer();
 
-    this.aiService
+    this.scanSubscription = this.aiService
       .readBill(file)
       .pipe(
-        finalize(() => {
-          if (this.processingState === 'scanning') {
-            this.processingState = 'error';
-          }
+        timeout(20000),
+        catchError((err: unknown) => {
+          return of(null);
         }),
       )
-      .subscribe({
-        next: (response: ReadBillResponseDto) => {
-          if (!response.items || response.items.length === 0) {
-            this.errorMessage = this.lang.t('scan.error.noData');
-            this.processingState = 'error';
-            return;
+      .subscribe((response: ReadBillResponseDto | null) => {
+        this.clearMicrocopyTimer();
+
+        if (!response) {
+          this.errorMessage = this.lang.t('scan.errorNetwork');
+          this.processingState = 'error';
+          this.cdr.detectChanges();
+          return;
+        }
+
+        if (!response.items || response.items.length === 0) {
+          this.errorMessage = this.lang.t('scan.errorNoContent');
+          this.processingState = 'error';
+          this.cdr.detectChanges();
+          return;
+        }
+
+        this.storeName = response.merchantName || this.lang.t('scan.unknownStore');
+        this.receiptDate = response.transactionDate || new Date().toISOString();
+        this.billImageKey = response.billImageKey || null;
+        this.totalAmount = response.totalAmount || 0;
+
+        let hasUnknownCategory = false;
+
+        this.receiptItems = response.items.map((item, index) => {
+          const matchedCategory = item.category
+            ? this.categories.find(
+                (cat) => cat.name.toLowerCase() === item.category!.toLowerCase(),
+              )
+            : undefined;
+          const isUnknown = !matchedCategory;
+          if (isUnknown) {
+            hasUnknownCategory = true;
           }
 
-          this.storeName = response.merchantName || this.lang.t('scan.unknownStore');
-          this.receiptDate = response.transactionDate || new Date().toISOString();
-          this.billImageKey = response.billImageKey || null;
-          this.totalAmount = response.totalAmount || 0;
+          return {
+            id: index + 1,
+            name: item.itemName,
+            categoryId: matchedCategory ? matchedCategory.id : null,
+            categoryLabel: isUnknown ? 'Unknown' : matchedCategory.name,
+            categoryClass: isUnknown
+              ? 'category-pill--amber'
+              : this.getCategoryClass(matchedCategory.name),
+            unitPrice: item.price,
+            price: item.totalPrice,
+            quantity: item.quantity || 1,
+            unit: item.unit || null,
+          };
+        });
 
-          this.receiptItems = response.items.map((item, index) => {
-            const matchedCategory = item.category
-              ? this.categories.find(
-                  (cat) => cat.name.toLowerCase() === item.category!.toLowerCase(),
-                )
-              : undefined;
-            const isUnknown = !matchedCategory;
+        // Check for low confidence or incomplete data
+        const missingStore = !response.merchantName || response.merchantName.trim().length === 0;
+        const missingAmount = !response.totalAmount || response.totalAmount <= 0;
+        this.isLowConfidence = missingStore || missingAmount || hasUnknownCategory;
 
-            return {
-              id: index + 1,
-              name: item.itemName,
-              categoryId: matchedCategory ? matchedCategory.id : null,
-              categoryLabel: isUnknown ? 'Unknown' : matchedCategory.name,
-              categoryClass: isUnknown
-                ? 'category-pill--amber'
-                : this.getCategoryClass(matchedCategory.name),
-              unitPrice: item.price,
-              price: item.totalPrice,
-              quantity: item.quantity || 1,
-              unit: item.unit || null,
-            };
-          });
+        // Transition to success state first
+        this.processingState = 'success';
+        this.cdr.detectChanges();
 
+        if (this.successTimeout) {
+          clearTimeout(this.successTimeout);
+        }
+
+        // Wait 500ms before navigating to result screen
+        this.successTimeout = setTimeout(() => {
           this.processingState = 'result';
-        },
-        error: () => {
-          this.errorMessage = this.lang.t('scan.error.readFailed');
-          this.processingState = 'error';
-        },
+          this.highlightFields = true;
+          this.cdr.detectChanges();
+
+          if (this.highlightTimeout) {
+            clearTimeout(this.highlightTimeout);
+          }
+          this.highlightTimeout = setTimeout(() => {
+            this.highlightFields = false;
+            this.cdr.detectChanges();
+          }, 2500);
+        }, 500);
       });
   }
 
   private processItemScan(file: File): void {
+    if (
+      this.processingState === 'scanning' ||
+      this.processingState === 'success' ||
+      this.processingState === 'saving'
+    ) {
+      return;
+    }
+
+    if (this.scanSubscription) {
+      this.scanSubscription.unsubscribe();
+      this.scanSubscription = null;
+    }
+
     this.currentFile = file;
     this.processingState = 'scanning';
     this.errorMessage = null;
+    this.startMicrocopyTimer();
 
-    this.aiService
+    this.scanSubscription = this.aiService
       .analyzeImage(file)
       .pipe(
+        timeout(20000),
         map((response) => {
           const parsed = parseSnapItemAnalysis(response, this.categories);
           if (parsed) {
             return { extraction: parsed, source: 'ai' as const };
           }
           throw new Error('Failed to extract item details from image.');
-        })
+        }),
+        catchError(() => of(null)),
       )
-      .subscribe({
-        next: ({ extraction }) => {
-          this.manualForm.patchValue({
-            title: extraction.itemName,
-            amount: extraction.estimatedAmount,
-            category: extraction.category ?? '',
-            date: extraction.date.slice(0, 10),
-            note: extraction.note,
-          });
-          this.processingState = 'result';
-        },
-        error: () => {
-          this.errorMessage = this.lang.t('scan.error.itemFailed');
+      .subscribe((result) => {
+        this.clearMicrocopyTimer();
+
+        if (!result) {
+          this.errorMessage = this.lang.t('scan.errorNoContent');
           this.processingState = 'error';
-        },
+          this.cdr.detectChanges();
+          return;
+        }
+
+        const { extraction } = result;
+        this.manualForm.patchValue({
+          title: extraction.itemName,
+          amount: extraction.estimatedAmount,
+          category: extraction.category ?? '',
+          date: extraction.date.slice(0, 10),
+          note: extraction.note,
+        });
+
+        this.processingState = 'success';
+        this.cdr.detectChanges();
+
+        if (this.successTimeout) {
+          clearTimeout(this.successTimeout);
+        }
+        this.successTimeout = setTimeout(() => {
+          this.processingState = 'result';
+          this.cdr.detectChanges();
+        }, 500);
       });
   }
 

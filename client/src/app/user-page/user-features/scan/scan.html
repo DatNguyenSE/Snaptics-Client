@@ -231,20 +231,32 @@
 
         <!-- Error state -->
         @if (processingState === 'error') {
-          <div class="camera-state camera-state--error">
-            <div class="camera-state__icon camera-state__icon--error">
-              <span class="material-symbols-outlined">error_outline</span>
+          <div class="scan-error-card" role="alert" aria-live="assertive">
+            @if (previewUrl) {
+              <div class="scan-error-thumbnail">
+                <img [src]="previewUrl" alt="Receipt preview" />
+              </div>
+            }
+            <div class="scan-error-header">
+              <div class="scan-error-icon">
+                <span class="material-symbols-outlined">error_outline</span>
+              </div>
+              <h3 class="scan-error-title">{{ lang.t('scan.errorTitle') }}</h3>
+              <p class="scan-error-sub">{{ errorMessage }}</p>
             </div>
-            <p class="camera-state__title">{{ lang.t('scan.errorTitle') }}</p>
-            <p class="camera-state__sub">{{ errorMessage }}</p>
-            <div class="camera-state__actions">
-              <button class="scan-btn scan-btn--ghost" type="button" (click)="retakePhoto()" id="btn-retry-scan">
-                <span class="material-symbols-outlined">replay</span>
-                {{ lang.t('scan.retake') }}
+
+            <div class="scan-error-actions">
+              <button class="scan-btn scan-btn--primary" type="button" (click)="retryScan()" id="btn-retry-scan">
+                <span class="material-symbols-outlined">refresh</span>
+                {{ lang.t('scan.retryBtn') }}
               </button>
-              <button class="scan-btn scan-btn--outline" type="button" (click)="triggerUpload()" id="btn-retry-upload">
-                <span class="material-symbols-outlined">upload</span>
-                {{ lang.t('scan.uploadImage') }}
+              <button class="scan-btn scan-btn--outline" type="button" (click)="retakePhoto()" id="btn-retry-retake">
+                <span class="material-symbols-outlined">photo_camera</span>
+                {{ lang.t('scan.retakeBtn') }}
+              </button>
+              <button class="scan-btn scan-btn--ghost" type="button" (click)="setScanMode('manual')" id="btn-retry-manual">
+                <span class="material-symbols-outlined">edit_note</span>
+                {{ lang.t('scan.manualBtn') }}
               </button>
             </div>
           </div>
@@ -253,14 +265,30 @@
         <!-- Results: Receipt mode -->
         @if (scanMode === 'receipt' && processingState === 'result') {
           <div class="result-panel">
-            <div class="result-hint">
-              <span class="material-symbols-outlined">warning</span>
-              <p>{{ lang.t('scan.editHint') }}</p>
-            </div>
+            @if (isLowConfidence) {
+              <div class="warning-banner" role="alert" aria-live="assertive">
+                <div class="warning-banner__icon">
+                  <span class="material-symbols-outlined">warning</span>
+                </div>
+                <div class="warning-banner__content">
+                  <h4 class="warning-banner__title">{{ lang.t('scan.lowConfidenceTitle') }}</h4>
+                  <p class="warning-banner__sub">{{ lang.t('scan.lowConfidenceSub') }}</p>
+                </div>
+                <button class="scan-btn scan-btn--ghost warning-banner__action" (click)="retakePhoto()">
+                  <span class="material-symbols-outlined">replay</span>
+                  {{ lang.t('scan.retake') }}
+                </button>
+              </div>
+            } @else {
+              <div class="result-hint">
+                <span class="material-symbols-outlined">info</span>
+                <p>{{ lang.t('scan.editHint') }}</p>
+              </div>
+            }
 
-            <article class="receipt-card">
+            <article class="receipt-card" [class.field-highlight-pulse]="highlightFields">
               <div class="receipt-card__header">
-                <div class="receipt-card__store-wrap">
+                <div class="receipt-card__store-wrap" [class.field-warning]="isLowConfidence && (!storeName || storeName === lang.t('scan.unknownStore'))">
                   <input
                     type="text"
                     class="receipt-card__store"
@@ -545,4 +573,75 @@
     aria-hidden="true"
     (change)="onFileSelected($event)"
   />
+
+  <!-- ── Full-Screen Modern Receipt Scanner Processing Overlay Modal ── -->
+  @if (processingState === 'scanning' || processingState === 'success') {
+    <div
+      class="scan-processing-overlay"
+      role="status"
+      aria-live="polite"
+      [attr.aria-label]="lang.t('scan.analyzingTitle')"
+    >
+      <div class="scan-processing-backdrop"></div>
+
+      <div class="scan-processing-dialog">
+        <!-- Centered Floating Receipt Image Card -->
+        <div class="scan-floating-card">
+          <div class="scan-floating-card__image-wrap">
+            @if (previewUrl) {
+              <img [src]="previewUrl" alt="Receipt image scanning" class="scan-floating-card__img" />
+            }
+
+            <!-- 4 Corner Scan Frame Brackets -->
+            <div class="scan-bracket scan-bracket--tl" aria-hidden="true"></div>
+            <div class="scan-bracket scan-bracket--tr" aria-hidden="true"></div>
+            <div class="scan-bracket scan-bracket--bl" aria-hidden="true"></div>
+            <div class="scan-bracket scan-bracket--br" aria-hidden="true"></div>
+
+            <!-- Vertical Scanning Line Beam -->
+            @if (processingState === 'scanning') {
+              <div class="scan-beam" aria-hidden="true"></div>
+            }
+          </div>
+        </div>
+
+        <!-- Floating Processing Card / Bottom Sheet -->
+        <div class="scan-processing-card">
+          <!-- Status Icon -->
+          <div class="scan-status-icon-wrap">
+            @if (processingState === 'scanning') {
+              <div class="scan-status-icon scan-status-icon--scanning">
+                <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
+                <div class="scan-status-icon__pulse"></div>
+              </div>
+            } @else if (processingState === 'success') {
+              <div class="scan-status-icon scan-status-icon--success">
+                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+              </div>
+            }
+          </div>
+
+          <!-- Processing Text Info -->
+          <div class="scan-processing-info">
+            <h2 class="scan-processing-title">
+              {{ processingState === 'success' ? lang.t('scan.successTitle') : lang.t('scan.analyzingTitle') }}
+            </h2>
+            <p class="scan-processing-sub">
+              {{ processingState === 'success' ? lang.t('scan.successSub') : lang.t('scan.analyzingSub') }}
+            </p>
+          </div>
+
+          <!-- Dynamic Microcopy Phase & Shimmering Indeterminate Progress Bar -->
+          @if (processingState === 'scanning') {
+            <div class="scan-microcopy-phase">
+              <span class="scan-microcopy-text">{{ dynamicMicrocopy }}</span>
+            </div>
+            <div class="scan-progress-bar-track" aria-label="Đang xử lý hóa đơn">
+              <div class="scan-progress-bar-shimmer"></div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
 </section>
