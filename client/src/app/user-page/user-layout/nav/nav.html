@@ -28,6 +28,9 @@
           <span class="material-symbols-outlined">{{ item.icon }}</span>
         }
         <span>{{ language.t(item.labelKey) }}</span>
+        @if (item.id === 'notification' && unreadNotificationCount() > 0) {
+          <span class="sidebar__item-badge">{{ unreadNotificationCount() }}</span>
+        }
       </a>
     }
   </nav>
@@ -161,6 +164,9 @@
             </svg>
           } @else {
             <span class="material-symbols-outlined">{{ item.icon }}</span>
+          }
+          @if (item.id === 'notification' && unreadNotificationCount() > 0) {
+            <span class="bottom-nav__badge">{{ unreadNotificationCount() }}</span>
           }
         </span>
         <span class="bottom-nav__label">{{ language.t(item.labelKey) }}</span>

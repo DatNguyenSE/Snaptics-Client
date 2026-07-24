@@ -2,65 +2,528 @@
   <div class="notification-page__content">
     <app-user-header></app-user-header>
 
+    <!-- Hero Header -->
     <header class="notification-hero">
       <div class="notification-hero__copy">
         <span class="notification-hero__eyebrow">
           <span class="material-symbols-outlined">notifications_active</span>
-          {{ language.currentLang() === 'vi' ? 'Trung tâm cập nhật' : 'Update center' }}
+          {{ language.currentLang() === 'vi' ? 'Trung tâm thông báo' : 'Notification Center' }}
         </span>
-        <h1>{{ language.t('notifications.title') }}</h1>
-        <p>{{ language.t('notifications.subtitle') }}</p>
+        <h1>{{ language.currentLang() === 'vi' ? 'Thông báo' : 'Notifications' }}</h1>
+        <p>
+          {{ language.currentLang() === 'vi' 
+            ? 'Quản lý lời mời gia nhập ví, nhắc nhở đánh giá, hoạt động giao dịch và cập nhật hệ thống' 
+            : 'Manage wallet invitations, review reminders, transaction activity, and system updates' }}
+        </p>
       </div>
-      <div class="notification-hero__stat">
-        <span class="notification-hero__stat-icon material-symbols-outlined">mark_email_unread</span>
-        <strong>{{ unreadCount }}</strong>
-        <span>{{ language.currentLang() === 'vi' ? 'chưa đọc' : 'unread' }}</span>
+
+      <div class="notification-hero__actions">
+        <div class="notification-hero__stat">
+          <span class="notification-hero__stat-icon material-symbols-outlined">mark_email_unread</span>
+          <strong>{{ unreadCount() }}</strong>
+          <span>{{ language.currentLang() === 'vi' ? 'chưa đọc' : 'unread' }}</span>
+        </div>
+
+        <div class="notification-hero__buttons">
+          <button 
+            type="button" 
+            class="hero-btn hero-btn--read" 
+            [disabled]="unreadCount() === 0" 
+            (click)="markAllAsRead()"
+            [title]="language.currentLang() === 'vi' ? 'Đánh dấu tất cả là đã đọc' : 'Mark all as read'"
+          >
+            <span class="material-symbols-outlined">done_all</span>
+            <span class="hero-btn__text">{{ language.currentLang() === 'vi' ? 'Đánh dấu tất cả đã đọc' : 'Mark all read' }}</span>
+          </button>
+
+          <button 
+            type="button" 
+            class="hero-btn hero-btn--icon" 
+            (click)="openSettings()" 
+            [title]="language.currentLang() === 'vi' ? 'Cài đặt thông báo' : 'Notification Settings'"
+          >
+            <span class="material-symbols-outlined">settings</span>
+          </button>
+        </div>
       </div>
     </header>
 
+    <!-- Toolbar Filters & Dropdowns -->
     <div class="notification-toolbar">
-      <div class="notification-filters" role="tablist" [attr.aria-label]="language.t('notifications.title')">
-        <button type="button" class="notification-filter" [class.notification-filter--active]="activeFilter === 'all'" (click)="setFilter('all')">
-          {{ language.currentLang() === 'vi' ? 'Tất cả' : 'All' }} <span>{{ notifications().length }}</span>
+      <!-- Filter Tabs -->
+      <div class="notification-tabs" role="tablist">
+        <button 
+          type="button" 
+          class="notification-tab" 
+          [class.notification-tab--active]="activeTab() === 'all'" 
+          (click)="setTab('all')"
+        >
+          <span>{{ language.currentLang() === 'vi' ? 'Tất cả' : 'All' }}</span>
+          <span class="notification-tab__badge">{{ getTabCount('all') }}</span>
         </button>
-        <button type="button" class="notification-filter" [class.notification-filter--active]="activeFilter === 'unread'" (click)="setFilter('unread')">
-          {{ language.currentLang() === 'vi' ? 'Chưa đọc' : 'Unread' }} <span>{{ unreadCount }}</span>
+
+        <button 
+          type="button" 
+          class="notification-tab" 
+          [class.notification-tab--active]="activeTab() === 'unread'" 
+          (click)="setTab('unread')"
+        >
+          <span>{{ language.currentLang() === 'vi' ? 'Chưa đọc' : 'Unread' }}</span>
+          <span class="notification-tab__badge notification-tab__badge--unread">{{ getTabCount('unread') }}</span>
+        </button>
+
+        <button 
+          type="button" 
+          class="notification-tab" 
+          [class.notification-tab--active]="activeTab() === 'wallet_invitation'" 
+          (click)="setTab('wallet_invitation')"
+        >
+          <span class="material-symbols-outlined tab-icon">group_add</span>
+          <span>{{ language.currentLang() === 'vi' ? 'Lời mời vào ví' : 'Invitations' }}</span>
+          @if (getTabCount('wallet_invitation') > 0) {
+            <span class="notification-tab__badge">{{ getTabCount('wallet_invitation') }}</span>
+          }
+        </button>
+
+        <button 
+          type="button" 
+          class="notification-tab" 
+          [class.notification-tab--active]="activeTab() === 'product_review'" 
+          (click)="setTab('product_review')"
+        >
+          <span class="material-symbols-outlined tab-icon">rate_review</span>
+          <span>{{ language.currentLang() === 'vi' ? 'Review sản phẩm' : 'Reviews' }}</span>
+          @if (getTabCount('product_review') > 0) {
+            <span class="notification-tab__badge">{{ getTabCount('product_review') }}</span>
+          }
+        </button>
+
+        <button 
+          type="button" 
+          class="notification-tab" 
+          [class.notification-tab--active]="activeTab() === 'wallet_activity'" 
+          (click)="setTab('wallet_activity')"
+        >
+          <span class="material-symbols-outlined tab-icon">account_balance_wallet</span>
+          <span>{{ language.currentLang() === 'vi' ? 'Hoạt động ví' : 'Activity' }}</span>
+          @if (getTabCount('wallet_activity') > 0) {
+            <span class="notification-tab__badge">{{ getTabCount('wallet_activity') }}</span>
+          }
+        </button>
+
+        <button 
+          type="button" 
+          class="notification-tab" 
+          [class.notification-tab--active]="activeTab() === 'system'" 
+          (click)="setTab('system')"
+        >
+          <span class="material-symbols-outlined tab-icon">info</span>
+          <span>{{ language.currentLang() === 'vi' ? 'Hệ thống' : 'System' }}</span>
+          @if (getTabCount('system') > 0) {
+            <span class="notification-tab__badge">{{ getTabCount('system') }}</span>
+          }
         </button>
       </div>
-      <button type="button" class="notification-mark-all" [disabled]="unreadCount === 0" (click)="markAllAsRead()">
-        <span class="material-symbols-outlined">done_all</span>
-        {{ language.t('notifications.markAllRead') }}
-      </button>
+
+      <!-- Time Filter Dropdown -->
+      <div class="notification-time-filter">
+        <label for="time-select" class="time-filter__label">
+          <span class="material-symbols-outlined">filter_list</span>
+          <span>{{ language.currentLang() === 'vi' ? 'Thời gian:' : 'Time:' }}</span>
+        </label>
+        <select 
+          id="time-select" 
+          class="time-filter__select" 
+          [ngModel]="timeFilter()" 
+          (ngModelChange)="setTimeFilter($event)"
+        >
+          <option value="all">{{ language.currentLang() === 'vi' ? 'Tất cả' : 'All time' }}</option>
+          <option value="today">{{ language.currentLang() === 'vi' ? 'Hôm nay' : 'Today' }}</option>
+          <option value="7days">{{ language.currentLang() === 'vi' ? '7 ngày gần đây' : 'Last 7 days' }}</option>
+          <option value="30days">{{ language.currentLang() === 'vi' ? '30 ngày gần đây' : 'Last 30 days' }}</option>
+        </select>
+      </div>
     </div>
 
-    @if (filteredNotifications.length > 0) {
-      <div class="notification-list">
-        @for (notification of filteredNotifications; track notification.id; let index = $index) {
-          <article class="notification-card" [class.notification-card--unread]="!notification.isRead" [attr.data-tone]="notificationMeta[notification.type].tone" [style.--notification-index]="index" (click)="markAsRead(notification)">
-            <div class="notification-card__icon">
-              <span class="material-symbols-outlined">{{ notificationMeta[notification.type].icon }}</span>
+    <!-- MAIN NOTIFICATION CONTENT -->
+    @if (isLoading()) {
+      <!-- SKELETON LOADING STATE -->
+      <div class="notification-list notification-list--skeleton">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <div class="notification-card notification-card--skeleton">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-body">
+              <div class="skeleton-line skeleton-line--short"></div>
+              <div class="skeleton-line skeleton-line--medium"></div>
+              <div class="skeleton-line skeleton-line--full"></div>
             </div>
-            <div class="notification-card__body">
-              <div class="notification-card__meta">
-                <span>{{ labelForType(notification.type) }}</span>
-                <time>{{ notification.time }}</time>
-              </div>
-              <h2>{{ notification.title }}</h2>
-              <p>{{ notification.description }}</p>
-            </div>
-            @if (!notification.isRead) {
-              <span class="notification-card__unread" aria-label="Unread"></span>
-            }
-            <span class="material-symbols-outlined notification-card__arrow">chevron_right</span>
-          </article>
+          </div>
         }
       </div>
+    } @else if (hasError()) {
+      <!-- ERROR STATE -->
+      <div class="notification-error">
+        <span class="material-symbols-outlined notification-error__icon">error_outline</span>
+        <h2>{{ language.currentLang() === 'vi' ? 'Không thể tải dữ liệu thông báo' : 'Failed to load notifications' }}</h2>
+        <p>{{ language.currentLang() === 'vi' ? 'Đã xảy ra lỗi khi kết nối tới máy chủ. Vui lòng thử lại.' : 'An error occurred while connecting. Please try again.' }}</p>
+        <button type="button" class="btn btn--primary" (click)="retryLoad()">
+          <span class="material-symbols-outlined">refresh</span>
+          {{ language.currentLang() === 'vi' ? 'Thử lại' : 'Retry' }}
+        </button>
+      </div>
+    } @else if (filteredNotifications().length > 0) {
+      <!-- NOTIFICATION LIST -->
+      <div class="notification-list" (click)="closeAllMenus()">
+        @for (item of filteredNotifications(); track item.id) {
+          <article 
+            class="notification-card" 
+            [class.notification-card--unread]="!item.isRead"
+            [attr.data-tone]="getToneForNotification(item)"
+            (click)="onItemClick(item)"
+          >
+            <!-- Left Media (Avatar or Icon) -->
+            <div class="notification-card__media">
+              @if (item.senderAvatar) {
+                <div class="avatar-wrap">
+                  <img [src]="item.senderAvatar" [alt]="item.senderName || 'Avatar'" class="sender-avatar" />
+                  <span class="avatar-type-badge material-symbols-outlined">{{ getIconForNotification(item) }}</span>
+                </div>
+              } @else {
+                <div class="icon-wrap">
+                  <span class="material-symbols-outlined">{{ getIconForNotification(item) }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Card Body -->
+            <div class="notification-card__body">
+              <div class="notification-card__meta">
+                <span class="type-badge" [attr.data-tone]="getToneForNotification(item)">
+                  {{ getBadgeLabel(item) }}
+                </span>
+                <time class="notification-time">{{ item.time }}</time>
+              </div>
+
+              <h2 class="notification-card__title">{{ item.title }}</h2>
+              <p class="notification-card__desc">{{ item.description }}</p>
+
+              <!-- TYPE 1: WALLET INVITATION ACTION AREA -->
+              @if (item.type === 'wallet_invitation') {
+                <div class="action-box action-box--invitation" (click)="$event.stopPropagation()">
+                  <div class="invitation-info">
+                    <span class="material-symbols-outlined">folder_shared</span>
+                    <span>Ví: <strong>{{ item.metadata?.walletName || 'Ví dùng chung' }}</strong></span>
+                    <span class="role-tag">{{ item.metadata?.role || 'Thành viên' }}</span>
+                  </div>
+
+                  <div class="invitation-actions">
+                    @if (item.actionStatus === 'pending') {
+                      <button 
+                        type="button" 
+                        class="btn btn--accept" 
+                        (click)="acceptInvitation(item, $event)"
+                      >
+                        <span class="material-symbols-outlined">check</span>
+                        {{ language.currentLang() === 'vi' ? 'Chấp nhận' : 'Accept' }}
+                      </button>
+                      <button 
+                        type="button" 
+                        class="btn btn--reject" 
+                        (click)="rejectInvitation(item, $event)"
+                      >
+                        <span class="material-symbols-outlined">close</span>
+                        {{ language.currentLang() === 'vi' ? 'Từ chối' : 'Decline' }}
+                      </button>
+                    } @else if (item.actionStatus === 'accepted') {
+                      <span class="status-pill status-pill--accepted">
+                        <span class="material-symbols-outlined">check_circle</span>
+                        {{ language.currentLang() === 'vi' ? 'Đã chấp nhận' : 'Accepted' }}
+                      </span>
+                    } @else {
+                      <span class="status-pill status-pill--rejected">
+                        <span class="material-symbols-outlined">cancel</span>
+                        {{ language.currentLang() === 'vi' ? 'Đã từ chối' : 'Declined' }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- TYPE 2: PRODUCT REVIEW ACTION AREA -->
+              @if (item.type === 'product_review') {
+                <div class="action-box action-box--review" (click)="$event.stopPropagation()">
+                  @if (item.metadata?.productImage) {
+                    <img [src]="item.metadata?.productImage" [alt]="item.metadata?.productName || 'Product'" class="product-thumb" />
+                  }
+                  <div class="product-info">
+                    <strong class="product-name">{{ item.metadata?.productName }}</strong>
+                    <span class="product-price">{{ formatAmount(item.metadata?.amount) }}</span>
+                  </div>
+                  <div class="review-action">
+                    @if (item.actionStatus !== 'reviewed') {
+                      <button 
+                        type="button" 
+                        class="btn btn--review" 
+                        (click)="openReviewModal(item, $event)"
+                      >
+                        <span class="material-symbols-outlined">star</span>
+                        {{ language.currentLang() === 'vi' ? 'Đánh giá ngay' : 'Review Now' }}
+                      </button>
+                    } @else {
+                      <span class="status-pill status-pill--reviewed">
+                        <span class="material-symbols-outlined">verified</span>
+                        {{ language.currentLang() === 'vi' ? 'Đã đánh giá (' + (item.metadata?.rating || 5) + '★)' : 'Reviewed (' + (item.metadata?.rating || 5) + '★)' }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- TYPE 3: WALLET ACTIVITY EXTRA BADGES -->
+              @if (item.type === 'wallet_activity' && item.metadata?.amount) {
+                <div class="activity-meta">
+                  <span class="activity-amount">{{ formatAmount(item.metadata?.amount) }}</span>
+                  @if (item.metadata?.category) {
+                    <span class="activity-category">{{ item.metadata?.category }}</span>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Right Area: Unread Dot + 3-Dots Menu -->
+            <div class="notification-card__right" (click)="$event.stopPropagation()">
+              @if (!item.isRead) {
+                <span class="unread-dot" [title]="language.currentLang() === 'vi' ? 'Chưa đọc' : 'Unread'"></span>
+              }
+
+              <!-- Menu Button -->
+              <div class="card-menu-shell">
+                <button 
+                  type="button" 
+                  class="card-menu-trigger" 
+                  (click)="toggleMenu(item.id, $event)"
+                  [title]="language.currentLang() === 'vi' ? 'Tùy chọn' : 'Options'"
+                >
+                  <span class="material-symbols-outlined">more_vert</span>
+                </button>
+
+                <!-- Context Menu -->
+                @if (openMenuId() === item.id) {
+                  <div class="card-menu-dropdown" (click)="$event.stopPropagation()">
+                    @if (!item.isRead) {
+                      <button type="button" class="dropdown-item" (click)="markAsRead(item, $event)">
+                        <span class="material-symbols-outlined">done</span>
+                        <span>{{ language.currentLang() === 'vi' ? 'Đánh dấu đã đọc' : 'Mark as read' }}</span>
+                      </button>
+                    } @else {
+                      <button type="button" class="dropdown-item" (click)="markAsUnread(item, $event)">
+                        <span class="material-symbols-outlined">mark_email_unread</span>
+                        <span>{{ language.currentLang() === 'vi' ? 'Đánh dấu chưa đọc' : 'Mark as unread' }}</span>
+                      </button>
+                    }
+
+                    <button type="button" class="dropdown-item dropdown-item--danger" (click)="promptDelete(item, $event)">
+                      <span class="material-symbols-outlined">delete</span>
+                      <span>{{ language.currentLang() === 'vi' ? 'Xóa thông báo' : 'Delete notification' }}</span>
+                    </button>
+
+                    <button type="button" class="dropdown-item" (click)="toggleMute(item.type, $event)">
+                      <span class="material-symbols-outlined">notifications_off</span>
+                      <span>{{ language.currentLang() === 'vi' ? 'Tắt loại thông báo này' : 'Mute this type' }}</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          </article>
+        }
+
+        <!-- INFINITE SCROLL / LOAD MORE -->
+        <div class="notification-load-more">
+          <button 
+            type="button" 
+            class="btn btn--load-more" 
+            [disabled]="isInfiniteLoading()" 
+            (click)="loadMore()"
+          >
+            @if (isInfiniteLoading()) {
+              <span class="spinner"></span>
+              <span>{{ language.currentLang() === 'vi' ? 'Đang tải thêm...' : 'Loading more...' }}</span>
+            } @else {
+              <span class="material-symbols-outlined">expand_more</span>
+              <span>{{ language.currentLang() === 'vi' ? 'Tải thêm thông báo' : 'Load more notifications' }}</span>
+            }
+          </button>
+        </div>
+      </div>
     } @else {
+      <!-- EMPTY STATE -->
       <div class="notification-empty">
-        <div class="notification-empty__icon"><span class="material-symbols-outlined">notifications_off</span></div>
-        <h2>{{ language.t('notifications.empty') }}</h2>
-        <p>{{ language.currentLang() === 'vi' ? 'Các cập nhật mới sẽ xuất hiện ở đây.' : 'New updates will appear here.' }}</p>
+        <div class="notification-empty__illustration">
+          <span class="material-symbols-outlined">notifications_off</span>
+        </div>
+        <h2>{{ language.currentLang() === 'vi' ? 'Bạn đã xem hết thông báo' : 'You\'re all caught up!' }}</h2>
+        <p>{{ language.currentLang() === 'vi' ? 'Các cập nhật mới sẽ xuất hiện tại đây.' : 'New updates will appear here.' }}</p>
       </div>
     }
   </div>
 </section>
+
+<!-- MODAL 1: PRODUCT REVIEW MODAL -->
+@if (itemToReview()) {
+  <div class="modal-backdrop" (click)="closeReviewModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-card__header">
+        <h3>
+          <span class="material-symbols-outlined">rate_review</span>
+          {{ language.currentLang() === 'vi' ? 'Đánh giá sản phẩm' : 'Review Product' }}
+        </h3>
+        <button type="button" class="modal-close-btn" (click)="closeReviewModal()">&times;</button>
+      </div>
+
+      <div class="modal-card__body">
+        <div class="review-product-preview">
+          @if (itemToReview()?.metadata?.productImage) {
+            <img [src]="itemToReview()?.metadata?.productImage" alt="Product" />
+          }
+          <div>
+            <h4>{{ itemToReview()?.metadata?.productName }}</h4>
+            <p>{{ formatAmount(itemToReview()?.metadata?.amount) }} • {{ itemToReview()?.metadata?.purchaseDate }}</p>
+          </div>
+        </div>
+
+        <div class="star-rating-control">
+          <span class="rating-label">{{ language.currentLang() === 'vi' ? 'Đánh giá mức độ hài lòng:' : 'Rating:' }}</span>
+          <div class="stars">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <button 
+                type="button" 
+                class="star-btn" 
+                [class.star-btn--filled]="star <= reviewRating()" 
+                (click)="setRating(star)"
+              >
+                ★
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="review-comment-group">
+          <label for="comment">{{ language.currentLang() === 'vi' ? 'Nhận xét của bạn (không bắt buộc):' : 'Your review (optional):' }}</label>
+          <textarea 
+            id="comment" 
+            rows="3" 
+            [(ngModel)]="reviewComment" 
+            [placeholder]="language.currentLang() === 'vi' ? 'Hãy chia sẻ trải nghiệm sử dụng sản phẩm này...' : 'Share your thoughts about this product...'"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-card__footer">
+        <button type="button" class="btn btn--secondary" (click)="closeReviewModal()">
+          {{ language.currentLang() === 'vi' ? 'Hủy' : 'Cancel' }}
+        </button>
+        <button type="button" class="btn btn--primary" (click)="submitReview()">
+          <span class="material-symbols-outlined">send</span>
+          {{ language.currentLang() === 'vi' ? 'Gửi đánh giá' : 'Submit Review' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL 2: CONFIRM DELETE DIALOG -->
+@if (itemToDelete()) {
+  <div class="modal-backdrop" (click)="cancelDelete()">
+    <div class="modal-card modal-card--danger" (click)="$event.stopPropagation()">
+      <div class="modal-card__header">
+        <h3>
+          <span class="material-symbols-outlined">warning</span>
+          {{ language.currentLang() === 'vi' ? 'Xác nhận xóa' : 'Confirm Delete' }}
+        </h3>
+        <button type="button" class="modal-close-btn" (click)="cancelDelete()">&times;</button>
+      </div>
+
+      <div class="modal-card__body">
+        <p>{{ language.currentLang() === 'vi' ? 'Bạn có chắc chắn muốn xóa thông báo này khỏi danh sách?' : 'Are you sure you want to delete this notification?' }}</p>
+        <div class="delete-preview-item">
+          <strong>{{ itemToDelete()?.title }}</strong>
+          <p>{{ itemToDelete()?.description }}</p>
+        </div>
+      </div>
+
+      <div class="modal-card__footer">
+        <button type="button" class="btn btn--secondary" (click)="cancelDelete()">
+          {{ language.currentLang() === 'vi' ? 'Hủy' : 'Cancel' }}
+        </button>
+        <button type="button" class="btn btn--danger" (click)="confirmDelete()">
+          <span class="material-symbols-outlined">delete</span>
+          {{ language.currentLang() === 'vi' ? 'Xóa thông báo' : 'Delete' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL 3: NOTIFICATION SETTINGS MODAL -->
+@if (isSettingsOpen()) {
+  <div class="modal-backdrop" (click)="closeSettings()">
+    <div class="modal-card modal-card--settings" (click)="$event.stopPropagation()">
+      <div class="modal-card__header">
+        <h3>
+          <span class="material-symbols-outlined">settings</span>
+          {{ language.currentLang() === 'vi' ? 'Cài đặt thông báo' : 'Notification Settings' }}
+        </h3>
+        <button type="button" class="modal-close-btn" (click)="closeSettings()">&times;</button>
+      </div>
+
+      <div class="modal-card__body">
+        <div class="settings-group">
+          <h4>{{ language.currentLang() === 'vi' ? 'Kênh nhận thông báo' : 'Notification Channels' }}</h4>
+          <label class="setting-row">
+            <span>{{ language.currentLang() === 'vi' ? 'Thông báo đẩy trình duyệt (Push)' : 'Push Notifications' }}</span>
+            <input type="checkbox" [(ngModel)]="settingsForm.pushNotif" />
+          </label>
+          <label class="setting-row">
+            <span>{{ language.currentLang() === 'vi' ? 'Thông báo qua Email' : 'Email Notifications' }}</span>
+            <input type="checkbox" [(ngModel)]="settingsForm.emailNotif" />
+          </label>
+          <label class="setting-row">
+            <span>{{ language.currentLang() === 'vi' ? 'Âm thanh thông báo' : 'Sound Effects' }}</span>
+            <input type="checkbox" [(ngModel)]="settingsForm.soundEnabled" />
+          </label>
+        </div>
+
+        <div class="settings-group">
+          <h4>{{ language.currentLang() === 'vi' ? 'Loại thông báo nhận' : 'Notification Types' }}</h4>
+          <label class="setting-row">
+            <span>{{ language.currentLang() === 'vi' ? 'Lời mời gia nhập ví' : 'Wallet Invitations' }}</span>
+            <input type="checkbox" [(ngModel)]="settingsForm.walletInviteNotif" />
+          </label>
+          <label class="setting-row">
+            <span>{{ language.currentLang() === 'vi' ? 'Hoạt động chi tiêu trong ví' : 'Wallet Activity' }}</span>
+            <input type="checkbox" [(ngModel)]="settingsForm.walletActivityNotif" />
+          </label>
+          <label class="setting-row">
+            <span>{{ language.currentLang() === 'vi' ? 'Nhắc nhở đánh giá sản phẩm' : 'Product Reviews' }}</span>
+            <input type="checkbox" [(ngModel)]="settingsForm.reviewNotif" />
+          </label>
+          <label class="setting-row">
+            <span>{{ language.currentLang() === 'vi' ? 'Cảnh báo & Cập nhật hệ thống' : 'System Alerts' }}</span>
+            <input type="checkbox" [(ngModel)]="settingsForm.systemNotif" />
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-card__footer">
+        <button type="button" class="btn btn--secondary" (click)="closeSettings()">
+          {{ language.currentLang() === 'vi' ? 'Hủy' : 'Cancel' }}
+        </button>
+        <button type="button" class="btn btn--primary" (click)="saveSettings()">
+          <span class="material-symbols-outlined">save</span>
+          {{ language.currentLang() === 'vi' ? 'Lưu cài đặt' : 'Save Settings' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

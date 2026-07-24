@@ -17,6 +17,26 @@ const NOTIFICATION_META: Record<
   NotificationType,
   NotificationMeta
 > = {
+  wallet_invitation: {
+    icon: 'group_add',
+    tone: 'violet',
+    label: { vi: 'Lời mời vào ví', en: 'Wallet invitation' },
+  },
+  product_review: {
+    icon: 'rate_review',
+    tone: 'amber',
+    label: { vi: 'Đánh giá sản phẩm', en: 'Product review' },
+  },
+  wallet_activity: {
+    icon: 'account_balance_wallet',
+    tone: 'emerald',
+    label: { vi: 'Hoạt động ví', en: 'Wallet activity' },
+  },
+  system: {
+    icon: 'info',
+    tone: 'blue',
+    label: { vi: 'Hệ thống', en: 'System' },
+  },
   receipt: {
     icon: 'receipt_long',
     tone: 'blue',
