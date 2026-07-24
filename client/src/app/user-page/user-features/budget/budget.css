@@ -13,7 +13,7 @@
 
 @media (min-width: 1024px) {
   .budget-page {
-    padding: 32px 32px 32px 272px;
+    padding: 32px;
   }
 }
 
@@ -227,10 +227,15 @@ h1, h2, h3, p, span { margin: 0; }
   font-weight: 600;
 }
 
+.dropdown-container {
+  position: relative;
+}
+
 .budget-card__actions {
   display: flex;
   gap: 4px;
 }
+
 .btn-icon {
   background: transparent;
   border: none;
@@ -245,6 +250,82 @@ h1, h2, h3, p, span { margin: 0; }
 }
 .btn-icon:hover { background: #f3f4f6; color: #4b5563; }
 .btn-icon--danger:hover { background: #fef2f2; color: #ef4444; }
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  min-width: 200px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dropdown-menu--active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.dropdown-item:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.dropdown-item .material-symbols-outlined {
+  font-size: 1.2rem;
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.dropdown-item:hover .material-symbols-outlined {
+  color: #6b7280;
+}
+
+.dropdown-item--danger {
+  color: #ef4444;
+}
+
+.dropdown-item--danger:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.dropdown-item--danger .material-symbols-outlined {
+  color: #ef4444;
+}
+
+.dropdown-item--danger:hover .material-symbols-outlined {
+  color: #dc2626;
+}
 
 /* ─── Card Body & Amounts ─── */
 .budget-card__body {

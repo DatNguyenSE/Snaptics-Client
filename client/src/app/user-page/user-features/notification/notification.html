@@ -1,0 +1,66 @@
+<section class="notification-page">
+  <div class="notification-page__content">
+    <app-user-header></app-user-header>
+
+    <header class="notification-hero">
+      <div class="notification-hero__copy">
+        <span class="notification-hero__eyebrow">
+          <span class="material-symbols-outlined">notifications_active</span>
+          {{ language.currentLang() === 'vi' ? 'Trung tâm cập nhật' : 'Update center' }}
+        </span>
+        <h1>{{ language.t('notifications.title') }}</h1>
+        <p>{{ language.t('notifications.subtitle') }}</p>
+      </div>
+      <div class="notification-hero__stat">
+        <span class="notification-hero__stat-icon material-symbols-outlined">mark_email_unread</span>
+        <strong>{{ unreadCount }}</strong>
+        <span>{{ language.currentLang() === 'vi' ? 'chưa đọc' : 'unread' }}</span>
+      </div>
+    </header>
+
+    <div class="notification-toolbar">
+      <div class="notification-filters" role="tablist" [attr.aria-label]="language.t('notifications.title')">
+        <button type="button" class="notification-filter" [class.notification-filter--active]="activeFilter === 'all'" (click)="setFilter('all')">
+          {{ language.currentLang() === 'vi' ? 'Tất cả' : 'All' }} <span>{{ notifications().length }}</span>
+        </button>
+        <button type="button" class="notification-filter" [class.notification-filter--active]="activeFilter === 'unread'" (click)="setFilter('unread')">
+          {{ language.currentLang() === 'vi' ? 'Chưa đọc' : 'Unread' }} <span>{{ unreadCount }}</span>
+        </button>
+      </div>
+      <button type="button" class="notification-mark-all" [disabled]="unreadCount === 0" (click)="markAllAsRead()">
+        <span class="material-symbols-outlined">done_all</span>
+        {{ language.t('notifications.markAllRead') }}
+      </button>
+    </div>
+
+    @if (filteredNotifications.length > 0) {
+      <div class="notification-list">
+        @for (notification of filteredNotifications; track notification.id; let index = $index) {
+          <article class="notification-card" [class.notification-card--unread]="!notification.isRead" [attr.data-tone]="notificationMeta[notification.type].tone" [style.--notification-index]="index" (click)="markAsRead(notification)">
+            <div class="notification-card__icon">
+              <span class="material-symbols-outlined">{{ notificationMeta[notification.type].icon }}</span>
+            </div>
+            <div class="notification-card__body">
+              <div class="notification-card__meta">
+                <span>{{ labelForType(notification.type) }}</span>
+                <time>{{ notification.time }}</time>
+              </div>
+              <h2>{{ notification.title }}</h2>
+              <p>{{ notification.description }}</p>
+            </div>
+            @if (!notification.isRead) {
+              <span class="notification-card__unread" aria-label="Unread"></span>
+            }
+            <span class="material-symbols-outlined notification-card__arrow">chevron_right</span>
+          </article>
+        }
+      </div>
+    } @else {
+      <div class="notification-empty">
+        <div class="notification-empty__icon"><span class="material-symbols-outlined">notifications_off</span></div>
+        <h2>{{ language.t('notifications.empty') }}</h2>
+        <p>{{ language.currentLang() === 'vi' ? 'Các cập nhật mới sẽ xuất hiện ở đây.' : 'New updates will appear here.' }}</p>
+      </div>
+    }
+  </div>
+</section>

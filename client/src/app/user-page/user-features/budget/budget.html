@@ -93,16 +93,26 @@
                       </span>
                     </div>
                   </div>
-                  <div class="budget-card__actions">
+                  <div class="budget-card__actions dropdown-container">
+                    <!-- Default star button moved outside -->
                     <button class="btn-icon" [class.btn-icon--active]="budget.isDefault" aria-label="Đặt làm mặc định" (click)="setDefaultBudget(budget)" [title]="budget.isDefault ? 'Đang là ví mặc định' : 'Đặt làm mặc định'" [style.color]="budget.isDefault ? '#fbbf24' : ''">
                       <span class="material-symbols-outlined" [style.font-variation-settings]="budget.isDefault ? '&quot;FILL&quot; 1' : '&quot;FILL&quot; 0'">star</span>
                     </button>
-                    <button class="btn-icon" aria-label="Sửa ngân sách" (click)="openModal(budget)">
-                      <span class="material-symbols-outlined">edit</span>
+                    
+                    <button class="btn-icon" aria-label="Tùy chọn" (click)="toggleDropdown($event, budget.id)">
+                      <span class="material-symbols-outlined">more_vert</span>
                     </button>
-                    <button class="btn-icon btn-icon--danger" aria-label="Xóa ngân sách" (click)="deleteBudget(budget.id)">
-                      <span class="material-symbols-outlined">delete</span>
-                    </button>
+                    
+                    <div class="dropdown-menu" [class.dropdown-menu--active]="activeDropdownId === budget.id" (click)="stopPropagation($event)">
+                      <button class="dropdown-item" (click)="openModal(budget); activeDropdownId = null">
+                        <span class="material-symbols-outlined">edit</span>
+                        Chỉnh sửa
+                      </button>
+                      <button class="dropdown-item dropdown-item--danger" (click)="deleteBudget(budget.id); activeDropdownId = null">
+                        <span class="material-symbols-outlined">delete</span>
+                        Xóa ví
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -216,8 +226,8 @@
                         }
                       </div>
                     }
-                    @if ((budget.memberCount ?? 0) > 3) {
-                      <div class="member-chip member-chip--more">+{{ (budget.memberCount ?? 0) - 3 }}</div>
+                    @if (getAcceptedMemberCount(budget) > 3) {
+                      <div class="member-chip member-chip--more">+{{ getAcceptedMemberCount(budget) - 3 }}</div>
                     }
                   </div>
                 </div>
@@ -246,7 +256,7 @@
                       <span class="progress-percent">{{ getSharedSpentPercent(budget) }}%</span>
                       <span class="member-count-label">
                         <span class="material-symbols-outlined">group</span>
-                        {{ budget.memberCount }} thành viên
+                         {{ getAcceptedMemberCount(budget) }} thành viên
                       </span>
                     </div>
                   </div>

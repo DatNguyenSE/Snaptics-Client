@@ -722,7 +722,8 @@
   }
 
   .bottom-nav__item--budget,
-  .bottom-nav__item--analysis {
+  .bottom-nav__item--analysis,
+  .bottom-nav__item--frequency {
     display: none !important;
   }
 

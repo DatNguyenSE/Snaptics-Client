@@ -49,7 +49,10 @@ export class CreateSharedBudgetModal implements OnInit {
     const val = this.form.getRawValue();
 
     this.budgetMemberService
-      .inviteMember(val.budgetId, { email: val.email })
+      .inviteMember(val.budgetId, {
+        emailOrUsername: val.email,
+        role: 1,
+      })
       .subscribe({
         next: () => {
           this.toast.success(`Đã gửi lời mời đến ${val.email} thành công!`);

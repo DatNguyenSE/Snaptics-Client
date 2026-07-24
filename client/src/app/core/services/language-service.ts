@@ -37,6 +37,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       logout: '\u0110\u0103ng xu\u1ea5t',
       analysis: 'Ph\u00e2n t\u00edch',
       snapticsAi: 'Snaptics AI',
+      notifications: 'Thông báo',
     },
     header: {
       greeting: 'Xin ch\u00e0o, {{name}}',
@@ -126,7 +127,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       aiSearchPlaceholder: 'Bạn muốn tìm gì? Hỏi mình về chi tiêu, ngân sách...',
       aiSuggestions: {
         howMuch: 'Tháng này tôi chi bao nhiêu?',
-        compare: 'So sánh với tháng trước',
+        compare: 'Ăn uống thịnh soạn 500k',
         savings: 'Gợi ý tiết kiệm'
       },
       weeklySpending: 'Chi tiêu tuần này',
@@ -665,6 +666,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       reminders: 'Reminders',
       frequency: 'Frequency',
       snapticsAi: 'Snaptics AI',
+      notifications: 'Notifications',
       account: 'Account',
       settings: 'Settings',
       logout: 'Logout',

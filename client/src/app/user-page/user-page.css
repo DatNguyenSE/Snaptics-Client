@@ -41,6 +41,12 @@ html.dark-theme .snaptics-shell {
   min-height: 100vh;
 }
 
+@media (min-width: 1024px) {
+  .user-main {
+    padding-left: 240px;
+  }
+}
+
 @media (max-width: 1023px) {
   .snaptics-shell {
     height: 100dvh;

@@ -71,6 +71,12 @@ export class Nav {
       isScanItem: true,
     },
     {
+      id: 'notification',
+      labelKey: 'nav.notifications',
+      icon: 'notifications',
+      route: '/user/notification',
+    },
+    {
       id: 'frequency',
       labelKey: 'nav.frequency',
       icon: 'monitoring',

@@ -61,7 +61,7 @@ export class BudgetMemberModal implements OnInit {
     this.hasError = false;
     this.budgetService.getBudgetMembers(this.budgetId).subscribe({
       next: (members) => {
-        this.members = members.filter((m) => m.status === 'ACTIVE');
+        this.members = members.filter((m) => Number(m.status) === 1);
         this.isLoading = false;
       },
       error: () => {

@@ -5,7 +5,8 @@ import { environment } from '../../environments/environment.development';
 import { SharedBudgetDto, BudgetMemberDto, UserBudgetRole } from '../../models/shared-budget.dto';
 
 export interface InviteMemberRequestDto {
-  email: string;
+  emailOrUsername: string;
+  role: number;
 }
 
 export interface RespondInviteRequestDto {
@@ -22,7 +23,7 @@ export interface UpdateMemberRoleRequestDto {
 export class BudgetMemberService {
   private readonly http = inject(HttpClient);
   // Do proxy cấu hình xóa mất /api, mà route backend là api/budgets nên ta phải thêm một chữ api/ nữa
-  private readonly apiUrl = environment.apiUrl + 'budgets'; 
+  private readonly apiUrl = environment.apiUrl + 'api/budgets';
 
   inviteMember(budgetId: number, request: InviteMemberRequestDto): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/${budgetId}/members/invite`, request);

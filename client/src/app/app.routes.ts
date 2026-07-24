@@ -105,6 +105,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./user-page/user-features/scan/scan').then((m) => m.Scan),
       },
+      {
+        path: 'notification',
+        loadComponent: () =>
+          import('./user-page/user-features/notification/notification').then((m) => m.Notification),
+      },
 
       {
         path: 'manual-entry',

@@ -13,10 +13,10 @@
   background: var(--sw-background);
 }
 
-/* Desktop Sidebar Offset */
+/* Desktop Sidebar Offset removed as it is handled globally */
 @media (min-width: 1024px) {
   .ai-page-container {
-    padding-left: 240px; /* Offset the main application sidebar */
+    padding-left: 0;
   }
 }
 

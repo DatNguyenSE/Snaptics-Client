@@ -7,6 +7,7 @@ import { BudgetService, BudgetDto, CreateBudgetRequest } from '../../../core/ser
 import { BudgetMemberService } from '../../../core/services/budgetMember.service';
 import { LanguageService } from '../../../core/services/language-service';
 import { ToastService } from '../../../core/services/toast-service';
+import { AccountService } from '../../../core/services/account-service';
 import { SharedBudgetDto, BudgetMemberDto } from '../../../models/shared-budget.dto';
 import { CreateSharedBudgetModal } from './create-shared-budget-modal/create-shared-budget-modal';
 
@@ -24,6 +25,7 @@ export class Budget implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly accountService = inject(AccountService);
 
   // ─── Personal budgets ──────────────────────────────────────────────────────
   budgets: BudgetDto[] = [];
@@ -56,6 +58,9 @@ export class Budget implements OnInit {
   confirmAction: (() => void) | null = null;
   confirmBtnClass = 'btn-primary-modal';
   confirmBtnText = 'Xác nhận';
+
+  // ─── Dropdown State ────────────────────────────────────────────────────────
+  activeDropdownId: number | null = null;
 
   ngOnInit(): void {
     this.initForm();
@@ -173,7 +178,19 @@ export class Budget implements OnInit {
     this.hasErrorShared = false;
     this.budgetMemberService.getSharedBudgets().subscribe({
       next: (data) => {
-        this.sharedBudgets = data;
+        const currentUser = this.accountService.currentUser();
+        this.sharedBudgets = data.filter((budget) => {
+          const members = budget.members ?? [];
+          const currentMember = members.find(
+            (member) =>
+              member.userId === currentUser?.id ||
+              member.email?.toLowerCase() === currentUser?.email?.toLowerCase()
+          );
+
+          return currentMember
+            ? Number(currentMember.status) === 1
+            : members.some((member) => Number(member.status) === 1);
+        });
         this.isLoadingShared = false;
       },
       error: () => {
@@ -250,6 +267,16 @@ export class Budget implements OnInit {
     if (this.isSharedModalOpen) {
       this.closeSharedModal();
     }
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.activeDropdownId = null;
+  }
+
+  toggleDropdown(event: Event, budgetId: number): void {
+    event.stopPropagation();
+    this.activeDropdownId = this.activeDropdownId === budgetId ? null : budgetId;
   }
 
   stopPropagation(event: Event): void {
@@ -433,7 +460,13 @@ export class Budget implements OnInit {
   }
 
   getDisplayedMembers(budget: SharedBudgetDto): BudgetMemberDto[] {
-    return (budget.members ?? []).slice(0, 3);
+    return (budget.members ?? [])
+      .filter((member) => Number(member.status) === 1)
+      .slice(0, 3);
+  }
+
+  getAcceptedMemberCount(budget: SharedBudgetDto): number {
+    return (budget.members ?? []).filter((member) => Number(member.status) === 1).length;
   }
 
   getInitials(name: string): string {

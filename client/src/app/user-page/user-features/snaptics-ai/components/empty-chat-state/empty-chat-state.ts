@@ -111,7 +111,7 @@ export class EmptyChatState {
       description: 'Xem tổng quan và những danh mục chi nhiều nhất.',
     },
     {
-      title: 'So sánh với tháng trước',
+      title: 'Ăn uống thịnh soạn 500k',
       description: 'Tìm hiểu khoản chi nào đang tăng hoặc giảm.',
     },
     {

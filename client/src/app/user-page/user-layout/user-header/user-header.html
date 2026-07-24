@@ -11,9 +11,9 @@
   </div>
 
   <div class="user-header__text-container">
-    <div class="user-header__text" [class.fade-out]="isFading">
+    <div class="user-header__text" [class.fade-out]="isFading" [class.user-header__text--ai]="aiResponse">
       <h3>{{ displayTitle }}</h3>
-      <p class="subtitle-text" [title]="displaySubtitle">
+      <p class="subtitle-text" [class.subtitle-text--ai]="aiResponse" [title]="displaySubtitle">
         {{ displaySubtitle }}
         @if (isTyping) {
           <span class="typing-cursor"></span>

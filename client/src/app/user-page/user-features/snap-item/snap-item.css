@@ -433,7 +433,7 @@
 }
 
 @media (min-width: 1024px) {
-  .snap-item-page { padding: 32px 32px 32px 272px; }
+  .snap-item-page { padding: 32px; }
   .snap-item-page__content { max-width: 52rem; }
   .snap-preview, .snap-preview__video { min-height: 28rem; }
   .snap-preview__empty { min-height: 28rem; }

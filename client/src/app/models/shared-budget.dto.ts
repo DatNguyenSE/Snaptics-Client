@@ -2,7 +2,7 @@
 
 export type UserBudgetRole = 'OWNER' | 'MEMBER';
 
-export type UserBudgetStatus = 'PENDING' | 'ACTIVE' | 'REJECTED' | 'LEFT';
+export type UserBudgetStatus = 0 | 1 | 2;
 
 export type BudgetWalletType = 'PERSONAL' | 'SHARED';
 

@@ -70,6 +70,30 @@
   opacity: 0;
 }
 
+/* AI replies need a readable reading surface; the normal greeting stays unchanged. */
+.user-header__text--ai {
+  max-width: min(760px, 100%);
+  padding: 12px 16px 13px;
+  border: 1px solid rgba(99, 102, 241, 0.14);
+  border-radius: 16px 16px 16px 6px;
+  background: linear-gradient(135deg, rgba(245, 243, 255, 0.96), rgba(239, 246, 255, 0.9));
+  box-shadow: 0 8px 22px rgba(79, 70, 229, 0.08);
+}
+
+.user-header__text--ai h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4338ca;
+}
+
+.user-header__text--ai h3::before {
+  content: 'auto_awesome';
+  font-family: 'Material Symbols Outlined';
+  font-size: 1rem;
+  font-weight: 400;
+}
+
 .user-header__text h3 {
   margin: 0 0 2px 0;
   font-size: 0.9375rem;
@@ -90,6 +114,30 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.subtitle-text--ai {
+  display: block;
+  max-height: 220px;
+  padding-right: 6px;
+  color: #334155;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  white-space: pre-line;
+  overflow-y: auto;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: initial;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.35) transparent;
+}
+
+.subtitle-text--ai::-webkit-scrollbar {
+  width: 5px;
+}
+
+.subtitle-text--ai::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.35);
 }
 
 .typing-cursor {
@@ -191,6 +239,37 @@
   .user-header__text p {
     font-size: 0.75rem;
   }
+
+  .user-header__text--ai .subtitle-text--ai {
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .user-header__text--ai {
+    padding: 10px 12px 11px;
+    border-radius: 14px 14px 14px 5px;
+  }
+
+  .subtitle-text--ai {
+    max-height: 190px;
+    font-size: 0.75rem;
+    line-height: 1.6;
+  }
+}
+
+:host-context(html.dark-theme) .user-header__text--ai {
+  border-color: rgba(129, 140, 248, 0.28);
+  background: linear-gradient(135deg, rgba(49, 46, 129, 0.42), rgba(30, 41, 59, 0.82));
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+:host-context(html.dark-theme) .user-header__text--ai h3 {
+  color: #c7d2fe;
+}
+
+:host-context(html.dark-theme) .subtitle-text--ai {
+  color: #e2e8f0;
 }
 
 :host-context(html.dark-theme) .user-header__notification {

@@ -64,12 +64,20 @@ export class UserHeader {
       this.displayTitle = response.title;
       this.displaySubtitle = '';
       this.isTyping = true;
-      this.typeText(response.subtitle, 0);
+      this.typeText(this.formatAiResponse(response.subtitle), 0);
     } else {
       this.isTyping = false;
       this.displayTitle = `${this.greeting}, ${this.userName}!`;
       this.displaySubtitle = this.funnySlogan;
     }
+  }
+
+  private formatAiResponse(text: string): string {
+    return text
+      .replace(/\s+(?=\d+\.\s)/g, '\n')
+      .replace(/:\s+-\s+/g, ':\n• ')
+      .replace(/\s+-\s+(?=[A-ZÀ-Ỹ])/g, '\n• ')
+      .trim();
   }
 
   private typeText(text: string, index: number): void {

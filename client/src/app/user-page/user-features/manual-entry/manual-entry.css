@@ -115,7 +115,7 @@
 
 @media (min-width: 1024px) {
   .manual-entry-page {
-    padding: 32px 32px 32px 272px;
+    padding: 32px;
   }
 
   .manual-entry-page__content {
