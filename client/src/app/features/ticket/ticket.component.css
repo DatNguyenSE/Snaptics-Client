@@ -1,0 +1,5 @@
+/* Styling cho Ticket Component */
+:host {
+  display: block;
+  width: 100%;
+}
