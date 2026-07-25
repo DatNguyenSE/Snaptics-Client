@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AccountService } from '../../../core/services/account-service';
 import { LanguageService } from '../../../core/services/language-service';
 import { TransactionService } from '../../../core/services/transaction.service';
+import { BudgetService, BudgetDto } from '../../../core/services/budget.service';
 import { TransactionDto } from '../../../models/transaction.dto';
 import { environment } from '../../../environments/environment.development';
 import { TransactionDetailModal } from './transaction-detail-modal/transaction-detail-modal';
@@ -44,8 +45,10 @@ export class Transaction implements OnInit {
   private readonly accountService = inject(AccountService);
   protected readonly language = inject(LanguageService);
   private readonly transactionService = inject(TransactionService);
+  private readonly budgetService = inject(BudgetService);
 
   transactionHistory: TransactionDto[] = [];
+  budgets: BudgetDto[] = [];
   selectedTransaction: TransactionDto | null = null;
   isLoading = true;
   hasError = false;
@@ -53,12 +56,23 @@ export class Transaction implements OnInit {
   // ─── Filter State ───────────────────────────────────────────────────────────
   searchQuery = '';
   filterSource: 'all' | 'receipt' | 'manual' | 'snap' = 'all';
+  filterBudgetId = 'all'; // 'all', 'personal', or numeric string budget id
   filterDate = '';  // YYYY-MM-DD format
   filterMonth = ''; // YYYY-MM format
   filterYear = '';  // YYYY format
 
   ngOnInit(): void {
     this.loadTransactions();
+    this.loadBudgets();
+  }
+
+  private loadBudgets(): void {
+    this.budgetService.getBudgets().subscribe({
+      next: (data) => {
+        this.budgets = data;
+      },
+      error: () => {},
+    });
   }
 
   private loadTransactions(): void {
@@ -102,6 +116,7 @@ export class Transaction implements OnInit {
     return !!(
       this.searchQuery.trim() ||
       this.filterSource !== 'all' ||
+      this.filterBudgetId !== 'all' ||
       this.filterDate ||
       this.filterMonth ||
       this.filterYear
@@ -111,9 +126,16 @@ export class Transaction implements OnInit {
   clearFilters(): void {
     this.searchQuery = '';
     this.filterSource = 'all';
+    this.filterBudgetId = 'all';
     this.filterDate = '';
     this.filterMonth = '';
     this.filterYear = '';
+  }
+
+  getBudgetName(budgetId?: number | null): string {
+    if (!budgetId) return 'Ví cá nhân';
+    const found = this.budgets.find((b) => b.id === budgetId);
+    return found ? found.name : 'Ví dùng chung';
   }
 
   clearDateFilters(): void {
@@ -165,6 +187,15 @@ export class Transaction implements OnInit {
 
     if (this.filterSource !== 'all') {
       result = result.filter((t) => this.getTransactionSource(t) === this.filterSource);
+    }
+
+    if (this.filterBudgetId !== 'all') {
+      if (this.filterBudgetId === 'personal') {
+        result = result.filter((t) => !t.budgetId);
+      } else {
+        const targetId = Number(this.filterBudgetId);
+        result = result.filter((t) => t.budgetId === targetId);
+      }
     }
 
     if (this.filterDate) {

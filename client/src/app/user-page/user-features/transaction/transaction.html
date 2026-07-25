@@ -96,8 +96,24 @@
           </button>
         </div>
 
-        <!-- Date / Month / Year Filters -->
+        <!-- Date / Month / Year & Wallet Filters -->
         <div class="filter-date-group">
+          <!-- Ví -->
+          <div class="filter-date-input-wrap" [class.filter-date-input-wrap--active]="filterBudgetId !== 'all'">
+            <span class="material-symbols-outlined filter-date-icon">account_balance_wallet</span>
+            <select
+              id="transaction-wallet-filter"
+              class="filter-date-select"
+              [(ngModel)]="filterBudgetId"
+              title="Lọc theo ví">
+              <option value="all">Tất cả ví</option>
+              <option value="personal">Ví cá nhân</option>
+              @for (budget of budgets; track budget.id) {
+                <option [value]="budget.id">{{ budget.name }}</option>
+              }
+            </select>
+          </div>
+
           <!-- Ngày -->
           <div class="filter-date-input-wrap" [class.filter-date-input-wrap--active]="!!filterDate">
             <span class="material-symbols-outlined filter-date-icon">event</span>
@@ -137,8 +153,8 @@
             </select>
           </div>
 
-          @if (filterDate || filterMonth || filterYear) {
-            <button class="filter-date-clear-btn" (click)="clearDateFilters()" title="Xóa bộ lọc thời gian" type="button">
+          @if (filterDate || filterMonth || filterYear || filterBudgetId !== 'all') {
+            <button class="filter-date-clear-btn" (click)="clearFilters()" title="Xóa bộ lọc" type="button">
               <span class="material-symbols-outlined">filter_alt_off</span>
             </button>
           }
@@ -200,6 +216,10 @@
                           <div class="t-card-meta">
                             <span class="t-time">
                               {{ transaction.transactionDate | date:'HH:mm' }}
+                            </span>
+                            <span class="t-wallet-badge">
+                              <span class="material-symbols-outlined wallet-mini-icon">account_balance_wallet</span>
+                              {{ getBudgetName(transaction.budgetId) }}
                             </span>
                           </div>
                           @if (transaction.note) {

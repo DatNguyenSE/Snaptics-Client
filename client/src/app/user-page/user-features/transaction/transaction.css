@@ -409,6 +409,21 @@ h1, h2, h3, p, span { margin: 0; }
 }
 .t-time .material-symbols-outlined { font-size: 0.9rem; }
 
+.t-wallet-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f3e8ff;
+  color: #7c3aed;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.wallet-mini-icon {
+  font-size: 0.85rem !important;
+}
+
 .t-note {
   font-size: 0.8rem;
   color: #6b7280;
