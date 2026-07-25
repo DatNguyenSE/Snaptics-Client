@@ -166,6 +166,9 @@
   background: rgba(241, 245, 249, 0.85);
   border: 1px solid var(--sw-border);
   overflow-x: auto;
+  max-width: 100%;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
@@ -186,6 +189,8 @@
   font-size: 0.78125rem;
   font-weight: 700;
   white-space: nowrap;
+  flex-shrink: 0;
+  min-width: max-content;
   cursor: pointer;
   transition: all 0.2s ease;
 }

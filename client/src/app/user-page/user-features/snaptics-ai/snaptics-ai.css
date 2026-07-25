@@ -25,15 +25,19 @@
   .ai-page-container {
     height: calc(100dvh - 80px);
     height: calc(100vh - 80px); /* Fallback for older browsers */
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   /* When conversation list is open as an overlay on smaller screens */
   app-conversation-history {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
-    height: 100%;
-    z-index: 500;
-    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.15);
+    bottom: 0;
+    width: 280px;
+    max-width: 85vw;
+    z-index: 1200;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+    background: var(--sw-card);
   }
 }

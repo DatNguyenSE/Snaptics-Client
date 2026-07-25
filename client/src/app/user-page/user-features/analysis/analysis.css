@@ -5,7 +5,13 @@
 
 .analysis-page {
   min-height: 100vh;
-  padding: 24px 24px calc(112px + env(safe-area-inset-bottom));
+  padding: 16px 16px calc(104px + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 1024px) {
+  .analysis-page {
+    padding: 24px 24px calc(112px + env(safe-area-inset-bottom));
+  }
 }
 
 .analysis-page__content {
@@ -13,7 +19,8 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
+  width: 100%;
 }
 
 /* ─── HEADER & FILTERS ──────────────────────────────────────── */
