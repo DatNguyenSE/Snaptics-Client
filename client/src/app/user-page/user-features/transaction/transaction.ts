@@ -58,8 +58,13 @@ export class Transaction implements OnInit {
   filterSource: 'all' | 'receipt' | 'manual' | 'snap' = 'all';
   filterBudgetId = 'all'; // 'all', 'personal', or numeric string budget id
   filterDate = '';  // YYYY-MM-DD format
-  filterMonth = ''; // YYYY-MM format
+  filterMonth = ''; // Month number, 01-12
   filterYear = '';  // YYYY format
+
+  readonly availableMonths = Array.from({ length: 12 }, (_, index) => ({
+    value: String(index + 1).padStart(2, '0'),
+    label: `Tháng ${index + 1}`,
+  }));
 
   ngOnInit(): void {
     this.loadTransactions();
@@ -205,10 +210,14 @@ export class Transaction implements OnInit {
         return ymd === this.filterDate;
       });
     } else if (this.filterMonth) {
+      // The month picker supplies YYYY-MM, but the year selector is authoritative.
+      // With no selected year, a month always means that month in the current year.
+      const selectedMonth = this.filterMonth.padStart(2, '0');
+      const targetYear = this.filterYear || String(new Date().getFullYear());
       result = result.filter((t) => {
         const d = new Date(t.transactionDate);
-        const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        return ym === this.filterMonth;
+        return String(d.getFullYear()) === targetYear &&
+          String(d.getMonth() + 1).padStart(2, '0') === selectedMonth;
       });
     } else if (this.filterYear) {
       result = result.filter((t) => {

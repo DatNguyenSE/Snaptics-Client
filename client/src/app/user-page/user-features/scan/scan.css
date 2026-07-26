@@ -2223,7 +2223,6 @@
 
 /* Captured images are already cropped to the live camera viewport ratio. */
 .preview-container--camera-match {
-  aspect-ratio: 3 / 4;
   max-width: 480px;
   padding: 0;
 }

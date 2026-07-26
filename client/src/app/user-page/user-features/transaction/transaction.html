@@ -129,17 +129,20 @@
           <!-- Tháng -->
           <div class="filter-date-input-wrap" [class.filter-date-input-wrap--active]="!!filterMonth && !filterDate">
             <span class="material-symbols-outlined filter-date-icon">calendar_month</span>
-            <input
+            <select
               id="transaction-month-filter"
-              class="filter-date-input"
-              type="month"
+              class="filter-date-select"
               [(ngModel)]="filterMonth"
-              title="Lọc theo tháng"
-            />
+              title="Lọc theo tháng">
+              <option value="">Tháng</option>
+              @for (month of availableMonths; track month.value) {
+                <option [value]="month.value">{{ month.label }}</option>
+              }
+            </select>
           </div>
 
           <!-- Năm -->
-          <div class="filter-date-input-wrap" [class.filter-date-input-wrap--active]="!!filterYear && !filterMonth && !filterDate">
+          <div class="filter-date-input-wrap" [class.filter-date-input-wrap--active]="!!filterYear && !filterDate">
             <span class="material-symbols-outlined filter-date-icon">calendar_today</span>
             <select
               id="transaction-year-filter"

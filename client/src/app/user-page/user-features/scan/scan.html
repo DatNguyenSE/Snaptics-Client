@@ -183,6 +183,7 @@
               class="preview-container"
               [class.preview-container--scanning]="processingState === 'scanning'"
               [class.preview-container--camera-match]="previewMatchesCamera"
+              [style.aspect-ratio]="previewAspectRatio"
             >
               <img [src]="previewUrl" alt="Captured image preview" class="preview-image" />
               

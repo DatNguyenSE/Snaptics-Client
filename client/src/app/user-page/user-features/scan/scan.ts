@@ -86,6 +86,7 @@ export class Scan implements OnInit, OnDestroy {
   // ─── ViewChild refs ─────────────────────────────────────────────────────────
   @ViewChild('videoElement') videoElement?: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('cameraContainer') cameraContainer?: ElementRef<HTMLElement>;
   @ViewChild('uploadInput') uploadInput?: ElementRef<HTMLInputElement>;
 
   // ─── Constants ──────────────────────────────────────────────────────────────
@@ -127,6 +128,7 @@ export class Scan implements OnInit, OnDestroy {
   previewUrl: string | null = null;
   currentFile: File | null = null;
   previewMatchesCamera = false;
+  previewAspectRatio = 'auto';
 
   // Receipt scan results
   storeName = '';
@@ -446,15 +448,49 @@ export class Scan implements OnInit, OnDestroy {
       return;
     }
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    const container = this.cameraContainer?.nativeElement;
+    if (!container || container.clientWidth <= 0 || container.clientHeight <= 0) {
+      this.toast.error(this.lang.t('scan.toast.captureError'));
+      return;
+    }
+
+    // Match the exact visible camera viewport instead of using a fixed ratio.
+    const targetWidth = container.clientWidth;
+    const targetHeight = container.clientHeight;
+    const targetRatio = targetWidth / targetHeight;
+    const sourceRatio = video.videoWidth / video.videoHeight;
+    let sourceX = 0;
+    let sourceY = 0;
+    let sourceWidth = video.videoWidth;
+    let sourceHeight = video.videoHeight;
+
+    if (sourceRatio > targetRatio) {
+      sourceWidth = video.videoHeight * targetRatio;
+      sourceX = (video.videoWidth - sourceWidth) / 2;
+    } else {
+      sourceHeight = video.videoWidth / targetRatio;
+      sourceY = (video.videoHeight - sourceHeight) / 2;
+    }
+
+    canvas.width = Math.round(sourceWidth);
+    canvas.height = Math.round(sourceHeight);
     const ctx = canvas.getContext('2d');
 
     if (!ctx) {
       return;
     }
 
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(
+      video,
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    );
 
     canvas.toBlob(
       (blob) => {
@@ -466,7 +502,7 @@ export class Scan implements OnInit, OnDestroy {
           const fileName = this.scanMode === 'receipt' ? 'receipt.jpg' : 'item.jpg';
           const file = new File([blob], fileName, { type: 'image/jpeg' });
           this.stopCamera();
-          this.setPreview(file);
+          this.setPreview(file, true, `${targetWidth} / ${targetHeight}`);
         });
       },
       'image/jpeg',
@@ -922,11 +958,13 @@ export class Scan implements OnInit, OnDestroy {
   }
 
   // ─── Private Helpers ─────────────────────────────────────────────────────────
-  private setPreview(file: File): void {
+  private setPreview(file: File, matchesCameraFrame = false, aspectRatio = 'auto'): void {
     this.clearPreview();
     this.currentFile = file;
     this.previewUrl = URL.createObjectURL(file);
     this.captureState = 'preview';
+    this.previewMatchesCamera = matchesCameraFrame;
+    this.previewAspectRatio = aspectRatio;
   }
 
   private clearPreview(): void {
@@ -936,6 +974,7 @@ export class Scan implements OnInit, OnDestroy {
     }
     this.captureState = 'live';
     this.previewMatchesCamera = false;
+    this.previewAspectRatio = 'auto';
   }
 
   private getCategoryClass(category: string): string {
