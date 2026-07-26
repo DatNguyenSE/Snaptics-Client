@@ -246,14 +246,6 @@ import { DataRangeSelector } from '../data-range-selector/data-range-selector';
       opacity: 0.6;
       padding-left: 48px;
     }
-    @media (max-width: 768px) {
-      .composer-hints {
-        display: none;
-      }
-      .chat-composer {
-        padding: 8px 12px;
-      }
-    }
   `]
 })
 export class ChatComposer implements AfterViewInit {

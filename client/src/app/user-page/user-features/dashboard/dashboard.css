@@ -164,16 +164,10 @@
 
 
 .dashboard-summary-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   align-items: stretch;
-}
-
-@media (min-width: 376px) {
-  .dashboard-summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 .stat-card {
@@ -668,7 +662,12 @@
 
 @media (min-width: 640px) {
   .dashboard-summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-direction: row;
+  }
+  
+  .dashboard-summary-grid > * {
+    flex: 1;
+    min-width: 0; /* Prevents flex items from overflowing 50% */
   }
 }
 
@@ -860,14 +859,8 @@
 /* ─── KPI Grid ──────────────────────────────────────────────────────────── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-}
-
-@media (min-width: 376px) {
-  .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 .kpi-card {

@@ -156,10 +156,6 @@ h1, h2, h3, p, span { margin: 0; }
   align-items: center;
   gap: 8px;
   flex: 1;
-  max-width: 100%;
-  overflow-x: auto;
-  flex-wrap: nowrap;
-  -webkit-overflow-scrolling: touch;
 }
 .filter-chip {
   background: transparent;
@@ -172,9 +168,6 @@ h1, h2, h3, p, span { margin: 0; }
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-shrink: 0;
-  white-space: nowrap;
-  min-width: max-content;
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s;
@@ -476,26 +469,20 @@ h1, h2, h3, p, span { margin: 0; }
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .transaction-page {
-    padding: 16px 16px calc(112px + env(safe-area-inset-bottom));
+    padding: 24px 16px calc(112px + env(safe-area-inset-bottom));
   }
   
   .transaction-page__hero {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .summary-cards {
-    grid-template-columns: 1fr;
+    flex-direction: column-reverse;
     gap: 12px;
   }
 
   .filter-bar {
     border-radius: 20px;
-    padding: 14px;
+    padding: 16px;
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 16px;
   }
 
   .filter-search {
@@ -515,9 +502,8 @@ h1, h2, h3, p, span { margin: 0; }
     flex-wrap: nowrap;
     overflow-x: auto;
     padding-bottom: 4px;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    width: 100%;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
 
   .filter-chips::-webkit-scrollbar {
@@ -527,58 +513,15 @@ h1, h2, h3, p, span { margin: 0; }
   .filter-chip {
     white-space: nowrap;
     flex-shrink: 0;
-    padding: 6px 12px;
-    font-size: 0.8125rem;
   }
 
-  .filter-date-group {
+  .filter-month-wrap {
     margin-left: 0;
     width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
   }
 
-  .filter-date-input-wrap {
-    flex: 1 1 calc(50% - 4px);
-    min-width: 130px;
-  }
-
-  .filter-date-input,
-  .filter-date-select {
+  .filter-month {
     width: 100%;
     box-sizing: border-box;
-  }
-
-  .timeline-list {
-    padding-left: 14px;
-  }
-
-  .timeline-item-dot {
-    left: -21px;
-  }
-
-  .t-card {
-    padding: 12px;
-    gap: 10px;
-  }
-
-  .t-card-icon {
-    width: 40px;
-    height: 40px;
-  }
-
-  .t-title {
-    font-size: 0.9375rem;
-  }
-
-  .t-price {
-    font-size: 0.95rem;
-  }
-}
-
-@media (min-width: 376px) and (max-width: 768px) {
-  .summary-cards {
-    grid-template-columns: repeat(2, 1fr);
   }
 }
