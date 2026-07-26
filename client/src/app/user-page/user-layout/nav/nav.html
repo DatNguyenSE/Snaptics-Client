@@ -39,7 +39,7 @@
     <div class="sidebar__account">
       <div class="account-dropdown account-dropdown--desktop">
         <button
-          class="sidebar__account-trigger"
+           class="sidebar__account-trigger"
           type="button"
           aria-haspopup="menu"
           [attr.aria-expanded]="isAccountMenuOpen"
@@ -177,9 +177,8 @@
       <button
         class="bottom-nav__item bottom-nav__item--account"
         type="button"
-        aria-haspopup="menu"
-        [attr.aria-expanded]="isAccountMenuOpen"
-        (click)="toggleAccountMenu($event)"
+        (click)="handleMobileAccountClick($event)"
+        aria-label="{{ language.t('nav.account') }}"
       >
         <span class="bottom-nav__account-avatar">{{ account.initials }}</span>
         <span class="bottom-nav__label">{{ language.t('nav.account') }}</span>

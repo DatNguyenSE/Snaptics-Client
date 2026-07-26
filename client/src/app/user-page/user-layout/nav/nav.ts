@@ -150,6 +150,20 @@ export class Nav {
     void this.router.navigateByUrl('/settings');
   }
 
+  handleMobileAccountClick(event: MouseEvent): void {
+    event.stopPropagation();
+
+    // On very small screens the account item is a direct shortcut to settings.
+    // Wider responsive layouts keep the account menu so its options remain available.
+    if (window.innerWidth < 640) {
+      this.closeMenus();
+      void this.router.navigateByUrl('/settings');
+      return;
+    }
+
+    this.toggleAccountMenu(event);
+  }
+
   logout(): void {
     this.closeMenus();
     this.accountService.logout('/landing');

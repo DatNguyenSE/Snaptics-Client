@@ -2,10 +2,13 @@
   <div class="modal-container" (click)="$event.stopPropagation()">
     <!-- Header -->
     <div class="modal-header">
-      <h2 class="modal-title">
-        <span class="material-symbols-outlined title-icon">payments</span>
-        Chi tiết chi tiêu
-      </h2>
+        <div>
+          <h2 class="modal-title">
+          <span class="material-symbols-outlined title-icon">payments</span>
+          Chi tiết chi tiêu
+          </h2>
+          <p class="modal-subtitle">{{ filterLabel }} · Khoản chi cao nhất hiển thị trước</p>
+        </div>
       <button class="close-btn" (click)="closeModal()">
         <span class="material-symbols-outlined">close</span>
       </button>
@@ -30,17 +33,42 @@
         <p>Chưa có chi tiêu nào trong thời gian này.</p>
       </div>
 
-      <div class="category-list" *ngIf="!isLoading && trendData.length > 0">
-        <h3 class="list-title">Chi tiết theo thời gian</h3>
-        <div class="breakdown-item" *ngFor="let item of trendData; let i = index">
-          <div class="item-header">
-            <div class="item-name-group">
-              <span class="item-name">{{ item.label }}</span>
-            </div>
-            <span class="item-amount" style="color: #ef4444;">{{ item.expense | number }}đ</span>
+      <div class="trend-content" *ngIf="!isLoading && trendData.length > 0">
+        <div class="trend-highlight" *ngIf="highestExpense as highest">
+          <div class="trend-highlight__icon">
+            <span class="material-symbols-outlined">local_fire_department</span>
           </div>
-          <div class="progress-bar-container">
-            <div class="progress-bar" [style.width.%]="(item.expense / maxExpense) * 100" style="background-color: #ef4444;"></div>
+          <div class="trend-highlight__copy">
+            <span class="trend-highlight__eyebrow">Chi nhiều nhất · {{ filterLabel }}</span>
+            <strong>{{ highest.label }}</strong>
+            <span>{{ highest.expense | number }}đ</span>
+          </div>
+          <span class="trend-highlight__percent">{{ getExpensePercentage(highest.expense) }}%</span>
+        </div>
+
+        <div class="trend-total-row">
+          <span>Tổng chi trong kỳ</span>
+          <strong>{{ totalExpense | number }}đ</strong>
+        </div>
+
+        <div class="trend-list-header">
+          <h3 class="list-title">Chi tiết theo từng mốc</h3>
+          <span>{{ orderedTrendData.length }} mục</span>
+        </div>
+
+        <div class="trend-item" *ngFor="let item of orderedTrendData; let i = index">
+          <div class="trend-item__rank" [class.trend-item__rank--top]="i === 0">{{ i + 1 }}</div>
+          <div class="trend-item__body">
+            <div class="trend-item__heading">
+              <span class="trend-item__label">{{ item.label }}</span>
+              <strong>{{ item.expense | number }}đ</strong>
+            </div>
+            <div class="trend-item__meta">
+              <div class="progress-bar-container">
+                <div class="progress-bar" [style.width.%]="(item.expense / maxExpense) * 100"></div>
+              </div>
+              <span>{{ getExpensePercentage(item.expense) }}%</span>
+            </div>
           </div>
         </div>
       </div>

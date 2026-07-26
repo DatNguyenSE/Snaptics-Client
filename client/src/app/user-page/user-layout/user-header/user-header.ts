@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild, inject, signal, Input, Output, EventEmitter, OnChanges, SimpleChanges, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild, inject, signal, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { AccountService } from '../../../core/services/account-service';
 import { LanguageService } from '../../../core/services/language-service';
 import { NotificationService } from '../../../core/services/notification-service';
@@ -11,7 +11,7 @@ import { UserNotificationPopover } from '../user-notification-popover/user-notif
   templateUrl: './user-header.html',
   styleUrl: './user-header.css',
 })
-export class UserHeader {
+export class UserHeader implements AfterViewInit, OnDestroy {
   private readonly accountService = inject(AccountService);
   private readonly notificationService = inject(NotificationService);
   private readonly language = inject(LanguageService);
@@ -22,17 +22,99 @@ export class UserHeader {
   @ViewChild('notificationShell', { static: true })
   private notificationShell?: ElementRef<HTMLElement>;
 
+  @ViewChild('avatarVideo', { static: true })
+  private avatarVideo?: ElementRef<HTMLVideoElement>;
+
+  @ViewChild('avatarCanvas', { static: true })
+  private avatarCanvas?: ElementRef<HTMLCanvasElement>;
+
   @Input() aiResponse: { title: string, subtitle: string } | null = null;
   displayTitle = '';
   displaySubtitle = '';
   isFading = false;
   isTyping = false;
   private typingTimeout: any;
+  private animationFrame?: number;
+  private avatarRenderingStarted = false;
 
   @Output() avatarClick = new EventEmitter<void>();
 
   onAvatarClick(): void {
     this.avatarClick.emit();
+  }
+
+  ngAfterViewInit(): void {
+    const video = this.avatarVideo?.nativeElement;
+    if (!video) return;
+
+    video.muted = true;
+    video.addEventListener('loadeddata', () => this.startAvatarRendering(), { once: true });
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      this.startAvatarRendering();
+    }
+    void video.play().catch(() => undefined);
+  }
+
+  ngOnDestroy(): void {
+    if (this.animationFrame !== undefined) {
+      cancelAnimationFrame(this.animationFrame);
+    }
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+  }
+
+  private startAvatarRendering(): void {
+    if (this.avatarRenderingStarted) return;
+
+    const video = this.avatarVideo?.nativeElement;
+    const canvas = this.avatarCanvas?.nativeElement;
+    const context = canvas?.getContext('2d', { willReadFrequently: true });
+    if (!video || !canvas || !context) return;
+
+    this.avatarRenderingStarted = true;
+
+    canvas.width = 180;
+    canvas.height = 180;
+
+    const renderFrame = (): void => {
+      if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        const sourceRatio = video.videoWidth / video.videoHeight;
+        const targetRatio = canvas.width / canvas.height;
+        let sourceX = 0;
+        let sourceY = 0;
+        let sourceWidth = video.videoWidth;
+        let sourceHeight = video.videoHeight;
+
+        if (sourceRatio > targetRatio) {
+          sourceWidth = video.videoHeight * targetRatio;
+          sourceX = (video.videoWidth - sourceWidth) / 2;
+        } else {
+          sourceHeight = video.videoWidth / targetRatio;
+          sourceY = (video.videoHeight - sourceHeight) / 2;
+        }
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(video, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+
+        const frame = context.getImageData(0, 0, canvas.width, canvas.height);
+        for (let index = 0; index < frame.data.length; index += 4) {
+          const red = frame.data[index];
+          const green = frame.data[index + 1];
+          const blue = frame.data[index + 2];
+          const greenDominance = green - Math.max(red, blue);
+
+          if (green > 90 && greenDominance > 18) {
+            frame.data[index + 3] = Math.max(0, 255 - greenDominance * 14);
+          }
+        }
+        context.putImageData(frame, 0, 0);
+      }
+
+      this.animationFrame = requestAnimationFrame(renderFrame);
+    };
+
+    renderFrame();
   }
 
   ngOnInit(): void {

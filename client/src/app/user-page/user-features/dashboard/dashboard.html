@@ -241,4 +241,13 @@
     </button>
 
   </div>
+
+  <app-category-summary-modal
+    [isOpen]="isCategorySummaryModalOpen"
+    (close)="closeCategorySummaryModal()"
+  ></app-category-summary-modal>
+  <app-trend-summary-modal
+    [isOpen]="isTrendSummaryModalOpen"
+    (close)="closeTrendSummaryModal()"
+  ></app-trend-summary-modal>
 </section>

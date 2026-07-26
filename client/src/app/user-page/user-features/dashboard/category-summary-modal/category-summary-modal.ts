@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject, OnChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges, inject, OnChanges } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { DashboardService } from '../../../../core/services/dashboard.service';
 import { CategorySummaryResponseDto } from '../../../../models/dashboard.dto';
@@ -28,8 +28,8 @@ export class CategorySummaryModal implements OnInit, OnChanges {
     }
   }
 
-  ngOnChanges(): void {
-    if (this.isOpen && !this.summaryData) {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isOpen']?.currentValue === true && changes['isOpen'].previousValue !== true) {
       this.loadData();
     }
   }

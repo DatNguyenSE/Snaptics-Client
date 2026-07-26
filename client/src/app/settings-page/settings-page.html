@@ -62,22 +62,59 @@
         <p class="settings-section-title">{{ language.t('settingsPage.generalTitle') }}</p>
 
         <div class="settings-panel settings-panel--menu">
-          @for (item of generalSettings; track item.key) {
-            <button class="settings-menu-item" type="button" (click)="handleGeneralSettingClick(item.key)">
-              <span class="settings-menu-item__main">
-                <span class="settings-menu-item__icon">
-                  <span class="material-symbols-outlined">{{ item.icon }}</span>
-                </span>
-
-                <span class="settings-menu-item__label">{{ language.t(item.labelKey) }}</span>
+          <div class="settings-menu-item settings-menu-item--control">
+            <span class="settings-menu-item__main">
+              <span class="settings-menu-item__icon">
+                <span class="material-symbols-outlined">language</span>
               </span>
+              <span class="settings-menu-item__label">{{ language.t('settingsPage.general.language') }}</span>
+            </span>
 
-              <span class="settings-menu-item__value">
-                {{ item.value }}
-                <span class="material-symbols-outlined">chevron_right</span>
+            <div class="settings-segmented-control settings-segmented-control--language" role="group" [attr.aria-label]="language.t('settingsPage.general.language')">
+              <button
+                type="button"
+                class="settings-segmented-control__option"
+                [class.settings-segmented-control__option--active]="language.currentLang() === 'vi'"
+                (click)="setLanguage('vi')"
+              >VI</button>
+              <button
+                type="button"
+                class="settings-segmented-control__option"
+                [class.settings-segmented-control__option--active]="language.currentLang() === 'en'"
+                (click)="setLanguage('en')"
+              >EN</button>
+            </div>
+          </div>
+
+          <div class="settings-menu-item settings-menu-item--control">
+            <span class="settings-menu-item__main">
+              <span class="settings-menu-item__icon">
+                <span class="material-symbols-outlined">contrast</span>
               </span>
-            </button>
-          }
+              <span class="settings-menu-item__label">{{ language.currentLang() === 'vi' ? 'Chế độ giao diện' : 'Appearance' }}</span>
+            </span>
+
+            <div class="settings-segmented-control settings-segmented-control--theme" role="group" [attr.aria-label]="language.currentLang() === 'vi' ? 'Chế độ giao diện' : 'Appearance'">
+              <button
+                type="button"
+                class="settings-segmented-control__option"
+                [class.settings-segmented-control__option--active]="theme.currentTheme() === 'light'"
+                (click)="theme.setTheme('light')"
+                [attr.aria-label]="language.currentLang() === 'vi' ? 'Chế độ sáng' : 'Light mode'"
+              >
+                <span class="material-symbols-outlined">light_mode</span>
+              </button>
+              <button
+                type="button"
+                class="settings-segmented-control__option"
+                [class.settings-segmented-control__option--active]="theme.currentTheme() === 'dark'"
+                (click)="theme.setTheme('dark')"
+                [attr.aria-label]="language.currentLang() === 'vi' ? 'Chế độ tối' : 'Dark mode'"
+              >
+                <span class="material-symbols-outlined">dark_mode</span>
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 

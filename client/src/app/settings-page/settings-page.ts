@@ -3,27 +3,19 @@ import { FormsModule } from '@angular/forms';
 import { AccountService } from '../core/services/account-service';
 import { AppLanguage, LanguageService } from '../core/services/language-service';
 import { ToastService } from '../core/services/toast-service';
+import { ThemeService } from '../core/services/theme.service';
 import { Nav } from '../user-page/user-layout/nav/nav';
 
 type AiSettingKey =
-  | 'calories'
   | 'pricePopup'
   | 'dailyReminder'
   | 'budgetAlert'
   | 'usageReview';
-type GeneralSettingKey = 'language' | 'currency' | 'budget' | 'backup';
 
 interface AiSettingItem {
   key: AiSettingKey;
   titleKey: string;
   descriptionKey: string;
-}
-
-interface GeneralSettingItem {
-  key: GeneralSettingKey;
-  labelKey: string;
-  value: string;
-  icon: string;
 }
 
 @Component({
@@ -38,13 +30,9 @@ export class SettingsPage {
   private readonly toast = inject(ToastService);
 
   protected readonly language = inject(LanguageService);
+  protected readonly theme = inject(ThemeService);
 
   readonly aiSettings: AiSettingItem[] = [
-    {
-      key: 'calories',
-      titleKey: 'settingsPage.ai.caloriesTitle',
-      descriptionKey: 'settingsPage.ai.caloriesDescription',
-    },
     {
       key: 'pricePopup',
       titleKey: 'settingsPage.ai.priceTitle',
@@ -74,7 +62,6 @@ export class SettingsPage {
   };
 
   private aiSettingState: Record<AiSettingKey, boolean> = {
-    calories: true,
     pricePopup: true,
     dailyReminder: true,
     budgetAlert: true,
@@ -91,38 +78,6 @@ export class SettingsPage {
       email,
       initials: this.buildInitials(fullName),
     };
-  }
-
-  get generalSettings(): GeneralSettingItem[] {
-    return [
-      {
-        key: 'language',
-        labelKey: 'settingsPage.general.language',
-        value:
-          this.language.currentLang() === 'vi'
-            ? this.language.t('common.vietnamese')
-            : this.language.t('common.english'),
-        icon: 'language',
-      },
-      {
-        key: 'currency',
-        labelKey: 'settingsPage.general.currency',
-        value: 'VND (\u20ab)',
-        icon: 'payments',
-      },
-      {
-        key: 'budget',
-        labelKey: 'settingsPage.general.budget',
-        value: '500,000 VND',
-        icon: 'target',
-      },
-      {
-        key: 'backup',
-        labelKey: 'settingsPage.general.backup',
-        value: this.language.t('settingsPage.general.enabled'),
-        icon: 'cloud_done',
-      },
-    ];
   }
 
   get isProfileFormValid(): boolean {
@@ -172,10 +127,8 @@ export class SettingsPage {
     this.accountService.logout('/landing');
   }
 
-  handleGeneralSettingClick(key: GeneralSettingKey): void {
-    if (key === 'language') {
-      this.toggleLanguage();
-    }
+  setLanguage(lang: AppLanguage): void {
+    this.language.setLanguage(lang);
   }
 
   @HostListener('document:keydown.escape')
@@ -183,11 +136,6 @@ export class SettingsPage {
     if (this.isProfileModalOpen) {
       this.closeProfileModal();
     }
-  }
-
-  private toggleLanguage(): void {
-    const nextLanguage: AppLanguage = this.language.currentLang() === 'vi' ? 'en' : 'vi';
-    this.language.setLanguage(nextLanguage);
   }
 
   private buildInitials(fullName: string): string {
