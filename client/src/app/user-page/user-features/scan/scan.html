@@ -119,7 +119,7 @@
 
           <!-- Live camera Viewfinder Active -->
           @if (cameraPermission === 'granted') {
-            <div class="camera-container" [class.camera-container--receipt]="scanMode === 'receipt'">
+            <div #cameraContainer class="camera-container" [class.camera-container--receipt]="scanMode === 'receipt'">
               <video
                 #videoElement
                 class="camera-video"
@@ -179,7 +179,11 @@
         <!-- Captured Image Preview or Scanning Overlay -->
         @if (captureState === 'preview' && previewUrl && (processingState === 'idle' || processingState === 'scanning')) {
           <div class="preview-viewport-card">
-            <div class="preview-container" [class.preview-container--scanning]="processingState === 'scanning'">
+            <div
+              class="preview-container"
+              [class.preview-container--scanning]="processingState === 'scanning'"
+              [class.preview-container--camera-match]="previewMatchesCamera"
+            >
               <img [src]="previewUrl" alt="Captured image preview" class="preview-image" />
               
               @if (processingState === 'scanning') {

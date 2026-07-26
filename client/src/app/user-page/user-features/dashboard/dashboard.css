@@ -453,6 +453,7 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
+  text-decoration: none;
   transition:
     transform 0.2s ease,
     background 0.2s ease;
@@ -1847,4 +1848,20 @@
   width: 18px;
   border-radius: 3px;
   background: var(--sw-primary, #6366f1);
+}
+
+.usage-review-card__eyebrow {
+  margin: 0 0 2px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7c3aed;
+}
+
+.usage-review-card__copy .usage-review-card__title {
+  margin: 0;
+  color: #4c1d95;
+  font-size: 0.9rem;
+  font-weight: 800;
 }

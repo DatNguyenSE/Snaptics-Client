@@ -2220,3 +2220,18 @@
     animation: none;
   }
 }
+
+/* Captured images are already cropped to the live camera viewport ratio. */
+.preview-container--camera-match {
+  aspect-ratio: 3 / 4;
+  max-width: 480px;
+  padding: 0;
+}
+
+.preview-container--camera-match .preview-image {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  border-radius: 0;
+}

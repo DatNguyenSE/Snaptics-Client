@@ -126,6 +126,7 @@ export class Scan implements OnInit, OnDestroy {
   // Preview / image
   previewUrl: string | null = null;
   currentFile: File | null = null;
+  previewMatchesCamera = false;
 
   // Receipt scan results
   storeName = '';
@@ -667,7 +668,7 @@ export class Scan implements OnInit, OnDestroy {
         this.clearMicrocopyTimer();
 
         if (!result) {
-          this.errorMessage = this.lang.t('scan.errorNoContent');
+          this.errorMessage = this.lang.t('scan.errorItemNoContent');
           this.processingState = 'error';
           this.cdr.detectChanges();
           return;
@@ -934,6 +935,7 @@ export class Scan implements OnInit, OnDestroy {
       this.previewUrl = null;
     }
     this.captureState = 'live';
+    this.previewMatchesCamera = false;
   }
 
   private getCategoryClass(category: string): string {
