@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, HostListener, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone, inject, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { LanguageService } from '../../../core/services/language-service';
@@ -49,6 +49,22 @@ interface KpiCard {
   clickable?: boolean;
 }
 
+interface SpeechRecognitionLike {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((event: { results: SpeechRecognitionResultList }) => void) | null;
+  onerror: ((event: { error: string }) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+}
+
+interface SpeechRecognitionWindow extends Window {
+  SpeechRecognition?: new () => SpeechRecognitionLike;
+  webkitSpeechRecognition?: new () => SpeechRecognitionLike;
+}
+
 export interface UserBudget {
   id: number;
   name: string;
@@ -63,12 +79,13 @@ export interface UserBudget {
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
-export class Dashboard implements OnInit {
+export class Dashboard implements OnInit, OnDestroy {
   protected readonly language = inject(LanguageService);
   private readonly transactionService = inject(TransactionService);
   private readonly budgetService = inject(BudgetService);
   private readonly dashboardService = inject(DashboardService);
   private readonly aiService = inject(AiService);
+  private readonly zone = inject(NgZone);
   
   totalBudget = 0;
   isCategorySummaryModalOpen = false;
@@ -94,6 +111,9 @@ export class Dashboard implements OnInit {
   isAiLoading = false;
   aiSuggestions: string[] = [];
   currentAiResponse: { title: string, subtitle: string } | null = null;
+  isListening = false;
+  voiceError = '';
+  private speechRecognition?: SpeechRecognitionLike;
   
   resetAiResponse(): void {
     this.currentAiResponse = null;
@@ -235,6 +255,10 @@ export class Dashboard implements OnInit {
     this.loadSpendingComparison();
   }
 
+  ngOnDestroy(): void {
+    this.speechRecognition?.stop();
+  }
+
   private initAiSuggestions(): void {
     this.aiSuggestions = [
       this.language.t('dashboard.aiSuggestions.howMuch'),
@@ -245,6 +269,79 @@ export class Dashboard implements OnInit {
 
   fillAiQuery(suggestion: string): void {
     this.aiQuery = suggestion;
+  }
+
+  startVoiceInput(): void {
+    if (this.isListening) return;
+
+    const speechWindow = window as SpeechRecognitionWindow;
+    const SpeechRecognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      this.voiceError = this.isEnglish
+        ? 'Voice input is not supported by this browser.'
+        : 'Trình duyệt này chưa hỗ trợ nhập bằng giọng nói.';
+      return;
+    }
+
+    this.voiceError = '';
+    const recognition = new SpeechRecognition();
+    this.speechRecognition = recognition;
+    recognition.lang = this.isEnglish ? 'en-US' : 'vi-VN';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.onresult = (event) => {
+      let transcript = '';
+      for (let index = 0; index < event.results.length; index++) {
+        transcript += event.results[index][0].transcript;
+      }
+      // Web Speech events can fire outside Angular's change-detection zone.
+      this.zone.run(() => {
+        this.aiQuery = transcript;
+      });
+    };
+    recognition.onerror = (event) => {
+      this.zone.run(() => {
+        this.isListening = false;
+        if (event.error !== 'no-speech' && event.error !== 'aborted') {
+          this.voiceError = event.error === 'not-allowed'
+            ? (this.isEnglish ? 'Please allow microphone access.' : 'Vui lòng cho phép truy cập micro.')
+            : (this.isEnglish ? 'Could not recognize your voice.' : 'Không thể nhận diện giọng nói.');
+        }
+      });
+    };
+    recognition.onend = () => {
+      this.zone.run(() => {
+        this.isListening = false;
+        this.speechRecognition = undefined;
+      });
+    };
+
+    try {
+      recognition.start();
+      this.isListening = true;
+    } catch {
+      this.isListening = false;
+      this.voiceError = this.isEnglish ? 'Could not start microphone.' : 'Không thể bật micro.';
+    }
+  }
+
+  stopVoiceInput(): void {
+    if (!this.isListening) return;
+    this.speechRecognition?.stop();
+  }
+
+  onVoicePointerDown(event: PointerEvent): void {
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    this.startVoiceInput();
+  }
+
+  onVoicePointerUp(event: PointerEvent): void {
+    (event.currentTarget as HTMLElement).releasePointerCapture(event.pointerId);
+    this.stopVoiceInput();
+  }
+
+  get isEnglish(): boolean {
+    return this.language.currentLang() === 'en';
   }
 
   submitAiQuery(): void {

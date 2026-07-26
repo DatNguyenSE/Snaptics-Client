@@ -338,6 +338,12 @@
   color: #4338ca;
 }
 
+:host-context(html:not(.dark-theme)) .filter-tab.active {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #ffffff;
+}
+
 :host-context(html:not(.dark-theme)) .modal-body::-webkit-scrollbar-thumb {
   background: #cbd5e1;
 }
@@ -349,6 +355,14 @@
 
 :host-context(html:not(.dark-theme)) .list-title {
   color: #1e293b;
+}
+
+:host-context(html:not(.dark-theme)) .top-name {
+  color: #1e293b;
+}
+
+:host-context(html:not(.dark-theme)) .top-percent {
+  color: #64748b;
 }
 
 :host-context(html:not(.dark-theme)) .item-name {

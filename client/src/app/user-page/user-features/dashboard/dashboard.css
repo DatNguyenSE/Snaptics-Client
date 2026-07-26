@@ -69,10 +69,28 @@
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.2s ease;
+  touch-action: none;
+  user-select: none;
 }
 
 .ai-search-mic:hover {
   background: var(--sw-border, #e5e7eb);
+}
+
+.ai-search-mic--listening {
+  background: #fee2e2;
+  color: #dc2626;
+  animation: voice-pulse 1.2s ease-in-out infinite;
+}
+
+.ai-search-voice-error {
+  margin: 6px 4px 0;
+  color: #dc2626;
+  font-size: 0.6875rem;
+}
+
+@keyframes voice-pulse {
+  50% { box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.12); }
 }
 
 .ai-search-mic .material-symbols-outlined {
@@ -160,6 +178,11 @@
 
 :host-context(html.dark-theme) .ai-search-mic:hover {
   background: rgba(255, 255, 255, 0.15);
+}
+
+:host-context(html.dark-theme) .ai-search-mic--listening {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
 }
 
 

@@ -13,7 +13,16 @@
           [placeholder]="language.t('dashboard.aiSearchPlaceholder')" 
           class="ai-search-input"
         />
-        <button class="ai-search-mic">
+        <button
+          class="ai-search-mic"
+          [class.ai-search-mic--listening]="isListening"
+          (pointerdown)="onVoicePointerDown($event)"
+          (pointerup)="onVoicePointerUp($event)"
+          (pointercancel)="stopVoiceInput()"
+          type="button"
+          [attr.aria-label]="isEnglish ? 'Hold to speak' : 'Nhấn giữ để nói'"
+          [attr.aria-pressed]="isListening"
+        >
           <span class="material-symbols-outlined">mic</span>
         </button>
         <button class="ai-search-submit" (click)="submitAiQuery()" [disabled]="isAiLoading">
@@ -24,6 +33,9 @@
           }
         </button>
       </div>
+      @if (voiceError) {
+        <p class="ai-search-voice-error" role="status">{{ voiceError }}</p>
+      }
       <div class="ai-search-suggestions">
         @for (suggestion of aiSuggestions; track suggestion) {
           <button class="ai-search-chip" (click)="fillAiQuery(suggestion)">

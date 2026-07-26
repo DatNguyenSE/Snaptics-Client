@@ -269,6 +269,15 @@
   background: #f8fafc;
 }
 
+.member-item--pending {
+  background: #fffbeb;
+  border: 1px dashed #fcd34d;
+}
+
+.member-item--pending:hover {
+  background: #fef3c7;
+}
+
 /* ─── Avatar ─── */
 .member-avatar {
   width: 44px;
@@ -282,6 +291,11 @@
   background: linear-gradient(135deg, #6366f1, #7c3aed);
 }
 
+.member-avatar--pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
 .avatar-img {
   width: 100%;
   height: 100%;
@@ -292,6 +306,10 @@
   color: #fff;
   font-size: 0.875rem;
   font-weight: 700;
+}
+
+.member-avatar--pending .avatar-initials {
+  color: #b45309;
 }
 
 /* ─── Member Info ─── */
@@ -332,6 +350,12 @@
   text-overflow: ellipsis;
 }
 
+.member-pending-label {
+  color: #b45309;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
 /* ─── Meta ─── */
 .member-meta {
   display: flex;
@@ -357,6 +381,12 @@
   background: linear-gradient(135deg, #fef3c7, #fde68a);
   color: #92400e;
   border-color: #fbbf24;
+}
+
+.role-badge--pending {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: #fcd34d;
 }
 
 .member-actions {

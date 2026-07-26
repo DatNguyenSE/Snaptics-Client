@@ -544,6 +544,12 @@
   color: #4338ca;
 }
 
+:host-context(html:not(.dark-theme)) .filter-tab.active {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #ffffff;
+}
+
 :host-context(html:not(.dark-theme)) .modal-body::-webkit-scrollbar-thumb {
   background: #cbd5e1;
 }

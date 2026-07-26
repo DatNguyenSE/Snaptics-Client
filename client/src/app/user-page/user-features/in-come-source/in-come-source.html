@@ -1,11 +1,21 @@
 <div class="income-container">
   <div class="header">
-    <h2>Quản lý Nguồn tiền</h2>
-    <button class="btn-primary" (click)="openAddModal()">+ Thêm Nguồn Tiền</button>
+    <div class="header-copy">
+      <span class="section-kicker">Dòng tiền</span>
+      <h2>Quản lý nguồn tiền</h2>
+      <p>Theo dõi các khoản thu và nơi nhận tiền của bạn.</p>
+    </div>
+    <button class="btn-primary" (click)="openAddModal()">
+      <span class="material-symbols-outlined">add</span>
+      Thêm nguồn tiền
+    </button>
   </div>
 
   <div class="income-list">
     <div class="income-card" *ngFor="let source of incomeSources">
+      <div class="income-card__accent" aria-hidden="true">
+        <span class="material-symbols-outlined">payments</span>
+      </div>
       <div class="card-info">
         <h3>{{ source.name }}</h3>
         <p class="amount">{{ source.amount | number:'1.0-0' }} đ</p>

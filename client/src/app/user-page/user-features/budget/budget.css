@@ -7,8 +7,8 @@
 
 .budget-page {
   min-height: 100vh;
-  padding: 32px 24px calc(112px + env(safe-area-inset-bottom));
-  background-color: #f8f9fc;
+  padding: 28px 20px calc(112px + env(safe-area-inset-bottom));
+  background-color: var(--sw-background, #f4f7ff);
 }
 
 @media (min-width: 1024px) {
@@ -18,7 +18,7 @@
 }
 
 .budget-page__content {
-  max-width: 900px;
+  max-width: 980px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -45,7 +45,7 @@ h1, h2, h3, p, span { margin: 0; }
   margin-bottom: 4px;
 }
 .budget-header__title h1 {
-  font-size: 2.2rem;
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
   font-weight: 800;
   color: #111827;
   letter-spacing: -0.02em;
@@ -93,6 +93,7 @@ h1, h2, h3, p, span { margin: 0; }
   border-radius: 999px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.02);
   width: fit-content;
+  max-width: 100%;
 }
 .budget-tab {
   background: transparent;
@@ -164,7 +165,7 @@ h1, h2, h3, p, span { margin: 0; }
 .budget-card {
   background: white;
   border-radius: 20px;
-  padding: 24px;
+  padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   display: flex;
   flex-direction: column;
@@ -221,6 +222,10 @@ h1, h2, h3, p, span { margin: 0; }
   font-size: 1.15rem;
   font-weight: 800;
   color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
 }
 .budget-period {
   font-size: 0.85rem;
@@ -553,8 +558,59 @@ h1, h2, h3, p, span { margin: 0; }
   flex-direction: column;
   gap: 24px;
   position: relative;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+@media (max-width: 767px) {
+  .budget-page { padding: 18px 14px calc(104px + env(safe-area-inset-bottom)); }
+  .budget-page__content { gap: 18px; }
+  .budget-header { flex-direction: column; align-items: stretch; }
+  .budget-header__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .budget-header__actions > button { justify-content: center; padding-inline: 10px; font-size: 0.78rem; }
+  .budget-tabs { width: 100%; padding: 5px; gap: 4px; border-radius: 16px; }
+  .budget-tab { flex: 1; justify-content: center; padding: 10px 6px; font-size: 0.75rem; gap: 4px; min-width: 0; }
+  .budget-tab .material-symbols-outlined { font-size: 1rem; }
+  .budget-card { padding: 16px; border-radius: 18px; gap: 16px; }
+  .budget-card__title-wrap { gap: 10px; min-width: 0; }
+  .budget-icon-wrap { width: 44px; height: 44px; border-radius: 13px; }
+  .budget-name { max-width: 150px; font-size: 1rem; }
+  .budget-period { font-size: 0.75rem; }
+  .budget-amounts { gap: 10px; }
+  .amount-value { font-size: 1.1rem; }
+  .amount-label { font-size: 0.625rem; }
+  .member-chip { width: 30px; height: 30px; font-size: 0.7rem; }
+  .shared-card-badge { gap: 4px; padding: 5px 6px; }
+  .badge { padding: 3px 7px; font-size: 0.6rem; }
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-content { max-height: calc(100dvh - 12px); border-radius: 24px 24px 0 0; padding: 22px 18px calc(18px + env(safe-area-inset-bottom)); }
+  .modal-header { gap: 10px; }
+  .modal-icon { width: 44px; height: 44px; border-radius: 13px; }
+  .modal-titles h3 { font-size: 1.05rem; }
+  .modal-titles p { font-size: 0.75rem; }
+  .form-row { grid-template-columns: 1fr; gap: 16px; }
+  .form-group[style*="grid-column"] { grid-column: auto !important; }
+  .modal-actions { position: sticky; bottom: -18px; background: var(--sw-card, #fff); padding: 12px 0 2px; }
+  .modal-actions > button { flex: 1; justify-content: center; }
+}
+
+:host-context(html.dark-theme) .budget-page { background: var(--sw-background, #0f172a); }
+:host-context(html.dark-theme) .budget-header__title h1,
+:host-context(html.dark-theme) .budget-name,
+:host-context(html.dark-theme) .amount-value { color: #f8fafc; }
+:host-context(html.dark-theme) .budget-tabs,
+:host-context(html.dark-theme) .budget-card,
+:host-context(html.dark-theme) .dropdown-menu,
+:host-context(html.dark-theme) .modal-content { background: var(--sw-card, #1e293b); }
+:host-context(html.dark-theme) .budget-tab { color: #94a3b8; }
+:host-context(html.dark-theme) .budget-tab--active { background: rgba(139, 92, 246, 0.16); color: #c4b5fd; }
+:host-context(html.dark-theme) .budget-card--shared { background: linear-gradient(145deg, #1e293b, #172033); }
+:host-context(html.dark-theme) .dropdown-item { color: #cbd5e1; }
+:host-context(html.dark-theme) .dropdown-item:hover { background: #334155; color: #f8fafc; }
+:host-context(html.dark-theme) .form-control { background: #0f172a; border-color: rgba(255,255,255,0.12); color: #f8fafc; }
+:host-context(html.dark-theme) .btn-ghost { color: #cbd5e1; }
+:host-context(html.dark-theme) .btn-ghost:hover { background: #334155; color: #f8fafc; }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 .modal-header { display: flex; align-items: flex-start; gap: 16px; }

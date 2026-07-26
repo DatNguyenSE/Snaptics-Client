@@ -63,8 +63,9 @@ export class BudgetMemberModal implements OnInit {
     this.hasError = false;
     this.budgetMemberService.getMembers(this.budgetId).subscribe({
       next: (members) => {
-        this.members = members.filter((m) => Number(m.status) === 1);
-        const currentMember = this.members.find(
+        // Pending invitations remain visible so the owner can see who has not responded.
+        this.members = members.filter((m) => this.isMemberActive(m) || this.isMemberPending(m));
+        const currentMember = members.find(
           (m) => this.getMemberId(m) === this.currentUserId
         );
         if (currentMember) {
@@ -97,6 +98,14 @@ export class BudgetMemberModal implements OnInit {
 
   isMemberOwner(m: BudgetMemberDto): boolean {
     return m.isOwner === true || m.role === 0 || m.role === 'OWNER';
+  }
+
+  isMemberActive(m: BudgetMemberDto): boolean {
+    return Number(m.status) === 1;
+  }
+
+  isMemberPending(m: BudgetMemberDto): boolean {
+    return Number(m.status) === 0;
   }
 
   getInitials(name: string): string {

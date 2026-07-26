@@ -90,8 +90,8 @@
       } @else {
         <ul class="member-list" role="list">
           @for (member of members; track getMemberId(member)) {
-            <li class="member-item">
-              <div class="member-avatar" [attr.aria-label]="getMemberName(member)">
+            <li class="member-item" [class.member-item--pending]="isMemberPending(member)">
+              <div class="member-avatar" [class.member-avatar--pending]="isMemberPending(member)" [attr.aria-label]="getMemberName(member)">
                 @if (member.imageUrl) {
                   <img [src]="member.imageUrl" [alt]="getMemberName(member)" class="avatar-img" />
                 } @else {
@@ -110,15 +110,18 @@
                 @if (member.joinedAt) {
                   <span class="member-joined">Tham gia {{ member.joinedAt | date:'dd/MM/yyyy' }}</span>
                 }
+                @if (isMemberPending(member)) {
+                  <span class="member-pending-label">Chưa phản hồi</span>
+                }
               </div>
 
               <div class="member-meta">
-                <span class="role-badge" [class.role-badge--owner]="isMemberOwner(member)">
-                  {{ isMemberOwner(member) ? 'Chủ ví' : 'Thành viên' }}
+                <span class="role-badge" [class.role-badge--owner]="isMemberOwner(member)" [class.role-badge--pending]="isMemberPending(member)">
+                  {{ isMemberPending(member) ? 'Chưa phản hồi' : (isMemberOwner(member) ? 'Chủ ví' : 'Thành viên') }}
                 </span>
 
                 <!-- OWNER actions on other members -->
-                @if (isOwner && getMemberId(member) !== currentUserId && !isMemberOwner(member)) {
+                @if (isOwner && !isMemberPending(member) && getMemberId(member) !== currentUserId && !isMemberOwner(member)) {
                   <div class="member-actions">
                     <button
                       class="btn-action btn-action--transfer"

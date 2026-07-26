@@ -74,8 +74,11 @@ export class UserHeader implements AfterViewInit, OnDestroy {
 
     this.avatarRenderingStarted = true;
 
-    canvas.width = 180;
-    canvas.height = 180;
+    // Render at 4x CSS resolution so the circular crop stays smooth on mobile screens.
+    canvas.width = 360;
+    canvas.height = 360;
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = 'high';
 
     const renderFrame = (): void => {
       if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
@@ -102,11 +105,14 @@ export class UserHeader implements AfterViewInit, OnDestroy {
           const red = frame.data[index];
           const green = frame.data[index + 1];
           const blue = frame.data[index + 2];
-          const greenDominance = green - Math.max(red, blue);
+           const otherChannel = Math.max(red, blue);
+           const greenDominance = green - otherChannel;
 
-          if (green > 90 && greenDominance > 18) {
-            frame.data[index + 3] = Math.max(0, 255 - greenDominance * 14);
-          }
+           // Remove the green-screen spill around the silhouette, including soft edge pixels.
+           if (green > 60 && greenDominance > 3) {
+             frame.data[index + 1] = Math.min(green, otherChannel + 2);
+             frame.data[index + 3] = Math.max(0, 255 - (greenDominance - 3) * 85);
+           }
         }
         context.putImageData(frame, 0, 0);
       }
