@@ -1,4 +1,5 @@
 import { Injectable, computed, inject, signal, effect } from '@angular/core';
+import { Subject } from 'rxjs';
 import { AppLanguage, LanguageService } from './language-service';
 import { LocalizedText, NotificationItem, NotificationRecord, NotificationType, SystemSeverity } from '../../models/notification-item';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
@@ -131,6 +132,9 @@ export class NotificationService {
   private readonly http = inject(HttpClient);
   private hubConnection?: HubConnection;
 
+  public aiResult$ = new Subject<any>();
+  public aiError$ = new Subject<string>();
+
   private readonly notificationsState = signal<NotificationRecord[]>([]);
   readonly mutedTypes = signal<Set<NotificationType>>(new Set());
   readonly notificationSettings = signal({
@@ -207,6 +211,14 @@ export class NotificationService {
       .build();
 
     this.hubConnection.start().catch((error: unknown) => console.log('Error establishing SignalR connection', error));
+
+    this.hubConnection.on('ReceiveAiResult', (result: any) => {
+      this.aiResult$.next(result);
+    });
+
+    this.hubConnection.on('ReceiveAiError', (errorMsg: string) => {
+      this.aiError$.next(errorMsg);
+    });
 
     this.hubConnection.on('ReceiveNotification', (notificationDto: any) => {
       const feType: NotificationType = notificationDto.type === 4 ? 'wallet_invitation' : 'system';

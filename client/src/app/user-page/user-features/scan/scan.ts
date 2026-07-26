@@ -167,12 +167,13 @@ export class Scan implements OnInit, OnDestroy {
   }
 
   get dynamicMicrocopy(): string {
+    const isItem = this.scanMode === 'item';
     if (this.scanElapsedSeconds < 3) {
-      return this.lang.t('scan.loadingStep1');
+      return isItem ? this.lang.t('scan.itemLoadingStep1') : this.lang.t('scan.loadingStep1');
     } else if (this.scanElapsedSeconds < 7) {
-      return this.lang.t('scan.loadingStep2');
+      return isItem ? this.lang.t('scan.itemLoadingStep2') : this.lang.t('scan.loadingStep2');
     } else {
-      return this.lang.t('scan.loadingStep3');
+      return isItem ? this.lang.t('scan.itemLoadingStep3') : this.lang.t('scan.loadingStep3');
     }
   }
 

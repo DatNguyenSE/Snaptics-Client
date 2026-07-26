@@ -186,7 +186,7 @@
                 <div class="scanning-overlay">
                   <div class="scanning-overlay__line"></div>
                   <p class="scanning-overlay__title">{{ lang.t('scan.state.analyzing') }}</p>
-                  <p class="scanning-overlay__sub">{{ lang.t('scan.readingDescription') }}</p>
+                  <p class="scanning-overlay__sub">{{ scanMode === 'receipt' ? lang.t('scan.readingDescription') : lang.t('scan.analyzingItemSub') }}</p>
                 </div>
               }
             </div>
@@ -241,7 +241,7 @@
               <div class="scan-error-icon">
                 <span class="material-symbols-outlined">error_outline</span>
               </div>
-              <h3 class="scan-error-title">{{ lang.t('scan.errorTitle') }}</h3>
+              <h3 class="scan-error-title">{{ scanMode === 'receipt' ? lang.t('scan.errorTitle') : lang.t('scan.errorItemTitle') }}</h3>
               <p class="scan-error-sub">{{ errorMessage }}</p>
             </div>
 
@@ -611,7 +611,7 @@
           <div class="scan-status-icon-wrap">
             @if (processingState === 'scanning') {
               <div class="scan-status-icon scan-status-icon--scanning">
-                <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
+                <span class="material-symbols-outlined" aria-hidden="true">{{ scanMode === 'receipt' ? 'receipt_long' : 'image_search' }}</span>
                 <div class="scan-status-icon__pulse"></div>
               </div>
             } @else if (processingState === 'success') {
@@ -624,10 +624,10 @@
           <!-- Processing Text Info -->
           <div class="scan-processing-info">
             <h2 class="scan-processing-title">
-              {{ processingState === 'success' ? lang.t('scan.successTitle') : lang.t('scan.analyzingTitle') }}
+              {{ processingState === 'success' ? (scanMode === 'receipt' ? lang.t('scan.successTitle') : lang.t('scan.successItemTitle')) : (scanMode === 'receipt' ? lang.t('scan.analyzingTitle') : lang.t('scan.analyzingItemTitle')) }}
             </h2>
             <p class="scan-processing-sub">
-              {{ processingState === 'success' ? lang.t('scan.successSub') : lang.t('scan.analyzingSub') }}
+              {{ processingState === 'success' ? lang.t('scan.successSub') : (scanMode === 'receipt' ? lang.t('scan.analyzingSub') : lang.t('scan.analyzingItemSub')) }}
             </p>
           </div>
 
@@ -636,7 +636,7 @@
             <div class="scan-microcopy-phase">
               <span class="scan-microcopy-text">{{ dynamicMicrocopy }}</span>
             </div>
-            <div class="scan-progress-bar-track" aria-label="Đang xử lý hóa đơn">
+            <div class="scan-progress-bar-track" [attr.aria-label]="scanMode === 'receipt' ? 'Đang xử lý hóa đơn' : 'Đang xử lý hình ảnh'">
               <div class="scan-progress-bar-shimmer"></div>
             </div>
           }
