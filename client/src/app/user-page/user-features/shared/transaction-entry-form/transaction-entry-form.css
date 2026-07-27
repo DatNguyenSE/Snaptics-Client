@@ -1,5 +1,8 @@
 :host {
   display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .entry-form {
@@ -8,18 +11,28 @@
   background: var(--sw-card);
   box-shadow: var(--sw-shadow-sm);
   padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .entry-form__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 18px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .entry-field {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .entry-field--full {
@@ -34,37 +47,131 @@
   color: var(--sw-muted-foreground);
 }
 
+/* ── Segmented Control ── */
+.segmented-control {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: var(--sw-muted, #f0f3fe);
+  padding: 5px;
+  border-radius: 20px;
+  border: 1px solid var(--sw-border);
+}
+
+.segmented-control__option {
+  flex: 1 1 50%;
+  width: 50%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  border-radius: 16px;
+  border: 1px solid var(--sw-border);
+  background: var(--sw-card, #ffffff);
+  color: var(--sw-foreground);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+}
+
+.segmented-control__option:hover:not(.segmented-control__option--active) {
+  background: var(--sw-primary-soft, #edf0ff);
+  border-color: var(--sw-primary);
+}
+
+.segmented-control__option--active {
+  background: linear-gradient(135deg, var(--sw-primary, #5b7bfa), #7c3aed);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(91, 123, 250, 0.28);
+}
+
+.segmented-control__icon {
+  font-size: 1.25rem;
+  font-weight: 700;
+  transition: transform 0.2s ease;
+}
+
+.segmented-control__option--active .segmented-control__icon {
+  color: #ffffff;
+}
+
+.segmented-control__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* ── Uniform Inputs ── */
 .entry-field__control,
-.entry-field__amount {
+.entry-field__amount,
+.entry-field__date-display {
+  height: 56px;
   border: 1px solid var(--sw-border);
   border-radius: 18px;
   background: var(--sw-muted);
   color: var(--sw-foreground);
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .entry-field__control {
-  width: 100%;
-  padding: 14px 16px;
-  font: inherit;
+  padding: 0 16px;
   outline: 0;
 }
 
 .entry-field__control:focus,
-.entry-field__amount:focus-within {
+.entry-field__amount:focus-within,
+.entry-field__date-picker-wrap:focus-within .entry-field__date-display {
   border-color: var(--sw-primary);
   box-shadow: 0 0 0 4px var(--sw-primary-soft);
   background: var(--sw-card);
 }
 
-.entry-field__control--textarea {
-  min-height: 120px;
-  resize: vertical;
+/* ── Select Dropdown Wrapper ── */
+.entry-field__select-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
+.entry-field__control--select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 42px;
+  cursor: pointer;
+}
+
+.entry-field__select-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--sw-muted-foreground);
+  pointer-events: none;
+  font-size: 1.35rem;
+}
+
+/* ── Amount Input ── */
 .entry-field__amount {
   display: flex;
   align-items: center;
@@ -72,47 +179,135 @@
   padding: 0 16px;
 }
 
-.entry-field__amount input {
+.entry-field__amount-input {
   border: 0;
   background: transparent;
   width: 100%;
-  padding: 14px 0;
+  height: 100%;
+  padding: 0;
   font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
   color: inherit;
   outline: 0;
+  min-width: 0;
 }
 
-.entry-field__amount span {
+.entry-field__currency {
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--sw-muted-foreground);
+  flex-shrink: 0;
 }
 
+/* ── Textarea ── */
+.entry-field__control--textarea {
+  height: auto;
+  min-height: 110px;
+  padding: 14px 16px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* ── Date Picker ── */
+.entry-field__date-picker-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.entry-field__date-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+.entry-field__date-text {
+  font-weight: 600;
+  color: var(--sw-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entry-field__date-text--placeholder {
+  color: var(--sw-muted-foreground);
+  font-weight: 400;
+}
+
+.entry-field__date-icon {
+  color: var(--sw-muted-foreground);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.entry-field__native-date {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.entry-field__native-date::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ── Errors ── */
 .entry-field__error {
   font-size: 0.75rem;
+  font-weight: 600;
   color: #dc2626;
+  margin-top: 2px;
 }
 
+/* ── Form Actions ── */
 .entry-form__actions {
-  margin-top: 20px;
+  margin-top: 24px;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .entry-form__button {
+  height: 54px;
   border-radius: 18px;
-  padding: 14px 18px;
+  padding: 0 24px;
   border: 1px solid var(--sw-border);
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   cursor: pointer;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
     background 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .entry-form__button:hover {
@@ -130,7 +325,7 @@
 }
 
 .entry-form__button--ghost {
-  background: #ffffff;
+  background: var(--sw-card);
   color: var(--sw-foreground);
 }
 
@@ -138,23 +333,40 @@
   border-color: transparent;
   background: linear-gradient(135deg, var(--sw-primary), #7c3aed);
   color: #ffffff;
-  box-shadow: 0 18px 34px rgba(91, 123, 250, 0.18);
+  box-shadow: 0 14px 28px rgba(91, 123, 250, 0.22);
 }
 
+/* ── Mobile Responsive (320px, 375px, 390px, 430px) ── */
 @media (max-width: 639px) {
   .entry-form {
-    padding: 18px 16px;
+    padding: 20px 16px 28px;
+    border-radius: 24px;
   }
 
   .entry-form__grid {
     grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .segmented-control__option {
+    height: 48px;
+    font-size: 0.875rem;
+  }
+
+  .entry-field__control,
+  .entry-field__amount,
+  .entry-field__date-display {
+    height: 54px;
   }
 
   .entry-form__actions {
     flex-direction: column-reverse;
+    margin-top: 20px;
   }
 
   .entry-form__button {
     width: 100%;
+    height: 52px;
   }
 }
+

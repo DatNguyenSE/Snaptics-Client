@@ -80,6 +80,34 @@ export class TransactionEntryForm {
     return null;
   }
 
+  protected get formattedDateDisplay(): string {
+    const dateVal = this.form.controls.date?.value;
+    if (!dateVal) return '';
+    const parts = dateVal.split('-');
+    if (parts.length === 3) {
+      const [year, month, day] = parts;
+      if (year && month && day) {
+        return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+      }
+    }
+    return dateVal;
+  }
+
+  protected setExpenseType(isExpense: boolean): void {
+    this.form.controls.isExpense.setValue(isExpense);
+    this.form.controls.isExpense.markAsDirty();
+  }
+
+  protected openDatePicker(input: HTMLInputElement): void {
+    if ('showPicker' in input && typeof input.showPicker === 'function') {
+      try {
+        input.showPicker();
+      } catch {
+        // Fallback silently if browser restricts showPicker invocation context
+      }
+    }
+  }
+
   protected onSave(): void {
     this.save.emit();
   }
@@ -88,3 +116,4 @@ export class TransactionEntryForm {
     this.cancel.emit();
   }
 }
+

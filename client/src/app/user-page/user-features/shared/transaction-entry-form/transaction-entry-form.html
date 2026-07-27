@@ -1,17 +1,46 @@
 <form class="entry-form" [formGroup]="form" (ngSubmit)="onSave()">
   <div class="entry-form__grid">
-    <label class="entry-field entry-field--full" style="display: flex; gap: 1rem; align-items: center;">
-      <span class="entry-field__label" style="margin-bottom: 0;">Loại giao dịch:</span>
-      <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-        <input type="radio" formControlName="isExpense" [value]="true" />
-        <span>Chi tiêu</span>
-      </label>
-      <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-        <input type="radio" formControlName="isExpense" [value]="false" />
-        <span>Thu nhập</span>
-      </label>
-    </label>
+    <!-- ── Transaction Type Segmented Control ── -->
+    <div class="entry-field entry-field--full">
+      <span class="entry-field__label">{{ language.currentLang() === 'vi' ? 'Loại giao dịch' : 'Transaction Type' }}</span>
+      <div class="segmented-control" role="radiogroup" aria-label="Loại giao dịch">
+        <button
+          type="button"
+          class="segmented-control__option"
+          [class.segmented-control__option--active]="form.value.isExpense === true"
+          (click)="setExpenseType(true)"
+        >
+          <input
+            type="radio"
+            formControlName="isExpense"
+            [value]="true"
+            class="segmented-control__input"
+            tabindex="-1"
+          />
+          <span class="material-symbols-outlined segmented-control__icon">south</span>
+          <span class="segmented-control__text">{{ language.currentLang() === 'vi' ? 'Chi tiêu' : 'Expense' }}</span>
+        </button>
 
+        <button
+          type="button"
+          class="segmented-control__option"
+          [class.segmented-control__option--active]="form.value.isExpense === false"
+          (click)="setExpenseType(false)"
+        >
+          <input
+            type="radio"
+            formControlName="isExpense"
+            [value]="false"
+            class="segmented-control__input"
+            tabindex="-1"
+          />
+          <span class="material-symbols-outlined segmented-control__icon">north</span>
+          <span class="segmented-control__text">{{ language.currentLang() === 'vi' ? 'Thu nhập' : 'Income' }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Title Field ── -->
     <label class="entry-field">
       <span class="entry-field__label">{{ language.t('entryForm.title') }}</span>
       <input
@@ -25,58 +54,83 @@
       }
     </label>
 
+    <!-- ── Amount Field ── -->
     <label class="entry-field">
       <span class="entry-field__label">{{ language.t('entryForm.amount') }}</span>
       <div class="entry-field__amount">
         <input
-          class="entry-field__control"
+          class="entry-field__amount-input"
           type="number"
           min="0"
           step="1000"
           formControlName="amount"
           [placeholder]="language.t('entryForm.amountPlaceholder')"
         />
-        <span>VND</span>
+        <span class="entry-field__currency">VND</span>
       </div>
       @if (getErrorMessage('amount'); as errorMessage) {
         <span class="entry-field__error">{{ errorMessage }}</span>
       }
     </label>
 
+    <!-- ── Category Field ── -->
     <label class="entry-field">
       <span class="entry-field__label">{{ language.t('entryForm.category') }}</span>
-      <select class="entry-field__control" formControlName="category">
-        <option value="">{{ language.t('entryForm.categoryPlaceholder') }}</option>
-        @for (category of categories; track category.id) {
-          <option [value]="category.name">{{ getCategoryLabel(category.name) }}</option>
-        }
-      </select>
+      <div class="entry-field__select-wrap">
+        <select class="entry-field__control entry-field__control--select" formControlName="category">
+          <option value="">{{ language.t('entryForm.categoryPlaceholder') }}</option>
+          @for (category of categories; track category.id) {
+            <option [value]="category.name">{{ getCategoryLabel(category.name) }}</option>
+          }
+        </select>
+        <span class="material-symbols-outlined entry-field__select-icon">expand_more</span>
+      </div>
     </label>
 
+    <!-- ── Date Field ── -->
     <label class="entry-field">
       <span class="entry-field__label">{{ language.t('entryForm.date') }}</span>
-      <input class="entry-field__control" type="date" formControlName="date" />
+      <div class="entry-field__date-picker-wrap">
+        <div class="entry-field__date-display">
+          <span class="entry-field__date-text" [class.entry-field__date-text--placeholder]="!form.value.date">
+            {{ formattedDateDisplay || (language.currentLang() === 'vi' ? 'Chọn ngày' : 'Select date') }}
+          </span>
+          <span class="material-symbols-outlined entry-field__date-icon">calendar_today</span>
+        </div>
+        <input
+          #datePickerInput
+          class="entry-field__native-date"
+          type="date"
+          formControlName="date"
+          (click)="openDatePicker(datePickerInput)"
+        />
+      </div>
       @if (getErrorMessage('date'); as errorMessage) {
         <span class="entry-field__error">{{ errorMessage }}</span>
       }
     </label>
 
+    <!-- ── Payment Method Field ── -->
     @if (showPaymentMethod) {
       <label class="entry-field entry-field--full">
         <span class="entry-field__label">{{ language.t('entryForm.paymentMethodTitle') }}</span>
-        <select class="entry-field__control" formControlName="paymentMethod">
-          @for (method of paymentMethods; track method) {
-            <option [value]="method">{{ getPaymentMethodLabel(method) }}</option>
-          }
-        </select>
+        <div class="entry-field__select-wrap">
+          <select class="entry-field__control entry-field__control--select" formControlName="paymentMethod">
+            @for (method of paymentMethods; track method) {
+              <option [value]="method">{{ getPaymentMethodLabel(method) }}</option>
+            }
+          </select>
+          <span class="material-symbols-outlined entry-field__select-icon">expand_more</span>
+        </div>
       </label>
     }
 
+    <!-- ── Note Field ── -->
     <label class="entry-field entry-field--full">
       <span class="entry-field__label">{{ language.t('entryForm.note') }}</span>
       <textarea
         class="entry-field__control entry-field__control--textarea"
-        rows="4"
+        rows="3"
         formControlName="note"
         [placeholder]="language.t('entryForm.notePlaceholder')"
       ></textarea>
@@ -97,3 +151,4 @@
     </button>
   </div>
 </form>
+
