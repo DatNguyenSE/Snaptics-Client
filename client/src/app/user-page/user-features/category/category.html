@@ -1,22 +1,23 @@
-<section class="transaction-page">
-  <div class="transaction-page__content">
+<section class="category-page">
+  <div class="category-page__content">
     
     <!-- ─── Hero ──────────────────────────────────────────────────────────── -->
-    <header class="transaction-page__hero" style="display: flex; justify-content: space-between; align-items: flex-end;">
-      <div class="transaction-page__hero-copy">
+    <header class="category-hero">
+      <div class="category-hero__copy">
         <p class="section-eyebrow">Quản lý</p>
         <h1>Danh mục chi tiêu</h1>
+        <p>Chọn biểu tượng quen thuộc để nhận diện giao dịch nhanh hơn.</p>
       </div>
       <div>
-        <button class="add-btn" (click)="openAddModal()">
+        <button class="add-btn" type="button" (click)="openAddModal()">
           <span class="material-symbols-outlined">add</span> Thêm danh mục
         </button>
       </div>
     </header>
 
     <!-- ─── Category List ───────────────────────────────────────────────── -->
-    <section class="transactions-section">
-      <div class="transaction-list">
+    <section class="category-section">
+      <div class="category-list">
         <!-- Loading State -->
         @if (isLoading) {
           <div class="state-container">
@@ -30,11 +31,11 @@
             <button class="retry-btn" (click)="loadCategories()">Thử lại</button>
           </div>
         } @else {
-          <div class="category-grid">
+          <div class="category-grid" role="list">
             @for (category of categories; track category.id) {
-              <div class="category-card" [class.is-default]="category.isDefault">
+              <article class="category-card" [class.is-default]="category.isDefault" role="listitem">
                 <div class="category-icon-wrapper" [style.background-color]="category.color">
-                  <i class="{{ category.icon || 'ti ti-category' }}"></i>
+                  <i [class]="category.icon || 'ti ti-category'"></i>
                 </div>
                 <div class="category-info">
                   <h3 class="category-name">{{ category.name }}</h3>
@@ -43,14 +44,14 @@
                 </div>
                 
                 <div class="category-actions" *ngIf="!category.isDefault">
-                  <button class="action-btn edit" (click)="openEditModal(category)" title="Sửa">
+                  <button class="action-btn edit" type="button" (click)="openEditModal(category)" title="Sửa">
                     <span class="material-symbols-outlined">edit</span>
                   </button>
-                  <button class="action-btn delete" (click)="deleteCategory(category.id, category.isDefault)" title="Xóa">
+                  <button class="action-btn delete" type="button" (click)="deleteCategory(category.id, category.isDefault)" title="Xóa">
                     <span class="material-symbols-outlined">delete</span>
                   </button>
                 </div>
-              </div>
+              </article>
             }
           </div>
         }
@@ -65,7 +66,7 @@
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>{{ isEditing ? 'Sửa danh mục' : 'Thêm danh mục mới' }}</h2>
-        <button class="close-btn" (click)="closeModal()">
+        <button class="close-btn" type="button" (click)="closeModal()">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
@@ -77,12 +78,27 @@
         </div>
 
         <div class="form-group">
-          <label>Icon (Tabler class)</label>
-          <div class="icon-input-wrapper">
-            <i class="{{ currentCategory.icon || 'ti ti-category' }}" [style.color]="currentCategory.color"></i>
-            <input type="text" class="form-control" [(ngModel)]="currentCategory.icon" placeholder="Ví dụ: ti ti-home" />
+          <div class="form-label-row">
+            <label>Biểu tượng</label>
+            <span class="selected-icon-name">{{ currentCategory.icon || 'Chưa chọn' }}</span>
           </div>
-          <small class="help-text">Nhập tên class icon từ thư viện Tabler Icons.</small>
+          <div class="icon-picker" role="listbox" aria-label="Chọn biểu tượng">
+            @for (icon of iconOptions; track icon.value) {
+              <button
+                class="icon-option"
+                type="button"
+                [class.icon-option--selected]="currentCategory.icon === icon.value"
+                [attr.aria-selected]="currentCategory.icon === icon.value"
+                (click)="currentCategory.icon = icon.value"
+              >
+                <span class="icon-option__glyph" [style.color]="currentCategory.color">
+                  <i [class]="icon.value"></i>
+                </span>
+                <span>{{ icon.label }}</span>
+              </button>
+            }
+          </div>
+          <small class="help-text">Chọn một biểu tượng để hiển thị cạnh danh mục.</small>
         </div>
 
         <div class="form-group">
@@ -101,8 +117,8 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-cancel" (click)="closeModal()">Hủy</button>
-        <button class="btn-save" (click)="saveCategory()" [disabled]="!currentCategory.name">Lưu lại</button>
+      <button class="btn-cancel" type="button" (click)="closeModal()">Hủy</button>
+      <button class="btn-save" type="button" (click)="saveCategory()" [disabled]="!currentCategory.name">Lưu lại</button>
       </div>
     </div>
   </div>

@@ -389,6 +389,9 @@
                         <label class="form-label">
                           <span>Danh mục</span>
                           <select class="form-input" (change)="updateCategory(item.id, $event)">
+                            <option [value]="''" [selected]="item.categoryId === null" disabled>
+                              {{ lang.currentLang() === 'vi' ? '-- Chưa phân loại --' : '-- Uncategorized --' }}
+                            </option>
                             @for (cat of categories; track cat.id) {
                               <option [value]="cat.id" [selected]="cat.id === item.categoryId">
                                 {{ getCategoryName(cat.name) }}

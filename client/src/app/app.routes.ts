@@ -110,6 +110,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./user-page/user-features/notification/notification').then((m) => m.Notification),
       },
+      {
+        path: 'category',
+        loadComponent: () =>
+          import('./user-page/user-features/category/category').then((m) => m.Category),
+      },
 
       {
         path: 'manual-entry',

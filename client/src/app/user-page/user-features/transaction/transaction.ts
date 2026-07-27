@@ -5,7 +5,9 @@ import { AccountService } from '../../../core/services/account-service';
 import { LanguageService } from '../../../core/services/language-service';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { BudgetService, BudgetDto } from '../../../core/services/budget.service';
+import { CategoryService } from '../../../core/services/category.service';
 import { TransactionDto } from '../../../models/transaction.dto';
+import { CategoryDto } from '../../../models/category.dto';
 import { environment } from '../../../environments/environment.development';
 import { TransactionDetailModal } from './transaction-detail-modal/transaction-detail-modal';
 
@@ -46,9 +48,11 @@ export class Transaction implements OnInit {
   protected readonly language = inject(LanguageService);
   private readonly transactionService = inject(TransactionService);
   private readonly budgetService = inject(BudgetService);
+  private readonly categoryService = inject(CategoryService);
 
   transactionHistory: TransactionDto[] = [];
   budgets: BudgetDto[] = [];
+  categories: CategoryDto[] = [];
   selectedTransaction: TransactionDto | null = null;
   isLoading = true;
   hasError = false;
@@ -69,6 +73,18 @@ export class Transaction implements OnInit {
   ngOnInit(): void {
     this.loadTransactions();
     this.loadBudgets();
+    this.loadCategories();
+  }
+
+  private loadCategories(): void {
+    this.categoryService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories || [];
+      },
+      error: () => {
+        this.categories = [];
+      },
+    });
   }
 
   private loadBudgets(): void {
@@ -362,120 +378,17 @@ export class Transaction implements OnInit {
 
   getIcon(transaction: TransactionDto): string {
     const details = transaction.transactionDetails;
-    let categories: string[] = [];
-
-    if (details && details.length > 0) {
-      for (const item of details) {
-        if (item.categoryName && item.categoryName.trim()) {
-          categories.push(item.categoryName.trim());
-        }
-      }
-    }
-
-    // Combine category names or fallback to transaction name if no category in details
-    let searchString = categories.join(' ').toLowerCase();
-    if (!searchString && transaction.name) {
-      searchString = transaction.name.toLowerCase();
-    }
-
-    // If category is null / empty, return 'ti-receipt'
-    if (!searchString.trim()) {
+    if (!details?.length || details.length > 1) {
       return 'ti-receipt';
     }
 
-    if (
-      searchString.includes('ăn uống') ||
-      searchString.includes('food') ||
-      searchString.includes('noodle') ||
-      searchString.includes('rice') ||
-      searchString.includes('phở') ||
-      searchString.includes('bún') ||
-      searchString.includes('cơm')
-    ) {
-      return 'ti-soup';
-    }
+    const category = this.categories.find((item) => item.id === Number(details[0].categoryId));
+    return this.normalizeIconClass(category?.icon);
+  }
 
-    if (
-      searchString.includes('cà phê') ||
-      searchString.includes('coffee') ||
-      searchString.includes('trà') ||
-      searchString.includes('tea') ||
-      searchString.includes('drink') ||
-      searchString.includes('nước')
-    ) {
-      return 'ti-coffee';
-    }
-
-    if (
-      searchString.includes('mua sắm') ||
-      searchString.includes('shopping') ||
-      searchString.includes('siêu thị') ||
-      searchString.includes('tạp hóa')
-    ) {
-      return 'ti-shopping-cart';
-    }
-
-    if (
-      searchString.includes('di chuyển') ||
-      searchString.includes('xe') ||
-      searchString.includes('ride') ||
-      searchString.includes('grab') ||
-      searchString.includes('taxi') ||
-      searchString.includes('xăng') ||
-      searchString.includes('travel')
-    ) {
-      return 'ti-car';
-    }
-
-    if (
-      searchString.includes('giải trí') ||
-      searchString.includes('phim') ||
-      searchString.includes('entertainment') ||
-      searchString.includes('game')
-    ) {
-      return 'ti-device-gamepad';
-    }
-
-    if (
-      searchString.includes('y tế') ||
-      searchString.includes('sức khỏe') ||
-      searchString.includes('health') ||
-      searchString.includes('thuốc')
-    ) {
-      return 'ti-first-aid-kit';
-    }
-
-    if (
-      searchString.includes('giáo dục') ||
-      searchString.includes('học') ||
-      searchString.includes('education') ||
-      searchString.includes('sách')
-    ) {
-      return 'ti-book';
-    }
-
-    if (
-      searchString.includes('nhà cửa') ||
-      searchString.includes('home') ||
-      searchString.includes('điện') ||
-      searchString.includes('nước') ||
-      searchString.includes('tiền nhà')
-    ) {
-      return 'ti-home';
-    }
-
-    if (
-      searchString.includes('nạp tiền') ||
-      searchString.includes('lương') ||
-      searchString.includes('income') ||
-      searchString.includes('salary') ||
-      searchString.includes('thưởng')
-    ) {
-      return 'ti-wallet';
-    }
-
-    // Default icon when category is null / unmatched
-    return 'ti-receipt';
+  private normalizeIconClass(icon: string | null | undefined): string {
+    const iconClass = icon?.trim().split(/\s+/).find((className) => className.startsWith('ti-'));
+    return iconClass || 'ti-help-circle';
   }
 
   getMediaClass(transaction: TransactionDto): string {

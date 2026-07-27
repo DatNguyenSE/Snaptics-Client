@@ -5,10 +5,15 @@
 .manual-entry-page {
   min-height: 100vh;
   padding: 16px 16px calc(112px + env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .manual-entry-page__content {
   max-width: 46rem;
+  min-width: 0;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -62,6 +67,7 @@
   font-weight: 800;
   letter-spacing: -0.03em;
   color: var(--sw-foreground);
+  overflow-wrap: anywhere;
 }
 
 .manual-entry-hero__copy p {
@@ -125,10 +131,16 @@
 
 @media (max-width: 639px) {
   .manual-entry-page {
-    padding: 16px 16px calc(104px + env(safe-area-inset-bottom));
+    padding: 12px 10px calc(104px + env(safe-area-inset-bottom));
   }
 
   .manual-entry-hero {
-    padding: 20px;
+    padding: 18px 16px;
+    border-radius: 24px;
+  }
+
+  .manual-entry-intro {
+    padding: 16px;
+    border-radius: 20px;
   }
 }

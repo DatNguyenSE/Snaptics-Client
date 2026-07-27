@@ -12,16 +12,17 @@ export class DashboardService {
   private readonly apiUrl = environment.apiUrl + 'api/Dashboard';
 
   getCategorySummary(filterType: 'week' | 'month' | 'year' = 'month'): Observable<CategorySummaryResponseDto> {
-    const params = new HttpParams().set('filterType', filterType);
+    const params = new HttpParams().set('filterType', filterType).set('_t', Date.now().toString());
     return this.http.get<CategorySummaryResponseDto>(`${this.apiUrl}/category-summary`, { params });
   }
 
   getTrendSummary(filterType: 'week' | 'month' | 'year' = 'month'): Observable<BarChartDto[]> {
-    const params = new HttpParams().set('filterType', filterType);
+    const params = new HttpParams().set('filterType', filterType).set('_t', Date.now().toString());
     return this.http.get<BarChartDto[]>(`${this.apiUrl}/trend-summary`, { params });
   }
 
   getSpendingComparison(): Observable<SpendingComparisonResponseDto> {
-    return this.http.get<SpendingComparisonResponseDto>(`${this.apiUrl}/spending-comparison`);
+    const params = new HttpParams().set('_t', Date.now().toString());
+    return this.http.get<SpendingComparisonResponseDto>(`${this.apiUrl}/spending-comparison`, { params });
   }
 }

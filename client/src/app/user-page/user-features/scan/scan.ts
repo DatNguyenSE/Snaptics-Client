@@ -611,7 +611,7 @@ export class Scan implements OnInit, OnDestroy {
     this.scanSubscription = this.aiService
       .readBill(file)
       .pipe(
-        timeout(20000),
+        timeout(60000),
         catchError((err: unknown) => {
           return of(null);
         }),
@@ -718,7 +718,7 @@ export class Scan implements OnInit, OnDestroy {
     this.scanSubscription = this.aiService
       .analyzeImage(file)
       .pipe(
-        timeout(20000),
+        timeout(60000),
         map((response) => {
           const parsed = parseSnapItemAnalysis(response, this.categories);
           if (parsed) {
@@ -778,13 +778,6 @@ export class Scan implements OnInit, OnDestroy {
 
   confirmScan(): void {
     if (this.processingState !== 'result') return;
-
-    // Validate that all items have a category
-    const hasUnassigned = this.receiptItems.some(i => !i.categoryLabel || i.categoryLabel === 'Unknown' || i.categoryId == null);
-    if (hasUnassigned) {
-      this.toast.error(this.lang.currentLang() === 'vi' ? 'Vui lòng phân loại tất cả các sản phẩm' : 'Please assign a category to all items');
-      return;
-    }
 
     this.processingState = 'saving';
     this.errorMessage = null;

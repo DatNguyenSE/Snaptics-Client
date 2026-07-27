@@ -39,6 +39,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       snapticsAi: 'Snaptics AI',
       notifications: 'Thông báo',
       support: 'Hỗ trợ',
+      category: 'Loại danh mục',
     },
     header: {
       greeting: 'Xin ch\u00e0o, {{name}}',
@@ -367,7 +368,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       },
     },
     entryForm: {
-      title: 'T\u00ean m\u00f3n',
+      title: 'T\u00ean',
       titlePlaceholder: 'VD: Matcha latte',
       amount: 'S\u1ed1 ti\u1ec1n',
       amountPlaceholder: '0',
@@ -379,7 +380,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       notePlaceholder: 'Th\u00eam ghi ch\u00fa ho\u1eb7c ng\u1eef c\u1ea3nh cho kho\u1ea3n chi n\u00e0y',
       saving: '\u0110ang l\u01b0u...',
       error: {
-        titleRequired: 'T\u00ean m\u00f3n l\u00e0 b\u1eaft bu\u1ed9c.',
+        titleRequired: 'T\u00ean l\u00e0 b\u1eaft bu\u1ed9c.',
         amountRequired: 'S\u1ed1 ti\u1ec1n l\u00e0 b\u1eaft bu\u1ed9c.',
         dateRequired: 'Ng\u00e0y l\u00e0 b\u1eaft bu\u1ed9c.',
         required: 'Tr\u01b0\u1eddng n\u00e0y l\u00e0 b\u1eaft bu\u1ed9c.',
@@ -774,6 +775,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       logout: 'Logout',
       analysis: 'Analysis',
       support: 'Support',
+      category: 'Category',
     },
     header: {
       greeting: 'Hello, {{name}}',

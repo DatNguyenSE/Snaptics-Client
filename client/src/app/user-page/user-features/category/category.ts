@@ -26,8 +26,28 @@ export class Category implements OnInit {
   isEditing = false;
   currentCategory: Partial<CategoryDto> = {};
 
-  // Predefined color choices
-  colorOptions = ['#FF5733', '#335BFF', '#33FF5B', '#FFC300', '#FF3333', '#33A8FF', '#FF33A8', '#A833FF', '#FF8F33', '#33FFE3', '#FF3380', '#28B463', '#9E9E9E', '#000000'];
+  readonly iconOptions = [
+    { label: 'Ăn uống', value: 'ti ti-tools-kitchen-2' },
+    { label: 'Nhà ở', value: 'ti ti-home' },
+    { label: 'Di chuyển', value: 'ti ti-car' },
+    { label: 'Hóa đơn', value: 'ti ti-bolt' },
+    { label: 'Sức khỏe', value: 'ti ti-heartbeat' },
+    { label: 'Giáo dục', value: 'ti ti-school' },
+    { label: 'Mua sắm', value: 'ti ti-shopping-bag' },
+    { label: 'Giải trí', value: 'ti ti-movie' },
+    { label: 'Cá nhân', value: 'ti ti-spa' },
+    { label: 'Du lịch', value: 'ti ti-plane' },
+    { label: 'Quà tặng', value: 'ti ti-gift' },
+    { label: 'Lương', value: 'ti ti-cash' },
+    { label: 'Ví tiền', value: 'ti ti-wallet' },
+    { label: 'Công việc', value: 'ti ti-briefcase' },
+    { label: 'Khác', value: 'ti ti-help-circle' },
+  ];
+
+  readonly colorOptions = [
+    '#FF5733', '#335BFF', '#33FF5B', '#FFC300', '#FF3333', '#33A8FF', '#FF33A8',
+    '#A833FF', '#FF8F33', '#33FFE3', '#FF3380', '#28B463', '#9E9E9E', '#000000',
+  ];
 
   ngOnInit(): void {
     this.loadCategories();

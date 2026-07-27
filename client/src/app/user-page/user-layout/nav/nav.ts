@@ -87,6 +87,12 @@ export class Nav {
       route: '/user/frequency',
     },
     {
+      id: 'category',
+      labelKey: 'nav.category',
+      icon: 'category',
+      route: '/user/category',
+    },
+    {
       id: 'support',
       labelKey: 'nav.support',
       icon: 'headset_mic',

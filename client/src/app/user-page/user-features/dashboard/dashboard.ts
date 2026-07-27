@@ -129,7 +129,7 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   get totalSpent(): number {
-    return this.currentMonthTransactions.reduce((s, t) => s + t.totalAmount, 0);
+    return this.currentMonthTransactions.filter(t => t.isExpense).reduce((s, t) => s + t.totalAmount, 0);
   }
 
   get remainingBudget(): number {
@@ -264,9 +264,8 @@ export class Dashboard implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initAiSuggestions();
     this.loadTransactions();
-    this.loadActiveBudget();
-    this.loadTopCategory();
     this.loadSpendingComparison();
+    this.loadActiveBudget();
   }
 
   ngOnDestroy(): void {
@@ -371,11 +370,10 @@ export class Dashboard implements OnInit, OnDestroy {
           subtitle: response.reply 
         };
         
-        // Refresh the dashboard data so the new transaction/changes are visible
+        // No need to call these here, because refreshTransactions will emit new data
+        // and getTransactions().subscribe will handle reloading these components
         this.transactionService.refreshTransactions();
         this.loadActiveBudget();
-        this.loadTopCategory();
-        this.loadSpendingComparison();
       },
       error: (err) => {
         console.error(err);
@@ -395,7 +393,10 @@ export class Dashboard implements OnInit, OnDestroy {
     this.dashboardService.getSpendingComparison().subscribe({
       next: (data) => {
         this.spendingComparison = data;
-      }
+      },
+      error: () => {
+        this.spendingComparison = null;
+      },
     });
   }
 
@@ -420,6 +421,9 @@ export class Dashboard implements OnInit, OnDestroy {
         this.allTransactions = data;
         this.recentTransactions = data.slice(0, 4);
         this.buildLineData();
+        
+        this.loadTopCategory();
+        
         this.isLoading = false;
       },
       error: () => {
@@ -547,6 +551,7 @@ export class Dashboard implements OnInit, OnDestroy {
     end.setHours(23, 59, 59, 999);
 
     return this.allTransactions.reduce((sum, t) => {
+      if (!t.isExpense) return sum;
       const tDate = new Date(t.transactionDate);
       if (tDate >= start && tDate <= end) {
         if (!budget.categoryId) {

@@ -100,17 +100,26 @@ export class TransactionService {
     isExpense?: boolean;
     note?: string | null;
     budgetId?: number | null;
+    transactionDate?: string | null;
   }, file: File | null): Observable<TransactionDto> {
     const formData = new FormData();
     formData.append('ItemName', data.itemName);
     formData.append('EstimatedPriceVND', data.estimatedPriceVND.toString());
-    if (data.quantity) formData.append('Quantity', data.quantity.toString());
+    formData.append('Quantity', (data.quantity || 1).toString());
+    formData.append('EstimatedCalories', '0');
+    
     if (data.category) formData.append('Category', data.category);
     if (data.unit) formData.append('Unit', data.unit);
+    if (data.transactionDate) formData.append('TransactionDate', data.transactionDate);
     
     formData.append('IsExpense', data.isExpense !== undefined ? String(data.isExpense) : 'true');
     if (data.note) formData.append('Note', data.note);
-    if (data.budgetId !== undefined && data.budgetId !== null) formData.append('BudgetId', data.budgetId.toString());
+    
+    if (data.budgetId !== undefined && data.budgetId !== null) {
+      formData.append('BudgetId', data.budgetId.toString());
+    } else {
+      formData.append('BudgetId', '0');
+    }
 
     if (file) {
       formData.append('image', file);
@@ -138,34 +147,42 @@ export class TransactionService {
 
   createTransaction(data: CreateTransactionEntryDto, file?: File | null): Observable<TransactionDto> {
     if (file) {
-      const formData = new FormData();
-      formData.append('Title', data.title);
-      formData.append('Amount', data.amount.toString());
-      if (data.category) formData.append('Category', data.category);
-      formData.append('TransactionDate', data.transactionDate);
-      formData.append('IsExpense', String(data.isExpense));
-      formData.append('Source', data.source);
-      if (data.budgetId !== undefined && data.budgetId !== null) formData.append('BudgetId', data.budgetId.toString());
-      if (data.note) formData.append('Note', data.note);
-
-      formData.append('image', file);
-
-      return this.http.post<TransactionDto>(this.baseUrl + 'Transaction', formData).pipe(
-        tap((transaction) => {
-          this.upsertRemoteTransaction(transaction);
-        }),
+      const billData: CreateTransactionFromBillDto = {
+        merchantName: data.title,
+        totalAmount: data.amount,
+        transactionDate: data.transactionDate,
+        isExpense: data.isExpense,
+        note: data.note,
+        budgetId: data.budgetId,
+        items: [
+          {
+            itemName: data.title,
+            category: data.category || null,
+            price: data.amount,
+            quantity: 1,
+            unit: 'cái',
+          }
+        ]
+      };
+      
+      return this.createFromBill(billData, file).pipe(
+        tap((resTransaction) => {})
       );
     }
 
-    return this.http.post<TransactionDto>(this.baseUrl + 'Transaction', data).pipe(
-      tap((transaction) => {
-        this.upsertRemoteTransaction(transaction);
+    // Call the new backend API specifically designed for manual entries
+    return this.http.post<TransactionDto>(this.baseUrl + 'Transaction/manual', data).pipe(
+      tap((resTransaction) => {
+        this.upsertRemoteTransaction(resTransaction);
       }),
     );
   }
 
   updateTransaction(id: number, data: CreateTransactionEntryDto): Observable<TransactionDto> {
-    return this.http.put<TransactionDto>(this.baseUrl + `Transaction/${id}`, data).pipe(
+    const transaction = this.buildLocalTransaction(data);
+    transaction.id = id;
+    
+    return this.http.put<TransactionDto>(this.baseUrl + `Transaction/${id}`, transaction).pipe(
       tap((updatedTransaction) => {
         this.upsertRemoteTransaction(updatedTransaction);
       }),
@@ -253,7 +270,7 @@ export class TransactionService {
       imageKey: null,
       imagePreviewUrl: data.imagePreviewUrl ?? null,
       totalAmount: data.amount,
-      transactionDate: new Date(`${data.transactionDate}T12:00:00`).toISOString(),
+      transactionDate: new Date(data.transactionDate.includes('T') ? data.transactionDate : `${data.transactionDate}T12:00:00`).toISOString(),
       status: 1,
       isAiEstimated: data.isAiEstimated ?? false,
       createdAt: new Date().toISOString(),
