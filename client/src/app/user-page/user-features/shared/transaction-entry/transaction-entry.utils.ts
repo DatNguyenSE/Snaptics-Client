@@ -50,5 +50,7 @@ export function matchCategoryName(
 }
 
 export function getTodayInputValue(): string {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const tzOffset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - tzOffset).toISOString().slice(0, 16);
 }

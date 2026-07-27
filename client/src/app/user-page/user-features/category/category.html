@@ -1,0 +1,109 @@
+<section class="transaction-page">
+  <div class="transaction-page__content">
+    
+    <!-- ─── Hero ──────────────────────────────────────────────────────────── -->
+    <header class="transaction-page__hero" style="display: flex; justify-content: space-between; align-items: flex-end;">
+      <div class="transaction-page__hero-copy">
+        <p class="section-eyebrow">Quản lý</p>
+        <h1>Danh mục chi tiêu</h1>
+      </div>
+      <div>
+        <button class="add-btn" (click)="openAddModal()">
+          <span class="material-symbols-outlined">add</span> Thêm danh mục
+        </button>
+      </div>
+    </header>
+
+    <!-- ─── Category List ───────────────────────────────────────────────── -->
+    <section class="transactions-section">
+      <div class="transaction-list">
+        <!-- Loading State -->
+        @if (isLoading) {
+          <div class="state-container">
+            <span class="material-symbols-outlined spin-icon">progress_activity</span>
+            <p>Đang tải dữ liệu...</p>
+          </div>
+        <!-- Error State -->
+        } @else if (hasError) {
+          <div class="state-container">
+            <p>Lỗi khi tải danh mục.</p>
+            <button class="retry-btn" (click)="loadCategories()">Thử lại</button>
+          </div>
+        } @else {
+          <div class="category-grid">
+            @for (category of categories; track category.id) {
+              <div class="category-card" [class.is-default]="category.isDefault">
+                <div class="category-icon-wrapper" [style.background-color]="category.color">
+                  <i class="{{ category.icon || 'ti ti-category' }}"></i>
+                </div>
+                <div class="category-info">
+                  <h3 class="category-name">{{ category.name }}</h3>
+                  <span class="category-badge" *ngIf="category.isDefault">Hệ thống</span>
+                  <span class="category-badge custom-badge" *ngIf="!category.isDefault">Của bạn</span>
+                </div>
+                
+                <div class="category-actions" *ngIf="!category.isDefault">
+                  <button class="action-btn edit" (click)="openEditModal(category)" title="Sửa">
+                    <span class="material-symbols-outlined">edit</span>
+                  </button>
+                  <button class="action-btn delete" (click)="deleteCategory(category.id, category.isDefault)" title="Xóa">
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- ─── Modal Thêm / Sửa Danh Mục ───────────────────────────────────────────────── -->
+@if (showModal) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing ? 'Sửa danh mục' : 'Thêm danh mục mới' }}</h2>
+        <button class="close-btn" (click)="closeModal()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Tên danh mục <span class="required">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="currentCategory.name" placeholder="Ví dụ: Tiền điện nước" />
+        </div>
+
+        <div class="form-group">
+          <label>Icon (Tabler class)</label>
+          <div class="icon-input-wrapper">
+            <i class="{{ currentCategory.icon || 'ti ti-category' }}" [style.color]="currentCategory.color"></i>
+            <input type="text" class="form-control" [(ngModel)]="currentCategory.icon" placeholder="Ví dụ: ti ti-home" />
+          </div>
+          <small class="help-text">Nhập tên class icon từ thư viện Tabler Icons.</small>
+        </div>
+
+        <div class="form-group">
+          <label>Màu sắc</label>
+          <div class="color-picker-grid">
+            @for (color of colorOptions; track color) {
+              <div class="color-swatch" 
+                   [style.background-color]="color" 
+                   [class.selected]="currentCategory.color === color"
+                   (click)="currentCategory.color = color">
+                   <span class="material-symbols-outlined" *ngIf="currentCategory.color === color">check</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeModal()">Hủy</button>
+        <button class="btn-save" (click)="saveCategory()" [disabled]="!currentCategory.name">Lưu lại</button>
+      </div>
+    </div>
+  </div>
+}

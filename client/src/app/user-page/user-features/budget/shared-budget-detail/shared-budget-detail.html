@@ -64,13 +64,13 @@
                     }
                   </div>
                 }
-                @if ((budget.members?.length ?? budget.memberCount ?? 0) > 4) {
+                @if ((budget.members.length || budget.memberCount || 0) > 4) {
                   <div class="member-avatar-chip member-avatar-chip--more">
-                    +{{ (budget.members?.length ?? budget.memberCount ?? 0) - 4 }}
+                    +{{ (budget.members.length || budget.memberCount || 0) - 4 }}
                   </div>
                 }
               </div>
-              <span class="btn-members__label">{{ budget.members?.length || budget.memberCount || 0 }} thành viên</span>
+              <span class="btn-members__label">{{ budget.members.length || budget.memberCount || 0 }} thành viên</span>
             </button>
 
             @if (isOwner) {

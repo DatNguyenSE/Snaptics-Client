@@ -78,6 +78,7 @@ export class TransactionService {
     
     formData.append('IsExpense', data.isExpense !== undefined ? String(data.isExpense) : 'true');
     if (data.note) formData.append('Note', data.note);
+    if (data.budgetId !== undefined && data.budgetId !== null) formData.append('BudgetId', data.budgetId.toString());
 
     if (file) {
       formData.append('image', file);
@@ -98,6 +99,7 @@ export class TransactionService {
     unit?: string | null;
     isExpense?: boolean;
     note?: string | null;
+    budgetId?: number | null;
   }, file: File | null): Observable<TransactionDto> {
     const formData = new FormData();
     formData.append('ItemName', data.itemName);
@@ -108,6 +110,7 @@ export class TransactionService {
     
     formData.append('IsExpense', data.isExpense !== undefined ? String(data.isExpense) : 'true');
     if (data.note) formData.append('Note', data.note);
+    if (data.budgetId !== undefined && data.budgetId !== null) formData.append('BudgetId', data.budgetId.toString());
 
     if (file) {
       formData.append('image', file);
@@ -133,7 +136,27 @@ export class TransactionService {
     return of(transaction);
   }
 
-  createTransaction(data: CreateTransactionEntryDto): Observable<TransactionDto> {
+  createTransaction(data: CreateTransactionEntryDto, file?: File | null): Observable<TransactionDto> {
+    if (file) {
+      const formData = new FormData();
+      formData.append('Title', data.title);
+      formData.append('Amount', data.amount.toString());
+      if (data.category) formData.append('Category', data.category);
+      formData.append('TransactionDate', data.transactionDate);
+      formData.append('IsExpense', String(data.isExpense));
+      formData.append('Source', data.source);
+      if (data.budgetId !== undefined && data.budgetId !== null) formData.append('BudgetId', data.budgetId.toString());
+      if (data.note) formData.append('Note', data.note);
+
+      formData.append('image', file);
+
+      return this.http.post<TransactionDto>(this.baseUrl + 'Transaction', formData).pipe(
+        tap((transaction) => {
+          this.upsertRemoteTransaction(transaction);
+        }),
+      );
+    }
+
     return this.http.post<TransactionDto>(this.baseUrl + 'Transaction', data).pipe(
       tap((transaction) => {
         this.upsertRemoteTransaction(transaction);

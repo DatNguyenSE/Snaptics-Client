@@ -32,4 +32,5 @@ export interface CreateTransactionFromBillDto {
   items: CreateTransactionFromBillItemDto[];
   isExpense?: boolean;
   note?: string | null;
+  budgetId?: number | null;
 }

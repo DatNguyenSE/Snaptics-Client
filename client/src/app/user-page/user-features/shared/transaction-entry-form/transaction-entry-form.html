@@ -1,7 +1,7 @@
 <form class="entry-form" [formGroup]="form" (ngSubmit)="onSave()">
   <div class="entry-form__grid">
     <!-- ── Transaction Type Segmented Control ── -->
-    <div class="entry-field entry-field--full">
+    <div class="entry-field">
       <span class="entry-field__label">{{ language.currentLang() === 'vi' ? 'Loại giao dịch' : 'Transaction Type' }}</span>
       <div class="segmented-control" role="radiogroup" aria-label="Loại giao dịch">
         <button
@@ -60,15 +60,29 @@
       <div class="entry-field__amount">
         <input
           class="entry-field__amount-input"
-          type="number"
-          min="0"
-          step="1000"
-          formControlName="amount"
+          type="text"
+          [value]="formattedAmount"
+          (input)="onAmountChange($event)"
           [placeholder]="language.t('entryForm.amountPlaceholder')"
         />
         <span class="entry-field__currency">VND</span>
       </div>
       @if (getErrorMessage('amount'); as errorMessage) {
+        <span class="entry-field__error">{{ errorMessage }}</span>
+      }
+    </label>
+
+    <!-- ── Quantity Field ── -->
+    <label class="entry-field">
+      <span class="entry-field__label">{{ language.currentLang() === 'vi' ? 'Số lượng' : 'Quantity' }}</span>
+      <input
+        class="entry-field__control"
+        type="number"
+        min="1"
+        formControlName="quantity"
+        placeholder="1"
+      />
+      @if (getErrorMessage('quantity'); as errorMessage) {
         <span class="entry-field__error">{{ errorMessage }}</span>
       }
     </label>
@@ -100,7 +114,7 @@
         <input
           #datePickerInput
           class="entry-field__native-date"
-          type="date"
+          type="datetime-local"
           formControlName="date"
           (click)="openDatePicker(datePickerInput)"
         />
@@ -110,20 +124,18 @@
       }
     </label>
 
-    <!-- ── Payment Method Field ── -->
-    @if (showPaymentMethod) {
-      <label class="entry-field entry-field--full">
-        <span class="entry-field__label">{{ language.t('entryForm.paymentMethodTitle') }}</span>
-        <div class="entry-field__select-wrap">
-          <select class="entry-field__control entry-field__control--select" formControlName="paymentMethod">
-            @for (method of paymentMethods; track method) {
-              <option [value]="method">{{ getPaymentMethodLabel(method) }}</option>
-            }
-          </select>
-          <span class="material-symbols-outlined entry-field__select-icon">expand_more</span>
-        </div>
-      </label>
-    }
+    <!-- ── Wallet / Budget Field ── -->
+    <label class="entry-field entry-field--full">
+      <span class="entry-field__label">{{ language.currentLang() === 'vi' ? 'Chọn ví / ngân sách' : 'Wallet / Budget' }}</span>
+      <div class="entry-field__select-wrap">
+        <select class="entry-field__control entry-field__control--select" formControlName="budgetId">
+          @for (budget of budgets; track budget.id) {
+            <option [ngValue]="budget.id">{{ budget.name }}</option>
+          }
+        </select>
+        <span class="material-symbols-outlined entry-field__select-icon">expand_more</span>
+      </div>
+    </label>
 
     <!-- ── Note Field ── -->
     <label class="entry-field entry-field--full">
@@ -135,6 +147,30 @@
         [placeholder]="language.t('entryForm.notePlaceholder')"
       ></textarea>
     </label>
+
+    <!-- ── Image Upload Field ── -->
+    @if (showImageUpload) {
+      <div class="entry-field entry-field--full">
+        <span class="entry-field__label">{{ language.currentLang() === 'vi' ? 'Đính kèm ảnh' : 'Attach Image' }}</span>
+        
+        @if (previewUrl) {
+          <div class="entry-form__image-preview-wrap">
+            <img [src]="previewUrl" alt="Image preview" class="entry-form__image-preview" />
+            <button type="button" class="entry-form__remove-image-btn" (click)="removeImage()" title="Xóa ảnh">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+        } @else {
+          <label class="entry-form__image-upload-area">
+            <input type="file" accept="image/*" class="entry-form__image-input" (change)="onFileSelected($event)" />
+            <div class="entry-form__image-upload-content">
+              <span class="material-symbols-outlined entry-form__image-upload-icon">add_photo_alternate</span>
+              <span class="entry-form__image-upload-text">{{ language.currentLang() === 'vi' ? 'Nhấn để chọn ảnh' : 'Click to select image' }}</span>
+            </div>
+          </label>
+        }
+      </div>
+    }
   </div>
 
   <div class="entry-form__actions">

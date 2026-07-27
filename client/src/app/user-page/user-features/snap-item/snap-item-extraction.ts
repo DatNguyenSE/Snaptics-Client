@@ -85,6 +85,7 @@ export function parseSnapItemAnalysis(
   return {
     itemName,
     estimatedAmount,
+    quantity: 1,
     category,
     date:
       getFirstString([
@@ -118,8 +119,9 @@ export function buildMockSnapItemExtraction(
   return {
     itemName: inferredItemName,
     estimatedAmount,
+    quantity: 1,
     category,
-    date: new Date().toISOString(),
+    date: new Date().toISOString().split('T')[0],
     note:
       matchedPattern?.note ??
       `Mock extraction prepared a draft from ${file.name}. Update anything before saving.`,

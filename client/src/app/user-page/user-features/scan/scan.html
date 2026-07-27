@@ -403,7 +403,18 @@
               </div>
             </article>
 
-            <div class="result-actions">
+            <div class="result-budget-selection" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--sw-border);">
+              <label class="form-label" style="margin-bottom: 0;">
+                <span>{{ lang.currentLang() === 'vi' ? 'Chọn ví / ngân sách' : 'Wallet / Budget' }}</span>
+                <select class="form-input" [(ngModel)]="budgetId">
+                  @for (budget of budgets; track budget.id) {
+                    <option [ngValue]="budget.id">{{ budget.name }}</option>
+                  }
+                </select>
+              </label>
+            </div>
+
+            <div class="result-actions" style="margin-top: 24px;">
               <button
                 class="scan-btn scan-btn--ghost"
                 type="button"
@@ -438,7 +449,8 @@
             <app-transaction-entry-form
               [form]="manualForm"
               [categories]="categories"
-              [showPaymentMethod]="false"
+              [budgets]="budgets"
+              [showImageUpload]="false"
               [isSaving]="isSaving"
               [saveLabel]="lang.t('scan.confirmSave')"
               [cancelLabel]="lang.t('scan.retake')"
@@ -639,7 +651,7 @@
           <!-- Dynamic Microcopy Phase & Shimmering Indeterminate Progress Bar -->
           @if (processingState === 'scanning') {
             <div class="scan-microcopy-phase">
-              <span class="scan-microcopy-text">{{ dynamicMicrocopy }}</span>
+              <span class="scan-microcopy-text">{{ loadingText }}</span>
             </div>
             <div class="scan-progress-bar-track" [attr.aria-label]="scanMode === 'receipt' ? 'Đang xử lý hóa đơn' : 'Đang xử lý hình ảnh'">
               <div class="scan-progress-bar-shimmer"></div>

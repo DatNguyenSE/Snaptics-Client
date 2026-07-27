@@ -9,6 +9,7 @@ import { LanguageService } from '../../../core/services/language-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { CategoryDto } from '../../../models/category.dto';
+import { BudgetDto, BudgetService } from '../../../core/services/budget.service';
 import { TransactionEntryForm, TransactionEntryFormControls } from '../shared/transaction-entry-form/transaction-entry-form';
 import { FALLBACK_CATEGORIES, getTodayInputValue, resolveCategories } from '../shared/transaction-entry/transaction-entry.utils';
 import { buildMockSnapItemExtraction, parseSnapItemAnalysis } from './snap-item-extraction';
@@ -27,6 +28,7 @@ export class SnapItem implements OnInit, OnDestroy {
   private readonly aiService = inject(AiService);
   private readonly categoryService = inject(CategoryService);
   private readonly transactionService = inject(TransactionService);
+  private readonly budgetService = inject(BudgetService);
   private readonly toast = inject(ToastService);
   private readonly location = inject(Location);
   private readonly router = inject(Router);
@@ -41,17 +43,19 @@ export class SnapItem implements OnInit, OnDestroy {
   readonly form = new FormGroup<TransactionEntryFormControls>({
     title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    quantity: new FormControl<number | null>(1, [Validators.required, Validators.min(1)]),
     category: new FormControl('', { nonNullable: true }),
     date: new FormControl(getTodayInputValue(), {
       nonNullable: true,
       validators: [Validators.required],
     }),
-    paymentMethod: new FormControl('Cash', { nonNullable: true }),
+    budgetId: new FormControl<number | null>(null),
     note: new FormControl('', { nonNullable: true }),
     isExpense: new FormControl(true, { nonNullable: true }),
   });
 
   categories: CategoryDto[] = FALLBACK_CATEGORIES;
+  budgets: BudgetDto[] = [];
   snapState: SnapItemState = 'idle';
   extractionSource: ExtractionSource | null = null;
   previewUrl: string | null = null;
@@ -71,6 +75,18 @@ export class SnapItem implements OnInit, OnDestroy {
       .subscribe((categories) => {
         this.categories = categories;
       });
+
+    this.budgetService.getBudgets().subscribe({
+      next: (budgets) => {
+        this.budgets = [...budgets].sort((a, b) => (a.isDefault === b.isDefault ? 0 : a.isDefault ? -1 : 1));
+        if (this.budgets.length > 0) {
+          this.form.controls.budgetId.setValue(this.budgets[0].id);
+        }
+      },
+      error: () => {
+        this.budgets = [];
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -170,7 +186,7 @@ export class SnapItem implements OnInit, OnDestroy {
       amount: null,
       category: '',
       date: getTodayInputValue(),
-      paymentMethod: 'Cash',
+      budgetId: null,
       note: '',
     });
     this.form.markAsPristine();
@@ -189,7 +205,7 @@ export class SnapItem implements OnInit, OnDestroy {
       return;
     }
 
-    const { title, amount, category, date, note } = this.form.getRawValue();
+    const { title, amount, category, date, budgetId, note } = this.form.getRawValue();
 
     if (amount === null) {
       return;
@@ -198,12 +214,15 @@ export class SnapItem implements OnInit, OnDestroy {
     this.snapState = 'saving';
 
     this.transactionService
-      .createFromAnalyze({
-        itemName: title,
-        estimatedPriceVND: amount,
-        quantity: 1,
+      .createTransaction({
+        title,
+        amount,
         category: category || null,
-        unit: 'cái'
+        transactionDate: date,
+        budgetId: budgetId,
+        note: note || null,
+        isExpense: true,
+        source: 'snap',
       }, this.currentFile)
       .subscribe({
         next: () => {

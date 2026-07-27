@@ -29,12 +29,14 @@
     <app-transaction-entry-form
       [form]="form"
       [categories]="categories"
-      [showPaymentMethod]="true"
+      [budgets]="budgets"
+      [showImageUpload]="true"
       [isSaving]="isSaving"
       [saveLabel]="language.t('manualEntry.saveLabel')"
       [cancelLabel]="language.t('common.cancel')"
       (save)="saveTransaction()"
       (cancel)="cancel()"
+      (imageSelected)="onImageSelected($event)"
     ></app-transaction-entry-form>
   </div>
 </section>

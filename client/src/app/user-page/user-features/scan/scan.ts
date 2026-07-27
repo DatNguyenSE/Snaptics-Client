@@ -10,7 +10,7 @@ import {
   inject,
   NgZone,
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, finalize, map, of, Subscription, timeout } from 'rxjs';
 import { AiService } from '../../../core/services/ai.service';
@@ -20,6 +20,7 @@ import { ToastService } from '../../../core/services/toast-service';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { CreateTransactionFromBillDto, ReadBillResponseDto } from '../../../models/ai-bill.dto';
 import { CategoryDto } from '../../../models/category.dto';
+import { BudgetDto, BudgetService } from '../../../core/services/budget.service';
 import {
   TransactionEntryForm,
   TransactionEntryFormControls,
@@ -31,6 +32,7 @@ import {
   resolveCategories,
 } from '../shared/transaction-entry/transaction-entry.utils';
 import { parseSnapItemAnalysis } from './scan-extraction';
+import { buildMockSnapItemExtraction } from '../snap-item/snap-item-extraction';
 
 // ─── Type Definitions ─────────────────────────────────────────────────────────
 export type ScanMode = 'receipt' | 'item' | 'manual';
@@ -68,7 +70,7 @@ const ACCEPTED_FORMATS = 'image/jpeg,image/png,image/webp,image/jpg';
 @Component({
   selector: 'app-scan',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TransactionEntryForm],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, TransactionEntryForm],
   templateUrl: './scan.html',
   styleUrl: './scan.css',
 })
@@ -78,6 +80,7 @@ export class Scan implements OnInit, OnDestroy {
   private readonly aiService = inject(AiService);
   private readonly transactionService = inject(TransactionService);
   private readonly categoryService = inject(CategoryService);
+  private readonly budgetService = inject(BudgetService);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly ngZone = inject(NgZone);
@@ -88,6 +91,8 @@ export class Scan implements OnInit, OnDestroy {
   @ViewChild('canvasElement') canvasElement?: ElementRef<HTMLCanvasElement>;
   @ViewChild('cameraContainer') cameraContainer?: ElementRef<HTMLElement>;
   @ViewChild('uploadInput') uploadInput?: ElementRef<HTMLInputElement>;
+
+  // ─── Constants ──────────────────────────────────────────────────────────────
 
   // ─── Constants ──────────────────────────────────────────────────────────────
   readonly acceptedFormats = ACCEPTED_FORMATS;
@@ -130,46 +135,55 @@ export class Scan implements OnInit, OnDestroy {
   previewMatchesCamera = false;
   previewAspectRatio = 'auto';
 
-  // Receipt scan results
-  storeName = '';
-  receiptDate: string | null = null;
-  billImageKey: string | null = null;
-  billNote = '';
-  totalAmount = 0;
-  isEditingBill = false;
-  receiptItems: ReceiptItem[] = [];
-  categories: CategoryDto[] = FALLBACK_CATEGORIES;
+  // Form / Data
+  categories: CategoryDto[] = [...FALLBACK_CATEGORIES];
+  budgets: BudgetDto[] = [];
   errorMessage: string | null = null;
+  isEditingBill = false;
+  isProcessing = false;
 
-  // Manual / item form
+  // Item Scan Form
   readonly manualForm = new FormGroup<TransactionEntryFormControls>({
     title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    quantity: new FormControl<number | null>(1, [Validators.required, Validators.min(1)]),
     category: new FormControl('', { nonNullable: true }),
     date: new FormControl(getTodayInputValue(), {
       nonNullable: true,
       validators: [Validators.required],
     }),
-    paymentMethod: new FormControl(PAYMENT_METHOD_OPTIONS[0], { nonNullable: true }),
+    budgetId: new FormControl<number | null>(null),
     note: new FormControl('', { nonNullable: true }),
     isExpense: new FormControl(true, { nonNullable: true }),
   });
   isSaving = false;
 
-  // ─── Computed ────────────────────────────────────────────────────────────────
-  recalculateTotal(): void {
-    this.totalAmount = this.receiptItems.reduce((sum, item) => sum + item.price, 0);
-  }
+  // Receipt Scan Form Fields
+  receiptItems: ReceiptItem[] = [];
+  storeName = '';
+  receiptDate = '';
+  billImageKey: string | null = null;
+  totalAmount = 0;
+  billNote = '';
+  budgetId: number | null = null;
 
-  get isProcessing(): boolean {
-    return (
-      this.processingState === 'scanning' ||
-      this.processingState === 'success' ||
-      this.processingState === 'saving'
-    );
-  }
+  // Processing microcopy
+  private microcopyInterval: any = null;
+  microcopyIndex = 0;
+  readonly microcopyTexts = [
+    'scan.analyzing.1',
+    'scan.analyzing.2',
+    'scan.analyzing.3',
+    'scan.analyzing.4',
+    'scan.analyzing.5',
+    'scan.analyzing.6'
+  ];
 
   get dynamicMicrocopy(): string {
+    return this.lang.t(this.microcopyTexts[this.microcopyIndex]);
+  }
+
+  get loadingText(): string {
     const isItem = this.scanMode === 'item';
     if (this.scanElapsedSeconds < 3) {
       return isItem ? this.lang.t('scan.itemLoadingStep1') : this.lang.t('scan.loadingStep1');
@@ -222,6 +236,20 @@ export class Scan implements OnInit, OnDestroy {
       catchError(() => of(FALLBACK_CATEGORIES)),
     ).subscribe((categories) => {
       this.categories = categories;
+    });
+
+    this.budgetService.getBudgets().subscribe({
+      next: (budgets) => {
+        this.budgets = budgets;
+        const defaultBudget = budgets.find(b => b.isDefault) || budgets[0];
+        if (defaultBudget) {
+          this.manualForm.controls.budgetId.setValue(defaultBudget.id);
+          this.budgetId = defaultBudget.id;
+        }
+      },
+      error: () => {
+        this.budgets = [];
+      }
     });
 
     this.detectCameraCapabilities();
@@ -698,7 +726,10 @@ export class Scan implements OnInit, OnDestroy {
           }
           throw new Error('Failed to extract item details from image.');
         }),
-        catchError(() => of(null)),
+        catchError(() => {
+          const mock = buildMockSnapItemExtraction(file, this.categories);
+          return of({ extraction: mock, source: 'mock' as const });
+        }),
       )
       .subscribe((result) => {
         this.clearMicrocopyTimer();
@@ -711,195 +742,179 @@ export class Scan implements OnInit, OnDestroy {
         }
 
         const { extraction } = result;
+
         this.manualForm.patchValue({
           title: extraction.itemName,
           amount: extraction.estimatedAmount,
-          category: extraction.category ?? '',
-          date: extraction.date.slice(0, 10),
+          quantity: extraction.quantity || 1,
+          category: extraction.category || '',
+          date: extraction.date,
           note: extraction.note,
         });
 
+        // Use success state briefly
         this.processingState = 'success';
         this.cdr.detectChanges();
 
         if (this.successTimeout) {
           clearTimeout(this.successTimeout);
         }
+        
         this.successTimeout = setTimeout(() => {
           this.processingState = 'result';
+          this.highlightFields = true;
           this.cdr.detectChanges();
+
+          if (this.highlightTimeout) {
+            clearTimeout(this.highlightTimeout);
+          }
+          this.highlightTimeout = setTimeout(() => {
+            this.highlightFields = false;
+            this.cdr.detectChanges();
+          }, 2500);
         }, 500);
       });
   }
 
-  // ─── Receipt Confirm ─────────────────────────────────────────────────────────
   confirmScan(): void {
-    this.processingState = 'saving';
+    if (this.processingState !== 'result') return;
 
-    const requestData: CreateTransactionFromBillDto = {
+    // Validate that all items have a category
+    const hasUnassigned = this.receiptItems.some(i => !i.categoryLabel || i.categoryLabel === 'Unknown' || i.categoryId == null);
+    if (hasUnassigned) {
+      this.toast.error(this.lang.currentLang() === 'vi' ? 'Vui lòng phân loại tất cả các sản phẩm' : 'Please assign a category to all items');
+      return;
+    }
+
+    this.processingState = 'saving';
+    this.errorMessage = null;
+    this.cdr.detectChanges();
+
+    const dto = {
       merchantName: this.storeName,
-      imageKey: this.billImageKey,
-      totalAmount: this.totalAmount,
       transactionDate: this.receiptDate,
-      note: this.billNote || null,
+      totalAmount: this.totalAmount,
+      billImageKey: this.billImageKey,
+      note: this.billNote,
+      budgetId: this.budgetId,
       items: this.receiptItems.map((item) => ({
         itemName: item.name,
-        category: item.categoryLabel,
-        price: item.unitPrice,
+        category: item.categoryLabel === 'Unknown' ? null : item.categoryLabel,
+        unitPrice: item.unitPrice,
+        price: item.price,
         quantity: item.quantity,
-        unit: item.unit,
-      })),
+        unit: item.unit
+      }))
     };
 
-    this.transactionService.createFromBill(requestData, this.currentFile).subscribe({
+    this.transactionService.createFromBill(dto as any, this.currentFile).subscribe({
       next: () => {
-        this.toast.success(this.lang.t('scan.toast.saved'));
+        this.toast.success(this.lang.t('scan.successSave'));
         this.resetAll();
-        this.loadRecentScans();
       },
-      error: () => {
-        this.toast.error(this.lang.t('scan.toast.saveFailed'));
+      error: (err: any) => {
+        this.errorMessage = this.lang.t('scan.errorSave');
         this.processingState = 'result';
-      },
+        this.cdr.detectChanges();
+      }
     });
   }
 
-  // ─── Item / Manual Form Save ─────────────────────────────────────────────────
   saveItemTransaction(): void {
-    if (this.manualForm.invalid) {
+    if (this.manualForm.invalid || this.isSaving) {
       this.manualForm.markAllAsTouched();
       return;
     }
-
-    const { title, amount, category, date, paymentMethod, note, isExpense } =
-      this.manualForm.getRawValue();
-
-    if (amount === null) {
-      return;
-    }
-
+    
     this.isSaving = true;
+    this.errorMessage = null;
+    this.cdr.detectChanges();
 
-    const saveCall =
-      this.scanMode === 'item' && this.currentFile
-        ? this.transactionService.createFromAnalyze(
-            {
-              itemName: title,
-              estimatedPriceVND: amount,
-              quantity: 1,
-              category: category || null,
-              unit: 'cái',
-            },
-            this.currentFile,
-          )
-        : this.transactionService.createTransactionEntry({
-            title,
-            amount,
-            category: category || null,
-            transactionDate: date,
-            paymentMethod,
-            note: note || null,
-            isExpense,
-            source: 'manual',
-          });
+    const formValue = this.manualForm.getRawValue();
+    const categoryName = formValue.category;
 
-    saveCall.subscribe({
+    const dto = {
+      itemName: formValue.title,
+      estimatedPriceVND: formValue.amount || 0,
+      quantity: formValue.quantity || 1,
+      category: categoryName,
+      isExpense: formValue.isExpense,
+      note: formValue.note,
+      transactionDate: formValue.date,
+      budgetId: formValue.budgetId
+    };
+
+    this.transactionService.createFromAnalyze(dto, this.currentFile).subscribe({
       next: () => {
-        this.toast.success(this.lang.t('scan.toast.saved'));
-        void this.router.navigateByUrl('/user/dashboard');
-      },
-      error: () => {
+        this.toast.success(this.lang.t('scan.successSave'));
         this.isSaving = false;
-        this.toast.error(this.lang.t('scan.toast.saveFailed'));
+        this.resetAll();
       },
+      error: (err: any) => {
+        this.errorMessage = this.lang.t('scan.errorSave');
+        this.isSaving = false;
+        this.cdr.detectChanges();
+      }
     });
-  }
-
-  // ─── Update Methods ────────────────────────────────────────────────────────────
-  updateReceiptDate(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.value) {
-      this.receiptDate = new Date(input.value).toISOString();
-    }
-  }
-
-  updateTotalAmount(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.totalAmount = Number(input.value) || 0;
-  }
-
-  updateBillNote(event: Event): void {
-    const input = event.target as HTMLTextAreaElement;
-    this.billNote = input.value;
-  }
-
-  updateItemName(itemId: number, event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.receiptItems = this.receiptItems.map((item) =>
-      item.id === itemId ? { ...item, name: input.value } : item
-    );
-  }
-
-  updateItemPriceRaw(itemId: number, event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const val = Number(input.value) || 0;
-    this.receiptItems = this.receiptItems.map((item) =>
-      item.id === itemId ? { ...item, unitPrice: val, price: val * item.quantity } : item
-    );
-    this.recalculateTotal();
-  }
-
-  updateItemQuantity(itemId: number, event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const val = Number(input.value) || 1;
-    this.receiptItems = this.receiptItems.map((item) =>
-      item.id === itemId ? { ...item, quantity: val, price: item.unitPrice * val } : item
-    );
-    this.recalculateTotal();
   }
 
   updateCategory(itemId: number, event: Event): void {
     const select = event.target as HTMLSelectElement;
-    const newCategoryId = select.value === 'null' ? null : Number(select.value);
-
-    if (newCategoryId === null) {
-      this.receiptItems = this.receiptItems.map((item) =>
-        item.id === itemId
-          ? { ...item, categoryId: null, categoryLabel: 'Unknown', categoryClass: 'category-pill--amber' }
-          : item,
-      );
-      return;
+    const item = this.receiptItems.find((i) => i.id === itemId);
+    if (item) {
+      const cat = this.categories.find(c => c.id === Number(select.value));
+      item.categoryId = cat ? cat.id : null;
+      item.categoryLabel = cat ? cat.name : 'Unknown';
+      item.categoryClass = cat ? this.getCategoryClass(cat.name) : 'category-pill--amber';
+      this.cdr.detectChanges();
     }
-
-    const matchedCategory = this.categories.find((cat) => cat.id === newCategoryId);
-    if (!matchedCategory) {
-      return;
-    }
-
-    this.receiptItems = this.receiptItems.map((item) =>
-      item.id === itemId
-        ? {
-            ...item,
-            categoryId: matchedCategory.id,
-            categoryLabel: matchedCategory.name,
-            categoryClass: this.getCategoryClass(matchedCategory.name),
-          }
-        : item,
-    );
   }
+
 
   updatePrice(itemId: number, event: Event): void {
     const input = event.target as HTMLInputElement;
-    const numericValue = Number(input.value.replace(/[^\d]/g, '')) || 0;
-
-    this.receiptItems = this.receiptItems.map((item) => {
-      if (item.id !== itemId) {
-        return item;
+    const item = this.receiptItems.find((i) => i.id === itemId);
+    if (item) {
+      const rawValue = input.value.replace(/\D/g, '');
+      const val = parseInt(rawValue, 10);
+      if (!isNaN(val)) {
+        item.price = val;
+      } else {
+        item.price = 0;
       }
-      const newUnitPrice = item.quantity > 0 ? numericValue / item.quantity : numericValue;
-      return { ...item, price: numericValue, unitPrice: newUnitPrice };
-    });
-    this.recalculateTotal();
+      this.updateOverallTotal();
+      input.value = this.formatEditablePrice(item.price);
+    }
+  }
+
+  updateItemName(itemId: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const item = this.receiptItems.find((i) => i.id === itemId);
+    if (item) {
+      item.name = input.value;
+    }
+  }
+
+  updateItemPriceRaw(itemId: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const item = this.receiptItems.find((i) => i.id === itemId);
+    if (item) {
+      const val = parseFloat(input.value);
+      item.unitPrice = isNaN(val) ? 0 : val;
+      item.price = item.unitPrice * item.quantity;
+      this.updateOverallTotal();
+    }
+  }
+
+  updateItemQuantity(itemId: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const item = this.receiptItems.find((i) => i.id === itemId);
+    if (item) {
+      const val = parseFloat(input.value);
+      item.quantity = isNaN(val) ? 1 : val;
+      item.price = item.unitPrice * item.quantity;
+      this.updateOverallTotal();
+    }
   }
 
   updateStoreName(event: Event): void {
@@ -907,35 +922,62 @@ export class Scan implements OnInit, OnDestroy {
     this.storeName = input.value;
   }
 
-  // ─── Reset ───────────────────────────────────────────────────────────────────
+  updateReceiptDate(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.receiptDate = input.value;
+  }
+
+  updateTotalAmount(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const val = parseFloat(input.value);
+    this.totalAmount = isNaN(val) ? 0 : val;
+  }
+
+  updateBillNote(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.billNote = input.value;
+  }
+
+  private updateOverallTotal(): void {
+    this.totalAmount = this.receiptItems.reduce((sum, item) => sum + (item.price || 0), 0);
+  }
+
   resetCaptureState(): void {
-    this.clearAutoCaptureTimer();
-    this.clearPreview();
     this.processingState = 'idle';
     this.errorMessage = null;
-    this.receiptItems = [];
-    this.storeName = '';
-    this.receiptDate = null;
-    this.billImageKey = null;
-    this.currentFile = null;
-    this.isSaving = false;
+    this.isLowConfidence = false;
+    
+    this.clearPreview();
+    
+    const defaultBudget = this.budgets.find(b => b.isDefault) || this.budgets[0];
+    const defaultBudgetId = defaultBudget ? defaultBudget.id : null;
+
     this.manualForm.reset({
       title: '',
       amount: null,
+      quantity: 1,
       category: '',
       date: getTodayInputValue(),
-      paymentMethod: PAYMENT_METHOD_OPTIONS[0],
+      budgetId: defaultBudgetId,
       note: '',
       isExpense: true,
     });
-  }
-
-  resetAll(): void {
-    this.stopCamera();
-    this.resetCaptureState();
+    
+    this.receiptItems = [];
+    this.storeName = '';
+    this.receiptDate = '';
+    this.billImageKey = null;
+    this.totalAmount = 0;
+    this.billNote = '';
+    this.budgetId = defaultBudgetId;
+    
     if (this.scanMode !== 'manual') {
       void this.initCamera();
     }
+  }
+
+  resetAll(): void {
+    this.resetCaptureState();
   }
 
   // ─── Formatting ──────────────────────────────────────────────────────────────

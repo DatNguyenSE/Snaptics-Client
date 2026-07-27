@@ -142,9 +142,15 @@
 
     <!-- ── QUICK ACTIONS ──────────────────────────────────────── -->
     <section class="quick-actions">
-      <p class="section-eyebrow">{{ language.t('dashboard.quickActions') }}</p>
+      <div class="quick-actions__header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <p class="section-eyebrow" style="margin-bottom: 0;">{{ language.t('dashboard.quickActions') }}</p>
+        <button class="expand-btn" (click)="toggleQuickActions()" style="background: none; border: none; color: #a78bfa; cursor: pointer; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 4px; padding: 0;">
+          {{ isQuickActionsExpanded ? (isEnglish ? 'Show less' : 'Thu gọn') : (isEnglish ? 'Expand' : 'Mở rộng') }}
+          <span class="material-symbols-outlined" style="font-size: 1.1rem;">{{ isQuickActionsExpanded ? 'expand_less' : 'expand_more' }}</span>
+        </button>
+      </div>
       <div class="quick-actions__grid">
-        @for (action of quickActions; track action.id) {
+        @for (action of getVisibleQuickActions(); track action.id) {
           @if (action.route; as route) {
             @if (route !== '#') {
               <a class="quick-action" [routerLink]="route" [id]="'quick-action-btn-' + action.id">

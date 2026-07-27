@@ -17,6 +17,7 @@ export interface CreateTransactionEntryDto {
 export interface SnapItemExtractionDto {
   itemName: string;
   estimatedAmount: number;
+  quantity: number;
   category: string | null;
   date: string;
   note: string;

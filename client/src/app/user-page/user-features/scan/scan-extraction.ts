@@ -43,9 +43,16 @@ export function parseSnapItemAnalysis(
     categories,
   );
 
+  const quantity = getFirstNumber([
+    payload['quantity'],
+    payload['qty'],
+    nestedItem?.['quantity'],
+  ]) || 1;
+
   return {
     itemName,
     estimatedAmount,
+    quantity,
     category,
     date:
       getFirstString([

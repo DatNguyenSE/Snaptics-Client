@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+
 import { Component, OnInit, OnDestroy, NgZone, inject, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -7,7 +7,7 @@ import { TransactionService } from '../../../core/services/transaction.service';
 import { TransactionDto } from '../../../models/transaction.dto';
 import { environment } from '../../../environments/environment.development';
 import { UserHeader } from '../../user-layout/user-header/user-header';
-import { TransactionDetailModal } from '../transaction/transaction-detail-modal/transaction-detail-modal';
+
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { BudgetService, BudgetDto } from '../../../core/services/budget.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
@@ -75,7 +75,7 @@ export interface UserBudget {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, UserHeader, DatePipe, TransactionDetailModal, NgApexchartsModule, FormsModule, CategorySummaryModal, TrendSummaryModal],
+  imports: [RouterLink, UserHeader, NgApexchartsModule, FormsModule, CategorySummaryModal, TrendSummaryModal],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -231,7 +231,22 @@ export class Dashboard implements OnInit, OnDestroy {
     { id: 'analysis', labelKey: 'dashboard.quickAction.capture', icon: 'analytics', iconClass: 'quick-action__icon--violet', route: '/user/analysis' },
     { id: 'review', labelKey: 'dashboard.quickAction.review', icon: 'edit_square', iconClass: 'quick-action__icon--amber', route: '#' },
     { id: 'create-budget', labelKey: 'dashboard.quickAction.createBudget', icon: 'account_balance_wallet', iconClass: 'quick-action__icon--emerald', route: '/user/budget' },
+    { id: 'my-category', labelKey: 'dashboard.quickAction.myCategory', icon: 'category', iconClass: 'quick-action__icon--emerald', route: '/user/category' },
+    { id: 'manual-entry', labelKey: 'dashboard.quickAction.quickEntry', icon: 'post_add', iconClass: 'quick-action__icon--emerald', route: '/user/manual-entry' },
   ];
+
+  isQuickActionsExpanded: boolean = false;
+
+  toggleQuickActions(): void {
+    this.isQuickActionsExpanded = !this.isQuickActionsExpanded;
+  }
+
+  getVisibleQuickActions(): QuickAction[] {
+    if (this.isQuickActionsExpanded) {
+      return this.quickActions;
+    }
+    return this.quickActions.slice(0, 4);
+  }
 
   // ─── Spending Comparison ──────────────────────────────────────────────────
   spendingComparison: SpendingComparisonResponseDto | null = null;
@@ -241,7 +256,6 @@ export class Dashboard implements OnInit, OnDestroy {
     if (!this.spendingComparison) return null;
     return this.spendingComparison[this.selectedSpendingTab];
   }
-
   setSpendingTab(tab: 'week' | 'month' | 'year', event: Event): void {
     event.stopPropagation(); // prevent clicking the card
     this.selectedSpendingTab = tab;

@@ -1254,8 +1254,8 @@
 }
 
 .receipt-item__price:focus-within {
-  border-color: var(--scan-primary);
-  box-shadow: 0 0 0 3px var(--scan-primary-soft);
+  border-color: transparent;
+  box-shadow: none;
   background: var(--sw-card);
 }
 

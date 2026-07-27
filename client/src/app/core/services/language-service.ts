@@ -141,6 +141,8 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         manual: 'Nh\u1eadp th\u1ee7 c\u00f4ng',
         review: '\u0110\u00e1nh gi\u00e1',
         createBudget: 'Quản lý ví',
+        myCategory: 'Danh mục của bạn',
+        quickEntry: 'Nhập nhanh',
       },
       category: {
         drinks: '\u0110\u1ed3 u\u1ed1ng',
@@ -455,7 +457,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
           'Nh\u1eafc b\u1ea1n v\u00e0o cu\u1ed1i ng\u00e0y n\u1ebfu v\u1eabn c\u00f2n m\u00f3n \u0111\u00e3 qu\u00e9t nh\u01b0ng ch\u01b0a nh\u1eadp gi\u00e1.',
         budgetAlertTitle: 'C\u1ea3nh b\u00e1o v\u01b0\u1ee3t ng\u00e2n s\u00e1ch',
         budgetAlertDescription:
-          'Th\u00f4ng b\u00e1o ngay khi chi ti\u00eau trong ng\u00e0y ti\u1ebfn g\u1ea7n ho\u1eb7c v\u01b0\u1ee3t qu\u00e1 ng\u00e2n s\u00e1ch \u0111\u00e3 \u0111\u1eb7t.',
+          'Th\u00f4ng b\u00e1o ngay khi chi ti\u00eau trong ng\u00e0y ti\u1ebfn g\u1ea7n ho\u1eb7c v\u01b0\u1ee3t qu\u00e9t ng\u00e2n s\u00e1ch \u0111\u00e3 \u0111\u1eb7t.',
         usageTitle: 'Theo d\u00f5i m\u1ee9c \u0111\u1ed9 s\u1eed d\u1ee5ng',
         usageDescription:
           'H\u1ecfi l\u1ea1i xem m\u00f3n \u0111\u1ed3 \u0111\u00e3 mua c\u00f2n \u0111\u01b0\u1ee3c s\u1eed d\u1ee5ng sau 30 ng\u00e0y hay kh\u00f4ng.',
@@ -873,10 +875,12 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         manual: 'Manual Entry',
         review: 'Review',
         createBudget: 'Create Budget',
+        myCategory: 'Your Categories',
+        quickEntry: 'Quick Entry',
       },
       category: {
         drinks: 'Drinks',
-        drink: 'Drink',
+        drink: 'Drinks',
         food: 'Food',
         travel: 'Travel',
         bill: 'Bill',
