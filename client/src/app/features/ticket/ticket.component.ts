@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TicketService } from '../../core/services/ticket.service';
 import { ToastService } from '../../core/services/toast-service';
-import { TicketDto, CreateTicketDto, UpdateTicketDto } from '../../models/ticket.dto';
+import { TicketDto, CreateTicketDto } from '../../models/ticket.dto';
 
 @Component({
   selector: 'app-ticket',
@@ -48,8 +48,14 @@ export class TicketComponent implements OnInit {
   loadTickets(): void {
     this.isLoading.set(true);
     this.ticketService.getTickets().subscribe({
-      next: (data) => {
-        this.tickets.set(data || []);
+      next: (res) => {
+        let items: any[] = [];
+        if (Array.isArray(res)) {
+          items = res;
+        } else if (res && Array.isArray((res as any).items)) {
+          items = (res as any).items;
+        }
+        this.tickets.set(items || []);
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -63,8 +69,15 @@ export class TicketComponent implements OnInit {
   viewDetail(id: number | string): void {
     this.isLoading.set(true);
     this.ticketService.getTicketById(id).subscribe({
-      next: (ticket) => {
-        this.selectedTicket.set(ticket);
+      next: (ticket: any) => {
+        this.selectedTicket.set({
+          id: ticket.id,
+          title: ticket.subject || ticket.title || '',
+          description: ticket.description || '',
+          status: ticket.status,
+          priority: ticket.priority,
+          createdAt: ticket.createdAt,
+        });
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -91,10 +104,10 @@ export class TicketComponent implements OnInit {
     this.isEditMode.set(true);
     this.formModel = {
       id: ticket.id,
-      title: ticket.title,
+      title: ticket.title || ticket.subject || '',
       description: ticket.description || '',
-      priority: ticket.priority || 'Medium',
-      status: ticket.status || 'Open'
+      priority: typeof ticket.priority === 'string' ? ticket.priority : 'Medium',
+      status: typeof ticket.status === 'string' ? ticket.status : 'Open',
     };
     this.isModalOpen.set(true);
   }
@@ -103,7 +116,7 @@ export class TicketComponent implements OnInit {
     this.isModalOpen.set(false);
   }
 
-  /** [POST/PUT] Xử lý submit Form */
+  /** [POST] Xử lý submit Form */
   onSubmit(): void {
     if (!this.formModel.title.trim()) {
       this.toastService.warning('Vui lòng nhập tiêu đề Ticket!');
@@ -112,65 +125,43 @@ export class TicketComponent implements OnInit {
 
     this.isSubmitting.set(true);
 
-    if (this.isEditMode() && this.formModel.id) {
-      const updateDto: UpdateTicketDto = {
-        title: this.formModel.title,
-        description: this.formModel.description,
-        status: this.formModel.status,
-        priority: this.formModel.priority
-      };
+    const createDto: CreateTicketDto = {
+      title: this.formModel.title,
+      description: this.formModel.description,
+      priority: this.formModel.priority
+    };
 
-      this.ticketService.updateTicket(this.formModel.id, updateDto).subscribe({
-        next: () => {
-          this.isSubmitting.set(false);
-          this.toastService.success('Cập nhật Ticket thành công!');
-          this.closeModal();
-          this.loadTickets();
-        },
-        error: (err) => {
-          this.isSubmitting.set(false);
-          this.toastService.error('Cập nhật thất bại: ' + err.message);
-        }
-      });
-    } else {
-      const createDto: CreateTicketDto = {
-        title: this.formModel.title,
-        description: this.formModel.description,
-        priority: this.formModel.priority
-      };
-
-      this.ticketService.createTicket(createDto).subscribe({
-        next: () => {
-          this.isSubmitting.set(false);
-          this.toastService.success('Tạo Ticket mới thành công!');
-          this.closeModal();
-          this.loadTickets();
-        },
-        error: (err) => {
-          this.isSubmitting.set(false);
-          this.toastService.error('Tạo Ticket thất bại: ' + err.message);
-        }
-      });
-    }
+    this.ticketService.createTicket(createDto).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.toastService.success('Tạo Ticket mới thành công!');
+        this.closeModal();
+        this.loadTickets();
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        this.toastService.error('Tạo Ticket thất bại: ' + err.message);
+      }
+    });
   }
 
-  /** [DELETE] Xóa Ticket */
-  deleteTicket(id: number | string, title: string): void {
-    if (!confirm(`Bạn có chắc chắn muốn xóa Ticket "${title}" không?`)) {
-      return;
-    }
-
+  /** [PATCH] Đóng Ticket */
+  closeTicket(id: number | string): void {
     this.isLoading.set(true);
-    this.ticketService.deleteTicket(id).subscribe({
+    this.ticketService.closeTicket(id).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.toastService.success('Đã xóa Ticket thành công!');
+        this.toastService.success('Đã đóng Ticket thành công!');
         this.loadTickets();
       },
       error: (err) => {
         this.isLoading.set(false);
-        this.toastService.error('Xóa Ticket thất bại: ' + err.message);
+        this.toastService.error('Đóng Ticket thất bại: ' + err.message);
       }
     });
+  }
+
+  deleteTicket(id: number | string, title: string): void {
+    this.closeTicket(id);
   }
 }

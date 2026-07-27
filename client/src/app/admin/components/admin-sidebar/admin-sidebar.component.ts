@@ -42,6 +42,7 @@ export class AdminSidebarComponent {
   readonly mainNavItems: SidebarNavItem[] = [
     { id: 'overview', labelKey: 'admin.nav.overview', icon: 'dashboard', route: '/admin/overview' },
     { id: 'users', labelKey: 'admin.nav.users', icon: 'group', route: '/admin/users' },
+    { id: 'tickets', labelKey: 'admin.nav.tickets', icon: 'confirmation_number', route: '/admin/tickets' },
     { id: 'categories', labelKey: 'admin.nav.categories', icon: 'category', route: '/admin/categories' },
     { id: 'ai-operations', labelKey: 'admin.nav.aiOperations', icon: 'smart_toy', route: '/admin/ai-operations' },
     { id: 'audit-logs', labelKey: 'admin.nav.auditLogs', icon: 'fact_check', route: '/admin/audit-logs' },

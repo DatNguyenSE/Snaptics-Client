@@ -681,6 +681,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       nav: {
         overview: 'Tổng quan',
         users: 'Người dùng',
+        tickets: 'Support Tickets',
         categories: 'Danh mục',
         aiOperations: 'AI & Scan',
         auditLogs: 'Nhật ký hệ thống',

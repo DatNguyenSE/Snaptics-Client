@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccountService } from '../../../core/services/account-service';
 import { LanguageService } from '../../../core/services/language-service';
@@ -13,6 +13,8 @@ import {
   SupportTicket,
   TicketPriority,
   TicketStatus,
+  categoryStringToEnum,
+  statusStringToEnum,
 } from './models/support.models';
 import { SupportService } from './services/support.service';
 
@@ -23,7 +25,7 @@ import { SupportService } from './services/support.service';
   templateUrl: './support.html',
   styleUrl: './support.css',
 })
-export class Support {
+export class Support implements OnInit {
   readonly supportService = inject(SupportService);
   readonly languageService = inject(LanguageService);
   readonly accountService = inject(AccountService);
@@ -48,6 +50,11 @@ export class Support {
   readonly isCloseConfirmModalOpen = signal<boolean>(false);
   readonly ticketToCloseId = signal<string | null>(null);
   readonly isFaqModalOpen = signal<boolean>(false);
+  readonly isDetailLoading = signal<boolean>(false);
+
+  // Attachment File objects for upload
+  selectedCreateFiles: File[] = [];
+  selectedReplyFiles: File[] = [];
 
   // Create Ticket Form Model & Validation
   createForm = {
@@ -64,6 +71,7 @@ export class Support {
   // Reply Model
   replyText = signal<string>('');
   replyAttachments = signal<SupportAttachment[]>([]);
+  isSendingReply = signal<boolean>(false);
 
   // Category labels map
   readonly categoryMap: Record<SupportCategory, { label: string; icon: string }> = {
@@ -147,6 +155,14 @@ export class Support {
     },
   ];
 
+  ngOnInit(): void {
+    this.loadTicketsFromBackend();
+  }
+
+  loadTicketsFromBackend(): void {
+    this.supportService.loadUserTickets();
+  }
+
   // Computed Filtered List
   readonly filteredTickets = computed(() => {
     let list = this.supportService.tickets();
@@ -216,7 +232,7 @@ export class Support {
 
   // Form Validation Computeds
   readonly isTitleValid = computed(() => this.createForm.title.trim().length >= 5);
-  readonly isDescriptionValid = computed(() => this.createForm.description.trim().length >= 20);
+  readonly isDescriptionValid = computed(() => this.createForm.description.trim().length >= 10);
   readonly isFormValid = computed(() => this.isTitleValid() && this.isDescriptionValid());
 
   // --- Handlers ---
@@ -256,6 +272,7 @@ export class Support {
       email: user?.email || '',
       attachments: [],
     };
+    this.selectedCreateFiles = [];
     this.fileUploadError.set(null);
     this.isCreateModalOpen.set(true);
   }
@@ -278,10 +295,11 @@ export class Support {
     }
 
     this.fileUploadError.set(null);
-    const mockUrl = URL.createObjectURL(file);
+    this.selectedCreateFiles.push(file);
+
     const attachment: SupportAttachment = {
       name: file.name,
-      url: mockUrl,
+      url: URL.createObjectURL(file),
       size: file.size,
       type: file.type,
     };
@@ -292,6 +310,9 @@ export class Support {
 
   removeAttachment(index: number): void {
     this.createForm.attachments.splice(index, 1);
+    if (this.selectedCreateFiles[index]) {
+      this.selectedCreateFiles.splice(index, 1);
+    }
   }
 
   async submitCreateTicket(): Promise<void> {
@@ -309,6 +330,19 @@ export class Support {
       };
 
       const newTicket = await this.supportService.createTicket(dto);
+
+      // Upload files if any were selected
+      if (this.selectedCreateFiles.length > 0 && newTicket.id) {
+        const ticketIdNum = parseInt(newTicket.id, 10);
+        if (!isNaN(ticketIdNum)) {
+          for (const file of this.selectedCreateFiles) {
+            this.supportService.uploadAttachment(file, ticketIdNum).subscribe({
+              error: (err) => console.error('Error uploading file:', err),
+            });
+          }
+        }
+      }
+
       this.closeCreateModal();
       this.openTicketDetail(newTicket);
     } catch (e) {
@@ -322,7 +356,21 @@ export class Support {
     this.selectedTicket.set(ticket);
     this.replyText.set('');
     this.replyAttachments.set([]);
+    this.selectedReplyFiles = [];
     this.isDetailDrawerOpen.set(true);
+
+    // Fetch detail from Backend
+    this.isDetailLoading.set(true);
+    this.supportService.getTicketById(ticket.id).subscribe({
+      next: (detailDto) => {
+        const mapped = this.supportService.mapTicketDtoToModel(detailDto);
+        this.selectedTicket.set(mapped);
+        this.isDetailLoading.set(false);
+      },
+      error: () => {
+        this.isDetailLoading.set(false);
+      },
+    });
   }
 
   closeTicketDetail(): void {
@@ -341,6 +389,8 @@ export class Support {
       return;
     }
 
+    this.selectedReplyFiles.push(file);
+
     const attachment: SupportAttachment = {
       name: file.name,
       url: URL.createObjectURL(file),
@@ -354,23 +404,46 @@ export class Support {
 
   removeReplyAttachment(index: number): void {
     this.replyAttachments.update((list) => list.filter((_, i) => i !== index));
+    if (this.selectedReplyFiles[index]) {
+      this.selectedReplyFiles.splice(index, 1);
+    }
   }
 
   sendReplyMessage(): void {
     const text = this.replyText().trim();
     const ticket = this.selectedTicket();
 
-    if ((!text && this.replyAttachments().length === 0) || !ticket) return;
+    if ((!text && this.replyAttachments().length === 0) || !ticket || this.isSendingReply()) return;
 
-    this.supportService.sendMessage(ticket.id, text, this.replyAttachments());
+    this.isSendingReply.set(true);
+
+    // Upload attachment if any
+    if (this.selectedReplyFiles.length > 0) {
+      const ticketIdNum = parseInt(ticket.id, 10);
+      for (const file of this.selectedReplyFiles) {
+        this.supportService.uploadAttachment(file, !isNaN(ticketIdNum) ? ticketIdNum : undefined).subscribe({
+          error: (err) => console.error('Attachment upload error:', err),
+        });
+      }
+    }
+
+    this.supportService.sendMessage(ticket.id, text);
     this.replyText.set('');
     this.replyAttachments.set([]);
+    this.selectedReplyFiles = [];
 
-    // Update current open ticket signal
-    const updated = this.supportService.tickets().find((t) => t.id === ticket.id);
-    if (updated) {
-      this.selectedTicket.set(updated);
-    }
+    setTimeout(() => {
+      this.isSendingReply.set(false);
+      // Reload ticket detail
+      if (ticket) {
+        this.supportService.getTicketById(ticket.id).subscribe({
+          next: (detailDto) => {
+            const mapped = this.supportService.mapTicketDtoToModel(detailDto);
+            this.selectedTicket.set(mapped);
+          },
+        });
+      }
+    }, 800);
   }
 
   promptCloseTicket(ticketId: string): void {
@@ -381,11 +454,16 @@ export class Support {
   confirmCloseTicket(): void {
     const id = this.ticketToCloseId();
     if (id) {
-      this.supportService.updateStatus(id, 'closed');
-      const updated = this.supportService.tickets().find((t) => t.id === id);
-      if (updated) {
-        this.selectedTicket.set(updated);
-      }
+      this.supportService.closeTicket(id).subscribe({
+        next: () => {
+          this.toastService.info(`Đã đóng yêu cầu hỗ trợ #${id}`);
+          this.supportService.loadUserTickets();
+          if (this.selectedTicket()?.id === id) {
+            this.openTicketDetail(this.selectedTicket()!);
+          }
+        },
+        error: (err) => this.toastService.error('Lỗi khi đóng ticket: ' + err.message),
+      });
     }
     this.isCloseConfirmModalOpen.set(false);
     this.ticketToCloseId.set(null);
@@ -399,11 +477,14 @@ export class Support {
   reopenCurrentTicket(): void {
     const ticket = this.selectedTicket();
     if (ticket) {
-      this.supportService.reopenTicket(ticket.id);
-      const updated = this.supportService.tickets().find((t) => t.id === ticket.id);
-      if (updated) {
-        this.selectedTicket.set(updated);
-      }
+      this.supportService.reopenTicket(ticket.id).subscribe({
+        next: () => {
+          this.toastService.success(`Đã mở lại yêu cầu #${ticket.ticketCode}`);
+          this.supportService.loadUserTickets();
+          this.openTicketDetail(ticket);
+        },
+        error: (err) => this.toastService.error('Lỗi mở lại ticket: ' + err.message),
+      });
     }
   }
 

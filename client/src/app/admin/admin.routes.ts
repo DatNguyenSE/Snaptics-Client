@@ -29,6 +29,11 @@ export const adminRoutes: Routes = [
           import('./pages/users/user-detail/user-detail.component').then((m) => m.UserDetailComponent),
       },
       {
+        path: 'tickets',
+        loadComponent: () =>
+          import('./pages/tickets/tickets.component').then((m) => m.AdminTicketsComponent),
+      },
+      {
         path: 'categories',
         loadComponent: () =>
           import('./pages/categories/categories.component').then((m) => m.CategoriesComponent),

@@ -1,9 +1,33 @@
+export {
+  TicketCategoryEnum,
+  TicketStatusEnum,
+  TicketPriorityEnum,
+} from '../user-page/user-features/support/models/support.models';
+
+export type {
+  CreateTicketRequest,
+  SendTicketMessageRequest,
+  AssignTicketRequest,
+  UpdateTicketStatusRequest,
+  UpdateTicketPriorityRequest,
+  TicketQueryParams,
+  AdminTicketQueryParams,
+  SupportAttachmentDto,
+  SupportMessageDto,
+  SupportTicketDto,
+  SupportTicketDetailDto,
+  PaginatedResultDto,
+  SupportStatsDto,
+} from '../user-page/user-features/support/models/support.models';
+
 export interface TicketDto {
-  id: number;
+  id: number | string;
   title: string;
+  subject?: string;
   description?: string;
-  status: 'Open' | 'InProgress' | 'Resolved' | 'Closed' | string;
-  priority?: 'Low' | 'Medium' | 'High' | 'Urgent' | string;
+  status: string | number;
+  priority?: string | number;
+  category?: string | number;
   createdAt?: string;
   updatedAt?: string;
   createdBy?: string;
@@ -11,13 +35,16 @@ export interface TicketDto {
 
 export interface CreateTicketDto {
   title: string;
+  subject?: string;
   description?: string;
-  priority?: string;
+  category?: number;
+  priority?: string | number;
 }
 
 export interface UpdateTicketDto {
   title?: string;
+  subject?: string;
   description?: string;
-  status?: string;
-  priority?: string;
+  status?: string | number;
+  priority?: string | number;
 }

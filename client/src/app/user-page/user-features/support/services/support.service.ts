@@ -1,429 +1,375 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
-import { AccountService } from '../../../../core/services/account-service';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, catchError, map, tap, throwError } from 'rxjs';
+import { environment } from '../../../../environments/environment.development';
 import { ToastService } from '../../../../core/services/toast-service';
 import {
+  AdminTicketQueryParams,
+  AssignTicketRequest,
   CreateTicketDTO,
+  CreateTicketRequest,
+  PaginatedResultDto,
+  SendMessageDto,
+  SendTicketMessageRequest,
   SupportAttachment,
+  SupportAttachmentDto,
   SupportMessage,
+  SupportMessageDto,
   SupportStats,
+  SupportStatsDto,
   SupportTicket,
-  TicketPriority,
-  TicketStatus,
+  SupportTicketDetailDto,
+  SupportTicketDto,
+  TicketQueryParams,
+  UpdateTicketPriorityRequest,
+  UpdateTicketStatusRequest,
+  categoryEnumToString,
+  categoryStringToEnum,
+  priorityEnumToString,
+  priorityStringToEnum,
+  statusEnumToString,
+  statusStringToEnum,
 } from '../models/support.models';
-
-const STORAGE_KEY = 'snaptics_support_tickets_v1';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SupportService {
-  private readonly accountService = inject(AccountService);
+  private readonly http = inject(HttpClient);
   private readonly toastService = inject(ToastService);
 
+  private readonly userApiUrl = `${environment.apiUrl.replace(/\/$/, '')}/api/support`;
+  private readonly adminApiUrl = `${environment.apiUrl.replace(/\/$/, '')}/api/admin/support`;
+
   readonly tickets = signal<SupportTicket[]>([]);
+  readonly totalCount = signal<number>(0);
   readonly isLoading = signal<boolean>(false);
   readonly error = signal<string | null>(null);
 
   readonly stats = computed<SupportStats>(() => {
     const list = this.tickets();
     return {
-      total: list.length,
+      total: this.totalCount() || list.length,
       processing: list.filter((t) => t.status === 'processing' || t.status === 'pending').length,
       awaitingUser: list.filter((t) => t.status === 'awaiting_user').length,
       completed: list.filter((t) => t.status === 'resolved' || t.status === 'closed').length,
     };
   });
 
-  constructor() {
-    this.initData();
-  }
+  // ─── USER APIS ─────────────────────────────────────────────────────────────
 
   /**
-   * Khởi tạo dữ liệu ticket từ localStorage hoặc tạo dữ liệu mẫu nếu chưa có.
-   * NOTE FOR BACKEND INTEGRATION:
-   * Thay thế hàm này bằng `http.get<SupportTicket[]>(`${baseUrl}/support/tickets`)`
+   * [POST] /api/support/tickets - Tạo ticket mới
    */
-  initData(): void {
-    this.isLoading.set(true);
-    this.error.set(null);
-
-    try {
-      const savedData = localStorage.getItem(STORAGE_KEY);
-      if (savedData) {
-        const parsed = JSON.parse(savedData) as SupportTicket[];
-        this.tickets.set(parsed);
-      } else {
-        const initialMockTickets = this.generateMockTickets();
-        this.tickets.set(initialMockTickets);
-        this.saveToStorage(initialMockTickets);
-      }
-    } catch (e) {
-      console.error('Error loading support tickets:', e);
-      this.error.set('Không thể tải danh sách ticket. Vui lòng thử lại.');
-    } finally {
-      this.isLoading.set(false);
-    }
+  createTicketApi(payload: CreateTicketRequest): Observable<SupportTicketDto> {
+    return this.http.post<SupportTicketDto>(`${this.userApiUrl}/tickets`, payload).pipe(
+      catchError(this.handleError)
+    );
   }
 
   /**
-   * Thêm ticket mới
-   * NOTE FOR BACKEND INTEGRATION:
-   * REST endpoint: `POST /api/support/tickets`
+   * Wrapper hỗ trợ DTO frontend
    */
   createTicket(dto: CreateTicketDTO): Promise<SupportTicket> {
+    this.isLoading.set(true);
+    const requestPayload: CreateTicketRequest = {
+      subject: dto.title.trim(),
+      description: dto.description.trim(),
+      category: categoryStringToEnum(dto.category),
+    };
+
     return new Promise((resolve, reject) => {
-      this.isLoading.set(true);
-
-      setTimeout(() => {
-        try {
-          const currentUser = this.accountService.currentUser();
-          const nextIndex = this.tickets().length + 1024;
-          const ticketCode = `#SP-${nextIndex}`;
-          const now = new Date().toISOString();
-
-          const newTicket: SupportTicket = {
-            id: `ticket_${Date.now()}`,
-            ticketCode,
-            userId: currentUser?.id || 'guest_user',
-            userEmail: dto.contactEmail,
-            userName: currentUser?.displayName || 'Người dùng',
-            title: dto.title.trim(),
-            description: dto.description.trim(),
-            category: dto.category,
-            priority: dto.priority,
-            status: 'pending',
-            attachments: dto.attachments || [],
-            messages: [
-              {
-                id: `msg_${Date.now()}_init`,
-                ticketId: `ticket_${Date.now()}`,
-                senderId: currentUser?.id || 'guest_user',
-                senderName: currentUser?.displayName || 'Bạn',
-                senderAvatar: currentUser?.imageUrl,
-                senderType: 'user',
-                message: dto.description.trim(),
-                attachments: dto.attachments || [],
-                createdAt: now,
-              },
-            ],
-            createdAt: now,
-            updatedAt: now,
-          };
-
-          const updatedList = [newTicket, ...this.tickets()];
-          this.tickets.set(updatedList);
-          this.saveToStorage(updatedList);
-
-          // Phản hồi giả lập từ bot hỗ trợ tự động sau 1.5s
-          this.scheduleAutoSupportReply(newTicket.id);
-
-          this.toastService.success(`Đã tạo yêu cầu hỗ trợ mã ${ticketCode} thành công!`);
-          resolve(newTicket);
-        } catch (err) {
-          this.toastService.error('Không thể gửi yêu cầu hỗ trợ. Vui lòng thử lại.');
-          reject(err);
-        } finally {
+      this.createTicketApi(requestPayload).subscribe({
+        next: (res) => {
+          const mappedTicket = this.mapTicketDtoToModel(res);
+          this.toastService.success(`Đã tạo yêu cầu hỗ trợ #${res.id} thành công!`);
           this.isLoading.set(false);
-        }
-      }, 600);
+          this.loadUserTickets(); // Refresh list
+          resolve(mappedTicket);
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.toastService.error('Không thể tạo ticket: ' + (err.message || 'Lỗi server'));
+          reject(err);
+        },
+      });
     });
   }
 
   /**
-   * Gửi tin nhắn phản hồi trong ticket
-   * NOTE FOR BACKEND INTEGRATION:
-   * REST endpoint: `POST /api/support/tickets/{id}/messages`
+   * [GET] /api/support/tickets - Lấy danh sách ticket người dùng
    */
+  getTickets(params?: TicketQueryParams): Observable<PaginatedResultDto<SupportTicketDto> | SupportTicketDto[]> {
+    let httpParams = new HttpParams();
+    if (params) {
+      if (params.search) httpParams = httpParams.set('search', params.search);
+      if (params.status !== undefined && params.status !== null) httpParams = httpParams.set('status', params.status);
+      if (params.category !== undefined && params.category !== null) httpParams = httpParams.set('category', params.category);
+      if (params.page) httpParams = httpParams.set('page', params.page);
+      if (params.size) httpParams = httpParams.set('size', params.size);
+    }
+
+    return this.http.get<PaginatedResultDto<SupportTicketDto> | SupportTicketDto[]>(`${this.userApiUrl}/tickets`, { params: httpParams }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Tải danh sách ticket của User vào Signal state
+   */
+  loadUserTickets(params?: TicketQueryParams): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.getTickets(params).subscribe({
+      next: (res) => {
+        let items: SupportTicketDto[] = [];
+        let total = 0;
+
+        if (Array.isArray(res)) {
+          items = res;
+          total = res.length;
+        } else if (res && Array.isArray(res.items)) {
+          items = res.items;
+          total = res.totalCount;
+        }
+
+        const mappedList = items.map((item) => this.mapTicketDtoToModel(item));
+        this.tickets.set(mappedList);
+        this.totalCount.set(total);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.error.set(err.message || 'Không thể tải danh sách ticket');
+        this.toastService.error('Lỗi tải danh sách ticket: ' + err.message);
+      },
+    });
+  }
+
+  /**
+   * [GET] /api/support/tickets/{id} - Lấy chi tiết ticket
+   */
+  getTicketById(id: number | string): Observable<SupportTicketDetailDto> {
+    return this.http.get<SupportTicketDetailDto>(`${this.userApiUrl}/tickets/${id}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * [POST] /api/support/tickets/{id}/messages - Gửi tin nhắn phản hồi
+   */
+  sendMessageApi(id: number | string, payload: SendTicketMessageRequest): Observable<SupportMessageDto> {
+    return this.http.post<SupportMessageDto>(`${this.userApiUrl}/tickets/${id}/messages`, payload).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   sendMessage(ticketId: string, messageText: string, attachments?: SupportAttachment[]): void {
-    const list = this.tickets();
-    const index = list.findIndex((t) => t.id === ticketId);
-    if (index === -1) return;
+    if (!messageText.trim()) return;
 
-    const ticket = list[index];
-    if (ticket.status === 'closed') {
-      this.toastService.warning('Yêu cầu này đã đóng. Hãy mở lại để tiếp tục nhắn tin.');
-      return;
-    }
+    this.isLoading.set(true);
+    const payload: SendTicketMessageRequest = { content: messageText.trim() };
 
-    const currentUser = this.accountService.currentUser();
-    const now = new Date().toISOString();
-
-    const newMessage: SupportMessage = {
-      id: `msg_${Date.now()}`,
-      ticketId,
-      senderId: currentUser?.id || 'guest_user',
-      senderName: currentUser?.displayName || 'Bạn',
-      senderAvatar: currentUser?.imageUrl,
-      senderType: 'user',
-      message: messageText.trim(),
-      attachments,
-      createdAt: now,
-    };
-
-    const updatedTicket: SupportTicket = {
-      ...ticket,
-      status: ticket.status === 'awaiting_user' ? 'processing' : ticket.status,
-      updatedAt: now,
-      messages: [...ticket.messages, newMessage],
-    };
-
-    const updatedList = [...list];
-    updatedList[index] = updatedTicket;
-    this.tickets.set(updatedList);
-    this.saveToStorage(updatedList);
-
-    // Giả lập bot phản hồi tin nhắn tự động
-    this.scheduleAutoSupportMessageReply(ticketId);
+    this.sendMessageApi(ticketId, payload).subscribe({
+      next: () => {
+        this.toastService.success('Đã gửi phản hồi thành công');
+        this.loadUserTickets();
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        this.toastService.error('Không thể gửi phản hồi: ' + err.message);
+      },
+    });
   }
 
   /**
-   * Cập nhật trạng thái ticket (Chuyển sang Đã giải quyết / Đã đóng)
-   * NOTE FOR BACKEND INTEGRATION:
-   * REST endpoint: `PATCH /api/support/tickets/{id}/status`
+   * [PATCH] /api/support/tickets/{id}/close - Đóng ticket
    */
-  updateStatus(ticketId: string, status: TicketStatus): void {
-    const list = this.tickets();
-    const index = list.findIndex((t) => t.id === ticketId);
-    if (index === -1) return;
+  closeTicket(id: number | string): Observable<SupportTicketDto> {
+    return this.http.patch<SupportTicketDto>(`${this.userApiUrl}/tickets/${id}/close`, {}).pipe(
+      catchError(this.handleError)
+    );
+  }
 
-    const ticket = list[index];
-    const now = new Date().toISOString();
-    const updatedTicket: SupportTicket = {
-      ...ticket,
-      status,
-      updatedAt: now,
-      resolvedAt: status === 'resolved' || status === 'closed' ? now : ticket.resolvedAt,
-    };
+  /**
+   * [PATCH] /api/support/tickets/{id}/reopen - Mở lại ticket
+   */
+  reopenTicket(id: number | string): Observable<SupportTicketDto> {
+    return this.http.patch<SupportTicketDto>(`${this.userApiUrl}/tickets/${id}/reopen`, {}).pipe(
+      catchError(this.handleError)
+    );
+  }
 
-    const updatedList = [...list];
-    updatedList[index] = updatedTicket;
-    this.tickets.set(updatedList);
-    this.saveToStorage(updatedList);
-
+  updateStatus(ticketId: string, status: string): void {
     if (status === 'closed') {
-      this.toastService.info(`Đã đóng yêu cầu hỗ trợ ${ticket.ticketCode}`);
-    } else if (status === 'resolved') {
-      this.toastService.success(`Đã đánh dấu giải quyết yêu cầu ${ticket.ticketCode}`);
+      this.closeTicket(ticketId).subscribe({
+        next: () => {
+          this.toastService.info(`Đã đóng yêu cầu hỗ trợ #${ticketId}`);
+          this.loadUserTickets();
+        },
+        error: (err) => this.toastService.error('Không thể đóng ticket: ' + err.message),
+      });
     }
+  }
+
+  reopenTicketAction(ticketId: string): void {
+    this.reopenTicket(ticketId).subscribe({
+      next: () => {
+        this.toastService.success(`Đã mở lại yêu cầu hỗ trợ #${ticketId}`);
+        this.loadUserTickets();
+      },
+      error: (err) => this.toastService.error('Không thể mở lại ticket: ' + err.message),
+    });
   }
 
   /**
-   * Mở lại ticket đã đóng
+   * [GET] /api/support/tickets/statistics - Lấy thống kê
    */
-  reopenTicket(ticketId: string): void {
-    const list = this.tickets();
-    const index = list.findIndex((t) => t.id === ticketId);
-    if (index === -1) return;
-
-    const ticket = list[index];
-    const now = new Date().toISOString();
-    const updatedTicket: SupportTicket = {
-      ...ticket,
-      status: 'processing',
-      updatedAt: now,
-    };
-
-    const updatedList = [...list];
-    updatedList[index] = updatedTicket;
-    this.tickets.set(updatedList);
-    this.saveToStorage(updatedList);
-
-    this.toastService.success(`Đã mở lại yêu cầu ${ticket.ticketCode}`);
+  getStatistics(): Observable<SupportStatsDto> {
+    return this.http.get<SupportStatsDto>(`${this.userApiUrl}/tickets/statistics`).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  private saveToStorage(list: SupportTicket[]): void {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    } catch (e) {
-      console.error('Failed to save support tickets to storage:', e);
+  /**
+   * [POST] /api/support/attachments - Đính kèm tệp
+   */
+  uploadAttachment(file: File, ticketId?: number, messageId?: number): Observable<SupportAttachmentDto> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (ticketId) formData.append('ticketId', ticketId.toString());
+    if (messageId) formData.append('messageId', messageId.toString());
+
+    return this.http.post<SupportAttachmentDto>(`${this.userApiUrl}/attachments`, formData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // ─── ADMIN APIS ────────────────────────────────────────────────────────────
+
+  /**
+   * [GET] /api/admin/support/tickets - Lấy danh sách ticket cho Admin
+   */
+  getAdminTickets(params?: AdminTicketQueryParams): Observable<PaginatedResultDto<SupportTicketDto>> {
+    let httpParams = new HttpParams();
+    if (params) {
+      if (params.search) httpParams = httpParams.set('search', params.search);
+      if (params.status !== undefined && params.status !== null) httpParams = httpParams.set('status', params.status);
+      if (params.priority !== undefined && params.priority !== null) httpParams = httpParams.set('priority', params.priority);
+      if (params.category !== undefined && params.category !== null) httpParams = httpParams.set('category', params.category);
+      if (params.assignedToId) httpParams = httpParams.set('assignedToId', params.assignedToId);
+      if (params.page) httpParams = httpParams.set('page', params.page);
+      if (params.size) httpParams = httpParams.set('size', params.size);
     }
+
+    return this.http.get<PaginatedResultDto<SupportTicketDto>>(`${this.adminApiUrl}/tickets`, { params: httpParams }).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  private generateMockTickets(): SupportTicket[] {
-    const now = new Date();
-    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
-
-    return [
-      {
-        id: 'ticket_1024',
-        ticketCode: '#SP-1024',
-        userId: 'user_1',
-        userEmail: 'minhtran@gmail.com',
-        userName: 'Minh Trần',
-        title: 'Chờ xác thực giao dịch chuyển khoản vào ví gia đình',
-        description:
-          'Tôi đã thực hiện giao dịch nạp 1.500.000đ vào ví gia đình từ sáng nay nhưng số dư ví vẫn chưa được cập nhật. Nhờ bộ phận kỹ thuật kiểm tra lại giúp tôi.',
-        category: 'wallet',
-        priority: 'high',
-        status: 'awaiting_user',
-        createdAt: threeDaysAgo.toISOString(),
-        updatedAt: yesterday.toISOString(),
-        messages: [
-          {
-            id: 'msg_1',
-            ticketId: 'ticket_1024',
-            senderId: 'user_1',
-            senderName: 'Minh Trần',
-            senderType: 'user',
-            message:
-              'Tôi đã thực hiện giao dịch nạp 1.500.000đ vào ví gia đình từ sáng nay nhưng số dư ví vẫn chưa được cập nhật. Nhờ bộ phận kỹ thuật kiểm tra lại giúp tôi.',
-            createdAt: threeDaysAgo.toISOString(),
-          },
-          {
-            id: 'msg_2',
-            ticketId: 'ticket_1024',
-            senderId: 'supp_101',
-            senderName: 'Chăm sóc khách hàng Snaptics',
-            senderAvatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=SnapticsSupport',
-            senderType: 'support',
-            message:
-              'Chào bạn Minh, Snaptics đã nhận được phản hồi. Vui lòng cung cấp mã tham chiếu giao dịch bank transfer hoặc ảnh chụp màn hình chuyển khoản thành công để hệ thống đối soát giúp bạn nhé!',
-            createdAt: yesterday.toISOString(),
-          },
-        ],
-      },
-      {
-        id: 'ticket_1025',
-        ticketCode: '#SP-1025',
-        userId: 'user_1',
-        userEmail: 'minhtran@gmail.com',
-        userName: 'Minh Trần',
-        title: 'Lỗi nhận diện hóa đơn quét AI bị sai số tiền',
-        description:
-          'Khi tôi quét hóa đơn từ siêu thị Co.opmart, tổng số tiền là 450.000đ nhưng AI hiển thị thành 4.500.000đ. Nhờ team hỗ trợ tinh chỉnh mô hình OCR.',
-        category: 'ai',
-        priority: 'normal',
-        status: 'processing',
-        createdAt: yesterday.toISOString(),
-        updatedAt: now.toISOString(),
-        messages: [
-          {
-            id: 'msg_3',
-            ticketId: 'ticket_1025',
-            senderId: 'user_1',
-            senderName: 'Minh Trần',
-            senderType: 'user',
-            message:
-              'Khi tôi quét hóa đơn từ siêu thị Co.opmart, tổng số tiền là 450.000đ nhưng AI hiển thị thành 4.500.000đ. Nhờ team hỗ trợ tinh chỉnh mô hình OCR.',
-            createdAt: yesterday.toISOString(),
-          },
-          {
-            id: 'msg_4',
-            ticketId: 'ticket_1025',
-            senderId: 'supp_102',
-            senderName: 'Kỹ sư AI Snaptics',
-            senderType: 'support',
-            message:
-              'Cảm ơn bạn đã phản hồi! Đội ngũ AI đã ghi nhận mẫu hóa đơn bị lỗi dấu phân cách chữ số hàng nghìn và đang tối ưu lại thuật toán bóc tách dữ liệu.',
-            createdAt: now.toISOString(),
-          },
-        ],
-      },
-      {
-        id: 'ticket_1026',
-        ticketCode: '#SP-1026',
-        userId: 'user_1',
-        userEmail: 'minhtran@gmail.com',
-        userName: 'Minh Trần',
-        title: 'Góp ý thêm tính năng xuất báo cáo định dạng Excel/PDF',
-        description:
-          'Ứng dụng đang hỗ trợ xem báo cáo rất trực quan, nhưng nếu có thêm nút bấm xuất báo cáo chi tiêu thành tệp `.xlsx` hàng tháng sẽ rất tuyệt vời cho quản lý tài chính cá nhân.',
-        category: 'feedback',
-        priority: 'low',
-        status: 'resolved',
-        createdAt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: threeDaysAgo.toISOString(),
-        resolvedAt: threeDaysAgo.toISOString(),
-        messages: [
-          {
-            id: 'msg_5',
-            ticketId: 'ticket_1026',
-            senderId: 'user_1',
-            senderName: 'Minh Trần',
-            senderType: 'user',
-            message:
-              'Ứng dụng đang hỗ trợ xem báo cáo rất trực quan, nhưng nếu có thêm nút bấm xuất báo cáo chi tiêu thành tệp `.xlsx` hàng tháng sẽ rất tuyệt vời cho quản lý tài chính cá nhân.',
-            createdAt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          },
-          {
-            id: 'msg_6',
-            ticketId: 'ticket_1026',
-            senderId: 'supp_101',
-            senderName: 'Chăm sóc khách hàng Snaptics',
-            senderType: 'support',
-            message:
-              'Góp ý tuyệt vời! Tính năng xuất báo cáo Excel/PDF đã được chuyển tới Product Roadmap phiên bản tiếp theo. Cảm ơn bạn đã đồng hành cùng Snaptics!',
-            createdAt: threeDaysAgo.toISOString(),
-          },
-        ],
-      },
-    ];
+  /**
+   * [GET] /api/admin/support/tickets/{id} - Lấy chi tiết ticket cho Admin
+   */
+  getAdminTicketById(id: number | string): Observable<SupportTicketDetailDto> {
+    return this.http.get<SupportTicketDetailDto>(`${this.adminApiUrl}/tickets/${id}`).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  private scheduleAutoSupportReply(ticketId: string): void {
-    setTimeout(() => {
-      const list = this.tickets();
-      const index = list.findIndex((t) => t.id === ticketId);
-      if (index === -1) return;
-
-      const ticket = list[index];
-      const botMsg: SupportMessage = {
-        id: `msg_bot_${Date.now()}`,
-        ticketId,
-        senderId: 'supp_auto',
-        senderName: 'Hệ thống hỗ trợ tự động',
-        senderType: 'support',
-        message:
-          'Hệ thống Snaptics đã nhận được yêu cầu của bạn. Nhân viên hỗ trợ sẽ xử lý và phản hồi trong thời gian sớm nhất. Cảm ơn bạn!',
-        createdAt: new Date().toISOString(),
-      };
-
-      const updatedTicket: SupportTicket = {
-        ...ticket,
-        status: 'processing',
-        updatedAt: new Date().toISOString(),
-        messages: [...ticket.messages, botMsg],
-      };
-
-      const updatedList = [...list];
-      updatedList[index] = updatedTicket;
-      this.tickets.set(updatedList);
-      this.saveToStorage(updatedList);
-    }, 2000);
+  /**
+   * [PATCH] /api/admin/support/tickets/{id}/assign - Phân công ticket
+   */
+  assignTicket(id: number | string, payload: AssignTicketRequest): Observable<SupportTicketDto> {
+    return this.http.patch<SupportTicketDto>(`${this.adminApiUrl}/tickets/${id}/assign`, payload).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  private scheduleAutoSupportMessageReply(ticketId: string): void {
-    setTimeout(() => {
-      const list = this.tickets();
-      const index = list.findIndex((t) => t.id === ticketId);
-      if (index === -1) return;
+  /**
+   * [PATCH] /api/admin/support/tickets/{id}/status - Cập nhật trạng thái
+   */
+  updateTicketStatus(id: number | string, payload: UpdateTicketStatusRequest): Observable<SupportTicketDto> {
+    return this.http.patch<SupportTicketDto>(`${this.adminApiUrl}/tickets/${id}/status`, payload).pipe(
+      catchError(this.handleError)
+    );
+  }
 
-      const ticket = list[index];
-      if (ticket.status === 'closed') return;
+  /**
+   * [PATCH] /api/admin/support/tickets/{id}/priority - Cập nhật mức ưu tiên
+   */
+  updateTicketPriority(id: number | string, payload: UpdateTicketPriorityRequest): Observable<SupportTicketDto> {
+    return this.http.patch<SupportTicketDto>(`${this.adminApiUrl}/tickets/${id}/priority`, payload).pipe(
+      catchError(this.handleError)
+    );
+  }
 
-      const botReply: SupportMessage = {
-        id: `msg_reply_${Date.now()}`,
-        ticketId,
-        senderId: 'supp_101',
-        senderName: 'Chăm sóc khách hàng Snaptics',
-        senderType: 'support',
-        message:
-          'Cảm ơn bạn đã gửi thêm thông tin! Chuyên viên hỗ trợ đang kiểm tra và sẽ phản hồi chi tiết cho bạn ngay khi có thông tin mới nhất.',
-        createdAt: new Date().toISOString(),
-      };
+  /**
+   * [POST] /api/admin/support/tickets/{id}/messages - Phản hồi tin nhắn Admin (multipart/form-data)
+   */
+  sendAdminMessage(id: number | string, content: string, attachmentFile?: File): Observable<SupportMessageDto> {
+    const formData = new FormData();
+    formData.append('Content', content);
+    if (attachmentFile) {
+      formData.append('Attachment', attachmentFile);
+    }
 
-      const updatedTicket: SupportTicket = {
-        ...ticket,
-        status: 'awaiting_user',
-        updatedAt: new Date().toISOString(),
-        messages: [...ticket.messages, botReply],
-      };
+    return this.http.post<SupportMessageDto>(`${this.adminApiUrl}/tickets/${id}/messages`, formData).pipe(
+      catchError(this.handleError)
+    );
+  }
 
-      const updatedList = [...list];
-      updatedList[index] = updatedTicket;
-      this.tickets.set(updatedList);
-      this.saveToStorage(updatedList);
-    }, 3000);
+  // ─── HELPER MAPPER ─────────────────────────────────────────────────────────
+
+  mapTicketDtoToModel(dto: SupportTicketDto | SupportTicketDetailDto): SupportTicket {
+    const detailDto = dto as SupportTicketDetailDto;
+
+    const messagesMapped: SupportMessage[] = (detailDto.messages || []).map((m) => ({
+      id: String(m.id),
+      ticketId: String(m.ticketId),
+      senderId: m.senderId || (m.isFromAdmin ? 'admin' : 'user'),
+      senderName: m.senderName || (m.isFromAdmin ? 'Quản trị viên' : 'Người dùng'),
+      senderAvatar: m.senderAvatar,
+      senderType: m.isFromAdmin ? 'support' : 'user',
+      message: m.content || m.message || '',
+      attachments: m.attachments?.map((att) => ({
+        name: att.fileName || att.name || 'attachment',
+        url: att.fileUrl || att.url || '',
+        size: att.fileSize || att.size,
+        type: att.contentType || att.type,
+      })),
+      createdAt: m.createdAt,
+    }));
+
+    const attachmentsMapped: SupportAttachment[] = (detailDto.attachments || []).map((att) => ({
+      name: att.fileName || att.name || 'attachment',
+      url: att.fileUrl || att.url || '',
+      size: att.fileSize || att.size,
+      type: att.contentType || att.type,
+    }));
+
+    return {
+      id: String(dto.id),
+      ticketCode: dto.ticketCode || `#SP-${dto.id}`,
+      userId: dto.userId || '',
+      userEmail: dto.userEmail || '',
+      userName: dto.userName || 'User',
+      title: dto.subject || dto.title || '',
+      description: dto.description || '',
+      category: typeof dto.category === 'number' ? categoryEnumToString(dto.category) : (dto.category as any),
+      priority: typeof dto.priority === 'number' ? priorityEnumToString(dto.priority) : (dto.priority as any || 'normal'),
+      status: typeof dto.status === 'number' ? statusEnumToString(dto.status) : (dto.status as any || 'pending'),
+      attachments: attachmentsMapped,
+      messages: messagesMapped,
+      createdAt: dto.createdAt || new Date().toISOString(),
+      updatedAt: dto.updatedAt || dto.createdAt || new Date().toISOString(),
+      resolvedAt: dto.resolvedAt,
+    };
+  }
+
+  private handleError(error: any) {
+    console.error('SupportService Error:', error);
+    const message = error?.error?.message || error?.message || 'Có lỗi xảy ra khi kết nối tới máy chủ.';
+    return throwError(() => new Error(message));
   }
 }

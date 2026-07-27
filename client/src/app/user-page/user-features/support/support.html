@@ -218,7 +218,7 @@
             <span class="material-symbols-outlined support-error-state__icon">warning</span>
             <h3 class="support-error-state__title">Đã xảy ra lỗi</h3>
             <p class="support-error-state__description">{{ supportService.error() }}</p>
-            <button class="support-btn support-btn--secondary" (click)="supportService.initData()">
+            <button class="support-btn support-btn--secondary" (click)="loadTicketsFromBackend()">
               <span class="material-symbols-outlined">refresh</span>
               <span>Thử lại</span>
             </button>

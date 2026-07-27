@@ -1,58 +1,74 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../environments/environment.development';
-import { TicketDto, CreateTicketDto, UpdateTicketDto } from '../../models/ticket.dto';
+import {
+  TicketDto,
+  CreateTicketDto,
+  UpdateTicketDto,
+  SupportTicketDto,
+  SupportTicketDetailDto,
+  PaginatedResultDto,
+  CreateTicketRequest,
+} from '../../models/ticket.dto';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TicketService {
   private http = inject(HttpClient);
-  // URL endpoint: /api/tickets (dựa trên environment.apiUrl)
-  private baseUrl = environment.apiUrl + 'tickets';
+  private baseUrl = `${environment.apiUrl.replace(/\/$/, '')}/api/support/tickets`;
 
   /**
-   * [GET] /api/tickets - Lấy danh sách Ticket
+   * [GET] /api/support/tickets - Lấy danh sách Ticket
    */
-  getTickets(): Observable<TicketDto[]> {
-    return this.http.get<TicketDto[]>(this.baseUrl).pipe(
+  getTickets(page = 1, size = 10, search?: string, status?: number): Observable<PaginatedResultDto<SupportTicketDto> | SupportTicketDto[]> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (search) params = params.set('search', search);
+    if (status !== undefined && status !== null) params = params.set('status', status);
+
+    return this.http.get<PaginatedResultDto<SupportTicketDto> | SupportTicketDto[]>(this.baseUrl, { params }).pipe(
       catchError(this.handleError)
     );
   }
 
   /**
-   * [GET] /api/tickets/{id} - Xem chi tiết Ticket
+   * [GET] /api/support/tickets/{id} - Xem chi tiết Ticket
    */
-  getTicketById(id: number | string): Observable<TicketDto> {
-    return this.http.get<TicketDto>(`${this.baseUrl}/${id}`).pipe(
+  getTicketById(id: number | string): Observable<SupportTicketDetailDto> {
+    return this.http.get<SupportTicketDetailDto>(`${this.baseUrl}/${id}`).pipe(
       catchError(this.handleError)
     );
   }
 
   /**
-   * [POST] /api/tickets - Tạo Ticket mới
+   * [POST] /api/support/tickets - Tạo Ticket mới
    */
-  createTicket(dto: CreateTicketDto): Observable<TicketDto> {
-    return this.http.post<TicketDto>(this.baseUrl, dto).pipe(
+  createTicket(dto: CreateTicketDto | CreateTicketRequest): Observable<SupportTicketDto> {
+    const payload: CreateTicketRequest = {
+      subject: (dto as any).subject || (dto as any).title,
+      description: dto.description || '',
+      category: typeof dto.category === 'number' ? dto.category : 0,
+    };
+    return this.http.post<SupportTicketDto>(this.baseUrl, payload).pipe(
       catchError(this.handleError)
     );
   }
 
   /**
-   * [PUT] /api/tickets/{id} - Cập nhật Ticket (thông tin / trạng thái)
+   * [PATCH] /api/support/tickets/{id}/close - Đóng Ticket
    */
-  updateTicket(id: number | string, dto: UpdateTicketDto): Observable<TicketDto> {
-    return this.http.put<TicketDto>(`${this.baseUrl}/${id}`, dto).pipe(
+  closeTicket(id: number | string): Observable<SupportTicketDto> {
+    return this.http.patch<SupportTicketDto>(`${this.baseUrl}/${id}/close`, {}).pipe(
       catchError(this.handleError)
     );
   }
 
   /**
-   * [DELETE] /api/tickets/{id} - Xóa Ticket
+   * [PATCH] /api/support/tickets/{id}/reopen - Mở lại Ticket
    */
-  deleteTicket(id: number | string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(
+  reopenTicket(id: number | string): Observable<SupportTicketDto> {
+    return this.http.patch<SupportTicketDto>(`${this.baseUrl}/${id}/reopen`, {}).pipe(
       catchError(this.handleError)
     );
   }
