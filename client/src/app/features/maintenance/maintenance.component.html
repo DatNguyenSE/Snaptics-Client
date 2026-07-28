@@ -1,0 +1,58 @@
+<div class="maint-container">
+  <!-- Background Ambient Glow -->
+  <div class="glow-bg glow-amber"></div>
+  <div class="glow-bg glow-indigo"></div>
+
+  <div class="maint-card">
+    <!-- Maintenance Graphic Illustration -->
+    <div class="maint-illustration">
+      <div class="gear-spinner">
+        <span class="material-symbols-outlined icon-gear">engineering</span>
+      </div>
+      <div class="badge-status">
+        <span class="pulse-dot"></span>
+        BẢO TRÌ HỆ THỐNG
+      </div>
+    </div>
+
+    <!-- Title & Message -->
+    <h1 class="maint-title">{{ status().title }}</h1>
+    <p class="maint-message">{{ status().message }}</p>
+
+    <!-- Estimated Completion Time Badge -->
+    @if (status().estimatedCompletionTime) {
+      <div class="est-badge">
+        <span class="material-symbols-outlined est-icon">schedule</span>
+        <div class="est-content">
+          <span class="est-label">Dự kiến hoàn tất</span>
+          <span class="est-time">{{ status().estimatedCompletionTime | date:'HH:mm - dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+    }
+
+    <!-- Actions -->
+    <div class="maint-actions">
+      <button
+        type="button"
+        class="maint-btn maint-btn--primary"
+        [disabled]="isChecking()"
+        (click)="refreshStatus(true)"
+      >
+        @if (isChecking()) {
+          <span class="spinner"></span>
+          Đang kiểm tra...
+        } @else {
+          <span class="material-symbols-outlined">refresh</span>
+          Thử lại
+        }
+      </button>
+
+      @if (status().showSupportButton) {
+        <a routerLink="/user/support" class="maint-btn maint-btn--ghost">
+          <span class="material-symbols-outlined">support_agent</span>
+          Liên hệ hỗ trợ
+        </a>
+      }
+    </div>
+  </div>
+</div>

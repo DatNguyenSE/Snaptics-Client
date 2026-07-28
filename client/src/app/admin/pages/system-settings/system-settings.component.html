@@ -3,15 +3,15 @@
     <div>
       <div class="super-badge">
         <span class="material-symbols-outlined">shield</span>
-        Super Admin Only
+        Admin Access Only
       </div>
-      <h1 class="page-title">System Settings</h1>
-      <p class="page-subtitle">Configure application limits, AI rate caps, security policies, and feature flags.</p>
+      <h1 class="page-title">Cài đặt hệ thống</h1>
+      <p class="page-subtitle">Cấu hình giới hạn ứng dụng, chế độ bảo trì, chính sách bảo mật và tính năng hệ thống.</p>
     </div>
   </div>
 
   @if (loading) {
-    <div class="loading-state">Loading settings...</div>
+    <div class="loading-state">Đang tải cài đặt hệ thống...</div>
   } @else {
     <!-- Navigation Tabs -->
     <nav class="tabs" aria-label="Settings navigation">
@@ -31,51 +31,107 @@
     <!-- General & Maintenance -->
     @if (activeTab === 'general') {
       <div class="settings-section">
+        <!-- Chế độ bảo trì -->
         <div class="card">
-          <div class="card__header">
-            <h2 class="card__title">Maintenance Mode</h2>
+          <div class="card__header card__header--flex">
+            <div>
+              <h2 class="card__title">Chế độ bảo trì hệ thống</h2>
+              <p class="card__desc">Bật chế độ bảo trì để chuyển người dùng sang trang thông báo và tạm dừng các tác vụ thông thường.</p>
+            </div>
+
+            <button type="button" class="btn btn--outline" (click)="openPreview()">
+              <span class="material-symbols-outlined">visibility</span>
+              Xem trước giao diện
+            </button>
           </div>
+
           <div class="card__body">
-            <label class="toggle-row">
+            <!-- Toggle Maintenance Mode -->
+            <label class="toggle-row highlight-toggle">
               <input type="checkbox" [(ngModel)]="settings.maintenance.maintenanceMode" class="toggle-checkbox" />
               <div>
-                <p class="toggle-title">Enable Maintenance Mode</p>
-                <p class="toggle-desc">Users will see the maintenance banner and non-admin requests will be temporarily blocked.</p>
+                <p class="toggle-title">Kích hoạt chế độ bảo trì</p>
+                <p class="toggle-desc">Tất cả tài khoản USER khi truy cập sẽ được chuyển hướng về trang bảo trì. Tài khoản ADMIN vẫn có thể truy cập trang quản trị bình thường.</p>
               </div>
             </label>
+
+            <div class="form-grid" style="margin-top: 16px;">
+              <!-- Title -->
+              <div class="form-field">
+                <label class="form-label">Tiêu đề thông báo bảo trì</label>
+                <input
+                  type="text"
+                  class="form-input"
+                  [(ngModel)]="settings.maintenance.maintenanceTitle"
+                  placeholder="Hệ thống đang được bảo trì"
+                />
+              </div>
+
+              <!-- Estimated Completion Time -->
+              <div class="form-field">
+                <label class="form-label">Thời gian dự kiến hoàn tất</label>
+                <input
+                  type="datetime-local"
+                  class="form-input"
+                  [(ngModel)]="settings.maintenance.estimatedCompletionTime"
+                />
+              </div>
+            </div>
+
+            <!-- Message Content -->
             <div class="form-field" style="margin-top: 14px;">
-              <label class="form-label">Maintenance Banner Message</label>
-              <textarea class="form-textarea" [(ngModel)]="settings.maintenance.maintenanceMessage" rows="2"></textarea>
+              <label class="form-label">Nội dung chi tiết thông báo</label>
+              <textarea
+                class="form-textarea"
+                [(ngModel)]="settings.maintenance.maintenanceMessage"
+                rows="3"
+                placeholder="Chúng tôi đang nâng cấp hệ thống để mang đến trải nghiệm tốt hơn. Vui lòng quay lại sau."
+              ></textarea>
+            </div>
+
+            <!-- Toggle Support Button -->
+            <div style="margin-top: 14px;">
+              <label class="toggle-row">
+                <input type="checkbox" [(ngModel)]="settings.maintenance.showSupportButton" class="toggle-checkbox" />
+                <div>
+                  <p class="toggle-title">Hiển thị nút Liên hệ hỗ trợ</p>
+                  <p class="toggle-desc">Cho phép người dùng bấm nút gửi yêu cầu hỗ trợ khi hệ thống đang trong thời gian bảo trì.</p>
+                </div>
+              </label>
             </div>
           </div>
+
           <div class="card__footer">
-            <button type="button" class="btn btn--primary" (click)="saveSection('maintenance', 'Maintenance')">
-              Save Maintenance Settings
+            <button type="button" class="btn btn--primary" (click)="saveSection('maintenance', 'Bảo trì')">
+              <span class="material-symbols-outlined">save</span>
+              Lưu cấu hình bảo trì
             </button>
           </div>
         </div>
 
-        <div class="card" style="margin-top: 16px;">
+        <!-- Storage Limits -->
+        <div class="card" style="margin-top: 20px;">
           <div class="card__header">
-            <h2 class="card__title">Storage Limits</h2>
+            <h2 class="card__title">Giới hạn lưu trữ</h2>
           </div>
           <div class="card__body form-grid">
             <div class="form-field">
-              <label class="form-label">Max File Upload Size (MB)</label>
+              <label class="form-label">Dung lượng tải lên tối đa (MB)</label>
               <input type="number" class="form-input" [(ngModel)]="settings.storage.maxUploadSizeMb" />
             </div>
             <div class="form-field">
-              <label class="form-label">Receipt Retention (Days)</label>
+              <label class="form-label">Thời gian lưu trữ hóa đơn (Ngày)</label>
               <input type="number" class="form-input" [(ngModel)]="settings.storage.receiptRetentionDays" />
             </div>
             <div class="form-field">
-              <label class="form-label">Storage Warning Threshold (GB)</label>
+              <label class="form-label">Ngưỡng cảnh báo lưu trữ (GB)</label>
               <input type="number" class="form-input" [(ngModel)]="settings.storage.storageWarningThresholdGb" />
             </div>
           </div>
           <div class="card__footer">
-            <button type="button" class="btn btn--primary" (click)="saveSection('storage', 'Storage')">
-              Save Storage Settings
+            <button type="button" class="btn btn--primary" (click)="saveSection('storage', 'Lưu trữ')">
+              <span class="material-symbols-outlined">save</span>
+              Lưu cài đặt lưu trữ
             </button>
           </div>
         </div>
@@ -87,11 +143,11 @@
       <div class="settings-section">
         <div class="card">
           <div class="card__header">
-            <h2 class="card__title">AI &amp; OCR Engine Rate Limits</h2>
+            <h2 class="card__title">Giới hạn AI &amp; OCR Engine</h2>
           </div>
           <div class="card__body form-grid">
             <div class="form-field">
-              <label class="form-label">Active AI Model</label>
+              <label class="form-label">Mô hình AI đang sử dụng</label>
               <select class="form-select" [(ngModel)]="settings.ai.aiModelVersion">
                 <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
                 <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
@@ -99,35 +155,36 @@
               </select>
             </div>
             <div class="form-field">
-              <label class="form-label">Max Daily AI Requests per User</label>
+              <label class="form-label">Giới hạn request AI / ngày / user</label>
               <input type="number" class="form-input" [(ngModel)]="settings.ai.dailyAiLimit" />
             </div>
             <div class="form-field">
-              <label class="form-label">Max Scans per User per Month</label>
+              <label class="form-label">Giới hạn Scan hóa đơn / tháng / user</label>
               <input type="number" class="form-input" [(ngModel)]="settings.ai.dailyScanLimit" />
             </div>
             <div class="form-field">
-              <label class="form-label">Min Scan Confidence Threshold (%)</label>
+              <label class="form-label">Độ chính xác tối thiểu Scan (%)</label>
               <input type="number" class="form-input" [(ngModel)]="settings.ai.confidenceThreshold" />
             </div>
           </div>
           <div class="card__body toggle-list">
             <label class="toggle-row">
               <input type="checkbox" [(ngModel)]="settings.ai.enableSnapticsAi" class="toggle-checkbox" />
-              <div><p class="toggle-title">Enable Snaptics AI Chat</p></div>
+              <div><p class="toggle-title">Bật Snaptics AI Chat</p></div>
             </label>
             <label class="toggle-row">
               <input type="checkbox" [(ngModel)]="settings.ai.enableReceiptScan" class="toggle-checkbox" />
-              <div><p class="toggle-title">Enable Receipt OCR Scan</p></div>
+              <div><p class="toggle-title">Bật OCR Scan Hóa Đơn</p></div>
             </label>
             <label class="toggle-row">
               <input type="checkbox" [(ngModel)]="settings.ai.enableProductScan" class="toggle-checkbox" />
-              <div><p class="toggle-title">Enable Barcode Product Scan</p></div>
+              <div><p class="toggle-title">Bật Scan Barcode Sản Phẩm</p></div>
             </label>
           </div>
           <div class="card__footer">
             <button type="button" class="btn btn--primary" (click)="saveSection('ai', 'AI Engine')">
-              Save AI Limits
+              <span class="material-symbols-outlined">save</span>
+              Lưu cài đặt AI
             </button>
           </div>
         </div>
@@ -139,38 +196,26 @@
       <div class="settings-section">
         <div class="card">
           <div class="card__header">
-            <h2 class="card__title">Security Policies</h2>
+            <h2 class="card__title">Chính sách bảo mật</h2>
           </div>
           <div class="card__body form-grid">
             <div class="form-field">
-              <label class="form-label">Max Failed Logins</label>
+              <label class="form-label">Số lần đăng nhập sai tối đa</label>
               <input type="number" class="form-input" [(ngModel)]="settings.security.maxLoginAttempts" />
             </div>
             <div class="form-field">
-              <label class="form-label">User Session Duration (Minutes)</label>
+              <label class="form-label">Thời hạn phiên đăng nhập User (Phút)</label>
               <input type="number" class="form-input" [(ngModel)]="settings.security.sessionDurationMinutes" />
             </div>
             <div class="form-field">
-              <label class="form-label">Admin Session Duration (Minutes)</label>
+              <label class="form-label">Thời hạn phiên đăng nhập Admin (Phút)</label>
               <input type="number" class="form-input" [(ngModel)]="settings.security.adminSessionDurationMinutes" />
             </div>
-            <div class="form-field">
-              <label class="form-label">Sensitive Access Expiration (Minutes)</label>
-              <input type="number" class="form-input" [(ngModel)]="settings.security.sensitiveAccessDurationMinutes" />
-            </div>
-          </div>
-          <div class="card__body">
-            <label class="toggle-row">
-              <input type="checkbox" [(ngModel)]="settings.security.requireAdminTwoFactor" class="toggle-checkbox" />
-              <div>
-                <p class="toggle-title">Require 2FA for Admin Accounts</p>
-                <p class="toggle-desc">Enforce two-factor authentication for all ADMIN users.</p>
-              </div>
-            </label>
           </div>
           <div class="card__footer">
-            <button type="button" class="btn btn--primary" (click)="saveSection('security', 'Security')">
-              Save Security Settings
+            <button type="button" class="btn btn--primary" (click)="saveSection('security', 'Bảo mật')">
+              <span class="material-symbols-outlined">save</span>
+              Lưu cài đặt bảo mật
             </button>
           </div>
         </div>
@@ -182,29 +227,22 @@
       <div class="settings-section">
         <div class="card">
           <div class="card__header">
-            <h2 class="card__title">Application Feature Flags</h2>
+            <h2 class="card__title">Feature Flags hệ thống</h2>
           </div>
           <div class="card__body toggle-list">
             <label class="toggle-row">
               <input type="checkbox" [(ngModel)]="settings.maintenance.featureFlags['enableBudgetV2']" class="toggle-checkbox" />
-              <div><p class="toggle-title">Budget Management V2</p><p class="toggle-desc">New budget calculation engine and alert thresholds.</p></div>
+              <div><p class="toggle-title">Quản lý Ngân sách V2</p></div>
             </label>
             <label class="toggle-row">
               <input type="checkbox" [(ngModel)]="settings.maintenance.featureFlags['enableAiInsights']" class="toggle-checkbox" />
-              <div><p class="toggle-title">AI Financial Insights</p><p class="toggle-desc">Smart spending insights and anomaly detection.</p></div>
-            </label>
-            <label class="toggle-row">
-              <input type="checkbox" [(ngModel)]="settings.maintenance.featureFlags['enableReceiptHistory']" class="toggle-checkbox" />
-              <div><p class="toggle-title">Receipt Image Archival</p><p class="toggle-desc">Long term cloud storage for receipt images.</p></div>
-            </label>
-            <label class="toggle-row">
-              <input type="checkbox" [(ngModel)]="settings.maintenance.featureFlags['enableMultiCurrency']" class="toggle-checkbox" />
-              <div><p class="toggle-title">Multi-currency Support</p><p class="toggle-desc">Allow transaction entry in USD, EUR, JPY.</p></div>
+              <div><p class="toggle-title">Phân tích tài chính AI Insights</p></div>
             </label>
           </div>
           <div class="card__footer">
             <button type="button" class="btn btn--primary" (click)="saveSection('maintenance', 'Feature Flags')">
-              Save Feature Flags
+              <span class="material-symbols-outlined">save</span>
+              Lưu Feature Flags
             </button>
           </div>
         </div>
@@ -213,6 +251,73 @@
   }
 </div>
 
+<!-- Live Preview Modal -->
+@if (isPreviewOpen) {
+  <div class="preview-backdrop" (click)="closePreview()">
+    <div class="preview-modal" (click)="$event.stopPropagation()">
+      <div class="preview-modal__header">
+        <div class="preview-modal__title">
+          <span class="material-symbols-outlined">preview</span>
+          Xem trước giao diện Trang Bảo Trì
+        </div>
+        <button type="button" class="preview-modal__close" (click)="closePreview()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="preview-modal__body">
+        <div class="maint-card-preview">
+          <div class="gear-spinner-preview">
+            <span class="material-symbols-outlined icon-gear">engineering</span>
+          </div>
+
+          <div class="badge-status-preview">
+            <span class="pulse-dot"></span>
+            BẢO TRÌ HỆ THỐNG
+          </div>
+
+          <h2 class="maint-title-preview">
+            {{ settings.maintenance.maintenanceTitle || 'Hệ thống đang được bảo trì' }}
+          </h2>
+
+          <p class="maint-message-preview">
+            {{ settings.maintenance.maintenanceMessage || 'Chúng tôi đang nâng cấp hệ thống để mang đến trải nghiệm tốt hơn. Vui lòng quay lại sau.' }}
+          </p>
+
+          @if (settings.maintenance.estimatedCompletionTime) {
+            <div class="est-badge-preview">
+              <span class="material-symbols-outlined">schedule</span>
+              <div>
+                <span class="est-label-prev">Dự kiến hoàn tất</span>
+                <span class="est-time-prev">{{ settings.maintenance.estimatedCompletionTime | date:'HH:mm - dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          }
+
+          <div class="maint-actions-preview">
+            <button type="button" class="btn-prev btn-prev--primary">
+              <span class="material-symbols-outlined">refresh</span>
+              Thử lại
+            </button>
+
+            @if (settings.maintenance.showSupportButton) {
+              <button type="button" class="btn-prev btn-prev--ghost">
+                <span class="material-symbols-outlined">support_agent</span>
+                Liên hệ hỗ trợ
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-modal__footer">
+        <button type="button" class="btn btn--outline" (click)="closePreview()">Đóng xem trước</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Confirmation Modal -->
 @if (confirmModal.open) {
   <app-confirmation-modal
     [config]="confirmModal.config"

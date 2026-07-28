@@ -197,7 +197,10 @@ export interface SecuritySettings {
 
 export interface MaintenanceSettings {
   maintenanceMode: boolean;
+  maintenanceTitle?: string;
   maintenanceMessage: string;
+  estimatedCompletionTime?: string | null;
+  showSupportButton?: boolean;
   scheduledMaintenance?: string;
   featureFlags: Record<string, boolean>;
 }

@@ -59,6 +59,11 @@ export const adminRoutes: Routes = [
         loadComponent: () =>
           import('./pages/system-settings/system-settings.component').then((m) => m.SystemSettingsComponent),
       },
+      {
+        path: '**',
+        loadComponent: () =>
+          import('../features/not-found/not-found.component').then((m) => m.NotFoundComponent),
+      },
     ],
   },
 ];

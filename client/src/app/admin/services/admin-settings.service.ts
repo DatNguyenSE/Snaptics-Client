@@ -29,7 +29,10 @@ const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   },
   maintenance: {
     maintenanceMode: false,
-    maintenanceMessage: 'Hệ thống đang bảo trì. Vui lòng quay lại sau.',
+    maintenanceTitle: 'Hệ thống đang được bảo trì',
+    maintenanceMessage: 'Chúng tôi đang nâng cấp hệ thống để mang đến trải nghiệm tốt hơn. Vui lòng quay lại sau.',
+    estimatedCompletionTime: null,
+    showSupportButton: true,
     scheduledMaintenance: undefined,
     featureFlags: {
       enableBudgetV2: true,

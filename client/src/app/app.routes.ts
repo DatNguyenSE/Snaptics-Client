@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/_guard/auth-guard';
 import { adminGuard } from './admin/guards/admin.guard';
+import { maintenanceGuard } from './core/guards/maintenance.guard';
 import { ForgotPassword } from './features/account/forgot-password/forgot-password';
 import { Login } from './features/account/login/login';
 import { Register } from './features/account/register/register';
@@ -17,6 +18,7 @@ export const routes: Routes = [
   {
     path: 'landing',
     component: LandingPage,
+    canActivate: [maintenanceGuard],
   },
   {
     path: 'Trang-chu',
@@ -37,6 +39,12 @@ export const routes: Routes = [
     path: 'home',
     redirectTo: 'landing',
     pathMatch: 'full',
+  },
+  {
+    path: 'maintenance',
+    canActivate: [maintenanceGuard],
+    loadComponent: () =>
+      import('./features/maintenance/maintenance.component').then((m) => m.MaintenanceComponent),
   },
   {
     path: 'dang-nhap',
@@ -72,7 +80,7 @@ export const routes: Routes = [
     path: 'user',
     component: UserPage,
     runGuardsAndResolvers: 'always',
-    canActivate: [authGuard],
+    canActivate: [maintenanceGuard, authGuard],
     children: [
       {
         path: 'dashboard',
@@ -162,16 +170,20 @@ export const routes: Routes = [
     path: 'settings',
     component: SettingsPage,
     runGuardsAndResolvers: 'always',
-    canActivate: [authGuard],
+    canActivate: [maintenanceGuard, authGuard],
   },
   { path: 'login', component: Login },
   { path: 'register', component: Register },
   { path: 'forgot-password', component: ForgotPassword },
 
-
   {
     path: 'admin',
     canActivate: [adminGuard],
     loadChildren: () => import('./admin/admin.routes').then((m) => m.adminRoutes),
+  },
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./features/not-found/not-found.component').then((m) => m.NotFoundComponent),
   },
 ];
