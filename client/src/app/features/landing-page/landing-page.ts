@@ -1,11 +1,12 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, HostListener, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { LandingDashboardPreviewComponent } from './landing-dashboard-preview/landing-dashboard-preview';
 
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LandingDashboardPreviewComponent],
   templateUrl: './landing-page.html',
   styleUrl: './landing-page.host.css',
 })

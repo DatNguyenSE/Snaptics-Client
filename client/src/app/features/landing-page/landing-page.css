@@ -702,8 +702,14 @@
 }
 
 .landing-dashboard__body {
-  display: flex;
+  display: block;
+  width: 100%;
   min-height: 0;
+}
+
+.landing-dashboard__body app-landing-dashboard-preview {
+  display: block;
+  width: 100%;
 }
 
 .landing-dashboard__sidebar {

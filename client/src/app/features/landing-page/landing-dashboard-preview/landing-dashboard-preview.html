@@ -1,0 +1,203 @@
+<div class="demo-dashboard">
+  <!-- ── SIDEBAR ────────────────────────────────────────── -->
+  <aside class="demo-sidebar">
+    <div class="demo-sidebar__brand">
+      <span class="demo-sidebar__brand-name">Snaptics</span>
+      <span class="demo-sidebar__brand-badge">AI</span>
+    </div>
+
+    <nav class="demo-sidebar__nav">
+      @for (item of navItems; track item.id) {
+        <div class="demo-sidebar__item" [class.demo-sidebar__item--active]="item.active">
+          @if (item.isScanItem) {
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="demo-scan-svg">
+              <path d="M8 5H6C5.44772 5 5 5.44772 5 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M16 5H18C18.5523 5 19 5.44772 19 6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 19H6C5.44772 19 5 18.5523 5 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M16 19H18C18.5523 19 19 18.5523 19 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          } @else {
+            <span class="material-symbols-outlined">{{ item.icon }}</span>
+          }
+          <span class="demo-sidebar__item-label">{{ item.label }}</span>
+          @if (item.badge) {
+            <span class="demo-sidebar__item-badge">{{ item.badge }}</span>
+          }
+        </div>
+      }
+    </nav>
+
+    <div class="demo-sidebar__footer">
+      <div class="demo-sidebar__account">
+        <div class="demo-sidebar__avatar">U</div>
+        <div class="demo-sidebar__account-info">
+          <span class="demo-sidebar__account-name">User</span>
+        </div>
+        <span class="material-symbols-outlined demo-sidebar__account-chevron">expand_more</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CONTENT ───────────────────────────────────── -->
+  <main class="demo-main">
+    <!-- Header -->
+    <header class="demo-header">
+      <div class="demo-header__mascot">
+        <video 
+          src="/Roni_AI/Roni_hi_video.mp4" 
+          [autoplay]="true" 
+          [loop]="true" 
+          [muted]="true" 
+          playsinline 
+          class="demo-header__mascot-video"
+        ></video>
+      </div>
+
+      <div class="demo-header__greeting">
+        <h3>Chào buổi sáng, User!</h3>
+        <p>Dậy sớm để thành công... nhưng đừng quên ghi chép lại tách cà phê sáng nhất ☕</p>
+      </div>
+
+      <div class="demo-header__actions">
+        <div class="demo-header__notification">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="demo-header__notification-badge">4</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- AI Search Bar -->
+    <div class="demo-ai-search">
+      <div class="demo-ai-search__box">
+        <span class="material-symbols-outlined demo-ai-search__icon">auto_awesome</span>
+        <input 
+          type="text" 
+          readonly 
+          placeholder="Bạn muốn tìm gì? Hỏi mình về chi tiêu, ngân sách..." 
+          class="demo-ai-search__input"
+        />
+        <button type="button" class="demo-ai-search__mic">
+          <span class="material-symbols-outlined">mic</span>
+        </button>
+        <button type="button" class="demo-ai-search__submit">
+          <span class="material-symbols-outlined">arrow_upward</span>
+        </button>
+      </div>
+      <div class="demo-ai-search__chips">
+        @for (chip of suggestions; track chip) {
+          <span class="demo-ai-chip">{{ chip }}</span>
+        }
+      </div>
+    </div>
+
+    <!-- Summary Stat Cards -->
+    <div class="demo-summary-grid">
+      <!-- Total Spent Card -->
+      <article class="demo-stat-card demo-stat-card--primary">
+        <div class="demo-stat-card__top">
+          <span class="demo-stat-card__label demo-stat-card__label--light">Tổng chi</span>
+          <div class="demo-stat-card__tabs">
+            <span class="demo-stat-card__tab demo-stat-card__tab--active">Tuần</span>
+            <span class="demo-stat-card__tab">Tháng</span>
+            <span class="demo-stat-card__tab">Năm</span>
+          </div>
+        </div>
+        <div class="demo-stat-card__amount">0đ</div>
+        <div class="demo-stat-card__trend">
+          <span class="material-symbols-outlined">trending_down</span>
+          <span>Tăng 0% so với tuần trước</span>
+        </div>
+      </article>
+
+      <!-- Default Budget Card -->
+      <article class="demo-stat-card">
+        <div class="demo-stat-card__top">
+          <div class="demo-stat-card__wallet-header">
+            <span class="material-symbols-outlined demo-stat-card__wallet-icon">account_balance_wallet</span>
+            <span class="demo-stat-card__label">Mặc định</span>
+          </div>
+        </div>
+        <div class="demo-stat-card__amount demo-stat-card__amount--accent">0đ</div>
+        <div class="demo-progress">
+          <div class="demo-progress__row">
+            <span>Đã dùng NaN%</span>
+            <span>0đ</span>
+          </div>
+          <div class="demo-progress__track">
+            <div class="demo-progress__value" style="width: 0%;"></div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Quick Actions -->
+    <section class="demo-section">
+      <div class="demo-section__header">
+        <span class="demo-eyebrow">THAO TÁC NHANH</span>
+        <span class="demo-expand-btn">
+          Mở rộng
+          <span class="material-symbols-outlined">expand_more</span>
+        </span>
+      </div>
+      <div class="demo-quick-actions">
+        @for (action of quickActions; track action.label) {
+          <div class="demo-quick-action">
+            <div class="demo-quick-action__icon" [style.color]="action.color">
+              <span class="material-symbols-outlined">{{ action.icon }}</span>
+            </div>
+            <span class="demo-quick-action__label">{{ action.label }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Analytics -->
+    <section class="demo-section">
+      <div class="demo-section__header">
+        <span class="demo-eyebrow">PHÂN TÍCH</span>
+      </div>
+      <div class="demo-kpi-grid">
+        @for (kpi of kpiCards; track kpi.label) {
+          <article class="demo-kpi-card" [ngClass]="kpi.colorClass">
+            <div class="demo-kpi-card__top">
+              <span class="demo-kpi-card__icon">
+                <span class="material-symbols-outlined">{{ kpi.icon }}</span>
+              </span>
+              <span class="demo-kpi-card__label">{{ kpi.label }}</span>
+            </div>
+            <div class="demo-kpi-card__value">{{ kpi.value }}</div>
+            <div class="demo-kpi-card__sub">{{ kpi.subLabel }}</div>
+          </article>
+        }
+      </div>
+
+      <!-- Chart Card -->
+      <div class="demo-chart-card">
+        <div class="demo-chart-card__header">
+          <div class="demo-chart-card__title">
+            <span class="material-symbols-outlined">bar_chart</span>
+            Chi tiêu theo tuần
+          </div>
+          <span class="demo-chart-card__sub">Tháng này</span>
+        </div>
+        <div class="demo-chart-card__empty">
+          <span class="material-symbols-outlined demo-chart-card__empty-icon">bar_chart</span>
+          <p>Chưa có dữ liệu tháng này</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Support Banner -->
+    <div class="demo-support-banner">
+      <div class="demo-support-banner__icon">
+        <span class="material-symbols-outlined">support_agent</span>
+      </div>
+      <div class="demo-support-banner__text">
+        <h4>Bạn cần hỗ trợ?</h4>
+        <p>Gửi câu hỏi hoặc góp ý, đội ngũ Snaptics sẽ hỗ trợ bạn.</p>
+      </div>
+      <span class="material-symbols-outlined demo-support-banner__arrow">arrow_forward</span>
+    </div>
+  </main>
+</div>
