@@ -173,6 +173,43 @@ html.dark-theme .badge--scheduled {
 }
 .badge--user .badge__dot { background: #94a3b8; }
 
+/* Ticket Specific Variants */
+.badge--processing {
+  background: rgba(14, 165, 233, 0.1);
+  color: #0284c7;
+}
+.badge--processing .badge__dot { background: #0ea5e9; }
+
+.badge--awaiting_user {
+  background: rgba(192, 38, 211, 0.1);
+  color: #c026d3;
+}
+.badge--awaiting_user .badge__dot { background: #d946ef; }
+
+.badge--resolved {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+.badge--resolved .badge__dot { background: #10b981; }
+
+.badge--closed {
+  background: rgba(100, 116, 139, 0.1);
+  color: #64748b;
+}
+.badge--closed .badge__dot { background: #94a3b8; }
+
+.badge--normal {
+  background: rgba(91, 123, 250, 0.1);
+  color: #4f46e5;
+}
+.badge--normal .badge__dot { background: #5b7bfa; }
+
+.badge--urgent {
+  background: rgba(225, 29, 72, 0.15);
+  color: #e11d48;
+}
+.badge--urgent .badge__dot { background: #f43f5e; animation: pulse 1s infinite; }
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }

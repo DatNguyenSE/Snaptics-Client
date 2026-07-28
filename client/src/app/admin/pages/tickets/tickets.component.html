@@ -1,80 +1,78 @@
-<div class="tickets-container">
+<div class="tickets-page">
   <!-- Page Header -->
   <div class="page-header">
     <div>
       <h1 class="page-title">Quản lý Support Tickets</h1>
       <p class="page-subtitle">Xem, phân công, cập nhật trạng thái và phản hồi yêu cầu hỗ trợ người dùng</p>
     </div>
-    <button class="btn btn-outline" (click)="loadTickets()">
-      <span class="material-icons-outlined">refresh</span> Làm mới
-    </button>
-  </div>
-
-  <!-- Filters Toolbar -->
-  <div class="filters-card">
-    <div class="filter-row">
-      <div class="search-box">
-        <span class="material-icons-outlined search-icon">search</span>
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Tìm theo tiêu đề, nội dung, ID..."
-          [(ngModel)]="searchQuery"
-          (keyup.enter)="onFilterChange()"
-        />
-      </div>
-
-      <select class="form-select" [(ngModel)]="selectedStatus" (change)="onFilterChange()">
-        @for (opt of statusOptions; track opt.label) {
-          <option [ngValue]="opt.value">{{ opt.label }}</option>
-        }
-      </select>
-
-      <select class="form-select" [(ngModel)]="selectedPriority" (change)="onFilterChange()">
-        @for (opt of priorityOptions; track opt.label) {
-          <option [ngValue]="opt.value">{{ opt.label }}</option>
-        }
-      </select>
-
-      <select class="form-select" [(ngModel)]="selectedCategory" (change)="onFilterChange()">
-        @for (opt of categoryOptions; track opt.label) {
-          <option [ngValue]="opt.value">{{ opt.label }}</option>
-        }
-      </select>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn--ghost" (click)="loadTickets()">
+        <span class="material-symbols-outlined">refresh</span>
+        Làm mới
+      </button>
     </div>
   </div>
 
-  <!-- Tickets Table -->
+  <!-- Filters Toolbar -->
+  <div class="filter-bar">
+    <div class="filter-search">
+      <span class="material-symbols-outlined filter-search__icon">search</span>
+      <input
+        type="search"
+        class="filter-search__input"
+        placeholder="Tìm theo tiêu đề, nội dung, ID..."
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="onFilterChange()"
+      />
+    </div>
+
+    <select class="filter-select" [(ngModel)]="selectedStatus" (change)="onFilterChange()">
+      @for (opt of statusOptions; track opt.label) {
+        <option [ngValue]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+
+    <select class="filter-select" [(ngModel)]="selectedPriority" (change)="onFilterChange()">
+      @for (opt of priorityOptions; track opt.label) {
+        <option [ngValue]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+
+    <select class="filter-select" [(ngModel)]="selectedCategory" (change)="onFilterChange()">
+      @for (opt of categoryOptions; track opt.label) {
+        <option [ngValue]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Tickets Table Card -->
   <div class="table-card">
     @if (isLoading()) {
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Đang tải danh sách ticket từ máy chủ...</p>
-      </div>
+      <app-loading-skeleton [count]="8" [showAvatar]="false" />
     } @else if (tickets().length === 0) {
-      <div class="empty-state">
-        <span class="material-icons-outlined empty-icon">confirmation_number</span>
-        <h3>Không có ticket nào</h3>
-        <p>Không tìm thấy yêu cầu hỗ trợ nào phù hợp với bộ lọc hiện tại.</p>
-      </div>
+      <app-empty-state
+        icon="confirmation_number"
+        title="Không có ticket nào"
+        description="Không tìm thấy yêu cầu hỗ trợ nào phù hợp với bộ lọc hiện tại."
+      />
     } @else {
-      <div class="table-wrapper">
+      <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th>ID / Code</th>
-              <th>Tiêu đề</th>
+              <th>ID / Mã Code</th>
+              <th>Tiêu đề & Người gửi</th>
               <th>Phân loại</th>
               <th>Trạng thái</th>
               <th>Độ ưu tiên</th>
               <th>Người phụ trách</th>
               <th>Ngày tạo</th>
-              <th>Thao tác</th>
+              <th class="th-actions">Thao tác</th>
             </tr>
           </thead>
           <tbody>
             @for (ticket of tickets(); track ticket.id) {
-              <tr [class.highlighted]="selectedTicket()?.id === ticket.id">
+              <tr class="data-table__row" [class.highlighted]="selectedTicket()?.id === ticket.id" (click)="viewDetail(ticket.id)">
                 <td class="cell-id">
                   <strong>#{{ ticket.id }}</strong>
                   @if (ticket.ticketCode) {
@@ -83,28 +81,35 @@
                 </td>
                 <td class="cell-subject">
                   <div class="ticket-subject">{{ ticket.subject || ticket.title }}</div>
-                  <div class="ticket-user">{{ ticket.userName || ticket.userEmail || 'Khách hàng' }}</div>
+                  <div class="ticket-user">
+                    <span class="material-symbols-outlined icon-user">person</span>
+                    {{ ticket.userName || ticket.userEmail || 'Khách hàng' }}
+                  </div>
                 </td>
                 <td>
                   <span class="category-chip">{{ getCategoryLabel(ticket.category) }}</span>
                 </td>
                 <td>
-                  <span class="status-badge" [ngClass]="'status--' + getStatusLabel(ticket.status)">
-                    {{ getStatusLabel(ticket.status) }}
+                  <app-status-badge
+                    [variant]="getStatusVariant(ticket.status)"
+                    [label]="getStatusDisplay(ticket.status)"
+                  />
+                </td>
+                <td>
+                  <app-status-badge
+                    [variant]="getPriorityVariant(ticket.priority)"
+                    [label]="getPriorityDisplay(ticket.priority)"
+                  />
+                </td>
+                <td>
+                  <span class="assignee-text">
+                    {{ ticket.assignedToName || ticket.assignedToId || 'Chưa gán' }}
                   </span>
                 </td>
+                <td class="td-muted">{{ formatDate(ticket.createdAt) }}</td>
                 <td>
-                  <span class="priority-badge" [ngClass]="'prio--' + getPriorityLabel(ticket.priority)">
-                    {{ getPriorityLabel(ticket.priority) }}
-                  </span>
-                </td>
-                <td>
-                  {{ ticket.assignedToName || ticket.assignedToId || 'Chưa gán' }}
-                </td>
-                <td>{{ formatDate(ticket.createdAt) }}</td>
-                <td>
-                  <button class="btn btn-sm btn-primary" (click)="viewDetail(ticket.id)">
-                    Chi tiết & Xử lý
+                  <button type="button" class="action-btn" title="Chi tiết & Xử lý" (click)="viewDetail(ticket.id); $event.stopPropagation()">
+                    <span class="material-symbols-outlined">visibility</span>
                   </button>
                 </td>
               </tr>
@@ -114,139 +119,170 @@
       </div>
 
       <div class="table-footer">
-        <span>Tổng cộng: {{ totalCount() }} ticket</span>
+        <app-pagination
+          [page]="currentPage()"
+          [total]="totalCount()"
+          [pageSize]="pageSize()"
+          (pageChange)="onPageChange($event)"
+        />
       </div>
     }
   </div>
 </div>
 
 <!-- Admin Detail Drawer -->
-@if (isDrawerOpen()) {
-  <div class="drawer-backdrop" (click)="closeDrawer()"></div>
-  <div class="drawer">
-    <div class="drawer-header">
-      <div>
-        <h3>Ticket #{{ selectedTicket()?.id }}</h3>
-        <p class="drawer-subtitle">{{ selectedTicket()?.subject || selectedTicket()?.title }}</p>
-      </div>
-      <button class="btn-icon" (click)="closeDrawer()">
-        <span class="material-icons-outlined">close</span>
-      </button>
+<app-admin-drawer
+  [open]="isDrawerOpen()"
+  [title]="selectedTicket() ? 'Ticket #' + selectedTicket()?.id : 'Chi tiết Ticket'"
+  [subtitle]="selectedTicket()?.subject || selectedTicket()?.title"
+  (closed)="closeDrawer()"
+>
+  @if (isDetailLoading()) {
+    <div class="drawer-loading">
+      <div class="spinner"></div>
+      <p>Đang tải chi tiết ticket...</p>
     </div>
-
-    @if (isDetailLoading()) {
-      <div class="drawer-loading">
-        <div class="spinner"></div>
-        <p>Đang tải chi tiết...</p>
-      </div>
-    } @else if (selectedTicket(); as detail) {
-      <div class="drawer-content">
-        <!-- Quick Control Bar -->
-        <div class="control-panel">
-          <div class="control-group">
-            <label>Phân công Admin/Staff:</label>
-            <div class="input-action-group">
-              <input
-                type="text"
-                class="form-control form-control-sm"
-                placeholder="Nhập ID Admin/Staff"
-                [(ngModel)]="assignedToInput"
-              />
-              <button class="btn btn-sm btn-outline" (click)="assignTicket()" [disabled]="isSubmitting()">
-                Lưu Gán
-              </button>
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label>Cập nhật Trạng thái:</label>
-            <div class="button-grid">
-              <button class="btn btn-xs" [class.btn-active]="detail.status === 0" (click)="changeStatus(0)">Pending</button>
-              <button class="btn btn-xs" [class.btn-active]="detail.status === 1" (click)="changeStatus(1)">In Progress</button>
-              <button class="btn btn-xs" [class.btn-active]="detail.status === 2" (click)="changeStatus(2)">Waiting User</button>
-              <button class="btn btn-xs" [class.btn-active]="detail.status === 3" (click)="changeStatus(3)">Resolved</button>
-              <button class="btn btn-xs" [class.btn-active]="detail.status === 4" (click)="changeStatus(4)">Closed</button>
-            </div>
-          </div>
-
-          <div class="control-group">
-            <label>Cập nhật Độ ưu tiên:</label>
-            <div class="button-grid">
-              <button class="btn btn-xs" [class.btn-active]="detail.priority === 0" (click)="changePriority(0)">Low</button>
-              <button class="btn btn-xs" [class.btn-active]="detail.priority === 1" (click)="changePriority(1)">Normal</button>
-              <button class="btn btn-xs" [class.btn-active]="detail.priority === 2" (click)="changePriority(2)">High</button>
-              <button class="btn btn-xs" [class.btn-active]="detail.priority === 3" (click)="changePriority(3)">Urgent</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Ticket Description & Attachments -->
-        <div class="detail-section">
-          <h4>Mô tả ban đầu:</h4>
-          <p class="description-text">{{ detail.description || 'Không có mô tả chi tiết.' }}</p>
-
-          @if (detail.attachments && detail.attachments.length > 0) {
-            <div class="attachments-box">
-              <h5>Tệp đính kèm:</h5>
-              <ul>
-                @for (att of detail.attachments; track att.url) {
-                  <li>
-                    <a [href]="att.fileUrl || att.url" target="_blank">{{ att.fileName || att.name || 'File đính kèm' }}</a>
-                  </li>
-                }
-              </ul>
-            </div>
-          }
-        </div>
-
-        <!-- Conversation History -->
-        <div class="chat-section">
-          <h4>Lịch sử phản hồi:</h4>
-
-          <div class="messages-list">
-            @if (!detail.messages || detail.messages.length === 0) {
-              <p class="no-messages">Chưa có tin nhắn nào trong hội thoại này.</p>
-            } @else {
-              @for (msg of detail.messages; track msg.id) {
-                <div class="chat-bubble" [class.chat-admin]="msg.isFromAdmin" [class.chat-user]="!msg.isFromAdmin">
-                  <div class="chat-header">
-                    <strong>{{ msg.senderName || (msg.isFromAdmin ? 'Admin Support' : 'Người dùng') }}</strong>
-                    <span class="chat-time">{{ formatDate(msg.createdAt) }}</span>
-                  </div>
-                  <div class="chat-body">{{ msg.content || msg.message }}</div>
-                  @if (msg.attachmentUrl) {
-                    <div class="chat-attachment">
-                      <a [href]="msg.attachmentUrl" target="_blank">🔗 Xem file đính kèm</a>
-                    </div>
-                  }
-                </div>
-              }
-            }
-          </div>
-        </div>
-
-        <!-- Admin Reply Form -->
-        <div class="reply-form-section">
-          <h4>Gửi tin nhắn phản hồi cho User:</h4>
-          <textarea
-            class="form-control"
-            rows="3"
-            placeholder="Nhập nội dung phản hồi từ Admin..."
-            [(ngModel)]="replyContent"
-          ></textarea>
-
-          <div class="reply-actions">
-            <input type="file" (change)="onReplyFileSelected($event)" id="admin-reply-file" />
-            <button
-              class="btn btn-primary"
-              (click)="sendAdminReply()"
-              [disabled]="isSubmitting() || (!replyContent() && !selectedReplyFile)"
-            >
-              Gửi phản hồi
+  } @else if (selectedTicket(); as detail) {
+    <div class="drawer-body-content">
+      <!-- Quick Control Panel -->
+      <div class="control-panel">
+        <div class="control-group">
+          <label class="control-label">
+            <span class="material-symbols-outlined">person_add</span>
+            Phân công Admin/Staff:
+          </label>
+          <div class="input-action-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Nhập ID / Tên Admin"
+              [(ngModel)]="assignedToInput"
+            />
+            <button type="button" class="btn btn--primary btn--sm" (click)="assignTicket()" [disabled]="isSubmitting()">
+              Lưu gán
             </button>
           </div>
         </div>
+
+        <div class="control-group">
+          <label class="control-label">
+            <span class="material-symbols-outlined">flag</span>
+            Cập nhật Trạng thái:
+          </label>
+          <div class="button-grid">
+            <button type="button" class="status-chip-btn" [class.active]="detail.status === 0" (click)="changeStatus(0)">Pending</button>
+            <button type="button" class="status-chip-btn" [class.active]="detail.status === 1" (click)="changeStatus(1)">In Progress</button>
+            <button type="button" class="status-chip-btn" [class.active]="detail.status === 2" (click)="changeStatus(2)">Waiting User</button>
+            <button type="button" class="status-chip-btn" [class.active]="detail.status === 3" (click)="changeStatus(3)">Resolved</button>
+            <button type="button" class="status-chip-btn" [class.active]="detail.status === 4" (click)="changeStatus(4)">Closed</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">
+            <span class="material-symbols-outlined">priority_high</span>
+            Cập nhật Độ ưu tiên:
+          </label>
+          <div class="button-grid">
+            <button type="button" class="prio-chip-btn prio--low" [class.active]="detail.priority === 0" (click)="changePriority(0)">Low</button>
+            <button type="button" class="prio-chip-btn prio--normal" [class.active]="detail.priority === 1" (click)="changePriority(1)">Normal</button>
+            <button type="button" class="prio-chip-btn prio--high" [class.active]="detail.priority === 2" (click)="changePriority(2)">High</button>
+            <button type="button" class="prio-chip-btn prio--urgent" [class.active]="detail.priority === 3" (click)="changePriority(3)">Urgent</button>
+          </div>
+        </div>
       </div>
-    }
-  </div>
-}
+
+      <!-- Ticket Description -->
+      <div class="detail-section">
+        <h4 class="section-title">
+          <span class="material-symbols-outlined">description</span>
+          Mô tả ban đầu:
+        </h4>
+        <div class="description-box">
+          <p>{{ detail.description || 'Không có mô tả chi tiết.' }}</p>
+        </div>
+
+        @if (detail.attachments && detail.attachments.length > 0) {
+          <div class="attachments-box">
+            <h5 class="attachment-title">
+              <span class="material-symbols-outlined">attach_file</span>
+              Tệp đính kèm:
+            </h5>
+            <ul class="attachment-list">
+              @for (att of detail.attachments; track att.url) {
+                <li>
+                  <a [href]="att.fileUrl || att.url" target="_blank" class="attachment-link">
+                    <span class="material-symbols-outlined">file_present</span>
+                    {{ att.fileName || att.name || 'File đính kèm' }}
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+
+      <!-- Conversation History -->
+      <div class="chat-section">
+        <h4 class="section-title">
+          <span class="material-symbols-outlined">forum</span>
+          Lịch sử phản hồi:
+        </h4>
+
+        <div class="messages-list">
+          @if (!detail.messages || detail.messages.length === 0) {
+            <p class="no-messages">Chưa có tin nhắn nào trong hội thoại này.</p>
+          } @else {
+            @for (msg of detail.messages; track msg.id) {
+              <div class="chat-bubble" [class.chat-admin]="msg.isFromAdmin" [class.chat-user]="!msg.isFromAdmin">
+                <div class="chat-header">
+                  <strong>{{ msg.senderName || (msg.isFromAdmin ? 'Admin Support' : 'Người dùng') }}</strong>
+                  <span class="chat-time">{{ formatDate(msg.createdAt) }}</span>
+                </div>
+                <div class="chat-body">{{ msg.content || msg.message }}</div>
+                @if (msg.attachmentUrl) {
+                  <div class="chat-attachment">
+                    <a [href]="msg.attachmentUrl" target="_blank">
+                      <span class="material-symbols-outlined">attach_file</span> Tệp đính kèm
+                    </a>
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Admin Reply Form -->
+      <div class="reply-form-section">
+        <h4 class="section-title">
+          <span class="material-symbols-outlined">rate_review</span>
+          Gửi tin nhắn phản hồi cho User:
+        </h4>
+        <textarea
+          class="reply-textarea"
+          rows="3"
+          placeholder="Nhập nội dung phản hồi từ Admin..."
+          [(ngModel)]="replyContent"
+        ></textarea>
+
+        <div class="reply-actions">
+          <label for="admin-reply-file" class="file-upload-btn">
+            <span class="material-symbols-outlined">attach_file</span>
+            {{ selectedReplyFile ? selectedReplyFile.name : 'Đính kèm tệp' }}
+          </label>
+          <input type="file" (change)="onReplyFileSelected($event)" id="admin-reply-file" class="hidden-file-input" />
+          <button
+            type="button"
+            class="btn btn--primary"
+            (click)="sendAdminReply()"
+            [disabled]="isSubmitting() || (!replyContent() && !selectedReplyFile)"
+          >
+            <span class="material-symbols-outlined">send</span>
+            Gửi phản hồi
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</app-admin-drawer>

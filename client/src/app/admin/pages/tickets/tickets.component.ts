@@ -3,6 +3,11 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SupportService } from '../../../user-page/user-features/support/services/support.service';
 import { ToastService } from '../../../core/services/toast-service';
+import { AdminDrawerComponent } from '../../components/admin-drawer/admin-drawer.component';
+import { EmptyStateComponent } from '../../components/empty-state/empty-state.component';
+import { LoadingSkeletonComponent } from '../../components/loading-skeleton/loading-skeleton.component';
+import { PaginationComponent } from '../../components/pagination/pagination.component';
+import { StatusBadgeComponent, BadgeVariant } from '../../components/status-badge/status-badge.component';
 import {
   AdminTicketQueryParams,
   SupportMessageDto,
@@ -19,7 +24,15 @@ import {
 @Component({
   selector: 'app-admin-tickets',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    AdminDrawerComponent,
+    EmptyStateComponent,
+    LoadingSkeletonComponent,
+    PaginationComponent,
+    StatusBadgeComponent,
+  ],
   templateUrl: './tickets.component.html',
   styleUrl: './tickets.component.css',
 })
@@ -57,31 +70,31 @@ export class AdminTicketsComponent implements OnInit {
   // Enum Options
   readonly statusOptions = [
     { value: null, label: 'Tất cả trạng thái' },
-    { value: TicketStatusEnum.Pending, label: 'Chờ xử lý (Pending)' },
-    { value: TicketStatusEnum.InProgress, label: 'Đang xử lý (In Progress)' },
-    { value: TicketStatusEnum.WaitingForUser, label: 'Chờ phản hồi (Waiting for User)' },
-    { value: TicketStatusEnum.Resolved, label: 'Đã giải quyết (Resolved)' },
-    { value: TicketStatusEnum.Closed, label: 'Đã đóng (Closed)' },
+    { value: TicketStatusEnum.Pending, label: 'Chờ xử lý' },
+    { value: TicketStatusEnum.InProgress, label: 'Đang xử lý' },
+    { value: TicketStatusEnum.WaitingForUser, label: 'Chờ phản hồi' },
+    { value: TicketStatusEnum.Resolved, label: 'Đã giải quyết' },
+    { value: TicketStatusEnum.Closed, label: 'Đã đóng' },
   ];
 
   readonly priorityOptions = [
     { value: null, label: 'Tất cả mức ưu tiên' },
-    { value: TicketPriorityEnum.Low, label: 'Thấp (Low)' },
-    { value: TicketPriorityEnum.Normal, label: 'Bình thường (Normal)' },
-    { value: TicketPriorityEnum.High, label: 'Cao (High)' },
-    { value: TicketPriorityEnum.Urgent, label: 'Khẩn cấp (Urgent)' },
+    { value: TicketPriorityEnum.Low, label: 'Thấp' },
+    { value: TicketPriorityEnum.Normal, label: 'Bình thường' },
+    { value: TicketPriorityEnum.High, label: 'Cao' },
+    { value: TicketPriorityEnum.Urgent, label: 'Khẩn cấp' },
   ];
 
   readonly categoryOptions = [
     { value: null, label: 'Tất cả phân loại' },
-    { value: TicketCategoryEnum.General, label: 'Chung (General)' },
-    { value: TicketCategoryEnum.TransactionIssue, label: 'Giao dịch (Transaction)' },
-    { value: TicketCategoryEnum.BudgetIssue, label: 'Ngân sách (Budget)' },
+    { value: TicketCategoryEnum.General, label: 'Chung' },
+    { value: TicketCategoryEnum.TransactionIssue, label: 'Giao dịch' },
+    { value: TicketCategoryEnum.BudgetIssue, label: 'Ngân sách' },
     { value: TicketCategoryEnum.AiFeature, label: 'Tính năng AI' },
-    { value: TicketCategoryEnum.AccountIssue, label: 'Tài khoản (Account)' },
-    { value: TicketCategoryEnum.BugReport, label: 'Báo lỗi (Bug Report)' },
+    { value: TicketCategoryEnum.AccountIssue, label: 'Tài khoản' },
+    { value: TicketCategoryEnum.BugReport, label: 'Báo lỗi' },
     { value: TicketCategoryEnum.FeatureRequest, label: 'Yêu cầu tính năng' },
-    { value: TicketCategoryEnum.Other, label: 'Khác (Other)' },
+    { value: TicketCategoryEnum.Other, label: 'Khác' },
   ];
 
   ngOnInit(): void {
@@ -119,6 +132,11 @@ export class AdminTicketsComponent implements OnInit {
     this.loadTickets();
   }
 
+  onPageChange(newPage: number): void {
+    this.currentPage.set(newPage);
+    this.loadTickets();
+  }
+
   viewDetail(ticketId: number | string): void {
     this.isDrawerOpen.set(true);
     this.isDetailLoading.set(true);
@@ -153,7 +171,7 @@ export class AdminTicketsComponent implements OnInit {
 
     this.isSubmitting.set(true);
     this.supportService.assignTicket(ticket.id, { assignedToId }).subscribe({
-      next: (updated) => {
+      next: () => {
         this.isSubmitting.set(false);
         this.toastService.success(`Đã phân công Ticket #${ticket.id} thành công`);
         this.viewDetail(ticket.id);
@@ -173,7 +191,7 @@ export class AdminTicketsComponent implements OnInit {
 
     this.isSubmitting.set(true);
     this.supportService.updateTicketStatus(ticket.id, { status: statusValue }).subscribe({
-      next: (updated) => {
+      next: () => {
         this.isSubmitting.set(false);
         this.toastService.success(`Cập nhật trạng thái Ticket #${ticket.id} thành công`);
         this.viewDetail(ticket.id);
@@ -193,7 +211,7 @@ export class AdminTicketsComponent implements OnInit {
 
     this.isSubmitting.set(true);
     this.supportService.updateTicketPriority(ticket.id, { priority: priorityValue }).subscribe({
-      next: (updated) => {
+      next: () => {
         this.isSubmitting.set(false);
         this.toastService.success(`Cập nhật mức ưu tiên Ticket #${ticket.id} thành công`);
         this.viewDetail(ticket.id);
@@ -237,16 +255,59 @@ export class AdminTicketsComponent implements OnInit {
 
   // ─── UTILS & BADGES ────────────────────────────────────────────────────────
 
-  getStatusLabel(status: number): string {
-    return statusEnumToString(status);
+  getStatusVariant(status: number): BadgeVariant {
+    switch (status) {
+      case TicketStatusEnum.Pending: return 'pending';
+      case TicketStatusEnum.InProgress: return 'processing';
+      case TicketStatusEnum.WaitingForUser: return 'awaiting_user';
+      case TicketStatusEnum.Resolved: return 'resolved';
+      case TicketStatusEnum.Closed: return 'closed';
+      default: return 'pending';
+    }
   }
 
-  getPriorityLabel(priority?: number): string {
-    return priority !== undefined ? priorityEnumToString(priority) : 'normal';
+  getStatusDisplay(status: number): string {
+    switch (status) {
+      case TicketStatusEnum.Pending: return 'Chờ tiếp nhận';
+      case TicketStatusEnum.InProgress: return 'Đang xử lý';
+      case TicketStatusEnum.WaitingForUser: return 'Chờ phản hồi';
+      case TicketStatusEnum.Resolved: return 'Đã giải quyết';
+      case TicketStatusEnum.Closed: return 'Đã đóng';
+      default: return 'Chờ xử lý';
+    }
+  }
+
+  getPriorityVariant(priority?: number): BadgeVariant {
+    switch (priority) {
+      case TicketPriorityEnum.Low: return 'low';
+      case TicketPriorityEnum.Normal: return 'normal';
+      case TicketPriorityEnum.High: return 'medium';
+      case TicketPriorityEnum.Urgent: return 'urgent';
+      default: return 'normal';
+    }
+  }
+
+  getPriorityDisplay(priority?: number): string {
+    switch (priority) {
+      case TicketPriorityEnum.Low: return 'Thấp';
+      case TicketPriorityEnum.Normal: return 'Bình thường';
+      case TicketPriorityEnum.High: return 'Cao';
+      case TicketPriorityEnum.Urgent: return 'Khẩn cấp';
+      default: return 'Bình thường';
+    }
   }
 
   getCategoryLabel(category: number): string {
-    return categoryEnumToString(category);
+    switch (category) {
+      case TicketCategoryEnum.General: return 'Chung';
+      case TicketCategoryEnum.TransactionIssue: return 'Giao dịch';
+      case TicketCategoryEnum.BudgetIssue: return 'Ngân sách';
+      case TicketCategoryEnum.AiFeature: return 'Tính năng AI';
+      case TicketCategoryEnum.AccountIssue: return 'Tài khoản';
+      case TicketCategoryEnum.BugReport: return 'Báo lỗi';
+      case TicketCategoryEnum.FeatureRequest: return 'Góp ý';
+      case TicketCategoryEnum.Other: default: return 'Khác';
+    }
   }
 
   formatDate(dateStr?: string): string {
