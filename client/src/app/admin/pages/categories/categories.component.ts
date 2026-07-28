@@ -9,6 +9,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 import { LoadingSkeletonComponent } from '../../components/loading-skeleton/loading-skeleton.component';
 import { AdminDrawerComponent } from '../../components/admin-drawer/admin-drawer.component';
 import { ToastService } from '../../../core/services/toast-service';
+import { LanguageService } from '../../../core/services/language-service';
 
 @Component({
   selector: 'app-categories',
@@ -20,6 +21,7 @@ import { ToastService } from '../../../core/services/toast-service';
 export class CategoriesComponent implements OnInit, OnDestroy {
   private readonly categoryService = inject(AdminCategoryService);
   private readonly toast = inject(ToastService);
+  protected readonly language = inject(LanguageService);
   private subs: Subscription[] = [];
 
   loading = true;
@@ -35,12 +37,14 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     open: false, config: { title: '', description: '' }, loading: false,
   };
 
-  readonly typeOptions: { value: CategoryType | ''; label: string }[] = [
-    { value: '', label: 'All Types' },
-    { value: 'expense', label: 'Expense' },
-    { value: 'income', label: 'Income' },
-    { value: 'both', label: 'Both' },
-  ];
+  get typeOptions(): { value: CategoryType | ''; label: string }[] {
+    return [
+      { value: '', label: this.language.t('admin.categories.allTypes') },
+      { value: 'expense', label: this.language.t('admin.categories.expense') },
+      { value: 'income', label: this.language.t('admin.categories.income') },
+      { value: 'both', label: this.language.t('admin.categories.both') },
+    ];
+  }
 
   readonly iconOptions = [
     'restaurant', 'directions_car', 'shopping_bag', 'sports_esports',

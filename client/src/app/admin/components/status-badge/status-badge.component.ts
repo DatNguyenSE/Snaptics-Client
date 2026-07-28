@@ -20,8 +20,6 @@ export type BadgeVariant =
   | 'normal'
   | 'urgent'
   | 'admin'
-  | 'super_admin'
-  | 'support'
   | 'user';
 
 @Component({

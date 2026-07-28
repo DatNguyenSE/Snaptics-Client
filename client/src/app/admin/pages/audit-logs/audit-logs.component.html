@@ -1,13 +1,13 @@
 <div class="audit-page">
   <div class="page-header">
     <div>
-      <h1 class="page-title">Audit Logs</h1>
-      <p class="page-subtitle">Immutable record of all administrative actions. Every action is tracked and timestamped.</p>
+      <h1 class="page-title">{{ language.t('admin.auditLogs.title') }}</h1>
+      <p class="page-subtitle">{{ language.t('admin.auditLogs.subtitle') }}</p>
     </div>
     <div class="page-header__actions">
       <button type="button" class="btn btn--ghost">
         <span class="material-symbols-outlined">download</span>
-        Export CSV
+        {{ language.t('admin.auditLogs.exportCsv') }}
       </button>
     </div>
   </div>
@@ -16,7 +16,7 @@
   <div class="filter-bar">
     <div class="filter-search">
       <span class="material-symbols-outlined filter-search__icon">search</span>
-      <input type="search" class="filter-search__input" placeholder="Search admin, action or target..." [(ngModel)]="filter.search" (ngModelChange)="onFilterChange()" />
+      <input type="search" class="filter-search__input" [placeholder]="language.t('admin.auditLogs.searchPlaceholder')" [(ngModel)]="filter.search" (ngModelChange)="onFilterChange()" />
     </div>
     <select class="filter-select" [(ngModel)]="filter.role" (ngModelChange)="onFilterChange()">
       @for (opt of roleOptions; track opt.value) {
@@ -29,9 +29,9 @@
       }
     </select>
     <select class="filter-select" [(ngModel)]="filter.status" (ngModelChange)="onFilterChange()">
-      <option value="">All Status</option>
-      <option value="success">Success</option>
-      <option value="failed">Failed</option>
+      <option value="">{{ language.t('admin.auditLogs.allStatus') }}</option>
+      <option value="success">{{ language.t('admin.auditLogs.success') }}</option>
+      <option value="failed">{{ language.t('admin.auditLogs.failed') }}</option>
     </select>
   </div>
 
@@ -39,21 +39,21 @@
     @if (loading) {
       <app-loading-skeleton [count]="10" [showAvatar]="false" />
     } @else if (result.data.length === 0) {
-      <app-empty-state icon="fact_check" title="No logs found" description="No audit logs match your filter criteria." />
+      <app-empty-state icon="fact_check" [title]="language.t('admin.auditLogs.noLogsFound')" [description]="language.t('admin.auditLogs.noLogsDesc')" />
     } @else {
       <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Timestamp</th>
-              <th>Admin</th>
-              <th>Role</th>
-              <th>Action</th>
-              <th>Target</th>
-              <th>Status</th>
-              <th>Risk</th>
-              <th>IP</th>
-              <th>Details</th>
+              <th>{{ language.t('admin.auditLogs.timestamp') }}</th>
+              <th>{{ language.t('admin.auditLogs.admin') }}</th>
+              <th>{{ language.t('admin.auditLogs.role') }}</th>
+              <th>{{ language.t('admin.auditLogs.action') }}</th>
+              <th>{{ language.t('admin.auditLogs.target') }}</th>
+              <th>{{ language.t('admin.auditLogs.status') }}</th>
+              <th>{{ language.t('admin.auditLogs.risk') }}</th>
+              <th>{{ language.t('admin.auditLogs.ip') }}</th>
+              <th>{{ language.t('admin.auditLogs.details') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -87,24 +87,24 @@
 <!-- Log Detail Drawer -->
 <app-admin-drawer
   [open]="drawerOpen"
-  [title]="'Log Details'"
+  [title]="language.t('admin.auditLogs.logDetails')"
   [subtitle]="selectedLog?.action"
   (closed)="closeDrawer()"
 >
   @if (selectedLog) {
     <dl class="detail-list">
       <div class="detail-item"><dt>Log ID</dt><dd class="dd-mono">{{ selectedLog.id }}</dd></div>
-      <div class="detail-item"><dt>Timestamp</dt><dd>{{ formatTime(selectedLog.timestamp) }}</dd></div>
-      <div class="detail-item"><dt>Admin</dt><dd>{{ selectedLog.admin }}</dd></div>
-      <div class="detail-item"><dt>Admin Role</dt><dd><app-status-badge [variant]="getRoleVariant(selectedLog.adminRole)" [label]="selectedLog.adminRole" /></dd></div>
-      <div class="detail-item"><dt>Action</dt><dd>{{ selectedLog.action }}</dd></div>
-      <div class="detail-item"><dt>Target</dt><dd>{{ selectedLog.target }}</dd></div>
+      <div class="detail-item"><dt>{{ language.t('admin.auditLogs.timestamp') }}</dt><dd>{{ formatTime(selectedLog.timestamp) }}</dd></div>
+      <div class="detail-item"><dt>{{ language.t('admin.auditLogs.admin') }}</dt><dd>{{ selectedLog.admin }}</dd></div>
+      <div class="detail-item"><dt>{{ language.t('admin.auditLogs.role') }}</dt><dd><app-status-badge [variant]="getRoleVariant(selectedLog.adminRole)" [label]="selectedLog.adminRole" /></dd></div>
+      <div class="detail-item"><dt>{{ language.t('admin.auditLogs.action') }}</dt><dd>{{ selectedLog.action }}</dd></div>
+      <div class="detail-item"><dt>{{ language.t('admin.auditLogs.target') }}</dt><dd>{{ selectedLog.target }}</dd></div>
       @if (selectedLog.targetId) {
         <div class="detail-item"><dt>Target ID</dt><dd class="dd-mono">{{ selectedLog.targetId }}</dd></div>
       }
-      <div class="detail-item"><dt>Status</dt><dd><app-status-badge [variant]="getStatusVariant(selectedLog.status)" [label]="selectedLog.status" /></dd></div>
-      <div class="detail-item"><dt>Risk Level</dt><dd><app-status-badge [variant]="getRiskVariant(selectedLog.riskLevel)" [label]="selectedLog.riskLevel" /></dd></div>
-      <div class="detail-item"><dt>IP Address</dt><dd class="dd-mono">{{ selectedLog.ipAddress }}</dd></div>
+      <div class="detail-item"><dt>{{ language.t('admin.auditLogs.status') }}</dt><dd><app-status-badge [variant]="getStatusVariant(selectedLog.status)" [label]="selectedLog.status" /></dd></div>
+      <div class="detail-item"><dt>{{ language.t('admin.auditLogs.risk') }}</dt><dd><app-status-badge [variant]="getRiskVariant(selectedLog.riskLevel)" [label]="selectedLog.riskLevel" /></dd></div>
+      <div class="detail-item"><dt>{{ language.t('admin.auditLogs.ip') }}</dt><dd class="dd-mono">{{ selectedLog.ipAddress }}</dd></div>
       <div class="detail-item"><dt>Device</dt><dd>{{ selectedLog.device }}</dd></div>
       <div class="detail-item"><dt>Request ID</dt><dd class="dd-mono">{{ selectedLog.requestId }}</dd></div>
       <div class="detail-item detail-item--block"><dt>Reason</dt><dd class="dd-reason">{{ selectedLog.reason }}</dd></div>
@@ -123,7 +123,7 @@
     </dl>
     <div class="detail-notice">
       <span class="material-symbols-outlined">lock</span>
-      <p>Audit logs are immutable and cannot be modified or deleted.</p>
+      <p>{{ language.t('admin.auditLogs.immutableNotice') }}</p>
     </div>
   }
 </app-admin-drawer>

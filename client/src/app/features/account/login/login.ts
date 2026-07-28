@@ -104,7 +104,7 @@ export class Login implements OnDestroy {
         if (this.accountService.currentUser()) {
           const user = this.accountService.currentUser();
           const roles = user?.roles ?? [];
-          if (roles.includes('ADMIN') || roles.includes('SUPER_ADMIN')) {
+          if (roles.includes('ADMIN')) {
             this.router.navigate(['/admin']);
           } else {
             this.router.navigate(['/user/dashboard']);

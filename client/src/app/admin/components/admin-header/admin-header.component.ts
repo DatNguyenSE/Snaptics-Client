@@ -41,7 +41,7 @@ export class AdminHeaderComponent {
     const user = this.accountService.currentUser();
     const name = user?.displayName ?? 'Admin';
     const initials = name.split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('');
-    const role = (user?.roles ?? []).includes('SUPER_ADMIN') ? 'Super Admin' : 'Admin';
+    const role = 'Admin';
     return { name, initials, role };
   }
 

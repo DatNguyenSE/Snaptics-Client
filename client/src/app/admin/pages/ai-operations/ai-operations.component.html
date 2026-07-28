@@ -1,17 +1,17 @@
 <div class="ai-ops">
   <div class="page-header">
     <div>
-      <h1 class="page-title">AI &amp; Scan Operations</h1>
-      <p class="page-subtitle">Monitor AI requests, OCR performance and processing errors.</p>
+      <h1 class="page-title">{{ language.t('admin.aiOperations.title') }}</h1>
+      <p class="page-subtitle">{{ language.t('admin.aiOperations.subtitle') }}</p>
     </div>
     <div class="page-header__actions">
       <button type="button" class="btn btn--ghost">
         <span class="material-symbols-outlined">refresh</span>
-        Refresh
+        {{ language.t('admin.aiOperations.refresh') }}
       </button>
       <button type="button" class="btn btn--ghost">
         <span class="material-symbols-outlined">download</span>
-        Export Logs
+        {{ language.t('admin.aiOperations.exportLogs') }}
       </button>
     </div>
   </div>
@@ -22,42 +22,42 @@
       <span class="material-symbols-outlined kpi-card__icon kpi-card__icon--primary">smart_toy</span>
       <div>
         <p class="kpi-card__value">{{ totalRequests | number }}</p>
-        <p class="kpi-card__label">AI Requests</p>
+        <p class="kpi-card__label">{{ language.t('admin.aiOperations.aiRequests') }}</p>
       </div>
     </div>
     <div class="kpi-card">
       <span class="material-symbols-outlined kpi-card__icon kpi-card__icon--blue">receipt_long</span>
       <div>
         <p class="kpi-card__value">{{ receiptScans | number }}</p>
-        <p class="kpi-card__label">Receipt Scans</p>
+        <p class="kpi-card__label">{{ language.t('admin.aiOperations.receiptScans') }}</p>
       </div>
     </div>
     <div class="kpi-card">
       <span class="material-symbols-outlined kpi-card__icon kpi-card__icon--purple">qr_code_scanner</span>
       <div>
         <p class="kpi-card__value">{{ productScans | number }}</p>
-        <p class="kpi-card__label">Product Scans</p>
+        <p class="kpi-card__label">{{ language.t('admin.aiOperations.productScans') }}</p>
       </div>
     </div>
     <div class="kpi-card">
       <span class="material-symbols-outlined kpi-card__icon kpi-card__icon--green">verified</span>
       <div>
         <p class="kpi-card__value">{{ successRate }}%</p>
-        <p class="kpi-card__label">Success Rate</p>
+        <p class="kpi-card__label">{{ language.t('admin.aiOperations.successRate') }}</p>
       </div>
     </div>
     <div class="kpi-card">
       <span class="material-symbols-outlined kpi-card__icon kpi-card__icon--yellow">timer</span>
       <div>
         <p class="kpi-card__value">{{ avgLatencyMs / 1000 }}s</p>
-        <p class="kpi-card__label">Avg Latency</p>
+        <p class="kpi-card__label">{{ language.t('admin.aiOperations.avgLatency') }}</p>
       </div>
     </div>
     <div class="kpi-card">
       <span class="material-symbols-outlined kpi-card__icon kpi-card__icon--red">attach_money</span>
       <div>
         <p class="kpi-card__value">${{ estimatedCostUsd }}</p>
-        <p class="kpi-card__label">Est. AI Cost</p>
+        <p class="kpi-card__label">{{ language.t('admin.aiOperations.estCost') }}</p>
       </div>
     </div>
   </div>
@@ -65,7 +65,7 @@
   <!-- Failure Reasons -->
   <div class="card" style="margin-bottom: 16px;">
     <div class="card__header">
-      <h2 class="card__title">Top Failure Reasons</h2>
+      <h2 class="card__title">{{ language.t('admin.aiOperations.topFailureReasons') }}</h2>
     </div>
     <div class="failure-list">
       @for (reason of failureReasons; track reason.reason) {
@@ -87,7 +87,7 @@
   <div class="filter-bar">
     <div class="filter-search">
       <span class="material-symbols-outlined filter-search__icon">search</span>
-      <input type="search" class="filter-search__input" placeholder="Search request ID or user..." [(ngModel)]="filter.search" (ngModelChange)="onFilterChange()" />
+      <input type="search" class="filter-search__input" [placeholder]="language.t('admin.aiOperations.searchPlaceholder')" [(ngModel)]="filter.search" (ngModelChange)="onFilterChange()" />
     </div>
     <select class="filter-select" [(ngModel)]="filter.type" (ngModelChange)="onFilterChange()">
       @for (opt of typeOptions; track opt.value) {
@@ -105,22 +105,22 @@
     @if (loading) {
       <app-loading-skeleton [count]="8" />
     } @else if (result.data.length === 0) {
-      <app-empty-state icon="manage_search" title="No requests found" description="Try adjusting your search criteria." />
+      <app-empty-state icon="manage_search" [title]="language.t('admin.aiOperations.noRequestsFound')" [description]="language.t('admin.aiOperations.noRequestsDesc')" />
     } @else {
       <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Request ID</th>
-              <th>Time</th>
-              <th>User</th>
-              <th>Type</th>
-              <th>Status</th>
-              <th class="th-num">Time</th>
-              <th class="th-num">Confidence</th>
-              <th>Model</th>
-              <th>Error</th>
-              <th>Actions</th>
+              <th>{{ language.t('admin.aiOperations.requestId') }}</th>
+              <th>{{ language.t('admin.aiOperations.time') }}</th>
+              <th>{{ language.t('admin.aiOperations.user') }}</th>
+              <th>{{ language.t('admin.aiOperations.type') }}</th>
+              <th>{{ language.t('admin.aiOperations.status') }}</th>
+              <th class="th-num">{{ language.t('admin.aiOperations.time') }}</th>
+              <th class="th-num">{{ language.t('admin.aiOperations.confidence') }}</th>
+              <th>{{ language.t('admin.aiOperations.model') }}</th>
+              <th>{{ language.t('admin.aiOperations.error') }}</th>
+              <th>{{ language.t('admin.aiOperations.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -167,22 +167,22 @@
 <!-- Request Detail Drawer -->
 <app-admin-drawer
   [open]="drawerOpen"
-  [title]="'Request Details'"
+  [title]="language.t('admin.aiOperations.requestDetails')"
   [subtitle]="selectedRequest?.id"
   (closed)="closeDrawer()"
 >
   @if (selectedRequest) {
     <div class="request-detail">
       <dl class="detail-list">
-        <div class="detail-item"><dt>Request ID</dt><dd class="dd-mono">{{ selectedRequest.id }}</dd></div>
-        <div class="detail-item"><dt>Timestamp</dt><dd>{{ formatTime(selectedRequest.timestamp) }}</dd></div>
-        <div class="detail-item"><dt>Type</dt><dd>{{ getTypeLabel(selectedRequest.type) }}</dd></div>
-        <div class="detail-item"><dt>User</dt><dd class="dd-masked">{{ selectedRequest.maskedUser }}</dd></div>
-        <div class="detail-item"><dt>Model</dt><dd>{{ selectedRequest.modelVersion }}</dd></div>
-        <div class="detail-item"><dt>Status</dt><dd><app-status-badge [variant]="getStatusVariant(selectedRequest.status)" [label]="selectedRequest.status" /></dd></div>
-        <div class="detail-item"><dt>Processing Time</dt><dd>{{ formatMs(selectedRequest.processingTime) }}</dd></div>
+        <div class="detail-item"><dt>{{ language.t('admin.aiOperations.requestId') }}</dt><dd class="dd-mono">{{ selectedRequest.id }}</dd></div>
+        <div class="detail-item"><dt>{{ language.t('admin.aiOperations.time') }}</dt><dd>{{ formatTime(selectedRequest.timestamp) }}</dd></div>
+        <div class="detail-item"><dt>{{ language.t('admin.aiOperations.type') }}</dt><dd>{{ getTypeLabel(selectedRequest.type) }}</dd></div>
+        <div class="detail-item"><dt>{{ language.t('admin.aiOperations.user') }}</dt><dd class="dd-masked">{{ selectedRequest.maskedUser }}</dd></div>
+        <div class="detail-item"><dt>{{ language.t('admin.aiOperations.model') }}</dt><dd>{{ selectedRequest.modelVersion }}</dd></div>
+        <div class="detail-item"><dt>{{ language.t('admin.aiOperations.status') }}</dt><dd><app-status-badge [variant]="getStatusVariant(selectedRequest.status)" [label]="selectedRequest.status" /></dd></div>
+        <div class="detail-item"><dt>{{ language.t('admin.overview.scanPerformance.avgProcessingTime') }}</dt><dd>{{ formatMs(selectedRequest.processingTime) }}</dd></div>
         @if (selectedRequest.confidence !== undefined) {
-          <div class="detail-item"><dt>Confidence</dt><dd>{{ selectedRequest.confidence }}%</dd></div>
+          <div class="detail-item"><dt>{{ language.t('admin.aiOperations.confidence') }}</dt><dd>{{ selectedRequest.confidence }}%</dd></div>
         }
         @if (selectedRequest.tokenUsage !== undefined) {
           <div class="detail-item"><dt>Token Usage</dt><dd>{{ selectedRequest.tokenUsage }}</dd></div>
@@ -195,7 +195,7 @@
       </dl>
 
       @if (selectedRequest.stages?.length) {
-        <h3 class="detail-section-title">Processing Stages</h3>
+        <h3 class="detail-section-title">{{ language.t('admin.aiOperations.processingStages') }}</h3>
         <div class="stages">
           @for (stage of selectedRequest.stages; track stage.name) {
             <div class="stage" [class.stage--failed]="stage.status === 'failed'">
@@ -209,18 +209,18 @@
 
       <div class="detail-privacy">
         <span class="material-symbols-outlined">lock</span>
-        <p>Financial data and receipt images are hidden by default. Use "Request temporary access" for audit purposes.</p>
+        <p>{{ language.t('admin.aiOperations.privacyNotice') }}</p>
       </div>
 
       <div class="detail-actions">
         @if (selectedRequest.status === 'failed' || selectedRequest.status === 'low_confidence') {
           <button type="button" class="btn btn--primary" (click)="retryRequest(selectedRequest!, $event)">
             <span class="material-symbols-outlined">replay</span>
-            Retry Request
+            {{ language.t('admin.aiOperations.retryRequest') }}
           </button>
           <button type="button" class="btn btn--ghost" (click)="markResolved(selectedRequest!)">
             <span class="material-symbols-outlined">check</span>
-            Mark Resolved
+            {{ language.t('admin.aiOperations.markResolved') }}
           </button>
         }
       </div>

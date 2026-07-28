@@ -10,6 +10,7 @@ import { ConfirmationModalComponent, ConfirmModalConfig } from '../../../compone
 import { EmptyStateComponent } from '../../../components/empty-state/empty-state.component';
 import { LoadingSkeletonComponent } from '../../../components/loading-skeleton/loading-skeleton.component';
 import { ToastService } from '../../../../core/services/toast-service';
+import { LanguageService } from '../../../../core/services/language-service';
 
 @Component({
   selector: 'app-user-list',
@@ -30,6 +31,7 @@ export class UserListComponent implements OnInit {
   private readonly userService = inject(AdminUserService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
+  protected readonly language = inject(LanguageService);
 
   loading = true;
   result: PaginatedResult<AdminUser> = { data: [], total: 0, page: 1, pageSize: 10, totalPages: 0 };
@@ -45,27 +47,31 @@ export class UserListComponent implements OnInit {
     loading: false,
   };
 
-  readonly statusOptions: { value: AdminUserStatus | ''; label: string }[] = [
-    { value: '', label: 'All Status' },
-    { value: 'active', label: 'Active' },
-    { value: 'locked', label: 'Locked' },
-    { value: 'deleted', label: 'Deleted' },
-  ];
+  get statusOptions(): { value: AdminUserStatus | ''; label: string }[] {
+    return [
+      { value: '', label: this.language.t('admin.users.allStatus') },
+      { value: 'active', label: this.language.t('admin.users.active') },
+      { value: 'locked', label: this.language.t('admin.users.locked') },
+      { value: 'deleted', label: this.language.t('admin.users.deleted') },
+    ];
+  }
 
-  readonly roleOptions: { value: AdminRole | ''; label: string }[] = [
-    { value: '', label: 'All Roles' },
-    { value: 'USER', label: 'User' },
-    { value: 'SUPPORT', label: 'Support' },
-    { value: 'ADMIN', label: 'Admin' },
-    { value: 'SUPER_ADMIN', label: 'Super Admin' },
-  ];
+  get roleOptions(): { value: AdminRole | ''; label: string }[] {
+    return [
+      { value: '', label: this.language.t('admin.users.allRoles') },
+      { value: 'USER', label: 'User' },
+      { value: 'ADMIN', label: 'Admin' },
+    ];
+  }
 
-  readonly verificationOptions: { value: VerificationStatus | ''; label: string }[] = [
-    { value: '', label: 'All' },
-    { value: 'verified', label: 'Verified' },
-    { value: 'unverified', label: 'Unverified' },
-    { value: 'pending', label: 'Pending' },
-  ];
+  get verificationOptions(): { value: VerificationStatus | ''; label: string }[] {
+    return [
+      { value: '', label: this.language.t('admin.users.allVerification') },
+      { value: 'verified', label: this.language.t('admin.users.verified') },
+      { value: 'unverified', label: this.language.t('admin.users.unverified') },
+      { value: 'pending', label: this.language.t('admin.users.pending') },
+    ];
+  }
 
   get totalUsers(): number { return this.userService.totalUsers(); }
   get activeUsers(): number { return this.userService.activeUsers(); }

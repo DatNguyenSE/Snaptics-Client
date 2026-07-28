@@ -9,6 +9,7 @@ import { LoadingSkeletonComponent } from '../../components/loading-skeleton/load
 import { AdminDrawerComponent } from '../../components/admin-drawer/admin-drawer.component';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
 import { ToastService } from '../../../core/services/toast-service';
+import { LanguageService } from '../../../core/services/language-service';
 
 @Component({
   selector: 'app-ai-operations',
@@ -20,6 +21,7 @@ import { ToastService } from '../../../core/services/toast-service';
 export class AiOperationsComponent implements OnInit {
   private readonly aiService = inject(AdminAiService);
   private readonly toast = inject(ToastService);
+  protected readonly language = inject(LanguageService);
 
   loading = true;
   result: PaginatedResult<AiRequestLog> = { data: [], total: 0, page: 1, pageSize: 10, totalPages: 0 };
@@ -30,21 +32,25 @@ export class AiOperationsComponent implements OnInit {
 
   filter: Partial<AiRequestFilter> = { search: '', type: '', status: '' };
 
-  readonly typeOptions: { value: AiRequestType | ''; label: string }[] = [
-    { value: '', label: 'All Types' },
-    { value: 'ai_chat', label: 'AI Chat' },
-    { value: 'receipt_scan', label: 'Receipt Scan' },
-    { value: 'product_scan', label: 'Product Scan' },
-  ];
+  get typeOptions(): { value: AiRequestType | ''; label: string }[] {
+    return [
+      { value: '', label: this.language.t('admin.aiOperations.allTypes') },
+      { value: 'ai_chat', label: 'AI Chat' },
+      { value: 'receipt_scan', label: this.language.t('admin.aiOperations.receiptScans') },
+      { value: 'product_scan', label: this.language.t('admin.aiOperations.productScans') },
+    ];
+  }
 
-  readonly statusOptions: { value: AiRequestStatus | ''; label: string }[] = [
-    { value: '', label: 'All Status' },
-    { value: 'success', label: 'Success' },
-    { value: 'low_confidence', label: 'Low Confidence' },
-    { value: 'failed', label: 'Failed' },
-    { value: 'retrying', label: 'Retrying' },
-    { value: 'cancelled', label: 'Cancelled' },
-  ];
+  get statusOptions(): { value: AiRequestStatus | ''; label: string }[] {
+    return [
+      { value: '', label: this.language.t('admin.aiOperations.allStatus') },
+      { value: 'success', label: this.language.t('admin.overview.scanPerformance.successful') },
+      { value: 'low_confidence', label: this.language.t('admin.overview.scanPerformance.lowConfidence') },
+      { value: 'failed', label: this.language.t('admin.overview.scanPerformance.failed') },
+      { value: 'retrying', label: 'Retrying' },
+      { value: 'cancelled', label: 'Cancelled' },
+    ];
+  }
 
   get totalRequests() { return this.aiService.totalRequests; }
   get receiptScans() { return this.aiService.receiptScans; }

@@ -2,13 +2,13 @@
   <!-- Header -->
   <div class="page-header">
     <div>
-      <h1 class="page-title">Users</h1>
-      <p class="page-subtitle">Manage accounts, verification status and user access.</p>
+      <h1 class="page-title">{{ language.t('admin.users.title') }}</h1>
+      <p class="page-subtitle">{{ language.t('admin.users.subtitle') }}</p>
     </div>
     <div class="page-header__actions">
       <button type="button" class="btn btn--ghost">
         <span class="material-symbols-outlined">download</span>
-        Export
+        {{ language.t('admin.users.export') }}
       </button>
     </div>
   </div>
@@ -19,28 +19,28 @@
       <span class="material-symbols-outlined summary-card__icon summary-card__icon--primary">group</span>
       <div>
         <p class="summary-card__value">{{ totalUsers | number }}</p>
-        <p class="summary-card__label">Total Users</p>
+        <p class="summary-card__label">{{ language.t('admin.users.totalUsers') }}</p>
       </div>
     </div>
     <div class="summary-card">
       <span class="material-symbols-outlined summary-card__icon summary-card__icon--green">person_check</span>
       <div>
         <p class="summary-card__value">{{ activeUsers | number }}</p>
-        <p class="summary-card__label">Active Users</p>
+        <p class="summary-card__label">{{ language.t('admin.users.activeUsers') }}</p>
       </div>
     </div>
     <div class="summary-card">
       <span class="material-symbols-outlined summary-card__icon summary-card__icon--red">lock</span>
       <div>
         <p class="summary-card__value">{{ lockedUsers }}</p>
-        <p class="summary-card__label">Locked Accounts</p>
+        <p class="summary-card__label">{{ language.t('admin.users.lockedAccounts') }}</p>
       </div>
     </div>
     <div class="summary-card">
       <span class="material-symbols-outlined summary-card__icon summary-card__icon--yellow">mark_email_unread</span>
       <div>
         <p class="summary-card__value">{{ unverifiedUsers }}</p>
-        <p class="summary-card__label">Unverified Accounts</p>
+        <p class="summary-card__label">{{ language.t('admin.users.unverifiedAccounts') }}</p>
       </div>
     </div>
   </div>
@@ -52,7 +52,7 @@
       <input
         type="search"
         class="filter-bar__search-input"
-        placeholder="Search by name or email..."
+        [placeholder]="language.t('admin.users.searchPlaceholder')"
         [(ngModel)]="filter.search"
         (ngModelChange)="onSearchChange()"
         aria-label="Search users"
@@ -76,7 +76,7 @@
     @if (filter.search || filter.status || filter.verification || filter.role) {
       <button type="button" class="btn btn--ghost btn--sm" (click)="clearFilters()">
         <span class="material-symbols-outlined">close</span>
-        Clear
+        {{ language.t('admin.users.clear') }}
       </button>
     }
   </div>
@@ -84,18 +84,18 @@
   <!-- Bulk actions -->
   @if (selectedIds.size > 0) {
     <div class="bulk-actions">
-      <span class="bulk-actions__count">{{ selectedIds.size }} selected</span>
+      <span class="bulk-actions__count">{{ selectedIds.size }} {{ language.t('admin.users.selected') }}</span>
       <button type="button" class="btn btn--ghost btn--sm">
         <span class="material-symbols-outlined">lock</span>
-        Lock
+        {{ language.t('admin.users.lock') }}
       </button>
       <button type="button" class="btn btn--ghost btn--sm">
         <span class="material-symbols-outlined">lock_open</span>
-        Unlock
+        {{ language.t('admin.users.unlock') }}
       </button>
       <button type="button" class="btn btn--ghost btn--sm">
         <span class="material-symbols-outlined">download</span>
-        Export
+        {{ language.t('admin.users.export') }}
       </button>
     </div>
   }
@@ -105,7 +105,7 @@
     @if (loading) {
       <app-loading-skeleton [count]="8" [showAvatar]="true" [showAction]="true" />
     } @else if (result.data.length === 0) {
-      <app-empty-state icon="person_off" title="No users found" description="Try adjusting your search or filter criteria." />
+      <app-empty-state icon="person_off" [title]="language.t('admin.users.noUsersFound')" [description]="language.t('admin.users.noUsersDesc')" />
     } @else {
       <div class="table-wrap">
         <table class="data-table" aria-label="Users table">
@@ -114,15 +114,15 @@
               <th class="th-check">
                 <input type="checkbox" [checked]="allSelected" (change)="toggleSelectAll()" aria-label="Select all" />
               </th>
-              <th>User</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Verification</th>
-              <th class="th-num">Transactions</th>
-              <th class="th-num">Scans</th>
-              <th>Last Login</th>
-              <th>Created</th>
-              <th>Actions</th>
+              <th>{{ language.t('admin.users.user') }}</th>
+              <th>{{ language.t('admin.users.role') }}</th>
+              <th>{{ language.t('admin.users.status') }}</th>
+              <th>{{ language.t('admin.users.verification') }}</th>
+              <th class="th-num">{{ language.t('admin.users.transactions') }}</th>
+              <th class="th-num">{{ language.t('admin.users.scans') }}</th>
+              <th>{{ language.t('admin.users.lastLogin') }}</th>
+              <th>{{ language.t('admin.users.created') }}</th>
+              <th>{{ language.t('admin.users.actions') }}</th>
             </tr>
           </thead>
           <tbody>

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { adminGuard, superAdminGuard } from './guards/admin.guard';
+import { adminGuard } from './guards/admin.guard';
 import { AdminLayoutComponent } from './layout/admin-layout.component';
 
 export const adminRoutes: Routes = [
@@ -55,7 +55,7 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'settings',
-        canActivate: [superAdminGuard],
+        canActivate: [adminGuard],
         loadComponent: () =>
           import('./pages/system-settings/system-settings.component').then((m) => m.SystemSettingsComponent),
       },

@@ -25,10 +25,7 @@ export class AuditLogService {
   }): void {
     const user = this.accountService.currentUser();
     const roles = user?.roles ?? [];
-    const adminRole: AdminRole =
-      roles.includes('SUPER_ADMIN') ? 'SUPER_ADMIN' :
-      roles.includes('ADMIN') ? 'ADMIN' :
-      roles.includes('SUPPORT') ? 'SUPPORT' : 'USER';
+    const adminRole: AdminRole = roles.includes('ADMIN') ? 'ADMIN' : 'USER';
 
     const newLog: AuditLog = {
       id: `log_${String(_logIdCounter++).padStart(3, '0')}`,

@@ -1,13 +1,13 @@
 <div class="notifications-page">
   <div class="page-header">
     <div>
-      <h1 class="page-title">Notifications</h1>
-      <p class="page-subtitle">Send in-app broadcasts, email announcements, or push alerts to users.</p>
+      <h1 class="page-title">{{ language.t('admin.notificationsPage.title') }}</h1>
+      <p class="page-subtitle">{{ language.t('admin.notificationsPage.subtitle') }}</p>
     </div>
     <div class="page-header__actions">
       <button type="button" class="btn btn--primary" (click)="openDrawer()">
         <span class="material-symbols-outlined">add</span>
-        New Notification
+        {{ language.t('admin.notificationsPage.newNotification') }}
       </button>
     </div>
   </div>
@@ -16,20 +16,20 @@
     @if (loading) {
       <app-loading-skeleton [count]="6" />
     } @else if (notifications.length === 0) {
-      <app-empty-state icon="notifications_off" title="No notifications" description="Click 'New Notification' to send an announcement." />
+      <app-empty-state icon="notifications_off" [title]="language.t('admin.notificationsPage.noNotifications')" [description]="language.t('admin.notificationsPage.noNotificationsDesc')" />
     } @else {
       <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Title</th>
-              <th>Audience</th>
-              <th>Channel</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Sent / Scheduled</th>
-              <th class="th-num">Read Rate</th>
-              <th>Actions</th>
+              <th>{{ language.t('admin.notificationsPage.titleCol') }}</th>
+              <th>{{ language.t('admin.notificationsPage.audienceCol') }}</th>
+              <th>{{ language.t('admin.notificationsPage.channelCol') }}</th>
+              <th>{{ language.t('admin.notificationsPage.statusCol') }}</th>
+              <th>{{ language.t('admin.notificationsPage.createdCol') }}</th>
+              <th>{{ language.t('admin.notificationsPage.sentScheduledCol') }}</th>
+              <th class="th-num">{{ language.t('admin.notificationsPage.readRateCol') }}</th>
+              <th>{{ language.t('admin.notificationsPage.actionsCol') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -83,20 +83,20 @@
 <!-- Create Notification Drawer -->
 <app-admin-drawer
   [open]="drawerOpen"
-  [title]="'Create Notification'"
+  [title]="language.t('admin.notificationsPage.createDrawerTitle')"
   (closed)="closeDrawer()"
 >
   <div class="drawer-form">
     <div class="form-field">
-      <label class="form-label">Title <span class="form-required">*</span></label>
+      <label class="form-label">{{ language.t('admin.notificationsPage.titleLabel') }} <span class="form-required">*</span></label>
       <input type="text" class="form-input" [(ngModel)]="formData.title" placeholder="System Maintenance Notice" />
     </div>
     <div class="form-field">
-      <label class="form-label">Message Body <span class="form-required">*</span></label>
+      <label class="form-label">{{ language.t('admin.notificationsPage.messageLabel') }} <span class="form-required">*</span></label>
       <textarea class="form-textarea" [(ngModel)]="formData.message" rows="4" placeholder="Enter message text..."></textarea>
     </div>
     <div class="form-field">
-      <label class="form-label">Audience</label>
+      <label class="form-label">{{ language.t('admin.notificationsPage.audienceLabel') }}</label>
       <select class="form-select" [(ngModel)]="formData.audience">
         @for (opt of audienceOptions; track opt.value) {
           <option [value]="opt.value">{{ opt.label }}</option>
@@ -104,7 +104,7 @@
       </select>
     </div>
     <div class="form-field">
-      <label class="form-label">Channel</label>
+      <label class="form-label">{{ language.t('admin.notificationsPage.channelLabel') }}</label>
       <select class="form-select" [(ngModel)]="selectedChannel">
         @for (opt of channelOptions; track opt.value) {
           <option [value]="opt.value">{{ opt.label }}</option>
@@ -112,15 +112,15 @@
       </select>
     </div>
     <div class="form-field">
-      <label class="form-label">Schedule Time (Optional)</label>
+      <label class="form-label">{{ language.t('admin.notificationsPage.scheduleLabel') }}</label>
       <input type="datetime-local" class="form-input" [(ngModel)]="formData.scheduledTime" />
-      <span class="form-hint">Leave blank to send manually.</span>
+      <span class="form-hint">{{ language.t('admin.notificationsPage.scheduleHint') }}</span>
     </div>
     <div class="form-actions">
-      <button type="button" class="btn btn--cancel" (click)="closeDrawer()">Cancel</button>
+      <button type="button" class="btn btn--cancel" (click)="closeDrawer()">{{ language.t('admin.notificationsPage.cancel') }}</button>
       <button type="button" class="btn btn--save" (click)="createNotification()">
         <span class="material-symbols-outlined">add</span>
-        Create Draft
+        {{ language.t('admin.notificationsPage.createDraft') }}
       </button>
     </div>
   </div>

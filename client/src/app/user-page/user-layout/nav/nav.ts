@@ -139,7 +139,7 @@ export class Nav {
 
   get isAdmin(): boolean {
     const roles = this.accountService.currentUser()?.roles ?? [];
-    return roles.includes('ADMIN') || roles.includes('SUPER_ADMIN');
+    return roles.includes('ADMIN');
   }
 
   openAdminConsole(): void {

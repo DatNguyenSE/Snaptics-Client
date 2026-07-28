@@ -7,26 +7,12 @@
 >
   <!-- Brand -->
   <div class="sidebar__brand">
-    <div class="sidebar__brand-icon">
-      <span class="material-symbols-outlined">shield</span>
+    <div class="sidebar__brand-main">
+      <span class="sidebar__brand-name">Snaptics</span>
+      @if (!collapsed) {
+        <span class="sidebar__brand-badge">Admin</span>
+      }
     </div>
-    @if (!collapsed) {
-      <div class="sidebar__brand-text">
-        <span class="sidebar__brand-name">Snaptics</span>
-        <span class="sidebar__brand-sub">{{ language.t('admin.console') }}</span>
-      </div>
-    }
-    <button
-      type="button"
-      class="sidebar__collapse-btn"
-      (click)="toggleCollapse.emit()"
-      [attr.aria-label]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-      [title]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-    >
-      <span class="material-symbols-outlined">
-        {{ collapsed ? 'menu_open' : 'menu' }}
-      </span>
-    </button>
   </div>
 
   <!-- Main nav -->
@@ -50,29 +36,21 @@
       </a>
     }
 
-    <div class="sidebar__divider"></div>
-
     @if (!collapsed) {
-      <p class="sidebar__section-label">{{ language.t('admin.sections.system') }}</p>
+      <p class="sidebar__section-label sidebar__section-label--system">{{ language.t('admin.sections.system') }}</p>
     }
     @for (item of systemNavItems; track item.id) {
       <a
         class="sidebar__item"
-        [class.sidebar__item--disabled]="item.id === 'settings' && !isSuperAdmin"
         [routerLink]="item.route"
         routerLinkActive="sidebar__item--active"
         [routerLinkActiveOptions]="{ exact: false }"
-        [title]="collapsed ? language.t(item.labelKey) : (item.id === 'settings' && !isSuperAdmin ? 'Super Admin only' : '')"
+        [title]="collapsed ? language.t(item.labelKey) : ''"
         (click)="onNavClick()"
       >
         <span class="material-symbols-outlined sidebar__item-icon">{{ item.icon }}</span>
         @if (!collapsed) {
           <span class="sidebar__item-label">{{ language.t(item.labelKey) }}</span>
-          @if (item.id === 'settings' && !isSuperAdmin) {
-            <span class="sidebar__item-lock">
-              <span class="material-symbols-outlined">lock</span>
-            </span>
-          }
         }
       </a>
     }

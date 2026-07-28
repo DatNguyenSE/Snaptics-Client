@@ -1,6 +1,6 @@
 // ─── Admin Roles & Status ──────────────────────────────────────────────────────
 
-export type AdminRole = 'USER' | 'SUPPORT' | 'ADMIN' | 'SUPER_ADMIN';
+export type AdminRole = 'USER' | 'ADMIN';
 
 export type AdminUserStatus = 'active' | 'locked' | 'deleted';
 

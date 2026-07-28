@@ -40,7 +40,7 @@ export class AdminSidebarComponent {
   ];
 
   readonly mainNavItems: SidebarNavItem[] = [
-    { id: 'overview', labelKey: 'admin.nav.overview', icon: 'dashboard', route: '/admin/overview' },
+    { id: 'overview', labelKey: 'admin.nav.overview', icon: 'grid_view', route: '/admin/overview' },
     { id: 'users', labelKey: 'admin.nav.users', icon: 'group', route: '/admin/users' },
     { id: 'tickets', labelKey: 'admin.nav.tickets', icon: 'confirmation_number', route: '/admin/tickets' },
     { id: 'categories', labelKey: 'admin.nav.categories', icon: 'category', route: '/admin/categories' },
@@ -58,8 +58,7 @@ export class AdminSidebarComponent {
     const fullName = user?.displayName?.trim() || 'Mock Admin';
     const email = user?.email?.trim() || 'admin@mock.local';
     const username = email.includes('@') ? email.split('@')[0] : fullName.toLowerCase().replace(/\s+/g, '');
-    const roles = user?.roles ?? [];
-    const role = roles.includes('SUPER_ADMIN') ? 'Super Admin' : 'Admin';
+    const role = 'Admin';
     const initials = fullName
       .split(/\s+/)
       .map((p) => p[0]?.toUpperCase() ?? '')
@@ -68,10 +67,6 @@ export class AdminSidebarComponent {
       .join('') || 'MA';
 
     return { fullName, email, username, role, initials };
-  }
-
-  get isSuperAdmin(): boolean {
-    return (this.accountService.currentUser()?.roles ?? []).includes('SUPER_ADMIN');
   }
 
   toggleAccountMenu(event: MouseEvent): void {

@@ -8,6 +8,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 import { LoadingSkeletonComponent } from '../../components/loading-skeleton/loading-skeleton.component';
 import { AdminDrawerComponent } from '../../components/admin-drawer/admin-drawer.component';
 import { PaginationComponent } from '../../components/pagination/pagination.component';
+import { LanguageService } from '../../../core/services/language-service';
 
 interface LogPage {
   data: AuditLog[];
@@ -26,6 +27,7 @@ interface LogPage {
 })
 export class AuditLogsComponent implements OnInit {
   private readonly auditService = inject(AuditLogService);
+  protected readonly language = inject(LanguageService);
 
   loading = true;
   result: LogPage = { data: [], total: 0, page: 1, pageSize: 15, totalPages: 0 };
@@ -42,20 +44,23 @@ export class AuditLogsComponent implements OnInit {
     riskLevel: '' as RiskLevel | '',
   };
 
-  readonly roleOptions: { value: AdminRole | ''; label: string }[] = [
-    { value: '', label: 'All Roles' },
-    { value: 'SUPER_ADMIN', label: 'Super Admin' },
-    { value: 'ADMIN', label: 'Admin' },
-    { value: 'SUPPORT', label: 'Support' },
-  ];
+  get roleOptions(): { value: AdminRole | ''; label: string }[] {
+    return [
+      { value: '', label: this.language.t('admin.auditLogs.allRoles') },
+      { value: 'ADMIN', label: 'Admin' },
+      { value: 'USER', label: 'User' },
+    ];
+  }
 
-  readonly riskOptions: { value: RiskLevel | ''; label: string }[] = [
-    { value: '', label: 'All Risk Levels' },
-    { value: 'low', label: 'Low' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'high', label: 'High' },
-    { value: 'critical', label: 'Critical' },
-  ];
+  get riskOptions(): { value: RiskLevel | ''; label: string }[] {
+    return [
+      { value: '', label: this.language.t('admin.auditLogs.allRiskLevels') },
+      { value: 'low', label: this.language.t('admin.overview.recentErrors.low') },
+      { value: 'medium', label: this.language.t('admin.overview.recentErrors.medium') },
+      { value: 'high', label: this.language.t('admin.overview.recentErrors.high') },
+      { value: 'critical', label: this.language.t('admin.overview.recentErrors.critical') },
+    ];
+  }
 
   ngOnInit(): void {
     setTimeout(() => {

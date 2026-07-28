@@ -7,6 +7,7 @@ import { EmptyStateComponent } from '../../components/empty-state/empty-state.co
 import { LoadingSkeletonComponent } from '../../components/loading-skeleton/loading-skeleton.component';
 import { AdminDrawerComponent } from '../../components/admin-drawer/admin-drawer.component';
 import { ToastService } from '../../../core/services/toast-service';
+import { LanguageService } from '../../../core/services/language-service';
 
 @Component({
   selector: 'app-notifications',
@@ -18,6 +19,7 @@ import { ToastService } from '../../../core/services/toast-service';
 export class NotificationsComponent implements OnInit {
   private readonly notifService = inject(AdminNotificationService);
   private readonly toast = inject(ToastService);
+  protected readonly language = inject(LanguageService);
 
   loading = true;
   notifications: AdminNotification[] = [];
@@ -32,18 +34,22 @@ export class NotificationsComponent implements OnInit {
     scheduledTime: '',
   };
 
-  readonly audienceOptions: { value: NotificationAudience; label: string }[] = [
-    { value: 'all', label: 'All Users' },
-    { value: 'unverified', label: 'Unverified Users' },
-    { value: 'active', label: 'Active Users' },
-    { value: 'specific', label: 'Specific User' },
-  ];
+  get audienceOptions(): { value: NotificationAudience; label: string }[] {
+    return [
+      { value: 'all', label: this.language.t('admin.notificationsPage.allUsers') },
+      { value: 'unverified', label: this.language.t('admin.notificationsPage.unverifiedUsers') },
+      { value: 'active', label: this.language.t('admin.notificationsPage.activeUsers') },
+      { value: 'specific', label: this.language.t('admin.notificationsPage.specificUser') },
+    ];
+  }
 
-  readonly channelOptions: { value: NotificationChannel; label: string }[] = [
-    { value: 'in_app', label: 'In-App' },
-    { value: 'email', label: 'Email' },
-    { value: 'push', label: 'Push Notification' },
-  ];
+  get channelOptions(): { value: NotificationChannel; label: string }[] {
+    return [
+      { value: 'in_app', label: this.language.t('admin.notificationsPage.inApp') },
+      { value: 'email', label: this.language.t('admin.notificationsPage.email') },
+      { value: 'push', label: this.language.t('admin.notificationsPage.push') },
+    ];
+  }
 
   ngOnInit(): void {
     setTimeout(() => {

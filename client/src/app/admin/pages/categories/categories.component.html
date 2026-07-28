@@ -1,17 +1,17 @@
 <div class="categories-page">
   <div class="page-header">
     <div>
-      <h1 class="page-title">Categories</h1>
-      <p class="page-subtitle">Manage income and expense categories across Snaptics.</p>
+      <h1 class="page-title">{{ language.t('admin.categories.title') }}</h1>
+      <p class="page-subtitle">{{ language.t('admin.categories.subtitle') }}</p>
     </div>
     <div class="page-header__actions">
       <button type="button" class="btn btn--ghost">
         <span class="material-symbols-outlined">download</span>
-        Export
+        {{ language.t('admin.categories.export') }}
       </button>
       <button type="button" class="btn btn--primary" (click)="openAddDrawer()">
         <span class="material-symbols-outlined">add</span>
-        Add Category
+        {{ language.t('admin.categories.addCategory') }}
       </button>
     </div>
   </div>
@@ -20,19 +20,19 @@
   <div class="summary-cards">
     <div class="summary-card">
       <span class="material-symbols-outlined summary-card__icon summary-card__icon--primary">category</span>
-      <div><p class="summary-card__value">{{ totalCats }}</p><p class="summary-card__label">Total Categories</p></div>
+      <div><p class="summary-card__value">{{ totalCats }}</p><p class="summary-card__label">{{ language.t('admin.categories.totalCategories') }}</p></div>
     </div>
     <div class="summary-card">
       <span class="material-symbols-outlined summary-card__icon summary-card__icon--red">trending_down</span>
-      <div><p class="summary-card__value">{{ expenseCats }}</p><p class="summary-card__label">Expense</p></div>
+      <div><p class="summary-card__value">{{ expenseCats }}</p><p class="summary-card__label">{{ language.t('admin.categories.expense') }}</p></div>
     </div>
     <div class="summary-card">
       <span class="material-symbols-outlined summary-card__icon summary-card__icon--green">trending_up</span>
-      <div><p class="summary-card__value">{{ incomeCats }}</p><p class="summary-card__label">Income</p></div>
+      <div><p class="summary-card__value">{{ incomeCats }}</p><p class="summary-card__label">{{ language.t('admin.categories.income') }}</p></div>
     </div>
     <div class="summary-card">
       <span class="material-symbols-outlined summary-card__icon summary-card__icon--muted">visibility_off</span>
-      <div><p class="summary-card__value">{{ inactiveCats }}</p><p class="summary-card__label">Inactive</p></div>
+      <div><p class="summary-card__value">{{ inactiveCats }}</p><p class="summary-card__label">{{ language.t('admin.categories.inactive') }}</p></div>
     </div>
   </div>
 
@@ -40,7 +40,7 @@
   <div class="filter-bar">
     <div class="filter-search">
       <span class="material-symbols-outlined filter-search__icon">search</span>
-      <input type="search" class="filter-search__input" placeholder="Search categories..." [(ngModel)]="searchQuery" />
+      <input type="search" class="filter-search__input" [placeholder]="language.t('admin.categories.searchPlaceholder')" [(ngModel)]="searchQuery" />
     </div>
     <select class="filter-select" [(ngModel)]="typeFilter">
       @for (opt of typeOptions; track opt.value) {
@@ -54,22 +54,22 @@
     @if (loading) {
       <app-loading-skeleton [count]="8" [showAvatar]="true" />
     } @else if (filtered.length === 0) {
-      <app-empty-state icon="category" title="No categories found" description="Try adjusting your search." />
+      <app-empty-state icon="category" [title]="language.t('admin.categories.noCategoriesFound')" [description]="language.t('admin.categories.noCategoriesDesc')" />
     } @else {
       <div class="table-wrap">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Icon</th>
-              <th>Vietnamese Name</th>
-              <th>English Name</th>
-              <th>Type</th>
-              <th class="th-num">Usage</th>
-              <th class="th-num">Order</th>
-              <th>Default</th>
-              <th>Status</th>
-              <th>Updated</th>
-              <th>Actions</th>
+              <th>{{ language.t('admin.categories.icon') }}</th>
+              <th>{{ language.t('admin.categories.nameVi') }}</th>
+              <th>{{ language.t('admin.categories.nameEn') }}</th>
+              <th>{{ language.t('admin.categories.type') }}</th>
+              <th class="th-num">{{ language.t('admin.categories.usage') }}</th>
+              <th class="th-num">{{ language.t('admin.categories.order') }}</th>
+              <th>{{ language.t('admin.categories.default') }}</th>
+              <th>{{ language.t('admin.categories.status') }}</th>
+              <th>{{ language.t('admin.categories.updated') }}</th>
+              <th>{{ language.t('admin.categories.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -87,12 +87,12 @@
                 <td class="td-num">{{ cat.displayOrder }}</td>
                 <td>
                   @if (cat.isDefault) {
-                    <span class="default-badge"><span class="material-symbols-outlined">check</span> Default</span>
+                    <span class="default-badge"><span class="material-symbols-outlined">check</span> {{ language.t('admin.categories.default') }}</span>
                   } @else {
                     <span class="td-muted">—</span>
                   }
                 </td>
-                <td><app-status-badge [variant]="getStatusVariant(cat.isActive)" [label]="cat.isActive ? 'Active' : 'Inactive'" /></td>
+                <td><app-status-badge [variant]="getStatusVariant(cat.isActive)" [label]="cat.isActive ? language.t('admin.categories.active') : language.t('admin.categories.inactive')" /></td>
                 <td class="td-muted">{{ formatDate(cat.updatedAt) }}</td>
                 <td>
                   <div class="actions">
@@ -123,29 +123,29 @@
 <!-- Drawer -->
 <app-admin-drawer
   [open]="drawerOpen"
-  [title]="editingCategory ? 'Edit Category' : 'Add Category'"
+  [title]="editingCategory ? language.t('admin.categories.editCategory') : language.t('admin.categories.addCategory')"
   [subtitle]="editingCategory?.nameVi"
   (closed)="closeDrawer()"
 >
   <div class="drawer-form">
     <div class="form-field">
-      <label class="form-label">Vietnamese Name <span class="form-required">*</span></label>
+      <label class="form-label">{{ language.t('admin.categories.nameVi') }} <span class="form-required">*</span></label>
       <input type="text" class="form-input" [(ngModel)]="formData.nameVi" placeholder="Ăn uống" />
     </div>
     <div class="form-field">
-      <label class="form-label">English Name <span class="form-required">*</span></label>
+      <label class="form-label">{{ language.t('admin.categories.nameEn') }} <span class="form-required">*</span></label>
       <input type="text" class="form-input" [(ngModel)]="formData.nameEn" placeholder="Food & Dining" />
     </div>
     <div class="form-field">
-      <label class="form-label">Type</label>
+      <label class="form-label">{{ language.t('admin.categories.type') }}</label>
       <select class="form-select" [(ngModel)]="formData.type">
-        <option value="expense">Expense</option>
-        <option value="income">Income</option>
-        <option value="both">Both</option>
+        <option value="expense">{{ language.t('admin.categories.expense') }}</option>
+        <option value="income">{{ language.t('admin.categories.income') }}</option>
+        <option value="both">{{ language.t('admin.categories.both') }}</option>
       </select>
     </div>
     <div class="form-field">
-      <label class="form-label">Icon</label>
+      <label class="form-label">{{ language.t('admin.categories.icon') }}</label>
       <div class="icon-picker">
         @for (icon of iconOptions; track icon) {
           <button
@@ -161,21 +161,21 @@
       </div>
     </div>
     <div class="form-field">
-      <label class="form-label">Description</label>
+      <label class="form-label">{{ language.t('admin.categories.description') }}</label>
       <textarea class="form-textarea" [(ngModel)]="formData.description" rows="2" placeholder="Optional description"></textarea>
     </div>
     <div class="form-field">
-      <label class="form-label">Display Order</label>
+      <label class="form-label">{{ language.t('admin.categories.displayOrder') }}</label>
       <input type="number" class="form-input" [(ngModel)]="formData.displayOrder" min="1" />
     </div>
     <div class="form-toggles">
       <label class="toggle-label">
         <input type="checkbox" [(ngModel)]="formData.isDefault" class="toggle-checkbox" />
-        <span class="toggle-text">Set as Default</span>
+        <span class="toggle-text">{{ language.t('admin.categories.setAsDefault') }}</span>
       </label>
       <label class="toggle-label">
         <input type="checkbox" [(ngModel)]="formData.isActive" class="toggle-checkbox" />
-        <span class="toggle-text">Active</span>
+        <span class="toggle-text">{{ language.t('admin.categories.active') }}</span>
       </label>
     </div>
     <!-- Preview -->
@@ -191,9 +191,9 @@
       </div>
     }
     <div class="form-actions">
-      <button type="button" class="btn btn--cancel" (click)="closeDrawer()">Cancel</button>
+      <button type="button" class="btn btn--cancel" (click)="closeDrawer()">{{ language.t('admin.categories.cancel') }}</button>
       <button type="button" class="btn btn--save" (click)="saveCategory()">
-        Save
+        {{ language.t('admin.categories.save') }}
       </button>
     </div>
   </div>
