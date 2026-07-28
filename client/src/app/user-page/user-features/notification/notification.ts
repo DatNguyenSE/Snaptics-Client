@@ -32,7 +32,7 @@ export class Notification {
   private readonly router = inject(Router);
 
   // States
-  readonly activeTab = signal<NotificationFilterTab>('all');
+  readonly activeTab = signal<NotificationFilterTab>('unread');
   readonly timeFilter = signal<TimeFilter>('all');
   readonly isLoading = this.notificationService.isLoading;
   readonly hasError = this.notificationService.hasError;

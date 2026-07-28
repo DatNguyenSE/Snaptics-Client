@@ -215,9 +215,16 @@
   text-align: center;
 }
 
+@keyframes pulse-badge {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
 .notification-tab__badge--unread {
   background: #ef4444;
   color: #ffffff;
+  animation: pulse-badge 2s infinite;
 }
 
 .notification-time-filter {

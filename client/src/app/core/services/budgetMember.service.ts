@@ -29,7 +29,7 @@ export class BudgetMemberService {
 
   inviteMember(budgetId: number, request: { email?: string; emailOrUsername?: string; role: any }): Observable<any> {
     const payload = {
-      email: request.email || request.emailOrUsername,
+      emailOrUsername: request.email || request.emailOrUsername,
       role: request.role
     };
     return this.http.post<any>(`${this.apiUrl}/${budgetId}/members/invite`, payload).pipe(
