@@ -114,18 +114,18 @@ export class Register implements OnDestroy {
 
     // Kiểm tra user đã nhập đủ thông tin chưa
     if (!fullName || !email || !password || !confirmPassword) {
-      this.errorMessage = 'Please fill in all required fields.';
+      this.errorMessage = 'Vui lòng điền đầy đủ tất cả thông tin.';
       return;
     }
 
     if (!this.emailPattern.test(email)) {
-      this.errorMessage = 'Email format is invalid.';
+      this.errorMessage = 'Định dạng email không hợp lệ.';
       return;
     }
 
     // Kiểm tra mật khẩu và xác nhận mật khẩu có giống nhau không
     if (password !== confirmPassword) {
-      this.errorMessage = 'Confirm password does not match.';
+      this.errorMessage = 'Mật khẩu xác nhận không khớp.';
       return;
     }
 
@@ -155,7 +155,7 @@ export class Register implements OnDestroy {
         this.isLoading = false;
 
         // Hiện thông báo thành công
-        this.successMessage = 'Registration successful! Please check your email for the OTP code.';
+        this.successMessage = 'Đăng ký thành công! Vui lòng kiểm tra email để lấy mã OTP.';
         this.isOtpStep = true;
       },
 
@@ -185,7 +185,7 @@ export class Register implements OnDestroy {
         if (this.accountService.currentUser()) {
           this.router.navigate(['/user/dashboard']);
         } else {
-          this.successMessage = 'Account verified successfully! Redirecting to login...';
+          this.successMessage = 'Xác thực tài khoản thành công! Đang chuyển hướng đến đăng nhập...';
           setTimeout(() => {
             this.router.navigate(['/login']);
           }, 1000);
@@ -201,7 +201,7 @@ export class Register implements OnDestroy {
         } else if (error.error && error.error.message) {
           this.errorMessage = error.error.message;
         } else {
-          this.errorMessage = 'Invalid OTP. Please try again.';
+          this.errorMessage = 'Mã OTP không hợp lệ. Vui lòng thử lại.';
         }
       }
     });
@@ -215,7 +215,7 @@ export class Register implements OnDestroy {
     this.accountService.resendOtp(this.email).subscribe({
       next: () => {
         this.isLoading = false;
-        this.successMessage = 'A new OTP has been sent to your email.';
+        this.successMessage = 'Mã OTP mới đã được gửi tới email của bạn.';
         this.startResendCountdown();
       },
       error: (error) => {
@@ -223,7 +223,7 @@ export class Register implements OnDestroy {
         if (error.error && typeof error.error === 'string') {
           this.errorMessage = error.error;
         } else {
-          this.errorMessage = 'Failed to resend OTP. Please try again.';
+          this.errorMessage = 'Gửi lại mã OTP thất bại. Vui lòng thử lại.';
         }
       }
     });
@@ -258,43 +258,43 @@ export class Register implements OnDestroy {
     
     switch (err.status) {
       case 0:
-        return 'Unable to connect to the server (failed to fetch). Please check your network, CORS, or backend.';
+        return 'Không thể kết nối tới máy chủ. Vui lòng kiểm tra kết nối mạng.';
       case 400:
         return rawMessage
           ? this.formatFallbackError(rawMessage)
-          : 'Registration data is invalid. Please review the fields and try again.';
+          : 'Dữ liệu đăng ký không hợp lệ. Vui lòng kiểm tra lại thông tin.';
       case 401:
         return rawMessage
           ? this.formatFallbackError(rawMessage)
-          : 'Your authentication session is invalid. Please refresh the page and try again.';
+          : 'Phiên làm việc không hợp lệ. Vui lòng tải lại trang và thử lại.';
       case 403:
         return rawMessage
           ? this.formatFallbackError(rawMessage)
-          : 'You do not have permission to perform this registration action.';
+          : 'Bạn không có quyền thực hiện thao tác đăng ký này.';
       case 404:
         return rawMessage
           ? this.formatFallbackError(rawMessage)
-          : 'Registration API was not found. Please check the backend configuration.';
+          : 'Không tìm thấy dịch vụ đăng ký.';
       case 409:
-        return rawMessage ? this.formatFallbackError(rawMessage) : 'This email has already been registered.';
+        return rawMessage ? this.formatFallbackError(rawMessage) : 'Email này đã được đăng ký.';
       case 422:
         return rawMessage
           ? this.formatFallbackError(rawMessage)
-          : 'Registration data does not meet the system requirements.';
+          : 'Dữ liệu đăng ký không đáp ứng yêu cầu hệ thống.';
       case 429:
-        return 'Too many requests. Please wait a moment and try again.';
+        return 'Quá nhiều yêu cầu. Vui lòng thử lại sau giây lát.';
       case 500:
         return rawMessage && !this.isGenericServerMessage(rawMessage)
           ? this.formatFallbackError(rawMessage)
-          : 'The server encountered an internal error. Please try again later.';
+          : 'Máy chủ xảy ra lỗi nội bộ. Vui lòng thử lại sau.';
       case 502:
       case 503:
       case 504:
-        return 'The server is temporarily unavailable. Please try again later.';
+        return 'Máy chủ tạm thời không khả dụng. Vui lòng thử lại sau.';
       default:
         return rawMessage
           ? this.formatFallbackError(rawMessage)
-          : 'Registration failed. Please try again.';
+          : 'Đăng ký thất bại. Vui lòng thử lại.';
     }
   }
 
@@ -337,7 +337,7 @@ export class Register implements OnDestroy {
         normalizedMessage.includes('duplicate') ||
         normalizedMessage.includes('taken')
       ) {
-        return 'This email has already been registered.';
+        return 'Email này đã được đăng ký.';
       }
 
       if (
@@ -346,20 +346,20 @@ export class Register implements OnDestroy {
         normalizedMessage.includes('email address') ||
         normalizedMessage.includes('format')
       ) {
-        return 'Email format is invalid.';
+        return 'Định dạng email không hợp lệ.';
       }
     }
 
     if (normalizedMessage.includes('required')) {
-      return `${fieldLabel} is required.`;
+      return `${fieldLabel} không được để trống.`;
     }
 
     if (normalizedMessage.includes('minimum length') || normalizedMessage.includes('at least')) {
-      return `${fieldLabel} does not meet the minimum length requirement.`;
+      return `${fieldLabel} chưa đạt độ dài tối thiểu.`;
     }
 
     if (normalizedMessage.includes('maximum length') || normalizedMessage.includes('at most')) {
-      return `${fieldLabel} exceeds the maximum allowed length.`;
+      return `${fieldLabel} vượt quá độ dài tối đa cho phép.`;
     }
 
     return `${fieldLabel}: ${message}`;
@@ -369,11 +369,11 @@ export class Register implements OnDestroy {
     const normalizedMessage = message.trim().toLowerCase();
 
     if (normalizedMessage.includes('failed to fetch')) {
-      return 'Unable to connect to the server (failed to fetch). Please check your network or backend.';
+      return 'Không thể kết nối tới máy chủ. Vui lòng kiểm tra kết nối mạng.';
     }
 
     if (normalizedMessage.includes('regular expression') || normalizedMessage.includes('regex')) {
-      return 'Registration data does not match the required format.';
+      return 'Dữ liệu đăng ký không đúng định dạng yêu cầu.';
     }
 
     if (
@@ -382,19 +382,19 @@ export class Register implements OnDestroy {
       normalizedMessage.includes('duplicate') ||
       normalizedMessage.includes('taken')
     ) {
-      return 'This email has already been registered.';
+      return 'Email này đã được đăng ký.';
     }
 
     if (normalizedMessage.includes('one or more validation errors occurred')) {
-      return 'Registration data is invalid. Please review the form and try again.';
+      return 'Dữ liệu đăng ký không hợp lệ. Vui lòng kiểm tra lại biểu mẫu.';
     }
 
     if (normalizedMessage.includes('forbidden')) {
-      return 'You do not have permission to perform this action.';
+      return 'Bạn không có quyền thực hiện hành động này.';
     }
 
     if (normalizedMessage.includes('unauthorized')) {
-      return 'This request is unauthorized. Please try again.';
+      return 'Yêu cầu chưa được xác thực. Vui lòng thử lại.';
     }
 
     return message;
@@ -415,13 +415,13 @@ export class Register implements OnDestroy {
     switch (field.toLowerCase()) {
       case 'displayname':
       case 'fullname':
-        return 'Display name';
+        return 'Họ và tên';
       case 'email':
         return 'Email';
       case 'password':
-        return 'Password';
+        return 'Mật khẩu';
       case 'confirmpassword':
-        return 'Confirm password';
+        return 'Xác nhận mật khẩu';
       default:
         return field;
     }

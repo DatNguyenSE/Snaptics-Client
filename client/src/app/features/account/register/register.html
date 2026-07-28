@@ -5,8 +5,8 @@
     <div class="register-image-side">
       <div class="image-content">
         <div class="promo-text">
-          <h2>Join Snaptics AI</h2>
-          <p>Create an account to start scanning, tracking, and managing your expenses intelligently.</p>
+          <h2>Tham Gia Snaptics AI</h2>
+          <p>Tạo tài khoản để bắt đầu quét, theo dõi và quản lý chi tiêu thông minh.</p>
         </div>
       </div>
       <!-- Decorative background elements -->
@@ -21,15 +21,15 @@
           <div class="brand-text-container">
             <span class="brand-text-logo">Snaptics</span>
           </div>
-          <h1>Create an Account</h1>
-          <p>Fill in the details below to get started</p>
+          <h1>Tạo Tài Khoản</h1>
+          <p>Điền đầy đủ thông tin bên dưới để bắt đầu</p>
         </div>
 
         @if (!isOtpStep) {
         <form class="register-form" (ngSubmit)="onRegister()" #registerForm="ngForm">
           <!-- Full Name -->
           <div class="form-group">
-            <label for="fullName">Full Name</label>
+            <label for="fullName">Họ và Tên</label>
             <div class="input-icon-wrapper">
               <span class="material-symbols-outlined input-icon">person</span>
               <input
@@ -38,7 +38,7 @@
                 name="fullName"
                 [(ngModel)]="fullName"
                 required
-                placeholder="John Doe"
+                placeholder="Nguyễn Văn A"
                 #nameInput="ngModel"
                 [class.invalid-field]="nameInput.invalid && nameInput.touched"
               />
@@ -47,7 +47,7 @@
 
           <!-- Email -->
           <div class="form-group">
-            <label for="email">Email Address</label>
+            <label for="email">Địa chỉ Email</label>
             <div class="input-icon-wrapper">
               <span class="material-symbols-outlined input-icon">mail</span>
               <input
@@ -57,7 +57,7 @@
                 [(ngModel)]="email"
                 required
                 email
-                placeholder="name@example.com"
+                placeholder="ten@vi-du.com"
                 #emailInput="ngModel"
                 [class.invalid-field]="emailInput.invalid && emailInput.touched"
               />
@@ -66,7 +66,7 @@
 
           <!-- Password -->
           <div class="form-group">
-            <label for="password">Password</label>
+            <label for="password">Mật khẩu</label>
             <div class="input-icon-wrapper">
               <span class="material-symbols-outlined input-icon">lock</span>
               <input
@@ -83,7 +83,7 @@
                 type="button" 
                 class="password-toggle-btn" 
                 (click)="showPassword = !showPassword" 
-                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                [attr.aria-label]="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
                 tabindex="-1"
               >
                 <span class="material-symbols-outlined">
@@ -95,7 +95,7 @@
 
           <!-- Confirm Password -->
           <div class="form-group">
-            <label for="confirmPassword">Confirm Password</label>
+            <label for="confirmPassword">Xác Nhận Mật Khẩu</label>
             <div class="input-icon-wrapper">
               <span class="material-symbols-outlined input-icon">lock_reset</span>
               <input
@@ -112,7 +112,7 @@
                 type="button" 
                 class="password-toggle-btn" 
                 (click)="showConfirmPassword = !showConfirmPassword" 
-                [attr.aria-label]="showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'"
+                [attr.aria-label]="showConfirmPassword ? 'Ẩn xác nhận mật khẩu' : 'Hiện xác nhận mật khẩu'"
                 tabindex="-1"
               >
                 <span class="material-symbols-outlined">
@@ -144,22 +144,22 @@
           >
             @if (isLoading) {
               <span class="spinner"></span>
-              <span>Registering...</span>
+              <span>Đang đăng ký...</span>
             } @else {
-              <span>Create Account</span>
+              <span>Đăng Ký Tài Khoản</span>
               <span class="material-symbols-outlined btn-arrow">arrow_forward</span>
             }
           </button>
 
           <div class="login-link">
-            Already have an account?
-            <a routerLink="/login">Log In</a>
+            Đã có tài khoản?
+            <a routerLink="/login">Đăng nhập</a>
           </div>
         </form>
         } @else {
         <form class="register-form" (ngSubmit)="verifyOtp()" #otpForm="ngForm">
           <div class="form-group">
-            <label for="otpCode">Verification Code</label>
+            <label for="otpCode">Mã Xác Thực (OTP)</label>
             <div class="otp-inputs-container">
               @for (digit of otpDigits; track $index) {
                 <input
@@ -199,26 +199,26 @@
           >
             @if (isLoading) {
               <span class="spinner"></span>
-              <span>Verifying...</span>
+              <span>Đang xác thực...</span>
             } @else {
-              <span>Verify OTP</span>
+              <span>Xác Thực OTP</span>
               <span class="material-symbols-outlined btn-arrow">check_circle</span>
             }
           </button>
 
           <div class="login-link" style="justify-content: center; margin-top: 16px;">
-            <span style="font-size: 13px; color: #64748b; font-weight: 500;">Didn't receive code?</span>
+            <span style="font-size: 13px; color: #64748b; font-weight: 500;">Chưa nhận được mã?</span>
             <a href="javascript:void(0)" 
                (click)="resendCountdown === 0 ? resendOtp() : null" 
                style="margin-left: 6px; text-decoration: none;"
                [style.color]="resendCountdown > 0 ? '#94a3b8' : '#2563eb'"
                [style.cursor]="resendCountdown > 0 ? 'not-allowed' : 'pointer'"
             >
-              {{ resendCountdown > 0 ? 'Resend in ' + resendCountdown + 's' : 'Resend' }}
+              {{ resendCountdown > 0 ? 'Gửi lại sau ' + resendCountdown + 's' : 'Gửi lại' }}
             </a>
           </div>
           <div class="login-link">
-            <a href="javascript:void(0)" (click)="isOtpStep = false; successMessage = ''; errorMessage = '';">Back to register</a>
+            <a href="javascript:void(0)" (click)="isOtpStep = false; successMessage = ''; errorMessage = '';">Quay lại đăng ký</a>
           </div>
         </form>
         }

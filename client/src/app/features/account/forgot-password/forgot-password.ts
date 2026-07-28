@@ -42,7 +42,7 @@ export class ForgotPassword implements OnInit {
     this.requestEmail = this.email;
 
     if (this.hasIncompleteResetLink) {
-      this.errorMessage = 'This password reset link is incomplete. Please request a new reset email below.';
+      this.errorMessage = 'Liên kết đặt lại mật khẩu này không đầy đủ. Vui lòng yêu cầu liên kết mới bên dưới.';
     }
   }
 
@@ -62,12 +62,12 @@ export class ForgotPassword implements OnInit {
     const email = this.requestEmail.trim();
 
     if (!email) {
-      this.errorMessage = 'Please enter your email address.';
+      this.errorMessage = 'Vui lòng nhập địa chỉ email.';
       return;
     }
 
     if (!this.emailPattern.test(email)) {
-      this.errorMessage = 'Email format is invalid.';
+      this.errorMessage = 'Định dạng email không hợp lệ.';
       return;
     }
 
@@ -76,7 +76,7 @@ export class ForgotPassword implements OnInit {
     this.accountService.forgotPassword(email).subscribe({
       next: () => {
         this.requestEmail = email;
-        this.successMessage = 'If an account exists for this email, a password reset link has been sent.';
+        this.successMessage = 'Nếu tài khoản tồn tại với email này, liên kết đặt lại mật khẩu đã được gửi.';
         this.isLoading = false;
       },
       error: (err: HttpErrorResponse) => {
@@ -88,22 +88,22 @@ export class ForgotPassword implements OnInit {
 
   private resetPassword() {
     if (!this.email || !this.token) {
-      this.errorMessage = 'This reset link is invalid or incomplete. Please request a new reset email.';
+      this.errorMessage = 'Liên kết đặt lại mật khẩu không hợp lệ hoặc thiếu thông tin. Vui lòng yêu cầu lại.';
       return;
     }
 
     if (!this.newPassword || !this.confirmPassword) {
-      this.errorMessage = 'Please enter and confirm your new password.';
+      this.errorMessage = 'Vui lòng nhập và xác nhận mật khẩu mới.';
       return;
     }
 
     if (this.newPassword.length < 8) {
-      this.errorMessage = 'Password must be at least 8 characters long.';
+      this.errorMessage = 'Mật khẩu phải có ít nhất 8 ký tự.';
       return;
     }
 
     if (this.newPassword !== this.confirmPassword) {
-      this.errorMessage = 'Password confirmation does not match.';
+      this.errorMessage = 'Mật khẩu xác nhận không khớp.';
       return;
     }
 
@@ -115,7 +115,7 @@ export class ForgotPassword implements OnInit {
         next: () => {
           this.newPassword = '';
           this.confirmPassword = '';
-          this.successMessage = 'Password has been reset successfully. Redirecting to sign in...';
+          this.successMessage = 'Mật khẩu đã được đặt lại thành công. Đang chuyển hướng đến đăng nhập...';
           this.isLoading = false;
 
           setTimeout(() => {
@@ -132,22 +132,22 @@ export class ForgotPassword implements OnInit {
 
   private getRequestErrorMessage(err: HttpErrorResponse): string {
     if (err.status === 0) {
-      return 'Unable to connect to the server. Please try again later.';
+      return 'Không thể kết nối tới máy chủ. Vui lòng thử lại sau.';
     }
 
-    return this.getRawErrorMessage(err) || 'Failed to send the password reset email. Please try again.';
+    return this.getRawErrorMessage(err) || 'Gửi email đặt lại mật khẩu thất bại. Vui lòng thử lại.';
   }
 
   private getResetErrorMessage(err: HttpErrorResponse): string {
     if (err.status === 0) {
-      return 'Unable to connect to the server. Please try again later.';
+      return 'Không thể kết nối tới máy chủ. Vui lòng thử lại sau.';
     }
 
     if (err.status === 400 || err.status === 404) {
-      return this.getRawErrorMessage(err) || 'This reset link is invalid or has expired. Please request a new one.';
+      return this.getRawErrorMessage(err) || 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu liên kết mới.';
     }
 
-    return this.getRawErrorMessage(err) || 'Cannot reset password right now. Please try again.';
+    return this.getRawErrorMessage(err) || 'Không thể đặt lại mật khẩu lúc này. Vui lòng thử lại.';
   }
 
   private getRawErrorMessage(err: HttpErrorResponse): string {

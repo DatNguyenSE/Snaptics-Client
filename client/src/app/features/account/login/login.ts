@@ -26,7 +26,7 @@ export class Login implements OnDestroy {
 
 
 
-  protected Title = 'Welcome Back';
+  protected Title = 'Chào Mừng Trở Lại';
   model: any = {};
   isLoading = false;
   errorMessage = '';
@@ -111,7 +111,7 @@ export class Login implements OnDestroy {
           }
         } else {
           this.isOtpStep = true;
-          this.successMessage = 'Please check your email for the OTP code.';
+          this.successMessage = 'Vui lòng kiểm tra email để lấy mã OTP.';
         }
       },
       error: (error) => {
@@ -143,7 +143,7 @@ export class Login implements OnDestroy {
           this.router.navigate(['/user/dashboard']);
         } else {
           this.isOtpStep = false;
-          this.successMessage = 'Account verified successfully. Please sign in.';
+          this.successMessage = 'Xác thực tài khoản thành công. Vui lòng đăng nhập.';
           this.errorMessage = '';
         }
       },
@@ -163,7 +163,7 @@ export class Login implements OnDestroy {
     this.accountService.resendOtp(this.model.email).subscribe({
       next: () => {
         this.isLoading = false;
-        this.successMessage = 'A new OTP has been sent to your email.';
+        this.successMessage = 'Mã OTP mới đã được gửi tới email của bạn.';
         this.startResendCountdown();
       },
       error: (error) => {
