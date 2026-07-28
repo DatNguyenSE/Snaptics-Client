@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AccountService } from '../../../core/services/account-service';
 import { LanguageService } from '../../../core/services/language-service';
 import { ToastService } from '../../../core/services/toast-service';
@@ -21,11 +21,12 @@ import { SupportService } from './services/support.service';
 @Component({
   selector: 'app-support',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './support.html',
   styleUrl: './support.css',
 })
 export class Support implements OnInit {
+  private readonly fb = inject(FormBuilder);
   readonly supportService = inject(SupportService);
   readonly languageService = inject(LanguageService);
   readonly accountService = inject(AccountService);
@@ -57,14 +58,14 @@ export class Support implements OnInit {
   selectedReplyFiles: File[] = [];
 
   // Create Ticket Form Model & Validation
-  createForm = {
-    title: '',
-    category: 'account' as SupportCategory,
-    priority: 'normal' as TicketPriority,
-    description: '',
-    email: '',
-    attachments: [] as SupportAttachment[],
-  };
+  ticketForm: FormGroup = this.fb.group({
+    email: [{ value: '', disabled: true }],
+    title: ['', [Validators.required, Validators.minLength(5)]],
+    category: ['account', Validators.required],
+    priority: ['normal', Validators.required],
+    description: ['', [Validators.required, Validators.minLength(20)]],
+  });
+  createAttachments: SupportAttachment[] = [];
   fileUploadError = signal<string | null>(null);
   isSubmittingTicket = signal<boolean>(false);
 
@@ -230,10 +231,20 @@ export class Support implements OnInit {
     return this.paginatedTickets().length < this.filteredTickets().length;
   });
 
-  // Form Validation Computeds
-  readonly isTitleValid = computed(() => this.createForm.title.trim().length >= 5);
-  readonly isDescriptionValid = computed(() => this.createForm.description.trim().length >= 10);
-  readonly isFormValid = computed(() => this.isTitleValid() && this.isDescriptionValid());
+  // Form Validation Getters
+  get isTitleValid(): boolean {
+    const title = this.ticketForm.get('title')?.value || '';
+    return title.trim().length >= 5;
+  }
+
+  get isDescriptionValid(): boolean {
+    const desc = this.ticketForm.get('description')?.value || '';
+    return desc.trim().length >= 20;
+  }
+
+  get isFormValid(): boolean {
+    return this.ticketForm.valid;
+  }
 
   // --- Handlers ---
 
@@ -264,14 +275,14 @@ export class Support implements OnInit {
 
   openCreateModal(): void {
     const user = this.accountService.currentUser();
-    this.createForm = {
+    this.ticketForm.reset({
+      email: user?.email || '',
       title: '',
       category: 'account',
       priority: 'normal',
       description: '',
-      email: user?.email || '',
-      attachments: [],
-    };
+    });
+    this.createAttachments = [];
     this.selectedCreateFiles = [];
     this.fileUploadError.set(null);
     this.isCreateModalOpen.set(true);
@@ -304,29 +315,30 @@ export class Support implements OnInit {
       type: file.type,
     };
 
-    this.createForm.attachments.push(attachment);
+    this.createAttachments.push(attachment);
     input.value = '';
   }
 
   removeAttachment(index: number): void {
-    this.createForm.attachments.splice(index, 1);
+    this.createAttachments.splice(index, 1);
     if (this.selectedCreateFiles[index]) {
       this.selectedCreateFiles.splice(index, 1);
     }
   }
 
   async submitCreateTicket(): Promise<void> {
-    if (!this.isFormValid() || this.isSubmittingTicket()) return;
+    if (this.ticketForm.invalid || this.isSubmittingTicket()) return;
 
     this.isSubmittingTicket.set(true);
     try {
+      const rawVal = this.ticketForm.getRawValue();
       const dto: CreateTicketDTO = {
-        title: this.createForm.title,
-        category: this.createForm.category,
-        priority: this.createForm.priority,
-        description: this.createForm.description,
-        contactEmail: this.createForm.email,
-        attachments: [...this.createForm.attachments],
+        title: rawVal.title,
+        category: rawVal.category,
+        priority: rawVal.priority,
+        description: rawVal.description,
+        contactEmail: rawVal.email || this.accountService.currentUser()?.email || '',
+        attachments: [...this.createAttachments],
       };
 
       const newTicket = await this.supportService.createTicket(dto);

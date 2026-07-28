@@ -37,3 +37,18 @@ export interface TransactionDto {
   createdByUserId?: string | null;
   createdByUser?: TransactionCreatorDto | null;
 }
+
+export interface UpdateItemPriceDto {
+  detailId: number;
+  price: number;
+}
+
+export interface MissingPriceItemDto {
+  detailId: number;
+  itemName: string;
+  price: number;
+  transactionId: number;
+  unit?: string | null;
+  categoryName?: string | null;
+}
+

@@ -1,19 +1,15 @@
 import { Injectable, signal } from '@angular/core';
 import { of, delay } from 'rxjs';
 import { AuditLog, AdminRole, RiskLevel } from '../models/admin.models';
-import { MOCK_AUDIT_LOGS } from '../data/admin-mock-data';
 import { AccountService } from '../../core/services/account-service';
 import { inject } from '@angular/core';
 
-// TODO: Replace mock implementation with Admin API.
-// GET /api/admin/audit-logs
-
-let _logIdCounter = MOCK_AUDIT_LOGS.length + 1;
+let _logIdCounter = 1;
 
 @Injectable({ providedIn: 'root' })
 export class AuditLogService {
   private readonly accountService = inject(AccountService);
-  private readonly _logs = signal<AuditLog[]>(structuredClone(MOCK_AUDIT_LOGS));
+  private readonly _logs = signal<AuditLog[]>([]);
 
   readonly logs = this._logs.asReadonly();
 

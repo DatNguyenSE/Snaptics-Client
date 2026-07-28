@@ -1,21 +1,13 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { of, delay } from 'rxjs';
 import { AdminUser, AdminUserStatus, AdminRole, PaginatedResult, UserFilter } from '../models/admin.models';
-import { MOCK_ADMIN_USERS } from '../data/admin-mock-data';
 import { AuditLogService } from './audit-log.service';
 import { inject } from '@angular/core';
-
-// TODO: Replace mock implementation with Admin API.
-// GET    /api/admin/users
-// GET    /api/admin/users/:id
-// PATCH  /api/admin/users/:id/status
-// PATCH  /api/admin/users/:id/role
-// DELETE /api/admin/users/:id
 
 @Injectable({ providedIn: 'root' })
 export class AdminUserService {
   private readonly auditLog = inject(AuditLogService);
-  private readonly _users = signal<AdminUser[]>(structuredClone(MOCK_ADMIN_USERS));
+  private readonly _users = signal<AdminUser[]>([]);
   private readonly _loading = signal<boolean>(false);
 
   readonly loading = this._loading.asReadonly();

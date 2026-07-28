@@ -1,22 +1,15 @@
 import { Injectable, signal } from '@angular/core';
 import { of, delay } from 'rxjs';
 import { AdminCategory, CategoryType } from '../models/admin.models';
-import { MOCK_CATEGORIES } from '../data/admin-mock-data';
 import { AuditLogService } from './audit-log.service';
 import { inject } from '@angular/core';
 
-// TODO: Replace mock implementation with Admin API.
-// GET    /api/admin/categories
-// POST   /api/admin/categories
-// PUT    /api/admin/categories/:id
-// DELETE /api/admin/categories/:id
-
-let _catIdCounter = MOCK_CATEGORIES.length + 1;
+let _catIdCounter = 1;
 
 @Injectable({ providedIn: 'root' })
 export class AdminCategoryService {
   private readonly auditLog = inject(AuditLogService);
-  private readonly _categories = signal<AdminCategory[]>(structuredClone(MOCK_CATEGORIES));
+  private readonly _categories = signal<AdminCategory[]>([]);
 
   readonly categories = this._categories.asReadonly();
 

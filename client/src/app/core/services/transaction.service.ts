@@ -12,8 +12,9 @@ import {
   switchMap,
   take,
   tap,
+  throwError,
 } from 'rxjs';
-import { TransactionDto } from '../../models/transaction.dto';
+import { TransactionDto, UpdateItemPriceDto, MissingPriceItemDto } from '../../models/transaction.dto';
 import { environment } from '../../environments/environment.development';
 import { CreateTransactionFromBillDto } from '../../models/ai-bill.dto';
 import { CreateTransactionEntryDto } from '../../models/transaction-entry.dto';
@@ -25,8 +26,12 @@ import { AccountService } from './account-service';
 export class TransactionService {
   private readonly http = inject(HttpClient);
   private readonly accountService = inject(AccountService);
-  private baseUrl = environment.apiUrl;
-  private readonly apiUrl = this.baseUrl + 'Transaction';
+  private readonly baseUrl = environment.apiUrl.endsWith('/')
+    ? environment.apiUrl
+    : environment.apiUrl + '/';
+  private readonly apiUrl = `${this.baseUrl}Transaction`;
+  private readonly detailApiUrl = `${this.baseUrl}TransactionDetail`;
+
   private readonly remoteTransactionsSubject = new BehaviorSubject<TransactionDto[]>([]);
   private readonly localTransactionsSubject = new BehaviorSubject<TransactionDto[]>([]);
   private readonly transactions$ = combineLatest([
@@ -41,6 +46,13 @@ export class TransactionService {
 
   private hasLoadedRemoteTransactions = false;
   private isLoadingRemoteTransactions = false;
+
+  getUserTransactions(): Observable<TransactionDto[]> {
+    return this.http.get<TransactionDto[]>(`${this.apiUrl}/user`).pipe(
+      map(transactions => transactions.map(t => this.sanitizeTransaction(t))),
+      catchError(err => throwError(() => err))
+    );
+  }
 
   getTransactions(): Observable<TransactionDto[]> {
     this.ensureTransactionsLoaded();
@@ -59,10 +71,51 @@ export class TransactionService {
       take(1),
       map((transactions) => transactions.find((transaction) => transaction.id === id) ?? null),
       switchMap((transaction) =>
-        transaction ? of(transaction) : this.http.get<TransactionDto>(`${this.apiUrl}/${id}`).pipe(
-          map(t => this.sanitizeTransaction(t))
-        ),
+        transaction
+          ? of(transaction)
+          : this.http.get<TransactionDto>(`${this.apiUrl}/${id}`).pipe(
+              map((t) => this.sanitizeTransaction(t)),
+              catchError((err) => throwError(() => err))
+            ),
       ),
+    );
+  }
+
+  getTransactionById(id: number): Observable<TransactionDto> {
+    return this.http.get<TransactionDto>(`${this.apiUrl}/${id}`).pipe(
+      map((t) => this.sanitizeTransaction(t)),
+      catchError((err) => throwError(() => err))
+    );
+  }
+
+  createTransaction(data: CreateTransactionEntryDto | TransactionDto, file?: File | null): Observable<TransactionDto> {
+    if (file) {
+      const entry = data as CreateTransactionEntryDto;
+      const billData: CreateTransactionFromBillDto = {
+        merchantName: entry.title || (data as TransactionDto).name || '',
+        totalAmount: entry.amount || (data as TransactionDto).totalAmount || 0,
+        transactionDate: entry.transactionDate || (data as TransactionDto).transactionDate,
+        isExpense: entry.isExpense ?? (data as TransactionDto).isExpense,
+        note: entry.note ?? (data as TransactionDto).note,
+        budgetId: entry.budgetId ?? (data as TransactionDto).budgetId,
+        items: [
+          {
+            itemName: entry.title || (data as TransactionDto).name || '',
+            category: entry.category || null,
+            price: entry.amount || (data as TransactionDto).totalAmount || 0,
+            quantity: 1,
+            unit: 'cái',
+          },
+        ],
+      };
+      return this.createFromBill(billData, file);
+    }
+
+    return this.http.post<TransactionDto>(this.apiUrl, data).pipe(
+      tap((resTransaction) => {
+        this.upsertRemoteTransaction(resTransaction);
+      }),
+      catchError((err) => throwError(() => err))
     );
   }
 
@@ -71,11 +124,11 @@ export class TransactionService {
     if (data.merchantName) formData.append('MerchantName', data.merchantName);
     formData.append('TotalAmount', data.totalAmount.toString());
     if (data.transactionDate) formData.append('TransactionDate', data.transactionDate);
-    
+
     if (data.items && data.items.length > 0) {
       formData.append('Items', JSON.stringify(data.items));
     }
-    
+
     formData.append('IsExpense', data.isExpense !== undefined ? String(data.isExpense) : 'true');
     if (data.note) formData.append('Note', data.note);
     if (data.budgetId !== undefined && data.budgetId !== null) formData.append('BudgetId', data.budgetId.toString());
@@ -84,37 +137,43 @@ export class TransactionService {
       formData.append('image', file);
     }
 
+    formData.append('billDto', JSON.stringify(data));
+
     return this.http.post<TransactionDto>(`${this.apiUrl}/from-bill`, formData).pipe(
       tap((transaction) => {
         this.upsertRemoteTransaction(transaction);
       }),
+      catchError((err) => throwError(() => err))
     );
   }
 
-  createFromAnalyze(data: {
-    itemName: string;
-    estimatedPriceVND: number;
-    quantity?: number;
-    category?: string | null;
-    unit?: string | null;
-    isExpense?: boolean;
-    note?: string | null;
-    budgetId?: number | null;
-    transactionDate?: string | null;
-  }, file: File | null): Observable<TransactionDto> {
+  createFromAnalyze(
+    data: {
+      itemName: string;
+      estimatedPriceVND: number;
+      quantity?: number;
+      category?: string | null;
+      unit?: string | null;
+      isExpense?: boolean;
+      note?: string | null;
+      budgetId?: number | null;
+      transactionDate?: string | null;
+    },
+    file: File | null
+  ): Observable<TransactionDto> {
     const formData = new FormData();
     formData.append('ItemName', data.itemName);
     formData.append('EstimatedPriceVND', data.estimatedPriceVND.toString());
     formData.append('Quantity', (data.quantity || 1).toString());
     formData.append('EstimatedCalories', '0');
-    
+
     if (data.category) formData.append('Category', data.category);
     if (data.unit) formData.append('Unit', data.unit);
     if (data.transactionDate) formData.append('TransactionDate', data.transactionDate);
-    
+
     formData.append('IsExpense', data.isExpense !== undefined ? String(data.isExpense) : 'true');
     if (data.note) formData.append('Note', data.note);
-    
+
     if (data.budgetId !== undefined && data.budgetId !== null) {
       formData.append('BudgetId', data.budgetId.toString());
     } else {
@@ -125,10 +184,47 @@ export class TransactionService {
       formData.append('image', file);
     }
 
+    formData.append('data', JSON.stringify(data));
+
     return this.http.post<TransactionDto>(`${this.apiUrl}/from-analyze`, formData).pipe(
       tap((transaction) => {
         this.upsertRemoteTransaction(transaction);
       }),
+      catchError((err) => throwError(() => err))
+    );
+  }
+
+  updateTransaction(id: number, data: CreateTransactionEntryDto | TransactionDto): Observable<TransactionDto> {
+    return this.http.put<TransactionDto>(`${this.apiUrl}/${id}`, data).pipe(
+      tap((updatedTransaction) => {
+        this.upsertRemoteTransaction(updatedTransaction);
+      }),
+      catchError((err) => throwError(() => err))
+    );
+  }
+
+  deleteTransaction(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => {
+        const nextRemote = this.remoteTransactionsSubject.value.filter((t) => t.id !== id);
+        this.remoteTransactionsSubject.next(nextRemote);
+
+        const nextLocal = this.localTransactionsSubject.value.filter((t) => t.id !== id);
+        this.localTransactionsSubject.next(nextLocal);
+      }),
+      catchError((err) => throwError(() => err))
+    );
+  }
+
+  confirmItemPrices(transactionId: number, items: UpdateItemPriceDto[]): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${transactionId}/confirm-prices`, items).pipe(
+      catchError((err) => throwError(() => err))
+    );
+  }
+
+  getMissingPriceItems(transactionId: number): Observable<MissingPriceItemDto[]> {
+    return this.http.get<MissingPriceItemDto[]>(`${this.detailApiUrl}/transaction/${transactionId}/missing-prices`).pipe(
+      catchError((err) => throwError(() => err))
     );
   }
 
@@ -145,73 +241,11 @@ export class TransactionService {
     return of(transaction);
   }
 
-  createTransaction(data: CreateTransactionEntryDto, file?: File | null): Observable<TransactionDto> {
-    if (file) {
-      const billData: CreateTransactionFromBillDto = {
-        merchantName: data.title,
-        totalAmount: data.amount,
-        transactionDate: data.transactionDate,
-        isExpense: data.isExpense,
-        note: data.note,
-        budgetId: data.budgetId,
-        items: [
-          {
-            itemName: data.title,
-            category: data.category || null,
-            price: data.amount,
-            quantity: 1,
-            unit: 'cái',
-          }
-        ]
-      };
-      
-      return this.createFromBill(billData, file).pipe(
-        tap((resTransaction) => {})
-      );
-    }
-
-    // Call the new backend API specifically designed for manual entries
-    return this.http.post<TransactionDto>(this.baseUrl + 'Transaction/manual', data).pipe(
-      tap((resTransaction) => {
-        this.upsertRemoteTransaction(resTransaction);
-      }),
-    );
-  }
-
-  updateTransaction(id: number, data: CreateTransactionEntryDto): Observable<TransactionDto> {
-    const transaction = this.buildLocalTransaction(data);
-    transaction.id = id;
-    
-    return this.http.put<TransactionDto>(this.baseUrl + `Transaction/${id}`, transaction).pipe(
-      tap((updatedTransaction) => {
-        this.upsertRemoteTransaction(updatedTransaction);
-      }),
-    );
-  }
-
-  deleteTransaction(id: number): Observable<void> {
-    return this.http.delete<void>(this.baseUrl + `Transaction/${id}`).pipe(
-      tap(() => {
-        const nextRemote = this.remoteTransactionsSubject.value.filter(
-          (t) => t.id !== id
-        );
-        this.remoteTransactionsSubject.next(nextRemote);
-
-        const nextLocal = this.localTransactionsSubject.value.filter(
-          (t) => t.id !== id
-        );
-        this.localTransactionsSubject.next(nextLocal);
-      })
-    );
-  }
-
   getBudgetTransactions(budgetId: number): Observable<TransactionDto[]> {
-    return this.http
-      .get<TransactionDto[]>(`${this.baseUrl}Budget/history/${budgetId}`)
-      .pipe(
-        map((transactions) => (transactions || []).map((t) => this.sanitizeTransaction(t))),
-        catchError(() => of([]))
-      );
+    return this.http.get<TransactionDto[]>(`${this.baseUrl}Budget/history/${budgetId}`).pipe(
+      map((transactions) => (transactions || []).map((t) => this.sanitizeTransaction(t))),
+      catchError(() => of([]))
+    );
   }
 
   private ensureTransactionsLoaded(): void {
@@ -222,7 +256,7 @@ export class TransactionService {
     this.isLoadingRemoteTransactions = true;
 
     this.http
-      .get<TransactionDto[]>(this.apiUrl + '/user')
+      .get<TransactionDto[]>(`${this.apiUrl}/user`)
       .pipe(
         catchError(() => of([])),
         finalize(() => {
@@ -231,7 +265,7 @@ export class TransactionService {
         }),
       )
       .subscribe((transactions) => {
-        const sanitized = transactions.map(t => this.sanitizeTransaction(t));
+        const sanitized = transactions.map((t) => this.sanitizeTransaction(t));
         this.remoteTransactionsSubject.next(this.sortTransactions(sanitized));
       });
   }
@@ -270,7 +304,9 @@ export class TransactionService {
       imageKey: null,
       imagePreviewUrl: data.imagePreviewUrl ?? null,
       totalAmount: data.amount,
-      transactionDate: new Date(data.transactionDate.includes('T') ? data.transactionDate : `${data.transactionDate}T12:00:00`).toISOString(),
+      transactionDate: new Date(
+        data.transactionDate.includes('T') ? data.transactionDate : `${data.transactionDate}T12:00:00`
+      ).toISOString(),
       status: 1,
       isAiEstimated: data.isAiEstimated ?? false,
       createdAt: new Date().toISOString(),

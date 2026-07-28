@@ -1,25 +1,56 @@
 import { Injectable, signal } from '@angular/core';
 import { of, delay } from 'rxjs';
 import { SystemSettings } from '../models/admin.models';
-import { MOCK_SYSTEM_SETTINGS } from '../data/admin-mock-data';
 import { AuditLogService } from './audit-log.service';
 import { inject } from '@angular/core';
 
-// TODO: Replace mock implementation with Admin API.
-// GET /api/admin/settings
-// PUT /api/admin/settings
+const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
+  ai: {
+    enableSnapticsAi: true,
+    enableReceiptScan: true,
+    enableProductScan: true,
+    aiModelVersion: 'gpt-4o-mini',
+    dailyAiLimit: 50,
+    dailyScanLimit: 20,
+    confidenceThreshold: 75,
+  },
+  storage: {
+    maxUploadSizeMb: 10,
+    supportedFormats: ['jpg', 'jpeg', 'png', 'webp', 'heic', 'pdf'],
+    receiptRetentionDays: 365,
+    storageWarningThresholdGb: 80,
+  },
+  security: {
+    maxLoginAttempts: 5,
+    sessionDurationMinutes: 10080,
+    adminSessionDurationMinutes: 480,
+    requireAdminTwoFactor: false,
+    sensitiveAccessDurationMinutes: 30,
+  },
+  maintenance: {
+    maintenanceMode: false,
+    maintenanceMessage: 'Hệ thống đang bảo trì. Vui lòng quay lại sau.',
+    scheduledMaintenance: undefined,
+    featureFlags: {
+      enableBudgetV2: true,
+      enableAiInsights: true,
+      enableReceiptHistory: false,
+      enableMultiCurrency: false,
+    },
+  },
+};
 
 @Injectable({ providedIn: 'root' })
 export class AdminSettingsService {
   private readonly auditLog = inject(AuditLogService);
-  private readonly _settings = signal<SystemSettings>(structuredClone(MOCK_SYSTEM_SETTINGS));
+  private readonly _settings = signal<SystemSettings>(structuredClone(DEFAULT_SYSTEM_SETTINGS));
   private readonly _saving = signal<boolean>(false);
 
   readonly settings = this._settings.asReadonly();
   readonly saving = this._saving.asReadonly();
 
   getSettings() {
-    return of(structuredClone(MOCK_SYSTEM_SETTINGS)).pipe(delay(300));
+    return of(structuredClone(this._settings())).pipe(delay(300));
   }
 
   saveSettings(section: keyof SystemSettings, changes: Partial<SystemSettings[typeof section]>, reason: string): void {

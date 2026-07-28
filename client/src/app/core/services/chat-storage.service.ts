@@ -64,14 +64,12 @@ export class ChatStorageService {
         const parsed = JSON.parse(stored) as Conversation[];
         this._conversations.set(parsed);
       } else {
-        const initialMock = this.createMockConversations();
-        this._conversations.set(initialMock);
-        this.saveToStorage(initialMock);
+        this._conversations.set([]);
+        this.saveToStorage([]);
       }
     } catch (e) {
       console.error('Error loading conversations from localStorage:', e);
-      const initialMock = this.createMockConversations();
-      this._conversations.set(initialMock);
+      this._conversations.set([]);
     }
   }
 

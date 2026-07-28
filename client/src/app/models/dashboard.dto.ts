@@ -27,3 +27,12 @@ export interface SpendingComparisonResponseDto {
   month: SpendingPeriodDto;
   year: SpendingPeriodDto;
 }
+
+export interface DashboardSummaryDto {
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
+  netSavings?: number;
+  filterType?: string;
+}
+

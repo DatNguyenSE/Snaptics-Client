@@ -1,20 +1,15 @@
 import { Injectable, signal } from '@angular/core';
 import { of, delay } from 'rxjs';
 import { AdminNotification, NotificationAudience, NotificationChannel, NotificationStatus } from '../models/admin.models';
-import { MOCK_NOTIFICATIONS } from '../data/admin-mock-data';
 import { AuditLogService } from './audit-log.service';
 import { inject } from '@angular/core';
 
-// TODO: Replace mock implementation with Admin API.
-// GET  /api/admin/notifications
-// POST /api/admin/notifications
-
-let _notifIdCounter = MOCK_NOTIFICATIONS.length + 1;
+let _notifIdCounter = 1;
 
 @Injectable({ providedIn: 'root' })
 export class AdminNotificationService {
   private readonly auditLog = inject(AuditLogService);
-  private readonly _notifications = signal<AdminNotification[]>(structuredClone(MOCK_NOTIFICATIONS));
+  private readonly _notifications = signal<AdminNotification[]>([]);
 
   readonly notifications = this._notifications.asReadonly();
 

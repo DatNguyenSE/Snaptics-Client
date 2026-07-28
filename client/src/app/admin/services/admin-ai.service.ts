@@ -1,31 +1,25 @@
 import { Injectable, signal } from '@angular/core';
 import { of, delay } from 'rxjs';
 import { AiRequestLog, AiRequestFilter, PaginatedResult, FailureReason } from '../models/admin.models';
-import { MOCK_AI_REQUESTS, MOCK_FAILURE_REASONS } from '../data/admin-mock-data';
 import { AuditLogService } from './audit-log.service';
 import { inject } from '@angular/core';
-
-// TODO: Replace mock implementation with Admin API.
-// GET  /api/admin/ai/requests
-// POST /api/admin/ai/requests/:id/retry
-// POST /api/admin/ai/requests/:id/resolve
 
 @Injectable({ providedIn: 'root' })
 export class AdminAiService {
   private readonly auditLog = inject(AuditLogService);
-  private readonly _requests = signal<AiRequestLog[]>(structuredClone(MOCK_AI_REQUESTS));
+  private readonly _requests = signal<AiRequestLog[]>([]);
   private readonly _loading = signal<boolean>(false);
 
   readonly requests = this._requests.asReadonly();
   readonly loading = this._loading.asReadonly();
-  readonly failureReasons: FailureReason[] = MOCK_FAILURE_REASONS;
+  readonly failureReasons: FailureReason[] = [];
 
-  readonly totalRequests = 38492;
-  readonly receiptScans = 14284;
-  readonly productScans = 7022;
-  readonly successRate = 93.8;
-  readonly avgLatencyMs = 2400;
-  readonly estimatedCostUsd = 184.20;
+  readonly totalRequests = 0;
+  readonly receiptScans = 0;
+  readonly productScans = 0;
+  readonly successRate = 0;
+  readonly avgLatencyMs = 0;
+  readonly estimatedCostUsd = 0;
 
   getRequests(filter?: Partial<AiRequestFilter>, page = 1, pageSize = 10): PaginatedResult<AiRequestLog> {
     let data = this._requests();

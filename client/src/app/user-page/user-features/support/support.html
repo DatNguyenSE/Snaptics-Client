@@ -425,7 +425,7 @@
         </div>
 
         <div class="support-modal__body">
-          <form (submit)="$event.preventDefault(); submitCreateTicket()">
+          <form [formGroup]="ticketForm" (ngSubmit)="submitCreateTicket()">
             <!-- Contact Email -->
             <div class="form-group">
               <label class="form-label" for="contactEmail">Email liên hệ</label>
@@ -433,8 +433,7 @@
                 id="contactEmail"
                 type="email"
                 class="form-input"
-                [(ngModel)]="createForm.email"
-                name="email"
+                formControlName="email"
                 readonly
               />
               <span class="form-hint">Email được tự động lấy từ tài khoản đang đăng nhập của bạn.</span>
@@ -447,13 +446,12 @@
                 id="ticketTitle"
                 type="text"
                 class="form-input"
-                [class.form-input--error]="createForm.title.length > 0 && !isTitleValid()"
+                [class.form-input--error]="ticketForm.get('title')?.invalid && (ticketForm.get('title')?.dirty || ticketForm.get('title')?.touched || (ticketForm.get('title')?.value?.length ?? 0) > 0)"
                 placeholder="VD: Không cập nhật được số dư ví gia đình"
-                [(ngModel)]="createForm.title"
-                name="title"
+                formControlName="title"
                 required
               />
-              @if (createForm.title.length > 0 && !isTitleValid()) {
+              @if (ticketForm.get('title')?.invalid && (ticketForm.get('title')?.dirty || ticketForm.get('title')?.touched || (ticketForm.get('title')?.value?.length ?? 0) > 0)) {
                 <span class="form-error">Tiêu đề bắt buộc có tối thiểu 5 ký tự.</span>
               }
             </div>
@@ -462,7 +460,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label" for="ticketCategory">Danh mục hỗ trợ</label>
-                <select id="ticketCategory" class="form-select" [(ngModel)]="createForm.category" name="category">
+                <select id="ticketCategory" class="form-select" formControlName="category">
                   @for (cat of categoryMap | keyvalue; track cat.key) {
                     <option [value]="cat.key">{{ cat.value.label }}</option>
                   }
@@ -471,7 +469,7 @@
 
               <div class="form-group">
                 <label class="form-label" for="ticketPriority">Mức độ ưu tiên</label>
-                <select id="ticketPriority" class="form-select" [(ngModel)]="createForm.priority" name="priority">
+                <select id="ticketPriority" class="form-select" formControlName="priority">
                   <option value="low">Thấp</option>
                   <option value="normal">Bình thường</option>
                   <option value="high">Cao</option>
@@ -487,13 +485,12 @@
                 id="ticketDescription"
                 rows="4"
                 class="form-textarea"
-                [class.form-input--error]="createForm.description.length > 0 && !isDescriptionValid()"
+                [class.form-input--error]="ticketForm.get('description')?.invalid && (ticketForm.get('description')?.dirty || ticketForm.get('description')?.touched || (ticketForm.get('description')?.value?.length ?? 0) > 0)"
                 placeholder="Mô tả cụ thể vấn đề bạn gặp phải, các bước dẫn đến lỗi hoặc thông tin liên quan..."
-                [(ngModel)]="createForm.description"
-                name="description"
+                formControlName="description"
                 required
               ></textarea>
-              @if (createForm.description.length > 0 && !isDescriptionValid()) {
+              @if (ticketForm.get('description')?.invalid && (ticketForm.get('description')?.dirty || ticketForm.get('description')?.touched || (ticketForm.get('description')?.value?.length ?? 0) > 0)) {
                 <span class="form-error">Nội dung mô tả bắt buộc có tối thiểu 20 ký tự.</span>
               }
             </div>
@@ -515,9 +512,9 @@
               }
 
               <!-- Attachments List -->
-              @if (createForm.attachments.length > 0) {
+              @if (createAttachments.length > 0) {
                 <div class="attachment-chips">
-                  @for (att of createForm.attachments; track att.name; let i = $index) {
+                  @for (att of createAttachments; track att.name; let i = $index) {
                     <div class="attachment-chip">
                       <span class="material-symbols-outlined attachment-chip__icon">attach_file</span>
                       <span class="attachment-chip__name">{{ att.name }}</span>
@@ -539,7 +536,7 @@
               <button
                 class="support-btn support-btn--primary"
                 type="submit"
-                [disabled]="!isFormValid() || isSubmittingTicket()"
+                [disabled]="ticketForm.invalid || isSubmittingTicket()"
               >
                 @if (isSubmittingTicket()) {
                   <span class="material-symbols-outlined animate-spin">progress_activity</span>

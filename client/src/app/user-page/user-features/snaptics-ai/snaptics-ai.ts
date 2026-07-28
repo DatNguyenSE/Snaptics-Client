@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { ChatStorageService, Conversation, ChatMessage } from '../../../core/services/chat-storage.service';
-import { MockAiService } from '../../../core/services/mock-ai.service';
+import { AiService } from '../../../core/services/ai.service';
 import { ConversationHistory } from './components/conversation-history/conversation-history';
 import { ChatWorkspace } from './components/chat-workspace/chat-workspace';
 import { RenameConversationDialog } from './components/rename-conversation-dialog/rename-conversation-dialog';
@@ -23,7 +23,7 @@ import { DeleteConversationDialog } from './components/delete-conversation-dialo
 })
 export class SnapticsAIPage implements OnInit, OnDestroy {
   protected readonly chatStorage = inject(ChatStorageService);
-  private readonly mockAi = inject(MockAiService);
+  private readonly aiService = inject(AiService);
 
   activeConversationId = signal<string>('');
   isHistoryCollapsed = signal<boolean>(false);
@@ -103,20 +103,19 @@ export class SnapticsAIPage implements OnInit, OnDestroy {
     // Start AI processing
     this.isAiResponding.set(true);
 
-    this.aiSubscription = this.mockAi
-      .generateResponse(payload.content, payload.dataRange, convId, !!payload.file)
+    this.aiSubscription = this.aiService
+      .ask(payload.content)
       .subscribe({
-        next: (aiMessage) => {
+        next: (res) => {
           this.chatStorage.addMessage(convId, {
             role: 'assistant',
-            content: aiMessage.content || '',
+            content: res?.reply || '',
             status: 'completed',
-            analysisData: aiMessage.analysisData,
           });
           this.isAiResponding.set(false);
         },
         error: (err) => {
-          console.error('Mock AI error:', err);
+          console.error('AI error:', err);
           this.chatStorage.addMessage(convId, {
             role: 'assistant',
             content: 'Snaptics AI chưa thể phân tích dữ liệu lúc này. Vui lòng thử lại.',
@@ -151,15 +150,14 @@ export class SnapticsAIPage implements OnInit, OnDestroy {
     // Set AI responding
     this.isAiResponding.set(true);
 
-    this.aiSubscription = this.mockAi
-      .generateResponse(prompt, 'month', conv.id)
+    this.aiSubscription = this.aiService
+      .ask(prompt)
       .subscribe({
-        next: (aiMessage) => {
+        next: (res) => {
           this.chatStorage.addMessage(conv.id, {
             role: 'assistant',
-            content: aiMessage.content || '',
+            content: res?.reply || '',
             status: 'completed',
-            analysisData: aiMessage.analysisData,
           });
           this.isAiResponding.set(false);
         },

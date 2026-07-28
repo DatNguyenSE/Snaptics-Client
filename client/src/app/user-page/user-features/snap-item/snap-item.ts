@@ -12,10 +12,10 @@ import { CategoryDto } from '../../../models/category.dto';
 import { BudgetDto, BudgetService } from '../../../core/services/budget.service';
 import { TransactionEntryForm, TransactionEntryFormControls } from '../shared/transaction-entry-form/transaction-entry-form';
 import { FALLBACK_CATEGORIES, getTodayInputValue, resolveCategories } from '../shared/transaction-entry/transaction-entry.utils';
-import { buildMockSnapItemExtraction, parseSnapItemAnalysis } from './snap-item-extraction';
+import { parseSnapItemAnalysis } from './snap-item-extraction';
 
 type SnapItemState = 'idle' | 'extracting' | 'ready' | 'error' | 'saving';
-type ExtractionSource = 'ai' | 'mock';
+type ExtractionSource = 'ai';
 
 @Component({
   selector: 'app-snap-item',
@@ -277,22 +277,11 @@ export class SnapItem implements OnInit, OnDestroy {
       .pipe(
         map((response) => {
           const parsedResponse = parseSnapItemAnalysis(response, this.categories);
-
           if (parsedResponse) {
             return { extraction: parsedResponse, source: 'ai' as const };
           }
-
-          return {
-            extraction: buildMockSnapItemExtraction(file, this.categories),
-            source: 'mock' as const,
-          };
-        }),
-        catchError(() =>
-          of({
-            extraction: buildMockSnapItemExtraction(file, this.categories),
-            source: 'mock' as const,
-          }),
-        ),
+          throw new Error('Could not parse response');
+        })
       )
       .subscribe({
         next: ({ extraction, source }) => {

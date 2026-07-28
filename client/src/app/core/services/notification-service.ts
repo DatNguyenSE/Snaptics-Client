@@ -163,8 +163,16 @@ export class NotificationService {
     });
   }
 
+  private get baseUrl(): string {
+    return environment.apiUrl.endsWith('/') ? environment.apiUrl : environment.apiUrl + '/';
+  }
+
+  private get apiUrl(): string {
+    return `${this.baseUrl}Notification`;
+  }
+
   loadNotifications(): void {
-    this.http.get<any[]>(environment.apiUrl + 'Notification/user', { withCredentials: true })
+    this.http.get<any[]>(`${this.apiUrl}/user`, { withCredentials: true })
       .subscribe({
         next: (dtos) => {
           if (dtos && dtos.length > 0) {
@@ -201,7 +209,7 @@ export class NotificationService {
     const token = this.accountService.currentUser()?.token;
     const hubUrl = (environment as any).hubUrl 
       ? (environment as any).hubUrl + 'notification'
-      : environment.apiUrl.replace('api/', 'hubs/notification');
+      : `${this.baseUrl}hubs/notification`;
 
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
@@ -311,6 +319,12 @@ export class NotificationService {
     this.notificationsState.update((notifications) =>
       notifications.filter((notification) => notification.id !== id),
     );
+
+    const numId = parseInt(id, 10);
+    if (!isNaN(numId)) {
+      this.http.delete(`${this.apiUrl}/${numId}`, { withCredentials: true })
+        .subscribe({ error: (err) => console.log('Error deleting notification', err) });
+    }
   }
 
   respondToInvitation(id: string, accept: boolean): void {

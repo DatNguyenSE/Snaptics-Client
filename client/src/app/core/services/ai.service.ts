@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ReadBillResponseDto } from '../../models/ai-bill.dto';
 import { NotificationService } from './notification-service';
@@ -10,30 +10,50 @@ import { NotificationService } from './notification-service';
 })
 export class AiService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = environment.apiUrl;
+  private readonly baseUrl = environment.apiUrl.endsWith('/')
+    ? environment.apiUrl
+    : environment.apiUrl + '/';
+  private readonly aiScanUrl = `${this.baseUrl}ai`;
+  private readonly aiAssistantUrl = `${this.baseUrl}AiAssistant`;
+
   private readonly notificationService = inject(NotificationService);
 
-  analyzeImage(file: File): Observable<any> {
+  analyzeImage(file: File, trackCalories?: boolean, estimatePrice?: boolean): Observable<any> {
     const formData = new FormData();
     formData.append('image', file);
     
-    return this.requestAndWaitForAiResult(`${this.apiUrl}ai/analyze-image`, formData);
+    let params = new HttpParams();
+    if (trackCalories !== undefined && trackCalories !== null) {
+      params = params.set('trackCalories', trackCalories.toString());
+    }
+    if (estimatePrice !== undefined && estimatePrice !== null) {
+      params = params.set('estimatePrice', estimatePrice.toString());
+    }
+
+    return this.requestAndWaitForAiResult(`${this.aiScanUrl}/analyze-image`, formData, params);
   }
 
   readBill(file: File): Observable<ReadBillResponseDto> {
     const formData = new FormData();
     formData.append('billImage', file);
     
-    return this.requestAndWaitForAiResult<ReadBillResponseDto>(`${this.apiUrl}ai/read-bill`, formData);
+    return this.requestAndWaitForAiResult<ReadBillResponseDto>(`${this.aiScanUrl}/read-bill`, formData);
   }
 
   ask(message: string): Observable<{ reply: string }> {
-    return this.http.post<{ reply: string }>(`${this.apiUrl}AiAssistant/ask`, { message });
+    return this.http.post<{ reply: string }>(`${this.aiAssistantUrl}/ask`, { message }).pipe(
+      catchError(err => throwError(() => err))
+    );
   }
 
-  private requestAndWaitForAiResult<T>(url: string, formData: FormData): Observable<T> {
+  generateInsights(): Observable<any> {
+    return this.http.post<any>(`${this.aiAssistantUrl}/insight`, {}).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  private requestAndWaitForAiResult<T>(url: string, formData: FormData, params?: HttpParams): Observable<T> {
     return new Observable<T>((observer) => {
-      // Subscribe before starting the request so a fast SignalR result cannot be missed.
       const resultSub = this.notificationService.aiResult$.subscribe((result: T) => {
         observer.next(result);
         observer.complete();
@@ -41,7 +61,7 @@ export class AiService {
       const errorSub = this.notificationService.aiError$.subscribe((error: string) => {
         observer.error(error);
       });
-      const requestSub = this.http.post(url, formData).subscribe({
+      const requestSub = this.http.post(url, formData, { params }).subscribe({
         error: (error) => observer.error(error),
       });
 

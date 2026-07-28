@@ -3,14 +3,24 @@ import { Observable, combineLatest, map, of } from 'rxjs';
 import { TransactionService } from './transaction.service';
 import { BudgetService, BudgetDto } from './budget.service';
 import { TransactionDto } from '../../models/transaction.dto';
-import { 
-  MOCK_TRANSACTIONS, 
-  MOCK_BUDGETS, 
-  MOCK_RECURRING_EXPENSES, 
-  MOCK_MERCHANTS,
-  RecurringExpenseDto,
-  MerchantDto
-} from '../../user-page/user-features/analysis/mock-analysis-data';
+export interface RecurringExpenseDto {
+  name: string;
+  amount: number;
+  period: string;
+  nextPaymentDate: string;
+  icon: string;
+  colorClass: string;
+}
+
+export interface MerchantDto {
+  name: string;
+  logoInitials: string;
+  transactionsCount: number;
+  totalAmount: number;
+  percentageChange: number;
+  isUp: boolean;
+  colorClass: string;
+}
 
 /**
  * Thống kê chỉ số KPI tài chính quan trọng
@@ -141,11 +151,8 @@ export class AnalyticsService {
       this.budgetService.getBudgets()
     ]).pipe(
       map(([realTxs, realBudgets]) => {
-        // Kiểm tra xem có giao dịch thực tế nào không.
-        // Nếu không có giao dịch thực tế, sử dụng dữ liệu giả lập (mock) để giao diện hiển thị đẹp và đầy đủ thông tin.
-        const useMock = realTxs.length === 0;
-        const txs = useMock ? MOCK_TRANSACTIONS : realTxs;
-        const budgets = useMock ? MOCK_BUDGETS : (realBudgets || []);
+        const txs = realTxs || [];
+        const budgets = realBudgets || [];
 
         // 1. Thu thập danh sách duy nhất các tài khoản/phương thức thanh toán (ví dụ: Cash, VPBank, Momo)
         const accountsSet = new Set<string>();
@@ -181,9 +188,9 @@ export class AnalyticsService {
         // 9. Tính toán dữ liệu so sánh chi tiêu danh mục giữa 2 chu kỳ thời gian liên tiếp
         const comparison = this.calculateComparison(txs, period, start, end, prevStart, prevEnd, account);
 
-        // 10. Lấy danh sách các khoản chi tiêu đăng ký định kỳ hàng tháng (Netflix, Spotify, Internet...)
-        const recurringItems = MOCK_RECURRING_EXPENSES;
-        const recurringTotal = recurringItems.reduce((sum, item) => sum + item.amount, 0);
+        // 10. Danh sách các khoản chi tiêu đăng ký định kỳ hàng tháng
+        const recurringItems: RecurringExpenseDto[] = [];
+        const recurringTotal = 0;
 
         // 11. Sắp xếp danh sách các giao dịch trong kỳ theo trình tự thời gian mới nhất lên đầu
         const notableTransactions = this.getNotableTransactions(currentTxs);
@@ -199,7 +206,7 @@ export class AnalyticsService {
             items: recurringItems,
             totalMonthly: recurringTotal
           },
-          merchants: MOCK_MERCHANTS,
+          merchants: [],
           notableTransactions,
           accounts
         };

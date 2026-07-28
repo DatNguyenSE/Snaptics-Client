@@ -1,10 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { map, of, tap, throwError } from 'rxjs';
+import { map, Observable, tap, throwError, catchError } from 'rxjs';
 import { environment } from '../../environments/environment.development';
-import { LoginCreds, LoginResponse, RegisterCreds, User } from '../../models/user';
-
+import { LoginCreds, RegisterCreds, User } from '../../models/user';
 
 @Injectable({
   providedIn: 'root',
@@ -14,14 +13,12 @@ export class AccountService {
   private router = inject(Router);
 
   currentUser = signal<User | null>(null);
-
-  /** true nếu user đang đăng nhập bằng tài khoản mock (dùng để hiển thị nhãn UI) */
   isMockSession = signal<boolean>(false);
-
-  /** Expose mock mode flag để template và các component có thể đọc */
   readonly useMockAuth: boolean = false;
 
-  protected baseUrl = environment.apiUrl;
+  protected baseUrl = environment.apiUrl.endsWith('/')
+    ? environment.apiUrl + 'Account'
+    : environment.apiUrl + '/Account';
 
   setCurrentUser(user: User) {
     if (user && user.token) {
@@ -52,11 +49,9 @@ export class AccountService {
 
   // ─── Login ────────────────────────────────────────────────────────────────────
 
-  login(creds: LoginCreds) {
-    // Real API login
-
+  login(creds: LoginCreds): Observable<any> {
     return this.http
-      .post<any>(this.baseUrl + 'account/login', creds, { withCredentials: true })
+      .post<any>(`${this.baseUrl}/login`, creds, { withCredentials: true })
       .pipe(
         tap((response) => {
           if (response) {
@@ -76,21 +71,22 @@ export class AccountService {
               this.startTokenRefreshInterval();
             }
           }
-
           return response;
         }),
+        catchError((err: any) => throwError(() => err))
       );
   }
 
-
   // ─── Register / OTP / Password ────────────────────────────────────────────────
 
-  register(creds: RegisterCreds) {
-    return this.http.post(this.baseUrl + 'account/register', creds, { responseType: 'text' });
+  register(creds: RegisterCreds): Observable<string> {
+    return this.http.post(`${this.baseUrl}/register`, creds, { responseType: 'text' }).pipe(
+      catchError((err: any) => throwError(() => err))
+    );
   }
 
-  verifyOtp(email: string, otp: string) {
-    return this.http.post(this.baseUrl + 'account/verify-otp', { email, otp }, { withCredentials: true, responseType: 'text' })
+  verifyOtp(email: string, otp: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/verify-otp`, { email, otp }, { withCredentials: true, responseType: 'text' })
       .pipe(
         map((response: string) => {
           let parsedResponse: any = response;
@@ -102,34 +98,41 @@ export class AccountService {
             this.setCurrentUser(parsedResponse as User);
           }
           return parsedResponse;
-        })
+        }),
+        catchError((err: any) => throwError(() => err))
       );
   }
 
-  resendOtp(email: string) {
-    return this.http.post(this.baseUrl + 'account/resend-otp', { email }, { responseType: 'text' });
-  }
-
-  forgotPassword(email: string) {
-    return this.http.post(
-      this.baseUrl + 'account/forgot-password',
-      { email },
-      { responseType: 'text' },
+  resendOtp(email: string): Observable<string> {
+    return this.http.post(`${this.baseUrl}/resend-otp`, { email }, { responseType: 'text' }).pipe(
+      catchError((err: any) => throwError(() => err))
     );
   }
 
-  resetPassword(email: string, token: string, newPassword: string) {
+  forgotPassword(email: string): Observable<string> {
     return this.http.post(
-      this.baseUrl + 'account/reset-password',
+      `${this.baseUrl}/forgot-password`,
+      { email },
+      { responseType: 'text' },
+    ).pipe(
+      catchError((err: any) => throwError(() => err))
+    );
+  }
+
+  resetPassword(email: string, token: string, newPassword: string): Observable<string> {
+    return this.http.post(
+      `${this.baseUrl}/reset-password`,
       { email, token, newPassword },
       { responseType: 'text' },
+    ).pipe(
+      catchError((err: any) => throwError(() => err))
     );
   }
 
   // ─── Logout ───────────────────────────────────────────────────────────────────
 
-  logout(redirectUrl = '/dang-nhap') {
-    this.http.post(this.baseUrl + 'account/logout', {}, { withCredentials: true }).subscribe({
+  logout(redirectUrl = '/dang-nhap'): void {
+    this.http.post(`${this.baseUrl}/logout`, {}, { withCredentials: true }).subscribe({
       next: () => {
         this.clearSessionAndRedirect(redirectUrl);
       },
@@ -141,19 +144,21 @@ export class AccountService {
 
   // ─── Token Refresh ────────────────────────────────────────────────────────────
 
-  refreshToken() {
+  refreshToken(): Observable<User> {
     return this.http.post<User>(
-      this.baseUrl + 'account/refresh-token',
+      `${this.baseUrl}/refresh-token`,
       {},
       { withCredentials: true },
+    ).pipe(
+      catchError((err: any) => throwError(() => err))
     );
   }
 
-  startTokenRefreshInterval() {
+  startTokenRefreshInterval(): void {
     setInterval(
       () => {
         this.http
-          .post<User>(this.baseUrl + 'account/refresh-token', {}, { withCredentials: true })
+          .post<User>(`${this.baseUrl}/refresh-token`, {}, { withCredentials: true })
           .subscribe({
             next: (user) => {
               this.setCurrentUser(user);
@@ -167,7 +172,7 @@ export class AccountService {
     );
   }
 
-  private clearSessionAndRedirect(redirectUrl: string) {
+  private clearSessionAndRedirect(redirectUrl: string): void {
     this.currentUser.set(null);
     void this.router.navigateByUrl(redirectUrl);
   }

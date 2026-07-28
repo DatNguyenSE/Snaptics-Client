@@ -32,7 +32,6 @@ import {
   resolveCategories,
 } from '../shared/transaction-entry/transaction-entry.utils';
 import { parseSnapItemAnalysis } from './scan-extraction';
-import { buildMockSnapItemExtraction } from '../snap-item/snap-item-extraction';
 
 // ─── Type Definitions ─────────────────────────────────────────────────────────
 export type ScanMode = 'receipt' | 'item' | 'manual';
@@ -725,23 +724,18 @@ export class Scan implements OnInit, OnDestroy {
             return { extraction: parsed, source: 'ai' as const };
           }
           throw new Error('Failed to extract item details from image.');
-        }),
-        catchError(() => {
-          const mock = buildMockSnapItemExtraction(file, this.categories);
-          return of({ extraction: mock, source: 'mock' as const });
-        }),
+        })
       )
-      .subscribe((result) => {
-        this.clearMicrocopyTimer();
-
-        if (!result) {
-          this.errorMessage = this.lang.t('scan.errorItemNoContent');
-          this.processingState = 'error';
-          this.cdr.detectChanges();
-          return;
-        }
-
-        const { extraction } = result;
+      .subscribe({
+        next: (result) => {
+          this.clearMicrocopyTimer();
+          if (!result) {
+            this.errorMessage = this.lang.t('scan.errorItemNoContent');
+            this.processingState = 'error';
+            this.cdr.detectChanges();
+            return;
+          }
+          const { extraction } = result;
 
         this.manualForm.patchValue({
           title: extraction.itemName,
@@ -773,7 +767,14 @@ export class Scan implements OnInit, OnDestroy {
             this.cdr.detectChanges();
           }, 2500);
         }, 500);
-      });
+      },
+      error: () => {
+        this.clearMicrocopyTimer();
+        this.errorMessage = this.lang.t('scan.errorItemNoContent');
+        this.processingState = 'error';
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   confirmScan(): void {

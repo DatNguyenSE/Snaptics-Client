@@ -3,9 +3,7 @@ import { Subscription } from 'rxjs';
 import { AdminDashboardService } from '../../services/admin-dashboard.service';
 import { StatCardComponent } from '../../components/stat-card/stat-card.component';
 import { StatusBadgeComponent } from '../../components/status-badge/status-badge.component';
-import { LoadingSkeletonComponent } from '../../components/loading-skeleton/loading-skeleton.component';
 import { RecentAdminActivity, RecentError, SystemHealthItem, KpiCard } from '../../models/admin.models';
-import { MOCK_USER_GROWTH_DATA, MOCK_AI_USAGE_DATA } from '../../data/admin-mock-data';
 import { BadgeVariant } from '../../components/status-badge/status-badge.component';
 import { LanguageService } from '../../../core/services/language-service';
 
