@@ -14,6 +14,7 @@ export interface NotificationDto {
   isRead: boolean;
   createdAt: string;
   itemInventoryId?: number | null;
+  relatedId?: number | null;
   type: number | string;
   transactionDetailId?: number | null;
 }
@@ -160,10 +161,12 @@ export class NotificationService {
       relatedEntityId: relatedEntityId,
       relatedEntityType: relatedEntityType,
       metadata: {
-        itemInventoryId: dto.itemInventoryId,
-        transactionDetailId: dto.transactionDetailId,
-        rawType: dto.type
-      }
+        itemInventoryId: dto.itemInventoryId ?? (dto as any).ItemInventoryId,
+        transactionDetailId: dto.transactionDetailId ?? (dto as any).TransactionDetailId,
+        relatedId: dto.relatedId ?? (dto as any).RelatedId,
+        rawType: dto.type ?? (dto as any).Type
+      },
+      actionStatus: feType === 'wallet_invitation' ? 'pending' : undefined
     };
   }
 

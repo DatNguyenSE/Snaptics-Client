@@ -7,6 +7,7 @@ import { NotificationService } from '../../../core/services/notification-service
 import { ToastService } from '../../../core/services/toast-service';
 import { NotificationItem, NotificationType } from '../../../models/notification-item';
 import { UserHeader } from '../../user-layout/user-header/user-header';
+import { BudgetMemberService } from '../../../core/services/budgetMember.service';
 
 export type NotificationFilterTab =
   | 'all'
@@ -30,6 +31,7 @@ export class Notification {
   protected readonly notificationService = inject(NotificationService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly budgetMemberService = inject(BudgetMemberService);
 
   // States
   readonly activeTab = signal<NotificationFilterTab>('unread');
@@ -200,24 +202,60 @@ export class Notification {
   // Actions: Wallet Invitation
   acceptInvitation(item: NotificationItem, event: MouseEvent): void {
     event.stopPropagation();
-    this.notificationService.respondToInvitation(item.id, true);
-    const walletName = item.metadata?.walletName || 'Ví';
-    this.toast.success(
-      this.language.currentLang() === 'vi'
-        ? `Bạn đã chấp nhận lời mời tham gia ${walletName}`
-        : `Accepted invitation to join ${walletName}`,
-    );
+    const invitationId = item.metadata?.['relatedId'];
+    if (invitationId) {
+      this.budgetMemberService.respondToInvitation(invitationId, { status: 1 }).subscribe({
+        next: () => {
+          this.notificationService.respondToInvitation(item.id, true);
+          const walletName = item.metadata?.walletName || 'Ví';
+          this.toast.success(
+            this.language.currentLang() === 'vi'
+              ? `Bạn đã chấp nhận lời mời tham gia ${walletName}`
+              : `Accepted invitation to join ${walletName}`,
+          );
+        },
+        error: () => {
+          this.toast.error(
+            this.language.currentLang() === 'vi' ? 'Có lỗi xảy ra' : 'An error occurred'
+          );
+        }
+      });
+    } else {
+      this.toast.error(
+        this.language.currentLang() === 'vi' 
+          ? 'Không tìm thấy ID thư mời. Vui lòng tạo thư mời mới.' 
+          : 'Invitation ID not found. Please create a new invitation.'
+      );
+    }
   }
 
   rejectInvitation(item: NotificationItem, event: MouseEvent): void {
     event.stopPropagation();
-    this.notificationService.respondToInvitation(item.id, false);
-    const walletName = item.metadata?.walletName || 'Ví';
-    this.toast.info(
-      this.language.currentLang() === 'vi'
-        ? `Bạn đã từ chối lời mời tham gia ${walletName}`
-        : `Declined invitation to join ${walletName}`,
-    );
+    const invitationId = item.metadata?.['relatedId'];
+    if (invitationId) {
+      this.budgetMemberService.respondToInvitation(invitationId, { status: 2 }).subscribe({
+        next: () => {
+          this.notificationService.respondToInvitation(item.id, false);
+          const walletName = item.metadata?.walletName || 'Ví';
+          this.toast.info(
+            this.language.currentLang() === 'vi'
+              ? `Bạn đã từ chối lời mời tham gia ${walletName}`
+              : `Declined invitation to join ${walletName}`,
+          );
+        },
+        error: () => {
+          this.toast.error(
+            this.language.currentLang() === 'vi' ? 'Có lỗi xảy ra' : 'An error occurred'
+          );
+        }
+      });
+    } else {
+      this.toast.error(
+        this.language.currentLang() === 'vi' 
+          ? 'Không tìm thấy ID thư mời. Vui lòng tạo thư mời mới.' 
+          : 'Invitation ID not found. Please create a new invitation.'
+      );
+    }
   }
 
   // Actions: Product Review Modal

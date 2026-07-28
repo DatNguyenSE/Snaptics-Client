@@ -110,12 +110,18 @@
   border-radius: 18px;
   background: var(--sw-card, #fff);
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
 }
 
 .category-card:hover {
   border-color: rgba(91, 123, 250, 0.28);
   box-shadow: 0 10px 24px rgba(91, 123, 250, 0.1);
   transform: translateY(-2px);
+}
+
+.category-card:focus-visible {
+  outline: 3px solid var(--sw-primary, #5b7bfa);
+  outline-offset: 2px;
 }
 
 .category-card.is-default {
@@ -162,6 +168,20 @@
   background: #ecfdf5;
   color: #047857;
 }
+
+.tracking-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 7px;
+  color: var(--sw-muted-foreground, #6870a5);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.tracking-status .material-symbols-outlined { font-size: 14px; }
+
+.tracking-status--active { color: #047857; }
 
 .category-actions {
   display: flex;
@@ -231,7 +251,9 @@
 .modal-content {
   width: min(100%, 560px);
   max-height: min(760px, calc(100dvh - 40px));
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   border: 1px solid var(--sw-border, rgba(91, 123, 250, 0.12));
   border-radius: 24px;
   background: var(--sw-card, #fff);
@@ -264,11 +286,52 @@
 }
 
 .modal-body {
+  min-height: 0;
   padding: 22px;
+  overflow-y: auto;
 }
 
 .form-group {
   margin-bottom: 20px;
+}
+
+.form-group--disabled { opacity: 0.58; }
+
+.tracking-setting {
+  padding: 14px;
+  border: 1px solid var(--sw-border, #dbe2ff);
+  border-radius: 14px;
+  background: var(--sw-muted, #f7f8ff);
+}
+
+.tracking-setting__label {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 11px;
+  margin: 0 !important;
+  cursor: pointer;
+}
+
+.tracking-setting__label input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  margin: 1px 0 0;
+  accent-color: var(--sw-primary, #5b7bfa);
+}
+
+.tracking-setting__label strong,
+.tracking-setting__label small {
+  display: block;
+}
+
+.tracking-setting__label strong { font-size: 0.82rem; }
+.tracking-setting__label small {
+  margin-top: 4px;
+  color: var(--sw-muted-foreground, #6870a5);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 .form-group label,
@@ -386,6 +449,12 @@
 
 .color-swatch:hover { transform: scale(1.08); }
 
+.color-swatch--disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
 .color-swatch.selected {
   border-color: #fff;
   box-shadow: 0 0 0 2px var(--sw-foreground, #1b1d2e);
@@ -394,6 +463,8 @@
 .modal-footer {
   justify-content: flex-end;
   border-top: 1px solid var(--sw-border, rgba(91, 123, 250, 0.12));
+  flex: 0 0 auto;
+  background: var(--sw-card, #fff);
 }
 
 .btn-cancel,

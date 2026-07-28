@@ -24,6 +24,8 @@ export class Category implements OnInit {
 
   showModal = false;
   isEditing = false;
+  isSaving = false;
+  deletingCategoryId: number | null = null;
   currentCategory: Partial<CategoryDto> = {};
 
   readonly iconOptions = [
@@ -71,15 +73,25 @@ export class Category implements OnInit {
 
   openAddModal(): void {
     this.isEditing = false;
-    this.currentCategory = { name: '', icon: 'ti ti-category', color: '#335BFF' };
+    this.currentCategory = {
+      name: '',
+      icon: 'ti ti-category',
+      color: '#335BFF',
+      isTrackableInventory: false,
+    };
     this.showModal = true;
   }
 
   openEditModal(category: CategoryDto): void {
-    if (category.isDefault) return;
     this.isEditing = true;
     this.currentCategory = { ...category };
     this.showModal = true;
+  }
+
+  handleCardKeydown(event: KeyboardEvent, category: CategoryDto): void {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    this.openEditModal(category);
   }
 
   closeModal(): void {
@@ -94,22 +106,41 @@ export class Category implements OnInit {
     }
 
     if (this.isEditing && this.currentCategory.id) {
-      this.categoryService.updateCategory(this.currentCategory.id, this.currentCategory).subscribe({
-        next: () => {
+      const id = this.currentCategory.id;
+      const changes: Partial<CategoryDto> = {
+        name: this.currentCategory.name,
+        icon: this.currentCategory.icon,
+        color: this.currentCategory.color,
+        isTrackableInventory: this.currentCategory.isTrackableInventory ?? false,
+      };
+      this.isSaving = true;
+      this.categoryService.updateCategory(id, changes).subscribe({
+        next: (updatedCategory) => {
           this.toastService.success('Cập nhật danh mục thành công');
           this.closeModal();
-          this.loadCategories();
+          this.isSaving = false;
+          this.categories = this.categories.map(category =>
+            category.id === id ? { ...category, ...changes, ...updatedCategory } : category
+          );
         },
-        error: () => this.toastService.error('Lỗi khi cập nhật danh mục')
+        error: () => {
+          this.isSaving = false;
+          this.toastService.error('Lỗi khi cập nhật danh mục');
+        }
       });
     } else {
+      this.isSaving = true;
       this.categoryService.createCategory(this.currentCategory).subscribe({
         next: () => {
           this.toastService.success('Tạo danh mục thành công');
           this.closeModal();
+          this.isSaving = false;
           this.loadCategories();
         },
-        error: () => this.toastService.error('Lỗi khi tạo danh mục')
+        error: () => {
+          this.isSaving = false;
+          this.toastService.error('Lỗi khi tạo danh mục');
+        }
       });
     }
   }
@@ -117,12 +148,17 @@ export class Category implements OnInit {
   deleteCategory(id: number, isDefault: boolean | undefined): void {
     if (isDefault) return;
     if (confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
+      this.deletingCategoryId = id;
       this.categoryService.deleteCategory(id).subscribe({
         next: () => {
           this.toastService.success('Xóa danh mục thành công');
-          this.loadCategories();
+          this.deletingCategoryId = null;
+          this.categories = this.categories.filter(category => category.id !== id);
         },
-        error: () => this.toastService.error('Lỗi khi xóa danh mục')
+        error: () => {
+          this.deletingCategoryId = null;
+          this.toastService.error('Lỗi khi xóa danh mục');
+        }
       });
     }
   }

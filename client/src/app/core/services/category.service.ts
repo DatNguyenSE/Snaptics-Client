@@ -38,8 +38,8 @@ export class CategoryService {
     );
   }
 
-  updateCategory(id: number, category: Partial<CategoryDto>): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/${id}`, category).pipe(
+  updateCategory(id: number, category: Partial<CategoryDto>): Observable<CategoryDto> {
+    return this.http.put<CategoryDto>(`${this.apiUrl}/${id}`, category).pipe(
       catchError(err => throwError(() => err))
     );
   }

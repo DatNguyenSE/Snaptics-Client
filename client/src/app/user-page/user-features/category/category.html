@@ -33,7 +33,15 @@
         } @else {
           <div class="category-grid" role="list">
             @for (category of categories; track category.id) {
-              <article class="category-card" [class.is-default]="category.isDefault" role="listitem">
+              <article
+                class="category-card"
+                [class.is-default]="category.isDefault"
+                [class.is-trackable]="category.isTrackableInventory"
+                role="listitem"
+                tabindex="0"
+                (click)="openEditModal(category)"
+                (keydown)="handleCardKeydown($event, category)"
+              >
                 <div class="category-icon-wrapper" [style.background-color]="category.color">
                   <i [class]="category.icon || 'ti ti-category'"></i>
                 </div>
@@ -41,14 +49,18 @@
                   <h3 class="category-name">{{ category.name }}</h3>
                   <span class="category-badge" *ngIf="category.isDefault">Hệ thống</span>
                   <span class="category-badge custom-badge" *ngIf="!category.isDefault">Của bạn</span>
+                  <span class="tracking-status" [class.tracking-status--active]="category.isTrackableInventory">
+                    <span class="material-symbols-outlined">{{ category.isTrackableInventory ? 'notifications_active' : 'notifications_off' }}</span>
+                    {{ category.isTrackableInventory ? 'Đang theo dõi' : 'Chưa theo dõi' }}
+                  </span>
                 </div>
                 
                 <div class="category-actions" *ngIf="!category.isDefault">
-                  <button class="action-btn edit" type="button" (click)="openEditModal(category)" title="Sửa">
+                  <button class="action-btn edit" type="button" (click)="$event.stopPropagation(); openEditModal(category)" title="Sửa">
                     <span class="material-symbols-outlined">edit</span>
                   </button>
-                  <button class="action-btn delete" type="button" (click)="deleteCategory(category.id, category.isDefault)" title="Xóa">
-                    <span class="material-symbols-outlined">delete</span>
+                  <button class="action-btn delete" type="button" [disabled]="deletingCategoryId === category.id" (click)="$event.stopPropagation(); deleteCategory(category.id, category.isDefault)" title="Xóa">
+                    <span class="material-symbols-outlined">{{ deletingCategoryId === category.id ? 'progress_activity' : 'delete' }}</span>
                   </button>
                 </div>
               </article>
@@ -72,12 +84,25 @@
       </div>
 
       <div class="modal-body">
-        <div class="form-group">
-          <label>Tên danh mục <span class="required">*</span></label>
-          <input type="text" class="form-control" [(ngModel)]="currentCategory.name" placeholder="Ví dụ: Tiền điện nước" />
+        <div class="form-group tracking-setting">
+          <label class="tracking-setting__label" [class.is-disabled]="currentCategory.isDefault">
+            <input
+              type="checkbox"
+              [(ngModel)]="currentCategory.isTrackableInventory"
+            />
+            <span>
+              <strong>Theo dõi tồn kho và nhắc đánh giá</strong>
+              <small>Cho phép hệ thống gửi thông báo phản hồi đánh giá sản phẩm thuộc danh mục này.</small>
+            </span>
+          </label>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" [class.form-group--disabled]="currentCategory.isDefault">
+          <label>Tên danh mục <span class="required">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="currentCategory.name" [disabled]="!!currentCategory.isDefault" placeholder="Ví dụ: Tiền điện nước" />
+        </div>
+
+        <div class="form-group" [class.form-group--disabled]="currentCategory.isDefault">
           <div class="form-label-row">
             <label>Biểu tượng</label>
             <span class="selected-icon-name">{{ currentCategory.icon || 'Chưa chọn' }}</span>
@@ -90,6 +115,7 @@
                 [class.icon-option--selected]="currentCategory.icon === icon.value"
                 [attr.aria-selected]="currentCategory.icon === icon.value"
                 (click)="currentCategory.icon = icon.value"
+                [disabled]="!!currentCategory.isDefault"
               >
                 <span class="icon-option__glyph" [style.color]="currentCategory.color">
                   <i [class]="icon.value"></i>
@@ -101,14 +127,15 @@
           <small class="help-text">Chọn một biểu tượng để hiển thị cạnh danh mục.</small>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" [class.form-group--disabled]="currentCategory.isDefault">
           <label>Màu sắc</label>
           <div class="color-picker-grid">
             @for (color of colorOptions; track color) {
               <div class="color-swatch" 
                    [style.background-color]="color" 
                    [class.selected]="currentCategory.color === color"
-                   (click)="currentCategory.color = color">
+                   [class.color-swatch--disabled]="currentCategory.isDefault"
+                   (click)="!currentCategory.isDefault && (currentCategory.color = color)">
                    <span class="material-symbols-outlined" *ngIf="currentCategory.color === color">check</span>
               </div>
             }
@@ -118,7 +145,7 @@
 
       <div class="modal-footer">
       <button class="btn-cancel" type="button" (click)="closeModal()">Hủy</button>
-      <button class="btn-save" type="button" (click)="saveCategory()" [disabled]="!currentCategory.name">Lưu lại</button>
+       <button class="btn-save" type="button" (click)="saveCategory()" [disabled]="!currentCategory.name || isSaving">{{ isSaving ? 'Đang lưu...' : 'Lưu lại' }}</button>
       </div>
     </div>
   </div>

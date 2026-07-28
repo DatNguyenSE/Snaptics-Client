@@ -11,7 +11,7 @@ export interface InviteMemberRequestDto {
 }
 
 export interface RespondInviteRequestDto {
-  accept: boolean;
+  status: number;
 }
 
 export interface UpdateMemberRoleRequestDto {
