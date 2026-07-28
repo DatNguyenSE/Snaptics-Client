@@ -33,6 +33,9 @@ export interface NotificationMetadata {
   severity?: SystemSeverity;
   rating?: number;
   userComment?: string;
+  itemInventoryId?: number | null;
+  transactionDetailId?: number | null;
+  rawType?: any;
   [key: string]: any;
 }
 

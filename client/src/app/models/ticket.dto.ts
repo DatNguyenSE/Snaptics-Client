@@ -1,3 +1,5 @@
+export * from './support-ticket.model';
+
 export {
   TicketCategoryEnum,
   TicketStatusEnum,
@@ -12,11 +14,6 @@ export type {
   UpdateTicketPriorityRequest,
   TicketQueryParams,
   AdminTicketQueryParams,
-  SupportAttachmentDto,
-  SupportMessageDto,
-  SupportTicketDto,
-  SupportTicketDetailDto,
-  PaginatedResultDto,
   SupportStatsDto,
 } from '../user-page/user-features/support/models/support.models';
 
@@ -31,10 +28,11 @@ export interface TicketDto {
   createdAt?: string;
   updatedAt?: string;
   createdBy?: string;
+  messageCount?: number;
 }
 
 export interface CreateTicketDto {
-  title: string;
+  title?: string;
   subject?: string;
   description?: string;
   category?: number;

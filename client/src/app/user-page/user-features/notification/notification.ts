@@ -34,8 +34,8 @@ export class Notification {
   // States
   readonly activeTab = signal<NotificationFilterTab>('all');
   readonly timeFilter = signal<TimeFilter>('all');
-  readonly isLoading = signal<boolean>(false);
-  readonly hasError = signal<boolean>(false);
+  readonly isLoading = this.notificationService.isLoading;
+  readonly hasError = this.notificationService.hasError;
   readonly isInfiniteLoading = signal<boolean>(false);
   readonly openMenuId = signal<string | null>(null);
 
@@ -271,26 +271,16 @@ export class Notification {
     this.isSettingsOpen.set(false);
   }
 
-  // Infinite Scroll load simulation
   loadMore(): void {
-    this.isInfiniteLoading.set(true);
-    setTimeout(() => {
-      this.isInfiniteLoading.set(false);
-      this.toast.info(
-        this.language.currentLang() === 'vi'
-          ? 'Đã tải xong toàn bộ thông báo.'
-          : 'All notifications loaded.',
-      );
-    }, 1000);
+    this.toast.info(
+      this.language.currentLang() === 'vi'
+        ? 'Đã tải xong toàn bộ thông báo.'
+        : 'All notifications loaded.',
+    );
   }
 
   retryLoad(): void {
-    this.isLoading.set(true);
-    this.hasError.set(false);
-    setTimeout(() => {
-      this.notificationService.loadNotifications();
-      this.isLoading.set(false);
-    }, 800);
+    this.notificationService.loadNotifications();
   }
 
   // Helpers for Icons, Badges, Formatting

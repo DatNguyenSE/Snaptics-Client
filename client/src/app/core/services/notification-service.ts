@@ -1,127 +1,22 @@
 import { Injectable, computed, inject, signal, effect } from '@angular/core';
 import { Subject } from 'rxjs';
 import { AppLanguage, LanguageService } from './language-service';
-import { LocalizedText, NotificationItem, NotificationRecord, NotificationType, SystemSeverity } from '../../models/notification-item';
+import { LocalizedText, NotificationItem, NotificationRecord, NotificationType } from '../../models/notification-item';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { AccountService } from './account-service';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 
-const SEED_NOTIFICATIONS: NotificationRecord[] = [
-  {
-    id: 'notif-1',
-    type: 'wallet_invitation',
-    isRead: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    title: { vi: 'Lời mời tham gia ví gia đình', en: 'Invitation to Family Wallet' },
-    description: {
-      vi: 'Nguyễn Văn Anh đã mời bạn gia nhập Ví Gia Đình 2026 với vai trò Thành viên.',
-      en: 'Nguyen Van Anh invited you to join Family Wallet 2026 as Member.'
-    },
-    time: { vi: '15 phút trước', en: '15 mins ago' },
-    senderName: 'Nguyễn Văn Anh',
-    senderAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    relatedEntityId: 'wallet-101',
-    relatedEntityType: 'wallet',
-    actionStatus: 'pending',
-    metadata: {
-      walletName: 'Ví Gia Đình 2026',
-      role: 'Thành viên'
-    }
-  },
-  {
-    id: 'notif-2',
-    type: 'product_review',
-    isRead: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    title: { vi: 'Nhắc nhở đánh giá sản phẩm', en: 'Product Review Reminder' },
-    description: {
-      vi: 'Bạn đã mua Tai nghe Bluetooth Sony WH-1000XM5 với giá 6.490.000 ₫. Hãy chia sẻ cảm nhận!',
-      en: 'You purchased Sony WH-1000XM5 Headphones for 6,490,000 ₫. Share your review!'
-    },
-    time: { vi: '2 giờ trước', en: '2 hours ago' },
-    relatedEntityId: 'prod-88',
-    relatedEntityType: 'product',
-    actionStatus: 'pending',
-    metadata: {
-      productName: 'Tai nghe Bluetooth Sony WH-1000XM5',
-      productImage: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&auto=format&fit=crop&q=80',
-      amount: 6490000,
-      purchaseDate: '24/07/2026'
-    }
-  },
-  {
-    id: 'notif-3',
-    type: 'wallet_activity',
-    isRead: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-    title: { vi: 'Chi tiêu mới trong ví dùng chung', en: 'New Expense in Shared Wallet' },
-    description: {
-      vi: 'Trần Minh Hải vừa thêm khoản chi "Ăn trưa nhóm" 450.000 ₫ thuộc danh mục Ăn uống.',
-      en: 'Tran Minh Hai added expense "Group Lunch" 450,000 ₫ in Food & Dining.'
-    },
-    time: { vi: '5 giờ trước', en: '5 hours ago' },
-    senderName: 'Trần Minh Hải',
-    senderAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    relatedEntityId: 'tx-502',
-    relatedEntityType: 'transaction',
-    metadata: {
-      walletName: 'Ví Quỹ Nhóm Công Ty',
-      memberName: 'Trần Minh Hải',
-      action: 'thêm khoản chi',
-      amount: 450000,
-      category: 'Ăn uống'
-    }
-  },
-  {
-    id: 'notif-4',
-    type: 'system',
-    isRead: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-    title: { vi: 'Cảnh báo hạn mức ngân sách', en: 'Budget Limit Warning' },
-    description: {
-      vi: 'Chi tiêu danh mục Giải trí đã đạt 92% (4.600.000 ₫ / 5.000.000 ₫) hạn mức tháng này.',
-      en: 'Entertainment category spending reached 92% of July budget limit.'
-    },
-    time: { vi: '12 giờ trước', en: '12 hours ago' },
-    relatedEntityType: 'system',
-    metadata: {
-      severity: 'warning'
-    }
-  },
-  {
-    id: 'notif-5',
-    type: 'system',
-    isRead: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    title: { vi: 'Bảo trì hệ thống định kỳ', en: 'Scheduled System Maintenance' },
-    description: {
-      vi: 'Hệ thống sẽ bảo trì nâng cấp máy chủ từ 02:00 - 04:00 ngày 26/07/2026.',
-      en: 'System upgrade maintenance scheduled from 02:00 - 04:00 AM on July 26, 2026.'
-    },
-    time: { vi: 'Hôm qua 10:15', en: 'Yesterday 10:15' },
-    relatedEntityType: 'system',
-    metadata: {
-      severity: 'critical'
-    }
-  },
-  {
-    id: 'notif-6',
-    type: 'system',
-    isRead: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-    title: { vi: 'Cập nhật phiên bản Snaptics 3.2', en: 'Snaptics v3.2 Update Available' },
-    description: {
-      vi: 'Trải nghiệm tính năng AI Phân tích chi tiêu thông minh và Trung tâm thông báo mới!',
-      en: 'Experience smart AI spending analytics and the new Notification Center!'
-    },
-    time: { vi: '2 ngày trước', en: '2 days ago' },
-    relatedEntityType: 'system',
-    metadata: {
-      severity: 'info'
-    }
-  }
-];
+export interface NotificationDto {
+  id: number;
+  userId: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  itemInventoryId?: number | null;
+  type: number | string;
+  transactionDetailId?: number | null;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -136,6 +31,10 @@ export class NotificationService {
   public aiError$ = new Subject<string>();
 
   private readonly notificationsState = signal<NotificationRecord[]>([]);
+  readonly isLoading = signal<boolean>(false);
+  readonly hasError = signal<boolean>(false);
+  readonly errorMessage = signal<string>('');
+
   readonly mutedTypes = signal<Set<NotificationType>>(new Set());
   readonly notificationSettings = signal({
     emailNotif: true,
@@ -172,37 +71,100 @@ export class NotificationService {
   }
 
   loadNotifications(): void {
-    this.http.get<any[]>(`${this.apiUrl}/user`, { withCredentials: true })
+    const url = `${this.apiUrl}/user`;
+    this.isLoading.set(true);
+    this.hasError.set(false);
+    this.errorMessage.set('');
+
+    if (!environment.production) {
+      console.log(`[NotificationService] Fetching notifications from: ${url}`);
+    }
+
+    this.http.get<NotificationDto[]>(url, { withCredentials: true })
       .subscribe({
         next: (dtos) => {
-          if (dtos && dtos.length > 0) {
-            const records: NotificationRecord[] = dtos.map(dto => {
-              const feType: NotificationType = dto.type === 4 ? 'wallet_invitation' : 'system';
-              const date = new Date(dto.createdAt);
-              const timeString = date.toLocaleString();
-              
-              return {
-                id: dto.id.toString(),
-                title: { vi: dto.title || 'Thông báo hệ thống', en: dto.title || 'System Notification' },
-                description: { vi: dto.message, en: dto.message },
-                time: { vi: timeString, en: timeString },
-                type: feType,
-                isRead: dto.isRead,
-                createdAt: dto.createdAt
-              };
-            });
+          this.isLoading.set(false);
+          if (!environment.production) {
+            console.log(`[NotificationService] API Response from ${url}:`, dtos);
+          }
+          if (dtos && Array.isArray(dtos)) {
+            const records: NotificationRecord[] = dtos.map(dto => this.mapDtoToRecord(dto));
             this.setNotifications(records);
           } else {
-            this.setNotifications(SEED_NOTIFICATIONS);
+            this.setNotifications([]);
           }
         },
         error: (err) => {
-          console.log('Using seed notifications as fallback', err);
-          if (this.notificationsState().length === 0) {
-            this.setNotifications(SEED_NOTIFICATIONS);
+          this.isLoading.set(false);
+          this.hasError.set(true);
+          this.errorMessage.set(err.message || 'Error fetching notifications');
+          if (!environment.production) {
+            console.error(`[NotificationService] HTTP error fetching from ${url}:`, err);
           }
+          this.setNotifications([]);
         }
       });
+  }
+
+  private mapDtoToRecord(dto: NotificationDto): NotificationRecord {
+    let feType: NotificationType = 'system';
+    let titleVi = 'Thông báo hệ thống';
+    let titleEn = 'System Notification';
+    let relatedEntityType: 'wallet' | 'transaction' | 'product' | 'system' = 'system';
+    let relatedEntityId: string | undefined = undefined;
+
+    const typeNum = typeof dto.type === 'number' ? dto.type : parseInt(dto.type as string, 10);
+    const typeStr = typeof dto.type === 'string' ? dto.type : '';
+
+    if (typeNum === 4 || typeStr === 'BudgetInvitation') {
+      feType = 'wallet_invitation';
+      titleVi = 'Lời mời tham gia ngân sách';
+      titleEn = 'Budget Invitation';
+      relatedEntityType = 'wallet';
+    } else if (typeNum === 2 || typeStr === 'UsageReview') {
+      feType = 'product_review';
+      titleVi = 'Đánh giá sản phẩm/chi tiêu';
+      titleEn = 'Usage Review';
+      relatedEntityType = 'product';
+      if (dto.itemInventoryId) {
+        relatedEntityId = dto.itemInventoryId.toString();
+      }
+    } else if (typeNum === 1 || typeStr === 'MissingInfo') {
+      feType = 'manual-entry';
+      titleVi = 'Cần bổ sung thông tin';
+      titleEn = 'Missing Information Needed';
+      if (dto.transactionDetailId) {
+        relatedEntityType = 'transaction';
+        relatedEntityId = dto.transactionDetailId.toString();
+      }
+    } else if (dto.transactionDetailId) {
+      feType = 'wallet_activity';
+      titleVi = 'Hoạt động giao dịch';
+      titleEn = 'Transaction Activity';
+      relatedEntityType = 'transaction';
+      relatedEntityId = dto.transactionDetailId.toString();
+    }
+
+    const date = new Date(dto.createdAt);
+    const timeString = isNaN(date.getTime()) ? dto.createdAt : date.toLocaleString();
+
+    return {
+      id: dto.id.toString(),
+      userId: dto.userId,
+      title: { vi: titleVi, en: titleEn },
+      description: { vi: dto.message || '', en: dto.message || '' },
+      time: { vi: timeString, en: timeString },
+      type: feType,
+      isRead: dto.isRead,
+      createdAt: dto.createdAt,
+      relatedEntityId: relatedEntityId,
+      relatedEntityType: relatedEntityType,
+      metadata: {
+        itemInventoryId: dto.itemInventoryId,
+        transactionDetailId: dto.transactionDetailId,
+        rawType: dto.type
+      }
+    };
   }
 
   createHubConnection(): void {
@@ -211,6 +173,10 @@ export class NotificationService {
       ? (environment as any).hubUrl + 'notification'
       : `${this.baseUrl}hubs/notification`;
 
+    if (!environment.production) {
+      console.log(`[NotificationService] Connecting to SignalR Hub: ${hubUrl}`);
+    }
+
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
         accessTokenFactory: () => token || ''
@@ -218,31 +184,31 @@ export class NotificationService {
       .withAutomaticReconnect()
       .build();
 
-    this.hubConnection.start().catch((error: unknown) => console.log('Error establishing SignalR connection', error));
+    this.hubConnection.start().catch((error: unknown) => {
+      if (!environment.production) {
+        console.error('[NotificationService] SignalR connection failed:', error);
+      }
+    });
 
     this.hubConnection.on('ReceiveAiResult', (result: any) => {
+      if (!environment.production) {
+        console.log('[NotificationService] SignalR ReceiveAiResult:', result);
+      }
       this.aiResult$.next(result);
     });
 
     this.hubConnection.on('ReceiveAiError', (errorMsg: string) => {
+      if (!environment.production) {
+        console.error('[NotificationService] SignalR ReceiveAiError:', errorMsg);
+      }
       this.aiError$.next(errorMsg);
     });
 
-    this.hubConnection.on('ReceiveNotification', (notificationDto: any) => {
-      const feType: NotificationType = notificationDto.type === 4 ? 'wallet_invitation' : 'system';
-      const date = new Date(notificationDto.createdAt);
-      const timeString = date.toLocaleString();
-      
-      const newRecord: NotificationRecord = {
-        id: notificationDto.id?.toString() || Date.now().toString(),
-        title: { vi: notificationDto.title || 'Thông báo mới', en: notificationDto.title || 'New Notification' },
-        description: { vi: notificationDto.message, en: notificationDto.message },
-        time: { vi: timeString, en: timeString },
-        type: feType,
-        isRead: false,
-        createdAt: notificationDto.createdAt || new Date().toISOString()
-      };
-
+    this.hubConnection.on('ReceiveNotification', (notificationDto: NotificationDto) => {
+      if (!environment.production) {
+        console.log('[NotificationService] SignalR ReceiveNotification:', notificationDto);
+      }
+      const newRecord = this.mapDtoToRecord(notificationDto);
       this.addNotification(newRecord);
     });
   }
@@ -285,16 +251,33 @@ export class NotificationService {
     if (!isNaN(numId)) {
       const target = this.notificationsState().find((n) => n.id === id);
       if (target) {
-        const dto = {
+        const dto: NotificationDto = {
           id: numId,
-          userId: this.accountService.currentUser()?.id || '',
-          message: target.description.en || target.description.vi,
+          userId: target.userId || this.accountService.currentUser()?.id || '',
+          message: target.description.en || target.description.vi || '',
           isRead: true,
-          type: target.type === 'wallet_invitation' ? 4 : 3,
-          createdAt: new Date().toISOString(),
+          type: target.metadata?.['rawType'] ?? (target.type === 'wallet_invitation' ? 4 : 0),
+          createdAt: target.createdAt || new Date().toISOString(),
+          itemInventoryId: target.metadata?.['itemInventoryId'] || null,
+          transactionDetailId: target.metadata?.['transactionDetailId'] || null
         };
-        this.http.put(environment.apiUrl + `Notification/${numId}`, dto, { withCredentials: true })
-          .subscribe({ error: (err) => console.log('Error updating notification', err) });
+        const url = `${this.apiUrl}/${numId}`;
+        if (!environment.production) {
+          console.log(`[NotificationService] PUT ${url}`, dto);
+        }
+        this.http.put<NotificationDto>(url, dto, { withCredentials: true })
+          .subscribe({
+            next: (res) => {
+              if (!environment.production) {
+                console.log(`[NotificationService] Marked as read success for ID ${numId}:`, res);
+              }
+            },
+            error: (err) => {
+              if (!environment.production) {
+                console.error(`[NotificationService] Error marking as read for ID ${numId}:`, err);
+              }
+            }
+          });
       }
     }
   }
@@ -305,14 +288,67 @@ export class NotificationService {
         notification.id === id ? { ...notification, isRead: false } : notification,
       ),
     );
+
+    const numId = parseInt(id, 10);
+    if (!isNaN(numId)) {
+      const target = this.notificationsState().find((n) => n.id === id);
+      if (target) {
+        const dto: NotificationDto = {
+          id: numId,
+          userId: target.userId || this.accountService.currentUser()?.id || '',
+          message: target.description.en || target.description.vi || '',
+          isRead: false,
+          type: target.metadata?.['rawType'] ?? (target.type === 'wallet_invitation' ? 4 : 0),
+          createdAt: target.createdAt || new Date().toISOString(),
+          itemInventoryId: target.metadata?.['itemInventoryId'] || null,
+          transactionDetailId: target.metadata?.['transactionDetailId'] || null
+        };
+        const url = `${this.apiUrl}/${numId}`;
+        if (!environment.production) {
+          console.log(`[NotificationService] PUT ${url} (mark unread)`, dto);
+        }
+        this.http.put<NotificationDto>(url, dto, { withCredentials: true })
+          .subscribe({
+            next: (res) => {
+              if (!environment.production) {
+                console.log(`[NotificationService] Marked as unread success for ID ${numId}:`, res);
+              }
+            },
+            error: (err) => {
+              if (!environment.production) {
+                console.error(`[NotificationService] Error marking as unread for ID ${numId}:`, err);
+              }
+            }
+          });
+      }
+    }
   }
 
   markAllAsRead(): void {
+    const unreadItems = this.notificationsState().filter((n) => !n.isRead);
     this.notificationsState.update((notifications) =>
       notifications.map((notification) =>
         notification.isRead ? notification : { ...notification, isRead: true },
       ),
     );
+
+    unreadItems.forEach((target) => {
+      const numId = parseInt(target.id, 10);
+      if (!isNaN(numId)) {
+        const dto: NotificationDto = {
+          id: numId,
+          userId: target.userId || this.accountService.currentUser()?.id || '',
+          message: target.description.en || target.description.vi || '',
+          isRead: true,
+          type: target.metadata?.['rawType'] ?? (target.type === 'wallet_invitation' ? 4 : 0),
+          createdAt: target.createdAt || new Date().toISOString(),
+          itemInventoryId: target.metadata?.['itemInventoryId'] || null,
+          transactionDetailId: target.metadata?.['transactionDetailId'] || null
+        };
+        const url = `${this.apiUrl}/${numId}`;
+        this.http.put<NotificationDto>(url, dto, { withCredentials: true }).subscribe();
+      }
+    });
   }
 
   deleteNotification(id: string): void {
@@ -322,8 +358,23 @@ export class NotificationService {
 
     const numId = parseInt(id, 10);
     if (!isNaN(numId)) {
+      const url = `${this.apiUrl}/${numId}`;
+      if (!environment.production) {
+        console.log(`[NotificationService] DELETE ${url}`);
+      }
       this.http.delete(`${this.apiUrl}/${numId}`, { withCredentials: true })
-        .subscribe({ error: (err) => console.log('Error deleting notification', err) });
+        .subscribe({
+          next: (res) => {
+            if (!environment.production) {
+              console.log(`[NotificationService] Deleted notification ID ${numId} success:`, res);
+            }
+          },
+          error: (err) => {
+            if (!environment.production) {
+              console.error(`[NotificationService] Error deleting notification ID ${numId}:`, err);
+            }
+          }
+        });
     }
   }
 
