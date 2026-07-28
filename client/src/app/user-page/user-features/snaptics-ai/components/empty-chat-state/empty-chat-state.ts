@@ -115,6 +115,10 @@ export class EmptyChatState {
       description: 'Tìm hiểu khoản chi nào đang tăng hoặc giảm.',
     },
     {
+      title: 'Sếp lớn thưởng 1 triệu :3',
+      description: 'Ghi nhận khoản thu nhập bất ngờ.',
+    },
+    {
       title: 'Gợi ý kế hoạch tiết kiệm',
       description: 'Tạo mục tiêu dựa trên thu nhập và thói quen chi tiêu.',
     },

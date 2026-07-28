@@ -386,6 +386,13 @@ export class Transaction implements OnInit {
     return this.normalizeIconClass(category?.icon);
   }
 
+  getCategoryColor(transaction: TransactionDto): string | null {
+    const details = transaction.transactionDetails;
+    if (details?.length !== 1) return null;
+
+    return this.categories.find((category) => category.id === Number(details[0].categoryId))?.color || null;
+  }
+
   private normalizeIconClass(icon: string | null | undefined): string {
     const iconClass = icon?.trim().split(/\s+/).find((className) => className.startsWith('ti-'));
     return iconClass || 'ti-help-circle';

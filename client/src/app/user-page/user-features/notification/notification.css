@@ -714,6 +714,30 @@
   color: #92400e;
 }
 
+.status-pill.review-status--frequent {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.status-pill.review-status--occasionally {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.status-pill.review-status--seldom {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.status-pill.review-status--unused {
+  background: #ffe4e6;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+}
+
 /* ==================== LOAD MORE & INFINITE SCROLL ==================== */
 .notification-load-more {
   display: flex;
@@ -1170,4 +1194,452 @@
   .invitation-actions {
     justify-content: flex-end;
   }
+
+  .usage-status-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
+
+/* ==================== MOBILE CARD REFINEMENT ==================== */
+@media (max-width: 640px) {
+  .notification-page {
+    padding: 10px 12px calc(104px + env(safe-area-inset-bottom));
+  }
+
+  .notification-hero {
+    gap: 16px;
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .notification-hero h1 {
+    font-size: 1.9rem;
+  }
+
+  .notification-hero p {
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .notification-hero__stat {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+  }
+
+  .notification-toolbar {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .notification-tabs {
+    gap: 3px;
+    padding: 3px;
+    border-radius: 14px;
+  }
+
+  .notification-tab {
+    gap: 5px;
+    padding: 9px 11px;
+    font-size: 0.72rem;
+  }
+
+  .notification-time-filter {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .time-filter__select {
+    min-width: 128px;
+    padding: 9px 12px;
+    border-radius: 12px;
+  }
+
+  .notification-card {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 12px;
+    padding: 15px;
+    border-radius: 20px;
+  }
+
+  .notification-card__media {
+    flex: 0 0 auto;
+    width: 44px;
+  }
+
+  .avatar-wrap,
+  .icon-wrap {
+    width: 44px;
+    height: 44px;
+  }
+
+  .notification-card__body {
+    min-width: 0;
+    padding-right: 20px;
+  }
+
+  .notification-card__meta {
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    padding-right: 4px;
+  }
+
+  .type-badge {
+    max-width: 68%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .notification-time {
+    font-size: 0.68rem;
+  }
+
+  .notification-card__title {
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  .notification-card__desc {
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .notification-card__right {
+    position: absolute;
+    top: 12px;
+    right: 9px;
+    z-index: 2;
+  }
+
+  .unread-dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .card-menu-trigger {
+    width: 30px;
+    height: 30px;
+  }
+
+  .action-box {
+    margin-top: 11px;
+    padding: 11px;
+    border-radius: 15px;
+  }
+
+  .action-box--invitation {
+    gap: 10px;
+  }
+
+  .invitation-info {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  .invitation-info > span:nth-child(2) {
+    flex: 1 1 calc(100% - 30px);
+    min-width: 0;
+  }
+
+  .role-tag {
+    margin-left: 30px;
+  }
+
+  .invitation-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+
+  .invitation-actions .btn {
+    min-height: 42px;
+    padding: 8px 6px;
+    font-size: 0.78rem;
+  }
+
+  .action-box--review {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .product-thumb {
+    width: 42px;
+    height: 42px;
+  }
+
+  .product-name {
+    font-size: 0.78rem;
+  }
+
+  .review-action {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .review-action .btn--review,
+  .review-action .status-pill {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+    min-height: 42px;
+  }
+
+  .activity-meta {
+    flex-wrap: wrap;
+  }
+
+  .notification-load-more .btn--load-more {
+    width: 100%;
+    min-height: 42px;
+  }
+}
+
+/* ==================== REVIEW MODAL (REDESIGN) ==================== */
+
+.modal-card--review {
+  max-width: 500px;
+}
+
+/* Header layout: icon + title block + close btn */
+.modal-card--review .modal-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--sw-border, rgba(0,0,0,.08));
+}
+
+.modal-review-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.modal-review-header-icon .material-symbols-outlined {
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+.modal-card--review .modal-card__header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sw-foreground);
+  margin: 0 0 3px;
+}
+
+.modal-review-subtitle {
+  font-size: 0.8125rem;
+  color: var(--sw-muted-foreground, #64748b);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Push close button to far right */
+.modal-card--review .modal-card__header .modal-close-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Product Info Strip */
+.review-product-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(139, 92, 246, 0.06));
+  border: 1px solid rgba(99, 102, 241, 0.14);
+  margin-bottom: 22px;
+}
+
+.review-product-strip__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(99, 102, 241, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.review-product-strip__icon .material-symbols-outlined {
+  font-size: 1.2rem;
+  color: #6366f1;
+}
+
+.review-product-strip__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.review-product-strip__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6366f1;
+}
+
+.review-product-strip__name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--sw-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Usage Status Section */
+.usage-status-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.usage-status-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sw-foreground);
+  margin: 0;
+}
+
+.usage-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.usage-status-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 12px;
+  border-radius: 16px;
+  border: 2px solid rgba(0,0,0,.08);
+  background: var(--sw-card, #fff);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  font-family: inherit;
+  box-shadow: 0 2px 6px rgba(0,0,0,.04);
+}
+
+.usage-status-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.1);
+}
+
+/* Color theming per data-color attribute */
+.usage-status-card[data-color="emerald"] .usage-status-card__icon { color: #10b981; }
+.usage-status-card[data-color="emerald"].usage-status-card--selected {
+  border-color: #10b981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.04));
+}
+
+.usage-status-card[data-color="blue"] .usage-status-card__icon { color: #3b82f6; }
+.usage-status-card[data-color="blue"].usage-status-card--selected {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.04));
+}
+
+.usage-status-card[data-color="amber"] .usage-status-card__icon { color: #f59e0b; }
+.usage-status-card[data-color="amber"].usage-status-card--selected {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.04));
+}
+
+.usage-status-card[data-color="rose"] .usage-status-card__icon { color: #f43f5e; }
+.usage-status-card[data-color="rose"].usage-status-card--selected {
+  border-color: #f43f5e;
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.08), rgba(244, 63, 94, 0.04));
+}
+
+.usage-status-card__icon {
+  font-size: 1.6rem;
+  transition: transform 0.2s ease;
+}
+
+.usage-status-card:hover .usage-status-card__icon {
+  transform: scale(1.1);
+}
+
+.usage-status-card__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sw-foreground);
+  line-height: 1.3;
+}
+
+.usage-status-card__check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 1rem;
+  color: inherit;
+  opacity: 0.85;
+}
+
+.usage-status-card[data-color="emerald"] .usage-status-card__check { color: #10b981; }
+.usage-status-card[data-color="blue"]    .usage-status-card__check { color: #3b82f6; }
+.usage-status-card[data-color="amber"]   .usage-status-card__check { color: #f59e0b; }
+.usage-status-card[data-color="rose"]    .usage-status-card__check { color: #f43f5e; }
+
+/* Submit button with spinner */
+.btn--submit-review {
+  min-width: 140px;
+}
+
+.spinner-sm {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Dark mode overrides for review modal */
+:host-context(html.dark-theme) .review-product-strip {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+:host-context(html.dark-theme) .review-product-strip__icon {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+:host-context(html.dark-theme) .usage-status-card {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(255,255,255,0.1);
+}
+
+:host-context(html.dark-theme) .usage-status-card:hover {
+  background: rgba(51, 65, 85, 0.9);
+}
+

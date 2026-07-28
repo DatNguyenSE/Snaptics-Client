@@ -38,7 +38,7 @@
             <span class="top-name">{{ summaryData.topCategory.name }}</span>
             <span class="top-amount">{{ summaryData.topCategory.totalAmount | number }}đ</span>
           </div>
-          <div class="top-percent">Chiếm {{ summaryData.topCategory.percentage }}% tổng chi tiêu</div>
+           <div class="top-percent">Chiếm {{ formatPercentage(summaryData.topCategory.percentage) }} tổng chi tiêu</div>
         </div>
 
         <!-- Breakdown List -->
@@ -52,9 +52,9 @@
             <span class="item-amount">{{ item.totalAmount | number }}đ</span>
           </div>
           <div class="progress-bar-container">
-            <div class="progress-bar" [style.width.%]="item.percentage" [style.backgroundColor]="getColor(i)"></div>
+             <div class="progress-bar" [style.width.%]="getPercentageWidth(item.percentage)" [style.backgroundColor]="getColor(i)"></div>
           </div>
-          <span class="item-percent">{{ item.percentage }}%</span>
+           <span class="item-percent">{{ formatPercentage(item.percentage) }}</span>
         </div>
       </div>
     </div>

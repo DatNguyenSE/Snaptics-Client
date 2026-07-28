@@ -208,7 +208,11 @@
                         role="button"
                         tabindex="0">
 
-                        <div class="t-card-icon" [class]="getMediaClass(transaction)">
+                        <div
+                          class="t-card-icon"
+                          [class]="getMediaClass(transaction)"
+                          [style.background-color]="getCategoryColor(transaction)"
+                          [style.color]="getCategoryColor(transaction) ? '#ffffff' : null">
                           <i class="ti {{ getIcon(transaction) }}" style="font-size: 1.5rem;"></i>
                         </div>
 

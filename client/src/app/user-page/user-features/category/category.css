@@ -250,6 +250,7 @@
 
 .modal-content {
   width: min(100%, 560px);
+  height: min(760px, calc(100dvh - 40px));
   max-height: min(760px, calc(100dvh - 40px));
   display: flex;
   flex-direction: column;
@@ -564,4 +565,34 @@
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ─── DARK THEME ────────────────────────────────────────────── */
+:host-context(html.dark-theme) .category-hero {
+  background: linear-gradient(135deg, #172554 0%, #1e293b 52%, #064e3b 100%);
+  border-color: rgba(139, 92, 246, 0.24);
+}
+
+:host-context(html.dark-theme) .category-card.is-default,
+:host-context(html.dark-theme) .category-badge {
+  background: var(--sw-muted, #1e293b);
+}
+
+:host-context(html.dark-theme) .category-badge.custom-badge {
+  background: rgba(16, 185, 129, 0.16);
+  color: #6ee7b7;
+}
+
+:host-context(html.dark-theme) .tracking-setting,
+:host-context(html.dark-theme) .form-control,
+:host-context(html.dark-theme) .icon-option {
+  background: var(--sw-muted, #1e293b);
+}
+
+:host-context(html.dark-theme) .icon-option--selected {
+  background: var(--sw-primary-soft, rgba(139, 92, 246, 0.1));
+}
+
+:host-context(html.dark-theme) .modal-footer {
+  background: var(--sw-card, #1e293b);
 }

@@ -8,6 +8,9 @@ import { ToastService } from '../../../core/services/toast-service';
 import { NotificationItem, NotificationType } from '../../../models/notification-item';
 import { UserHeader } from '../../user-layout/user-header/user-header';
 import { BudgetMemberService } from '../../../core/services/budgetMember.service';
+import { ItemInventoryService, UsageStatusType } from '../../../core/services/item-inventory.service';
+import { take } from 'rxjs';
+import { TransactionService } from '../../../core/services/transaction.service';
 
 export type NotificationFilterTab =
   | 'all'
@@ -32,6 +35,8 @@ export class Notification {
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly budgetMemberService = inject(BudgetMemberService);
+  private readonly itemInventoryService = inject(ItemInventoryService);
+  private readonly transactionService = inject(TransactionService);
 
   // States
   readonly activeTab = signal<NotificationFilterTab>('unread');
@@ -47,6 +52,9 @@ export class Notification {
   readonly itemToReview = signal<NotificationItem | null>(null);
   readonly reviewRating = signal<number>(5);
   readonly reviewComment = signal<string>('');
+  readonly selectedUsageStatus = signal<UsageStatusType>('Occasionally');
+  readonly isSubmittingReview = signal<boolean>(false);
+  readonly transactionImage = signal<string | null>(null);
 
   // Settings form values
   settingsForm = {
@@ -251,24 +259,123 @@ export class Notification {
     this.itemToReview.set(item);
     this.reviewRating.set(5);
     this.reviewComment.set('');
+    this.selectedUsageStatus.set('Occasionally');
+    this.transactionImage.set(null);
     this.closeAllMenus();
+
+    const transactionDetailId = item.metadata?.['transactionDetailId'];
+    const itemInventoryId = item.metadata?.['itemInventoryId'];
+
+    if (transactionDetailId) {
+      this.fetchTransactionImage(transactionDetailId);
+    } else if (itemInventoryId) {
+      this.itemInventoryService.getUserItemInventories().pipe(take(1)).subscribe(inventories => {
+        const inv = inventories.find(i => i.id == itemInventoryId);
+        if (inv && inv.transactionDetailId) {
+          this.fetchTransactionImage(inv.transactionDetailId);
+        }
+      });
+    }
+  }
+
+  private fetchTransactionImage(transactionDetailId: number | string): void {
+    const detailIdNum = Number(transactionDetailId);
+    this.transactionService.getTransactions().pipe(take(1)).subscribe(transactions => {
+      const tx = transactions.find(t => 
+        t.transactionDetails && t.transactionDetails.some(td => td.id === detailIdNum)
+      );
+      if (tx && tx.imagePreviewUrl) {
+        this.transactionImage.set(tx.imagePreviewUrl);
+      }
+    });
   }
 
   setRating(star: number): void {
     this.reviewRating.set(star);
   }
 
+  setUsageStatus(status: UsageStatusType): void {
+    this.selectedUsageStatus.set(status);
+  }
+
+  getUsageStatusOptions(): { value: UsageStatusType; labelVi: string; labelEn: string; icon: string; color: string }[] {
+    return [
+      { value: 'Frequent',     labelVi: 'Dùng thường xuyên', labelEn: 'Use Frequently',  icon: 'rocket_launch', color: 'emerald' },
+      { value: 'Occasionally', labelVi: 'Dùng thỉnh thoảng', labelEn: 'Use Occasionally', icon: 'refresh',       color: 'blue'    },
+      { value: 'Seldom',       labelVi: 'Ít dùng',           labelEn: 'Seldom Used',      icon: 'schedule',      color: 'amber'   },
+      { value: 'Unused',       labelVi: 'Không dùng nữa',   labelEn: 'No Longer Used',   icon: 'block',         color: 'rose'    },
+    ];
+  }
+
+  getReviewStatusClass(item: NotificationItem): string {
+    const status = this.getReviewStatus(item);
+    return status ? `review-status--${status.toLowerCase()}` : '';
+  }
+
+  getReviewStatusIcon(item: NotificationItem): string {
+    switch (this.getReviewStatus(item)) {
+      case 'Frequent': return 'rocket_launch';
+      case 'Occasionally': return 'refresh';
+      case 'Seldom': return 'schedule';
+      case 'Unused': return 'block';
+      default: return 'verified';
+    }
+  }
+
+  private getReviewStatus(item: NotificationItem): UsageStatusType | null {
+    const rawStatus = String(item.metadata?.['usageStatus'] || item.metadata?.['usageStatusLabel'] || '').toLowerCase();
+    if (rawStatus.includes('frequent') || rawStatus.includes('thường xuyên')) return 'Frequent';
+    if (rawStatus.includes('occasionally') || rawStatus.includes('thỉnh thoảng')) return 'Occasionally';
+    if (rawStatus.includes('seldom') || rawStatus.includes('ít dùng')) return 'Seldom';
+    if (rawStatus.includes('unused') || rawStatus.includes('không dùng')) return 'Unused';
+    return null;
+  }
+
   submitReview(): void {
     const item = this.itemToReview();
-    if (item) {
-      this.notificationService.submitProductReview(item.id, this.reviewRating(), this.reviewComment());
-      this.toast.success(
+    if (!item) return;
+
+    const itemInventoryId = item.metadata?.['itemInventoryId'];
+    if (!itemInventoryId) {
+      this.toast.error(
         this.language.currentLang() === 'vi'
-          ? 'Cảm ơn bạn đã gửi đánh giá sản phẩm!'
-          : 'Thank you for reviewing the product!',
+          ? 'Không tìm thấy ID sản phẩm. Vui lòng thử lại.'
+          : 'Product ID not found. Please try again.',
       );
-      this.itemToReview.set(null);
+      return;
     }
+
+    this.isSubmittingReview.set(true);
+    const usageStatus = this.selectedUsageStatus();
+
+    this.itemInventoryService.reviewItem(Number(itemInventoryId), usageStatus).subscribe({
+      next: () => {
+        this.isSubmittingReview.set(false);
+        const statusLabels: Record<UsageStatusType, { vi: string; en: string }> = {
+          Frequent:     { vi: 'Dùng thường xuyên', en: 'Frequent' },
+          Occasionally: { vi: 'Dùng thỉnh thoảng', en: 'Occasionally' },
+          Seldom:       { vi: 'Ít dùng',           en: 'Seldom' },
+          Unused:       { vi: 'Không dùng nữa',   en: 'Unused' },
+        };
+        const label = statusLabels[usageStatus];
+        const localizedLabel = this.language.currentLang() === 'vi' ? label.vi : label.en;
+        this.notificationService.submitProductReview(item.id, this.reviewRating(), this.reviewComment(), localizedLabel);
+        this.toast.success(
+          this.language.currentLang() === 'vi'
+            ? `Đã ghi nhận: ${label.vi}`
+            : `Review submitted: ${label.en}`,
+        );
+        this.itemToReview.set(null);
+      },
+      error: (err) => {
+        this.isSubmittingReview.set(false);
+        this.toast.error(
+          this.language.currentLang() === 'vi'
+            ? 'Gửi đánh giá thất bại. Vui lòng thử lại.'
+            : 'Failed to submit review. Please try again.',
+        );
+      },
+    });
   }
 
   closeReviewModal(): void {

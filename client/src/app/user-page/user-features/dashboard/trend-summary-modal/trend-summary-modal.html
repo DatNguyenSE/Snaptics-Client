@@ -43,7 +43,7 @@
             <strong>{{ highest.label }}</strong>
             <span>{{ highest.expense | number }}đ</span>
           </div>
-          <span class="trend-highlight__percent">{{ getExpensePercentage(highest.expense) }}%</span>
+           <span class="trend-highlight__percent">{{ getExpensePercentage(highest.expense) }}</span>
         </div>
 
         <div class="trend-total-row">
@@ -65,9 +65,9 @@
             </div>
             <div class="trend-item__meta">
               <div class="progress-bar-container">
-                <div class="progress-bar" [style.width.%]="(item.expense / maxExpense) * 100"></div>
+                 <div class="progress-bar" [style.width.%]="getExpenseProgress(item.expense)"></div>
               </div>
-              <span>{{ getExpensePercentage(item.expense) }}%</span>
+               <span>{{ getExpensePercentage(item.expense) }}</span>
             </div>
           </div>
         </div>

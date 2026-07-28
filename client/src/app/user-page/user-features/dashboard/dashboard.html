@@ -70,7 +70,7 @@
               {{ currentSpendingPeriod.isBetter ? 'trending_down' : 'trending_up' }}
             </span>
             <span [style.color]="currentSpendingPeriod.isBetter ? '#a7f3d0' : '#fecaca'">
-              {{ currentSpendingPeriod.percentageChange >= 0 ? 'Tăng' : 'Giảm' }} {{ currentSpendingPeriod.percentageChange >= 0 ? currentSpendingPeriod.percentageChange : -currentSpendingPeriod.percentageChange }}% so với {{ selectedSpendingTab === 'week' ? 'tuần' : selectedSpendingTab === 'month' ? 'tháng' : 'năm' }} trước
+               {{ formatPercentageChange(currentSpendingPeriod.percentageChange) }} so với {{ selectedSpendingTab === 'week' ? 'tuần' : selectedSpendingTab === 'month' ? 'tháng' : 'năm' }} trước
             </span>
           </div>
         } @else {
@@ -94,7 +94,7 @@
               <h2 class="stat-card__amount stat-card__amount--accent">{{ formatCurrency(totalBudget) }}</h2>
               <div class="budget-progress">
                 <div class="budget-progress__row">
-                  <span>{{ language.t('dashboard.used') }} {{ spentPercentage }}%</span>
+                   <span>{{ language.t('dashboard.used') }} {{ spentPercentageLabel }}</span>
                   <span>{{ formatCurrency(totalBudget) }}</span>
                 </div>
                 <div class="budget-progress__track" aria-hidden="true">
@@ -118,7 +118,7 @@
                 </h2>
                 <div class="budget-progress">
                   <div class="budget-progress__row">
-                    <span>{{ budget.type === 1 ? 'Đã tích lũy' : language.t('dashboard.used') }} {{ getBudgetSpentPercent(budget) }}%</span>
+                   <span>{{ budget.type === 1 ? 'Đã tích lũy' : language.t('dashboard.used') }} {{ getBudgetSpentPercentLabel(budget) }}</span>
                     <span>{{ formatCurrency(budget.amount) }}</span>
                   </div>
                   <div class="budget-progress__track" aria-hidden="true">

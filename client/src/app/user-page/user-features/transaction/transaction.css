@@ -654,3 +654,66 @@ h1, h2, h3, p, span { margin: 0; }
     align-self: center;
   }
 }
+
+/* ─── DARK THEME ────────────────────────────────────────────── */
+:host-context(html.dark-theme) .transaction-page {
+  background-color: var(--sw-background, #0f172a);
+}
+
+:host-context(html.dark-theme) .transaction-page__hero h1,
+:host-context(html.dark-theme) .t-title,
+:host-context(html.dark-theme) .sc-value,
+:host-context(html.dark-theme) .t-price {
+  color: var(--sw-foreground, #f8fafc);
+}
+
+:host-context(html.dark-theme) .transaction-page__hero-subtitle,
+:host-context(html.dark-theme) .sc-title,
+:host-context(html.dark-theme) .t-time,
+:host-context(html.dark-theme) .t-note,
+:host-context(html.dark-theme) .filter-chip,
+:host-context(html.dark-theme) .filter-search__input::placeholder {
+  color: var(--sw-muted-foreground, #94a3b8);
+}
+
+:host-context(html.dark-theme) .summary-card,
+:host-context(html.dark-theme) .filter-bar,
+:host-context(html.dark-theme) .t-card {
+  background: var(--sw-card, #1e293b);
+  border-color: var(--sw-border, rgba(255, 255, 255, 0.1));
+}
+
+:host-context(html.dark-theme) .filter-search,
+:host-context(html.dark-theme) .filter-chip:hover {
+  background: var(--sw-muted, #1e293b);
+}
+
+:host-context(html.dark-theme) .filter-date-input,
+:host-context(html.dark-theme) .filter-date-select {
+  color: var(--sw-foreground, #f8fafc);
+  background: transparent;
+}
+
+:host-context(html.dark-theme) .t-wallet-badge {
+  background: rgba(139, 92, 246, 0.16);
+  color: #c4b5fd;
+}
+
+:host-context(html.dark-theme) .t-category-pill.category-pill--amber {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+}
+
+:host-context(html.dark-theme) .t-category-pill.category-pill--blue {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+}
+
+:host-context(html.dark-theme) .t-category-pill.category-pill--emerald {
+  background: rgba(16, 185, 129, 0.16);
+  color: #6ee7b7;
+}
+
+:host-context(html.dark-theme) .timeline-item-dot {
+  background: var(--sw-background, #0f172a);
+}

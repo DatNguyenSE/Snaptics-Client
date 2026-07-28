@@ -38,11 +38,14 @@ export class TrendSummaryModal implements OnInit, OnChanges {
   }
 
   get orderedTrendData(): BarChartDto[] {
-    return [...this.trendData].sort((a, b) => b.expense - a.expense);
+    return [...this.trendData].sort((a, b) => (b.expense || 0) - (a.expense || 0));
   }
 
   get totalExpense(): number {
-    return this.trendData.reduce((total, item) => total + item.expense, 0);
+    return this.trendData.reduce(
+      (total, item) => total + (typeof item.expense === 'number' && Number.isFinite(item.expense) ? item.expense : 0),
+      0,
+    );
   }
 
   get highestExpense(): BarChartDto | null {
@@ -57,9 +60,14 @@ export class TrendSummaryModal implements OnInit, OnChanges {
     return this.trendData.reduce((max, item) => Math.max(max, item.expense), 0) || 1;
   }
 
-  getExpensePercentage(expense: number): number {
-    if (!this.totalExpense) return 0;
-    return Math.round((expense / this.totalExpense) * 100);
+  getExpensePercentage(expense: number | null | undefined): string {
+    if (typeof expense !== 'number' || !Number.isFinite(expense) || !this.totalExpense) return '-';
+    return `${Math.round((expense / this.totalExpense) * 100)}%`;
+  }
+
+  getExpenseProgress(expense: number | null | undefined): number {
+    if (typeof expense !== 'number' || !Number.isFinite(expense) || !this.maxExpense) return 0;
+    return Math.max(0, Math.min(100, (expense / this.maxExpense) * 100));
   }
 
   private loadData(): void {

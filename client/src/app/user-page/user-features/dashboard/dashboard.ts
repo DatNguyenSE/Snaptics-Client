@@ -144,13 +144,24 @@ export class Dashboard implements OnInit, OnDestroy {
 
   get spentPercentage(): number {
     const total = this.activeBudget ? this.activeBudget.amount : this.totalBudget;
+    if (!Number.isFinite(total) || total <= 0) return 0;
     const remaining = this.remainingBudget;
     const spent = Math.max(0, total - remaining);
     return Math.min(100, Math.round((spent / total) * 100));
   }
 
+  get spentPercentageLabel(): string {
+    const total = this.activeBudget ? this.activeBudget.amount : this.totalBudget;
+    return Number.isFinite(total) && total > 0 ? `${this.spentPercentage}%` : '-';
+  }
+
   get totalTransactions(): number {
     return this.currentMonthTransactions.length;
+  }
+
+  formatPercentageChange(value: number | null | undefined): string {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return '-';
+    return `${value >= 0 ? 'Tăng' : 'Giảm'} ${Math.abs(value)}%`;
   }
 
   get kpiCards(): KpiCard[] {
@@ -158,7 +169,7 @@ export class Dashboard implements OnInit, OnDestroy {
       { id: 'total-spent', label: 'Tổng chi tiêu', value: this.formatCurrency(this.totalSpent), icon: 'payments', colorClass: 'kpi-card--violet', subLabel: 'Tháng này', clickable: true },
       { id: 'transactions', label: 'Giao dịch', value: String(this.totalTransactions), icon: 'receipt_long', colorClass: 'kpi-card--blue', subLabel: 'Tháng này' },
       { id: 'top-category', label: 'Top danh mục', value: this.topCategoryName, icon: 'category', colorClass: 'kpi-card--amber', subLabel: 'Chi nhiều nhất', clickable: true },
-      { id: 'budget', label: 'Ngân sách', value: `${this.spentPercentage}%`, icon: 'donut_large', colorClass: this.spentPercentage >= 90 ? 'kpi-card--red' : 'kpi-card--emerald', subLabel: 'Đã sử dụng' },
+      { id: 'budget', label: 'Ngân sách', value: this.spentPercentageLabel, icon: 'donut_large', colorClass: this.spentPercentage >= 90 ? 'kpi-card--red' : 'kpi-card--emerald', subLabel: 'Đã sử dụng' },
     ];
   }
 
@@ -190,9 +201,9 @@ export class Dashboard implements OnInit, OnDestroy {
   get aiMessage(): string {
     if (this.isLoading) return 'Đang tải dữ liệu tài chính của bạn...';
     if (this.currentMonthTransactions.length === 0) return 'Hãy bắt đầu thêm giao dịch để mình hỗ trợ theo dõi chi tiêu nhé! 🚀';
-    if (this.spentPercentage >= 90) return `⚠️ Bạn đã sử dụng ${this.spentPercentage}% ngân sách tháng này. Hãy cẩn thận!`;
-    if (this.spentPercentage >= 70) return `Bạn đã dùng ${this.spentPercentage}%. Top: ${this.topCategoryName}. Theo dõi sát hơn nhé!`;
-    return `Bạn đang kiểm soát tài chính rất tốt! 💪 Đã chi ${this.spentPercentage}% với ${this.totalTransactions} giao dịch.`;
+    if (this.spentPercentage >= 90) return `⚠️ Bạn đã sử dụng ${this.spentPercentageLabel} ngân sách tháng này. Hãy cẩn thận!`;
+    if (this.spentPercentage >= 70) return `Bạn đã dùng ${this.spentPercentageLabel}. Top: ${this.topCategoryName}. Theo dõi sát hơn nhé!`;
+    return `Bạn đang kiểm soát tài chính rất tốt! 💪 Đã chi ${this.spentPercentageLabel} với ${this.totalTransactions} giao dịch.`;
   }
 
   // ─── Bar Chart ────────────────────────────────────────────────────────────
@@ -228,11 +239,11 @@ export class Dashboard implements OnInit, OnDestroy {
   // ─── Quick Actions ────────────────────────────────────────────────────────
   readonly quickActions: QuickAction[] = [
     { id: 'resources', labelKey: 'dashboard.quickAction.resources', icon: 'payments', iconClass: 'quick-action__icon--blue', route: '/user/in-come-source' },
-    { id: 'analysis', labelKey: 'dashboard.quickAction.capture', icon: 'analytics', iconClass: 'quick-action__icon--violet', route: '/user/analysis' },
+    { id: 'my-category', labelKey: 'dashboard.quickAction.myCategory', icon: 'category', iconClass: 'quick-action__icon--rose', route: '/user/category' },
     { id: 'review', labelKey: 'dashboard.quickAction.review', icon: 'edit_square', iconClass: 'quick-action__icon--amber', route: '#' },
     { id: 'create-budget', labelKey: 'dashboard.quickAction.createBudget', icon: 'account_balance_wallet', iconClass: 'quick-action__icon--emerald', route: '/user/budget' },
-    { id: 'my-category', labelKey: 'dashboard.quickAction.myCategory', icon: 'category', iconClass: 'quick-action__icon--emerald', route: '/user/category' },
-    { id: 'manual-entry', labelKey: 'dashboard.quickAction.quickEntry', icon: 'post_add', iconClass: 'quick-action__icon--emerald', route: '/user/manual-entry' },
+    { id: 'analysis', labelKey: 'dashboard.quickAction.capture', icon: 'analytics', iconClass: 'quick-action__icon--violet', route: '/user/analysis' },
+    { id: 'manual-entry', labelKey: 'dashboard.quickAction.quickEntry', icon: 'post_add', iconClass: 'quick-action__icon--cyan', route: '/user/manual-entry' },
   ];
 
   isQuickActionsExpanded: boolean = false;
@@ -538,10 +549,17 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   getBudgetSpentPercent(budget: BudgetDto): number {
+    if (!Number.isFinite(budget.amount) || budget.amount <= 0) return 0;
     const spent = budget.currentAmount !== undefined 
       ? budget.amount - budget.currentAmount 
       : this.getBudgetSpent(budget);
     return Math.min(100, Math.max(0, Math.round((spent / budget.amount) * 100)));
+  }
+
+  getBudgetSpentPercentLabel(budget: BudgetDto): string {
+    return Number.isFinite(budget.amount) && budget.amount > 0
+      ? `${this.getBudgetSpentPercent(budget)}%`
+      : '-';
   }
 
   getBudgetSpent(budget: BudgetDto): number {

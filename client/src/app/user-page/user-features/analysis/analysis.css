@@ -1631,3 +1631,179 @@
   color: var(--sw-muted-foreground);
   font-weight: 600;
 }
+
+/* The merchant and notable-transaction cards are intentionally hidden from the report. */
+.dashboard-grid--notable {
+  display: none;
+}
+
+/* ─── MOBILE LAYOUT ─────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .analysis-page {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 16px 12px calc(104px + env(safe-area-inset-bottom));
+    overflow-x: hidden;
+  }
+
+  .analysis-page__content {
+    width: 100%;
+    min-width: 0;
+    gap: 16px;
+  }
+
+  .analysis-header {
+    gap: 12px;
+    margin-bottom: 0;
+  }
+
+  .analysis-header__title { font-size: 1.5rem; }
+
+  .analysis-header__subtitle {
+    max-width: 34rem;
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  .analysis-header__filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .filter-dropdown-wrapper,
+  .btn-filter {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .btn-filter {
+    justify-content: flex-start;
+    gap: 5px;
+    padding: 10px 9px;
+    border-radius: 13px;
+    font-size: 0.72rem;
+  }
+
+  .btn-filter > span:nth-child(2) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .btn-filter__icon,
+  .btn-filter__chevron {
+    flex: 0 0 auto;
+    font-size: 1rem;
+  }
+
+  .btn-export {
+    width: 42px;
+    min-height: 42px;
+    justify-content: center;
+    padding: 0;
+    border-radius: 13px;
+  }
+
+  .filter-dropdown-menu {
+    width: min(220px, calc(100vw - 24px));
+    max-height: 55vh;
+    overflow-y: auto;
+  }
+
+  .analysis-card,
+  .cashflow-section {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .card-header { align-items: flex-start; }
+  .card-title { font-size: 1rem; }
+
+  .chart-controls {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .chart-container-wrap {
+    min-height: 230px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .category-donut-chart {
+    min-height: 220px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .category-legend-list,
+  .budget-performance-list {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .budget-performance-card { max-height: none; }
+
+  .budget-meter__name,
+  .budget-meter__limits {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .insight-item-card {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .empty-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .empty-actions .snap-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .drilldown-active-alert {
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.35;
+  }
+
+  .notable-tabs-bar {
+    margin-inline: -4px;
+    padding-inline: 4px;
+  }
+
+  .tab-btn { padding: 8px 12px; }
+
+  .mobile-tx-card {
+    min-width: 0;
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .mobile-tx-card__title-wrap,
+  .mobile-tx-card__title {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .custom-date-modal {
+    align-items: flex-end;
+    padding: 12px;
+  }
+
+  .custom-date-modal__content {
+    max-height: calc(100svh - 24px);
+    overflow-y: auto;
+    padding: 18px;
+    border-radius: 20px;
+  }
+}

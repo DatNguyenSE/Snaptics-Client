@@ -60,4 +60,12 @@ export class CategorySummaryModal implements OnInit, OnChanges {
   getColor(index: number): string {
     return this.categoryColors[index % this.categoryColors.length];
   }
+
+  formatPercentage(value: number | null | undefined): string {
+    return typeof value === 'number' && Number.isFinite(value) ? `${Math.round(value)}%` : '-';
+  }
+
+  getPercentageWidth(value: number | null | undefined): number {
+    return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0;
+  }
 }

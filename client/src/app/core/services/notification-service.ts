@@ -109,12 +109,32 @@ export class NotificationService {
 
   private mapDtoToRecord(dto: NotificationDto): NotificationRecord {
     let feType: NotificationType = 'system';
-    let titleVi = 'Thông báo hệ thống';
-    let titleEn = 'System Notification';
+    let titleVi = 'Hệ thống';
+    let titleEn = 'System';
+    let relatedEntityId: string | undefined;
     let relatedEntityType: 'wallet' | 'transaction' | 'product' | 'system' = 'system';
-    let relatedEntityId: string | undefined = undefined;
+    
+    // Parse encoded status from message
+    let actionStatus: 'pending' | 'accepted' | 'rejected' | 'reviewed' | undefined;
+    let usageStatusLabel: string | undefined;
+    let originalMessage = dto.message || '';
 
-    const typeNum = typeof dto.type === 'number' ? dto.type : parseInt(dto.type as string, 10);
+    if (originalMessage.startsWith('[REVIEWED:')) {
+      actionStatus = 'reviewed';
+      const match = originalMessage.match(/\[REVIEWED:(.*?)\]/);
+      if (match) {
+        usageStatusLabel = match[1].trim();
+        originalMessage = originalMessage.replace(match[0], '').trim();
+      }
+    } else if (originalMessage.startsWith('[ACCEPTED]')) {
+      actionStatus = 'accepted';
+      originalMessage = originalMessage.replace('[ACCEPTED]', '').trim();
+    } else if (originalMessage.startsWith('[REJECTED]')) {
+      actionStatus = 'rejected';
+      originalMessage = originalMessage.replace('[REJECTED]', '').trim();
+    }
+
+    const typeNum = typeof dto.type === 'number' ? dto.type : parseInt(dto.type as any, 10);
     const typeStr = typeof dto.type === 'string' ? dto.type : '';
 
     if (typeNum === 4 || typeStr === 'BudgetInvitation') {
@@ -157,7 +177,7 @@ export class NotificationService {
       id: dto.id.toString(),
       userId: dto.userId,
       title: { vi: titleVi, en: titleEn },
-      description: { vi: dto.message || '', en: dto.message || '' },
+      description: { vi: originalMessage, en: originalMessage },
       time: { vi: timeString, en: timeString },
       type: feType,
       isRead: dto.isRead,
@@ -168,14 +188,14 @@ export class NotificationService {
         itemInventoryId: dto.itemInventoryId ?? (dto as any).ItemInventoryId,
         transactionDetailId: dto.transactionDetailId ?? (dto as any).TransactionDetailId,
         relatedId: dto.relatedId ?? (dto as any).RelatedId,
-        rawType: dto.type ?? (dto as any).Type
+        rawType: dto.type ?? (dto as any).Type,
+        usageStatusLabel: usageStatusLabel
       },
-      actionStatus: feType === 'wallet_invitation' ? 'pending' : undefined
+      actionStatus: actionStatus ?? (feType === 'wallet_invitation' ? 'pending' : undefined)
     };
   }
 
   createHubConnection(): void {
-    const token = this.accountService.currentUser()?.token;
     const hubUrl = (environment as any).hubUrl 
       ? (environment as any).hubUrl + 'notification'
       : `${this.baseUrl}hubs/notification`;
@@ -186,7 +206,7 @@ export class NotificationService {
 
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
-        accessTokenFactory: () => token || ''
+        accessTokenFactory: () => this.accountService.currentUser()?.token || ''
       })
       .withAutomaticReconnect()
       .build();
@@ -389,10 +409,12 @@ export class NotificationService {
     this.notificationsState.update((notifications) =>
       notifications.map((notification) => {
         if (notification.id === id) {
+          const newStatus = accept ? 'accepted' : 'rejected';
+          this.updateBackendMessage(id, accept ? '[ACCEPTED]' : '[REJECTED]');
           return {
             ...notification,
             isRead: true,
-            actionStatus: accept ? 'accepted' : 'rejected',
+            actionStatus: newStatus,
           };
         }
         return notification;
@@ -400,10 +422,12 @@ export class NotificationService {
     );
   }
 
-  submitProductReview(id: string, rating: number, comment: string): void {
+  submitProductReview(id: string, rating: number, comment: string, usageStatusLabel?: string): void {
     this.notificationsState.update((notifications) =>
       notifications.map((notification) => {
         if (notification.id === id) {
+          const tag = `[REVIEWED:${usageStatusLabel || 'Done'}]`;
+          this.updateBackendMessage(id, tag);
           return {
             ...notification,
             isRead: true,
@@ -412,12 +436,59 @@ export class NotificationService {
               ...notification.metadata,
               rating,
               userComment: comment,
+              usageStatusLabel,
             },
           };
         }
         return notification;
       }),
     );
+  }
+
+  private updateBackendMessage(id: string, prefixTag: string): void {
+    const numId = parseInt(id, 10);
+    if (isNaN(numId)) return;
+
+    const target = this.notificationsState().find((n) => n.id === id);
+    if (!target) return;
+
+    // Use original message without existing tags if it somehow already has one
+    let cleanMessage = target.description.en || target.description.vi || '';
+    if (cleanMessage.startsWith('[REVIEWED:')) {
+      cleanMessage = cleanMessage.replace(/\[REVIEWED:(.*?)\]/, '').trim();
+    } else if (cleanMessage.startsWith('[ACCEPTED]')) {
+      cleanMessage = cleanMessage.replace('[ACCEPTED]', '').trim();
+    } else if (cleanMessage.startsWith('[REJECTED]')) {
+      cleanMessage = cleanMessage.replace('[REJECTED]', '').trim();
+    }
+
+    const newMessage = `${prefixTag} ${cleanMessage}`.trim();
+
+    const dto: NotificationDto = {
+      id: numId,
+      userId: target.userId || this.accountService.currentUser()?.id || '',
+      message: newMessage,
+      isRead: true,
+      type: target.metadata?.['rawType'] ?? (target.type === 'wallet_invitation' ? 4 : 0),
+      createdAt: target.createdAt || new Date().toISOString(),
+      itemInventoryId: target.metadata?.['itemInventoryId'] || null,
+      transactionDetailId: target.metadata?.['transactionDetailId'] || null,
+      relatedId: target.metadata?.['relatedId'] || null
+    };
+
+    const url = `${this.apiUrl}/${numId}`;
+    this.http.put(url, dto, { withCredentials: true }).subscribe({
+      next: () => {
+        if (!environment.production) {
+          console.log(`[NotificationService] Successfully updated notification ${numId} message to: ${newMessage}`);
+        }
+      },
+      error: (err) => {
+        if (!environment.production) {
+          console.error(`[NotificationService] Error updating notification message ${numId}:`, err);
+        }
+      }
+    });
   }
 
   toggleMuteType(type: NotificationType): void {
