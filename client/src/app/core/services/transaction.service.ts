@@ -184,8 +184,6 @@ export class TransactionService {
       formData.append('image', file);
     }
 
-    formData.append('data', JSON.stringify(data));
-
     return this.http.post<TransactionDto>(`${this.apiUrl}/from-analyze`, formData).pipe(
       tap((transaction) => {
         this.upsertRemoteTransaction(transaction);

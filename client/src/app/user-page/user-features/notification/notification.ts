@@ -186,19 +186,6 @@ export class Notification {
     this.itemToDelete.set(null);
   }
 
-  // Mute Type
-  toggleMute(type: NotificationType, event: MouseEvent): void {
-    event.stopPropagation();
-    this.notificationService.toggleMuteType(type);
-    this.closeAllMenus();
-    const label = this.getTabLabel(type as NotificationFilterTab);
-    this.toast.warning(
-      this.language.currentLang() === 'vi'
-        ? `Đã tắt nhận loại thông báo: ${label}`
-        : `Muted notifications for: ${label}`,
-    );
-  }
-
   // Actions: Wallet Invitation
   acceptInvitation(item: NotificationItem, event: MouseEvent): void {
     event.stopPropagation();

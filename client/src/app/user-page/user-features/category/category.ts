@@ -107,6 +107,29 @@ export class Category implements OnInit {
 
     if (this.isEditing && this.currentCategory.id) {
       const id = this.currentCategory.id;
+
+      if (this.currentCategory.isDefault) {
+        const isTrackableInventory = this.currentCategory.isTrackableInventory ?? false;
+        this.isSaving = true;
+        this.categoryService.setInventoryTracking(id, isTrackableInventory).subscribe({
+          next: (tracking) => {
+            this.toastService.success('Cập nhật theo dõi tồn kho thành công');
+            this.closeModal();
+            this.isSaving = false;
+            this.categories = this.categories.map(category =>
+              category.id === id
+                ? { ...category, isTrackableInventory: tracking.isTrackableInventory }
+                : category
+            );
+          },
+          error: () => {
+            this.isSaving = false;
+            this.toastService.error('Lỗi khi cập nhật theo dõi tồn kho');
+          }
+        });
+        return;
+      }
+
       const changes: Partial<CategoryDto> = {
         name: this.currentCategory.name,
         icon: this.currentCategory.icon,

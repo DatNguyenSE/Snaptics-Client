@@ -328,11 +328,6 @@
                       <span class="material-symbols-outlined">delete</span>
                       <span>{{ language.currentLang() === 'vi' ? 'Xóa thông báo' : 'Delete notification' }}</span>
                     </button>
-
-                    <button type="button" class="dropdown-item" (click)="toggleMute(item.type, $event)">
-                      <span class="material-symbols-outlined">notifications_off</span>
-                      <span>{{ language.currentLang() === 'vi' ? 'Tắt loại thông báo này' : 'Mute this type' }}</span>
-                    </button>
                   </div>
                 }
               </div>

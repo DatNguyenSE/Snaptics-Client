@@ -360,6 +360,7 @@ export class Scan implements OnInit, OnDestroy {
       this.mediaStream.getTracks().forEach((track) => track.stop());
       this.mediaStream = null;
     }
+    this.flashEnabled = false;
   }
 
   async flipCamera(): Promise<void> {
@@ -383,6 +384,26 @@ export class Scan implements OnInit, OnDestroy {
       });
     } catch {
       this.flashEnabled = !this.flashEnabled; // revert on failure
+    }
+  }
+
+  private async disableFlash(): Promise<void> {
+    if (!this.flashEnabled) {
+      return;
+    }
+
+    const track = this.mediaStream?.getVideoTracks()[0];
+    this.flashEnabled = false;
+    if (!track) {
+      return;
+    }
+
+    try {
+      await track.applyConstraints({
+        advanced: [{ torch: false } as MediaTrackConstraintSet],
+      });
+    } catch {
+      // Stopping the camera below also releases the torch if this constraint is rejected.
     }
   }
 
@@ -522,14 +543,17 @@ export class Scan implements OnInit, OnDestroy {
     canvas.toBlob(
       (blob) => {
         this.ngZone.run(() => {
-          if (!blob) {
-            this.toast.error(this.lang.t('scan.toast.captureError'));
-            return;
-          }
-          const fileName = this.scanMode === 'receipt' ? 'receipt.jpg' : 'item.jpg';
-          const file = new File([blob], fileName, { type: 'image/jpeg' });
-          this.stopCamera();
-          this.setPreview(file, true, `${targetWidth} / ${targetHeight}`);
+          void this.disableFlash().finally(() => {
+            if (!blob) {
+              this.stopCamera();
+              this.toast.error(this.lang.t('scan.toast.captureError'));
+              return;
+            }
+            const fileName = this.scanMode === 'receipt' ? 'receipt.jpg' : 'item.jpg';
+            const file = new File([blob], fileName, { type: 'image/jpeg' });
+            this.stopCamera();
+            this.setPreview(file, true, `${targetWidth} / ${targetHeight}`);
+          });
         });
       },
       'image/jpeg',
@@ -803,11 +827,11 @@ export class Scan implements OnInit, OnDestroy {
 
     this.transactionService.createFromBill(dto as any, this.currentFile).subscribe({
       next: () => {
-        this.toast.success(this.lang.t('scan.successSave'));
+        this.toast.success(this.lang.t('scan.toast.saved'));
         this.resetAll();
       },
       error: (err: any) => {
-        this.errorMessage = this.lang.t('scan.errorSave');
+        this.errorMessage = this.lang.t('scan.toast.saveFailed');
         this.processingState = 'result';
         this.cdr.detectChanges();
       }
@@ -840,12 +864,12 @@ export class Scan implements OnInit, OnDestroy {
 
     this.transactionService.createFromAnalyze(dto, this.currentFile).subscribe({
       next: () => {
-        this.toast.success(this.lang.t('scan.successSave'));
+        this.toast.success(this.lang.t('scan.toast.saved'));
         this.isSaving = false;
         this.resetAll();
       },
       error: (err: any) => {
-        this.errorMessage = this.lang.t('scan.errorSave');
+        this.errorMessage = this.lang.t('scan.toast.saveFailed');
         this.isSaving = false;
         this.cdr.detectChanges();
       }

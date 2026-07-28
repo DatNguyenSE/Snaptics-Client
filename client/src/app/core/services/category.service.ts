@@ -4,6 +4,11 @@ import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../environments/environment.development';
 import { CategoryDto } from '../../models/category.dto';
 
+export interface CategoryTrackingResponse {
+  categoryId: number;
+  isTrackableInventory: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -40,6 +45,15 @@ export class CategoryService {
 
   updateCategory(id: number, category: Partial<CategoryDto>): Observable<CategoryDto> {
     return this.http.put<CategoryDto>(`${this.apiUrl}/${id}`, category).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  setInventoryTracking(id: number, isTrackableInventory: boolean): Observable<CategoryTrackingResponse> {
+    return this.http.put<CategoryTrackingResponse>(
+      `${this.apiUrl}/${id}/inventory-tracking`,
+      isTrackableInventory
+    ).pipe(
       catchError(err => throwError(() => err))
     );
   }

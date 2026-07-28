@@ -124,6 +124,7 @@
               [(ngModel)]="filterDate"
               title="Lọc theo ngày"
             />
+            <span class="filter-date-format" [class.filter-date-format--hidden]="!!filterDate">yyyy-mm-dd</span>
           </div>
 
           <!-- Tháng -->
@@ -214,6 +215,9 @@
                         <div class="t-card-body">
                           <div class="t-card-title-row">
                             <span class="t-title">{{ transaction.name || language.t('dashboard.category.bill') }}</span>
+                            <span [class]="'t-category-pill ' + getCategoryClass(transaction)">
+                              {{ getCategoryDisplayName(transaction) }}
+                            </span>
                           </div>
                           
                           <div class="t-card-meta">

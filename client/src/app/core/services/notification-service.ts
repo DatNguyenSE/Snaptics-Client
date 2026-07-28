@@ -146,8 +146,12 @@ export class NotificationService {
       relatedEntityId = dto.transactionDetailId.toString();
     }
 
-    const date = new Date(dto.createdAt);
-    const timeString = isNaN(date.getTime()) ? dto.createdAt : date.toLocaleString();
+    const cleanDateString = dto.createdAt?.replace(/(Z|[+-]\d{2}:\d{2})$/, '') || '';
+    const date = new Date(cleanDateString);
+    const timeString = isNaN(date.getTime()) ? dto.createdAt : date.toLocaleString('vi-VN', { 
+      year: 'numeric', month: '2-digit', day: '2-digit', 
+      hour: '2-digit', minute: '2-digit' 
+    });
 
     return {
       id: dto.id.toString(),

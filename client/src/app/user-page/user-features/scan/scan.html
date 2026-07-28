@@ -155,7 +155,7 @@
               }
 
               <!-- Viewfinder Top toggles -->
-              <div class="camera-controls camera-controls--top">
+              <div class="camera-controls camera-controls--top desktop-flash-control">
                 @if (hasFlash) {
                   <button
                     class="camera-ctrl-btn"
@@ -534,6 +534,19 @@
 
             <!-- Right: Flip Camera -->
             <div class="capture-bar__action-wrapper">
+              @if (hasFlash) {
+                <button
+                  class="capture-bar__action-btn capture-bar__action-btn--flash"
+                  type="button"
+                  [class.camera-ctrl-btn--active]="flashEnabled"
+                  (click)="toggleFlash()"
+                  aria-label="Toggle flash"
+                >
+                  <span class="material-symbols-outlined">
+                    {{ flashEnabled ? 'flash_on' : 'flash_off' }}
+                  </span>
+                </button>
+              }
               @if (hasMultipleCameras) {
                 <button
                   class="capture-bar__action-btn"

@@ -429,6 +429,23 @@ export class Transaction implements OnInit {
     return 'dashboard.category.other';
   }
 
+  getCategoryDisplayName(transaction: TransactionDto): string {
+    const details = transaction.transactionDetails;
+
+    if (details?.length && details.length > 1) {
+      return this.language.t('dashboard.category.bill');
+    }
+
+    if (details?.length === 1) {
+      const detail = details[0];
+      const categoryName = detail.categoryName ||
+        this.categories.find((category) => category.id === Number(detail.categoryId))?.name;
+      return this.getCategoryLabel(categoryName || detail.itemName);
+    }
+
+    return this.language.t(this.getCategoryKey(transaction));
+  }
+
   getCategoryLabel(name: string | null | undefined): string {
     if (!name) {
       return this.language.t('dashboard.category.other');

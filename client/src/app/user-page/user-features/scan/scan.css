@@ -577,6 +577,8 @@
 
 .capture-bar__action-wrapper {
   display: flex;
+  align-items: center;
+  gap: 8px;
   justify-content: center;
   width: 100%;
 }
@@ -615,6 +617,12 @@
 
 .capture-bar__action-btn .material-symbols-outlined {
   font-size: 1.5rem;
+}
+
+.capture-bar__action-btn--flash.camera-ctrl-btn--active {
+  background: var(--scan-primary);
+  border-color: var(--scan-primary);
+  color: #fff;
 }
 
 .capture-bar__upload .material-symbols-outlined {
@@ -1772,6 +1780,10 @@
 
   .desktop-actions {
     display: none !important;
+  }
+
+  .desktop-flash-control {
+    display: none;
   }
 }
 
