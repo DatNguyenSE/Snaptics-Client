@@ -121,6 +121,7 @@
   color: var(--sw-muted-foreground);
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -136,6 +137,7 @@
   white-space: pre-line;
   overflow-y: auto;
   -webkit-line-clamp: unset;
+  line-clamp: unset;
   -webkit-box-orient: initial;
   scrollbar-width: thin;
   scrollbar-color: rgba(99, 102, 241, 0.35) transparent;
