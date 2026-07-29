@@ -172,17 +172,42 @@
   height: 44px;
   border-radius: 50%;
   overflow: hidden;
-  background: #e0e7ff;
+  background: rgba(99, 102, 241, 0.05);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
+  border: 1px solid rgba(99, 102, 241, 0.2);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  transform: translateZ(0);
+}
+
+.demo-header__mascot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.8), inset 0 0 8px rgba(99, 102, 241, 0.4);
+  pointer-events: none;
 }
 
 .demo-header__mascot-video {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scale(1.4) translateY(8%);
+  image-rendering: auto;
+  backface-visibility: hidden;
+}
+
+.demo-header__mascot-video-source {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .demo-header__greeting {
