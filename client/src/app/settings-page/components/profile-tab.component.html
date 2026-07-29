@@ -1,0 +1,420 @@
+<div class="settings-tab-content">
+  <div class="settings-grid settings-grid--stacked">
+    
+    <!-- Card A: Profile Picture -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-blue">account_circle</span>
+          Ảnh đại diện (Profile picture)
+        </h2>
+      </div>
+      <div class="settings-card__body">
+        <div class="avatar-uploader">
+          <div class="avatar-uploader__preview">
+            @if (previewAvatarUrl) {
+              <img [src]="previewAvatarUrl" alt="Profile Preview" />
+            } @else {
+              <span class="material-symbols-outlined avatar-uploader__placeholder">person</span>
+            }
+          </div>
+
+          <div class="avatar-uploader__content">
+            <h3 class="avatar-uploader__name">{{ personalForm.fullName || profile?.fullName || 'Người dùng' }}</h3>
+            <p class="avatar-uploader__hint">Định dạng hỗ trợ: JPG, JPEG, PNG hoặc WEBP. Dung lượng tối đa 2 MB.</p>
+            
+            @if (avatarError) {
+              <p class="form-error">{{ avatarError }}</p>
+            }
+
+            <div class="avatar-uploader__actions">
+              <!-- Custom Styled Upload Button -->
+              <label class="btn btn--outline avatar-uploader__btn">
+                <span class="material-symbols-outlined">cloud_upload</span>
+                Tải ảnh mới
+                <input
+                  type="file"
+                  class="avatar-uploader__input"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  (change)="onFileSelected($event)"
+                />
+              </label>
+
+              @if (previewAvatarUrl) {
+                <button type="button" class="btn btn--danger-ghost" (click)="removeAvatar()">
+                  <span class="material-symbols-outlined">delete</span>
+                  Xóa ảnh
+                </button>
+              }
+
+              @if (selectedAvatarFile) {
+                <button type="button" class="btn btn--primary" [disabled]="isUploadingAvatar" (click)="saveAvatar()">
+                  <span class="material-symbols-outlined">save</span>
+                  {{ isUploadingAvatar ? 'Đang lưu...' : 'Lưu ảnh đại diện' }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Card B: Personal Information -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-purple">person_pin</span>
+          Thông tin cá nhân (Personal information)
+        </h2>
+      </div>
+      <div class="settings-card__body">
+        <form (ngSubmit)="savePersonal()">
+          <div class="form-grid form-grid--2col">
+            <div class="form-group">
+              <label class="form-label" for="fullName">Họ và tên *</label>
+              <input
+                id="fullName"
+                type="text"
+                name="fullName"
+                class="form-control"
+                [(ngModel)]="personalForm.fullName"
+                placeholder="Nhập họ và tên đầy đủ"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="displayName">Tên hiển thị (Display name)</label>
+              <input
+                id="displayName"
+                type="text"
+                name="displayName"
+                class="form-control"
+                [(ngModel)]="personalForm.displayName"
+                placeholder="Nhập tên hiển thị mong muốn"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="phoneNumber">Số điện thoại</label>
+              <input
+                id="phoneNumber"
+                type="tel"
+                name="phoneNumber"
+                class="form-control"
+                [(ngModel)]="personalForm.phoneNumber"
+                placeholder="+84 901 234 567"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="dateOfBirth">Ngày sinh</label>
+              <input
+                id="dateOfBirth"
+                type="date"
+                name="dateOfBirth"
+                class="form-control"
+                [(ngModel)]="personalForm.dateOfBirth"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="gender">Giới tính</label>
+              <select id="gender" name="gender" class="form-control" [(ngModel)]="personalForm.gender">
+                <option value="male">Nam (Male)</option>
+                <option value="female">Nữ (Female)</option>
+                <option value="other">Khác (Other)</option>
+              </select>
+            </div>
+
+            <div class="form-group form-group--full">
+              <label class="form-label" for="bio">Tiểu sử / Ghi chú ngắn</label>
+              <textarea
+                id="bio"
+                name="bio"
+                class="form-control form-control--textarea"
+                rows="3"
+                [(ngModel)]="personalForm.bio"
+                placeholder="Viết một đoạn giới thiệu ngắn về bản thân..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="settings-card__footer">
+            <button type="submit" class="btn btn--primary" [disabled]="isSavingPersonal">
+              <span class="material-symbols-outlined">save</span>
+              {{ isSavingPersonal ? 'Đang lưu...' : 'Lưu thông tin cá nhân' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Card C: Address Information -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-teal">home_pin</span>
+          Thông tin địa chỉ (Address information)
+        </h2>
+      </div>
+      <div class="settings-card__body">
+        <form (ngSubmit)="saveAddress()">
+          <div class="form-grid form-grid--2col">
+            <div class="form-group form-group--full">
+              <label class="form-label" for="address">Địa chỉ đường / Tòa nhà</label>
+              <input
+                id="address"
+                type="text"
+                name="address"
+                class="form-control"
+                [(ngModel)]="addressForm.address"
+                placeholder="Tên đường, số nhà..."
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="city">Thành phố / Quận</label>
+              <input
+                id="city"
+                type="text"
+                name="city"
+                class="form-control"
+                [(ngModel)]="addressForm.city"
+                placeholder="Ví dụ: TP. Hồ Chí Minh"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="province">Tỉnh / Thành</label>
+              <input
+                id="province"
+                type="text"
+                name="province"
+                class="form-control"
+                [(ngModel)]="addressForm.province"
+                placeholder="Ví dụ: Hồ Chí Minh"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="postalCode">Mã bưu chính (Postal code)</label>
+              <input
+                id="postalCode"
+                type="text"
+                name="postalCode"
+                class="form-control"
+                [(ngModel)]="addressForm.postalCode"
+                placeholder="700000"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="country">Quốc gia</label>
+              <input
+                id="country"
+                type="text"
+                name="country"
+                class="form-control"
+                [(ngModel)]="addressForm.country"
+                placeholder="Việt Nam"
+              />
+            </div>
+          </div>
+
+          <div class="settings-card__footer">
+            <button type="submit" class="btn btn--primary" [disabled]="isSavingAddress">
+              <span class="material-symbols-outlined">save</span>
+              {{ isSavingAddress ? 'Đang lưu...' : 'Lưu thông tin địa chỉ' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Card D: Change Email -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-amber">mark_email_read</span>
+          Thay đổi địa chỉ Email
+        </h2>
+      </div>
+      <div class="settings-card__body">
+        <form (ngSubmit)="saveEmail()">
+          <div class="form-grid form-grid--2col">
+            <div class="form-group form-group--full">
+              <label class="form-label">Email hiện tại</label>
+              <input
+                type="email"
+                class="form-control"
+                [value]="emailForm.currentEmail"
+                disabled
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="newEmail">Email mới *</label>
+              <input
+                id="newEmail"
+                type="email"
+                name="newEmail"
+                class="form-control"
+                [(ngModel)]="emailForm.newEmail"
+                placeholder="email.moi@example.com"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="confirmNewEmail">Xác nhận email mới *</label>
+              <input
+                id="confirmNewEmail"
+                type="email"
+                name="confirmNewEmail"
+                class="form-control"
+                [(ngModel)]="emailForm.confirmNewEmail"
+                placeholder="email.moi@example.com"
+                required
+              />
+              @if (emailForm.confirmNewEmail && emailForm.newEmail !== emailForm.confirmNewEmail) {
+                <span class="form-error">Email xác nhận chưa trùng khớp.</span>
+              }
+            </div>
+          </div>
+
+          <p class="form-hint-box">
+            <span class="material-symbols-outlined">info</span>
+            Sau khi nhấn lưu, một email xác thực sẽ được gửi tới địa chỉ email mới. Vui lòng xác thực trước khi tài khoản được cập nhật.
+          </p>
+
+          <div class="settings-card__footer">
+            <button type="submit" class="btn btn--primary" [disabled]="!isEmailFormValid || isSavingEmail">
+              <span class="material-symbols-outlined">forward_to_inbox</span>
+              {{ isSavingEmail ? 'Đang gửi...' : 'Đổi địa chỉ Email' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Card E: Change Password -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-red">lock_reset</span>
+          Đổi mật khẩu (Change password)
+        </h2>
+      </div>
+      <div class="settings-card__body">
+        <form (ngSubmit)="savePassword()">
+          <div class="form-grid form-grid--stacked">
+            
+            <div class="form-group">
+              <label class="form-label" for="currentPassword">Mật khẩu hiện tại *</label>
+              <div class="input-with-icon">
+                <input
+                  id="currentPassword"
+                  [type]="showCurrentPassword ? 'text' : 'password'"
+                  name="currentPassword"
+                  class="form-control"
+                  [(ngModel)]="passwordForm.currentPassword"
+                  placeholder="••••••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  class="input-icon-btn"
+                  (click)="showCurrentPassword = !showCurrentPassword"
+                >
+                  <span class="material-symbols-outlined">{{ showCurrentPassword ? 'visibility_off' : 'visibility' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="newPassword">Mật khẩu mới *</label>
+              <div class="input-with-icon">
+                <input
+                  id="newPassword"
+                  [type]="showNewPassword ? 'text' : 'password'"
+                  name="newPassword"
+                  class="form-control"
+                  [(ngModel)]="passwordForm.newPassword"
+                  placeholder="••••••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  class="input-icon-btn"
+                  (click)="showNewPassword = !showNewPassword"
+                >
+                  <span class="material-symbols-outlined">{{ showNewPassword ? 'visibility_off' : 'visibility' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Password Strength Checklist -->
+            @if (passwordForm.newPassword) {
+              <div class="password-checklist">
+                <p class="password-checklist__title">Mật khẩu cần đáp ứng các tiêu chuẩn:</p>
+                <ul>
+                  <li [class.met]="passwordCriteria.minLength">
+                    <span class="material-symbols-outlined">{{ passwordCriteria.minLength ? 'check_circle' : 'cancel' }}</span>
+                    Tối thiểu 8 ký tự
+                  </li>
+                  <li [class.met]="passwordCriteria.hasUpper">
+                    <span class="material-symbols-outlined">{{ passwordCriteria.hasUpper ? 'check_circle' : 'cancel' }}</span>
+                    Có ít nhất 1 chữ cái viết hoa (A-Z)
+                  </li>
+                  <li [class.met]="passwordCriteria.hasLower">
+                    <span class="material-symbols-outlined">{{ passwordCriteria.hasLower ? 'check_circle' : 'cancel' }}</span>
+                    Có ít nhất 1 chữ cái viết thường (a-z)
+                  </li>
+                  <li [class.met]="passwordCriteria.hasNumber">
+                    <span class="material-symbols-outlined">{{ passwordCriteria.hasNumber ? 'check_circle' : 'cancel' }}</span>
+                    Có ít nhất 1 chữ số (0-9)
+                  </li>
+                </ul>
+              </div>
+            }
+
+            <div class="form-group">
+              <label class="form-label" for="confirmPassword">Xác nhận mật khẩu mới *</label>
+              <div class="input-with-icon">
+                <input
+                  id="confirmPassword"
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  name="confirmPassword"
+                  class="form-control"
+                  [(ngModel)]="passwordForm.confirmPassword"
+                  placeholder="••••••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  class="input-icon-btn"
+                  (click)="showConfirmPassword = !showConfirmPassword"
+                >
+                  <span class="material-symbols-outlined">{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</span>
+                </button>
+              </div>
+              @if (passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword) {
+                <span class="form-error">Mật khẩu xác nhận không trùng khớp.</span>
+              }
+            </div>
+
+          </div>
+
+          <div class="settings-card__footer">
+            <button type="submit" class="btn btn--primary" [disabled]="!isPasswordFormValid || isSavingPassword">
+              <span class="material-symbols-outlined">key</span>
+              {{ isSavingPassword ? 'Đang đổi mật khẩu...' : 'Cập nhật mật khẩu' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </div>
+</div>

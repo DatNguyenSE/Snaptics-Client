@@ -1,0 +1,220 @@
+<div class="settings-tab-content">
+  <div class="settings-grid settings-grid--stacked">
+    <!-- Card A: Appearance -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-purple">palette</span>
+          Giao diện & Ngôn ngữ
+        </h2>
+      </div>
+      <div class="settings-card__body">
+        <form (ngSubmit)="saveAppearance()">
+          <div class="form-grid form-grid--2col">
+            <div class="form-group">
+              <label class="form-label">Chế độ giao diện (Theme)</label>
+              <div class="theme-picker">
+                <button
+                  type="button"
+                  class="theme-picker__btn"
+                  [class.theme-picker__btn--active]="selectedTheme === 'system'"
+                  (click)="selectedTheme = 'system'"
+                >
+                  <span class="material-symbols-outlined">desktop_windows</span>
+                  <span>Hệ thống</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="theme-picker__btn"
+                  [class.theme-picker__btn--active]="selectedTheme === 'light'"
+                  (click)="selectedTheme = 'light'"
+                >
+                  <span class="material-symbols-outlined">light_mode</span>
+                  <span>Giao diện sáng</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="theme-picker__btn"
+                  [class.theme-picker__btn--active]="selectedTheme === 'dark'"
+                  (click)="selectedTheme = 'dark'"
+                >
+                  <span class="material-symbols-outlined">dark_mode</span>
+                  <span>Giao diện tối</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Ngôn ngữ hệ thống (Language)</label>
+              <div class="theme-picker">
+                <button
+                  type="button"
+                  class="theme-picker__btn"
+                  [class.theme-picker__btn--active]="selectedLang === 'vi'"
+                  (click)="selectedLang = 'vi'"
+                >
+                  <span class="flag-icon">🇻🇳</span>
+                  <span>Tiếng Việt</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="theme-picker__btn"
+                  [class.theme-picker__btn--active]="selectedLang === 'en'"
+                  (click)="selectedLang = 'en'"
+                >
+                  <span class="flag-icon">🇬🇧</span>
+                  <span>English</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card__footer">
+            <button type="submit" class="btn btn--primary" [disabled]="isSavingAppearance">
+              <span class="material-symbols-outlined">save</span>
+              {{ isSavingAppearance ? 'Đang lưu...' : 'Lưu tùy chọn giao diện' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Card B: Regional Preferences -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-blue">public</span>
+          Định dạng vùng miền (Regional preferences)
+        </h2>
+      </div>
+      <div class="settings-card__body">
+        <form (ngSubmit)="saveRegional()">
+          <div class="form-grid form-grid--2col">
+            <div class="form-group">
+              <label class="form-label" for="timezone">Múi giờ (Timezone)</label>
+              <select id="timezone" name="timezone" class="form-control" [(ngModel)]="regional.timezone">
+                @for (tz of timezones; track tz.value) {
+                  <option [value]="tz.value">{{ tz.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="dateFormat">Định dạng ngày (Date format)</label>
+              <select id="dateFormat" name="dateFormat" class="form-control" [(ngModel)]="regional.dateFormat">
+                @for (df of dateFormats; track df.value) {
+                  <option [value]="df.value">{{ df.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="numberFormat">Định dạng số (Number format)</label>
+              <select id="numberFormat" name="numberFormat" class="form-control" [(ngModel)]="regional.numberFormat">
+                @for (nf of numberFormats; track nf.value) {
+                  <option [value]="nf.value">{{ nf.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="landingPage">Trang mặc định sau khi đăng nhập</label>
+              <select id="landingPage" name="landingPage" class="form-control" [(ngModel)]="regional.landingPage">
+                @for (lp of landingPages; track lp.value) {
+                  <option [value]="lp.value">{{ lp.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-card__footer">
+            <button type="submit" class="btn btn--primary" [disabled]="isSavingRegional">
+              <span class="material-symbols-outlined">save</span>
+              {{ isSavingRegional ? 'Đang lưu...' : 'Lưu định dạng vùng miền' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Card C: Notifications -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-teal">notifications</span>
+          Cài đặt thông báo (Notifications)
+        </h2>
+      </div>
+      <div class="settings-card__body">
+        <form (ngSubmit)="saveNotifications()">
+          <div class="switch-list">
+            <div class="switch-item">
+              <div class="switch-item__text">
+                <span class="switch-item__title">Thông báo qua Email (Email notifications)</span>
+                <span class="switch-item__desc">Nhận báo cáo tổng hợp chi tiêu và cập nhật bảo mật qua hòm thư email</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" name="email" [(ngModel)]="notifications.email" />
+                <span class="toggle-switch__slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-item">
+              <div class="switch-item__text">
+                <span class="switch-item__title">Thông báo Push (Push notifications)</span>
+                <span class="switch-item__desc">Nhận thông báo tức thì trên trình duyệt khi có giao dịch mới hoặc quẹt hóa đơn</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" name="push" [(ngModel)]="notifications.push" />
+                <span class="toggle-switch__slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-item">
+              <div class="switch-item__text">
+                <span class="switch-item__title">Nhắc nhở ghi chép chi tiêu (Spending reminder)</span>
+                <span class="switch-item__desc">Nhắc nhở hàng ngày để bạn không bỏ lỡ việc ghi nhận các khoản chi trong ngày</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" name="spendingReminder" [(ngModel)]="notifications.spendingReminder" />
+                <span class="toggle-switch__slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-item">
+              <div class="switch-item__text">
+                <span class="switch-item__title">Cảnh báo hạn mức ngân sách (Budget warning)</span>
+                <span class="switch-item__desc">Cảnh báo ngay khi tổng chi tiêu chạm ngưỡng 80% hạn mức ngân sách đã cài đặt</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" name="budgetWarning" [(ngModel)]="notifications.budgetWarning" />
+                <span class="toggle-switch__slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-item">
+              <div class="switch-item__text">
+                <span class="switch-item__title">Báo cáo tài chính hàng tháng (Monthly report)</span>
+                <span class="switch-item__desc">Bản tổng hợp phân tích chi tiêu hàng tháng và khuyến nghị tài chính từ Snaptics AI</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" name="monthlyReport" [(ngModel)]="notifications.monthlyReport" />
+                <span class="toggle-switch__slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-card__footer">
+            <button type="submit" class="btn btn--primary" [disabled]="isSavingNotifications">
+              <span class="material-symbols-outlined">save</span>
+              {{ isSavingNotifications ? 'Đang lưu...' : 'Lưu tùy chọn thông báo' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
