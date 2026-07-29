@@ -53,9 +53,12 @@ export class IncomeHistoryModal implements OnInit {
     });
   }
 
-  getSourceName(sourceId?: number | null): string {
-    if (!sourceId) return 'Tự nhập thủ công';
-    const source = this.incomeSources.find(s => s.id === sourceId);
+  getSourceName(item: IncomeHistoryDto): string {
+    if (!item.incomeSourceId) return 'Tự nhập thủ công';
+    if (item.incomeSourceName) return item.incomeSourceName;
+    
+    // Fallback if backend didn't provide it
+    const source = this.incomeSources.find(s => s.id === item.incomeSourceId);
     return source ? source.name : 'Nguồn thu (Đã xóa)';
   }
 

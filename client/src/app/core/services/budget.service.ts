@@ -66,6 +66,7 @@ export interface IncomeHistoryDto {
   id: number;
   budgetId: number;
   incomeSourceId?: number | null;
+  incomeSourceName?: string | null;
   amount: number;
   receivedDate: string;
   note?: string;
