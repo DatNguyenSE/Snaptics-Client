@@ -11,6 +11,7 @@ type TranslationNode = string | TranslationMap;
 const STORAGE_KEY = 'SnapticsLanguage';
 
 const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
+
   vi: {
     common: {
       language: 'Ng\u00f4n ng\u1eef',
@@ -31,7 +32,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       manualEntry: 'Nh\u1eadp th\u1ee7 c\u00f4ng',
       transactions: 'Giao d\u1ecbch',
       reminders: 'Nh\u1eafc nh\u1edf',
-       frequency: 'M\u1ee9c \u0111\u1ed9 s\u1eed d\u1ee5ng',
+      frequency: 'M\u1ee9c \u0111\u1ed9 s\u1eed d\u1ee5ng',
       account: 'T\u00e0i kho\u1ea3n',
       settings: 'C\u00e0i \u0111\u1eb7t',
       logout: '\u0110\u0103ng xu\u1ea5t',
@@ -40,6 +41,8 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       notifications: 'Thông báo',
       support: 'Hỗ trợ',
       category: 'Loại danh mục',
+      systemSettings: 'Cài đặt hệ thống',
+      systemConfig: 'Cấu hình hệ thống',
     },
     header: {
       greeting: 'Xin ch\u00e0o, {{name}}',
@@ -130,6 +133,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       aiSuggestions: {
         howMuch: 'Tháng này tôi chi bao nhiêu?',
         compare: 'Ăn uống thịnh soạn 500k',
+        momBreakfast: 'mom gửi tiền ăn sáng 20k',
         savings: 'Gợi ý tiết kiệm'
       },
       weeklySpending: 'Chi tiêu tuần này',
@@ -1017,6 +1021,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
       aiSuggestions: {
         howMuch: 'How much did I spend this month?',
         compare: 'Compare to last month',
+        momBreakfast: 'Mom sent 20k for breakfast',
         savings: 'Savings tips'
       },
       weeklySpending: 'Weekly Spending',

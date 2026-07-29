@@ -1,0 +1,119 @@
+<div class="settings-page">
+  <div class="page-header">
+    <div>
+      <div class="super-badge">
+        <span class="material-symbols-outlined">memory</span>
+        Cấu hình hệ thống (Hangfire)
+      </div>
+      <h1 class="page-title">Quản lý các tác vụ ngầm</h1>
+      <p class="page-subtitle">Quản lý và cấu hình thời gian chạy các tác vụ nền tự động của hệ thống Snaptics.</p>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <!-- Card 1: Periodic Rollover -->
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card__header card__header--flex">
+        <div>
+          <h2 class="card__title">Gia hạn ví định kỳ</h2>
+          <p class="card__desc">Tự động xử lý chuyển số dư sang kỳ mới cho các ngân sách có chu kỳ lặp lại.</p>
+        </div>
+        <div class="super-badge" style="margin: 0;">Hàng ngày</div>
+      </div>
+      <div class="card__body">
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label">Giờ (0-23)</label>
+            <input type="number" min="0" max="23" [(ngModel)]="rolloverTime.hour" class="form-input" placeholder="VD: 0" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Phút (0-59)</label>
+            <input type="number" min="0" max="59" [(ngModel)]="rolloverTime.minute" class="form-input" placeholder="VD: 30" />
+          </div>
+        </div>
+      </div>
+      <div class="card__footer" style="gap: 12px; justify-content: flex-end;">
+        <button class="btn btn--outline" (click)="triggerRollover()" [disabled]="isTriggeringRollover">
+          <span class="material-symbols-outlined" *ngIf="!isTriggeringRollover">play_arrow</span>
+          <span class="material-symbols-outlined animate-spin" *ngIf="isTriggeringRollover">sync</span>
+          Chạy ngay
+        </button>
+        <button class="btn btn--primary" (click)="saveRolloverSchedule()" [disabled]="isSavingRollover">
+          <span class="material-symbols-outlined" *ngIf="!isSavingRollover">save</span>
+          <span class="material-symbols-outlined animate-spin" *ngIf="isSavingRollover">sync</span>
+          Lưu lịch chạy
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 2: Item Review -->
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card__header card__header--flex">
+        <div>
+          <h2 class="card__title">Nhắc nhở đánh giá sản phẩm</h2>
+          <p class="card__desc">Quét các món đồ mua sau 30 ngày và gửi thông báo nhắc người dùng đánh giá mức độ sử dụng.</p>
+        </div>
+        <div class="super-badge" style="margin: 0; background: rgba(16, 185, 129, 0.1); color: #10b981;">Hàng ngày</div>
+      </div>
+      <div class="card__body">
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label">Giờ (0-23)</label>
+            <input type="number" min="0" max="23" [(ngModel)]="reviewTime.hour" class="form-input" placeholder="VD: 20" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Phút (0-59)</label>
+            <input type="number" min="0" max="59" [(ngModel)]="reviewTime.minute" class="form-input" placeholder="VD: 0" />
+          </div>
+        </div>
+      </div>
+      <div class="card__footer" style="gap: 12px; justify-content: flex-end;">
+        <button class="btn btn--outline" (click)="triggerReview()" [disabled]="isTriggeringReview">
+          <span class="material-symbols-outlined" *ngIf="!isTriggeringReview">play_arrow</span>
+          <span class="material-symbols-outlined animate-spin" *ngIf="isTriggeringReview">sync</span>
+          Chạy ngay
+        </button>
+        <button class="btn btn--primary" style="background-color: #10b981;" (click)="saveReviewSchedule()" [disabled]="isSavingReview">
+          <span class="material-symbols-outlined" *ngIf="!isSavingReview">save</span>
+          <span class="material-symbols-outlined animate-spin" *ngIf="isSavingReview">sync</span>
+          Lưu lịch chạy
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 3: Cleanup Notifications -->
+    <div class="card">
+      <div class="card__header card__header--flex">
+        <div>
+          <h2 class="card__title">Dọn dẹp hệ thống</h2>
+          <p class="card__desc">Xóa bỏ các thông báo rác đã xem và dọn dẹp các dữ liệu tạm không cần thiết trên hệ thống.</p>
+        </div>
+        <div class="super-badge" style="margin: 0; background: rgba(245, 158, 11, 0.1); color: #f59e0b;">Hàng ngày</div>
+      </div>
+      <div class="card__body">
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label">Giờ (0-23)</label>
+            <input type="number" min="0" max="23" [(ngModel)]="cleanupTime.hour" class="form-input" placeholder="VD: 2" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Phút (0-59)</label>
+            <input type="number" min="0" max="59" [(ngModel)]="cleanupTime.minute" class="form-input" placeholder="VD: 0" />
+          </div>
+        </div>
+      </div>
+      <div class="card__footer" style="gap: 12px; justify-content: flex-end;">
+        <button class="btn btn--outline" (click)="triggerCleanup()" [disabled]="isTriggeringCleanup">
+          <span class="material-symbols-outlined" *ngIf="!isTriggeringCleanup">play_arrow</span>
+          <span class="material-symbols-outlined animate-spin" *ngIf="isTriggeringCleanup">sync</span>
+          Chạy ngay
+        </button>
+        <button class="btn btn--primary" style="background-color: #f59e0b;" (click)="saveCleanupSchedule()" [disabled]="isSavingCleanup">
+          <span class="material-symbols-outlined" *ngIf="!isSavingCleanup">save</span>
+          <span class="material-symbols-outlined animate-spin" *ngIf="isSavingCleanup">sync</span>
+          Lưu lịch chạy
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -60,6 +60,12 @@ export const adminRoutes: Routes = [
           import('./pages/system-settings/system-settings.component').then((m) => m.SystemSettingsComponent),
       },
       {
+        path: 'system-config',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/system-config/system-config.component').then((m) => m.SystemConfigComponent),
+      },
+      {
         path: '**',
         loadComponent: () =>
           import('../features/not-found/not-found.component').then((m) => m.NotFoundComponent),

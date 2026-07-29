@@ -183,6 +183,10 @@ export class Transaction implements OnInit {
     this.filterSource = source;
   }
 
+  setBudgetFilter(budgetId: string): void {
+    this.filterBudgetId = budgetId;
+  }
+
   getTransactionSource(t: TransactionDto): 'receipt' | 'manual' | 'snap' {
     if (t.source) return t.source;
     if (!t.imageKey && !t.imagePreviewUrl) return 'manual';

@@ -360,6 +360,7 @@ export class Dashboard implements OnInit, OnDestroy {
     this.aiSuggestions = [
       this.language.t('dashboard.aiSuggestions.howMuch'),
       this.language.t('dashboard.aiSuggestions.compare'),
+      this.language.t('dashboard.aiSuggestions.momBreakfast'),
       this.language.t('dashboard.aiSuggestions.savings')
     ];
   }

@@ -51,6 +51,7 @@ export class AdminSidebarComponent {
   readonly systemNavItems: SidebarNavItem[] = [
     { id: 'notifications', labelKey: 'admin.nav.notifications', icon: 'notifications', route: '/admin/notifications' },
     { id: 'settings', labelKey: 'admin.nav.systemSettings', icon: 'settings', route: '/admin/settings' },
+    { id: 'hangfire', labelKey: 'Cấu hình hệ thống', icon: 'memory', route: '/admin/system-config' },
   ];
 
   get account() {
