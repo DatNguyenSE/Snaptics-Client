@@ -54,15 +54,37 @@ export class AiService {
 
   private requestAndWaitForAiResult<T>(url: string, formData: FormData, params?: HttpParams): Observable<T> {
     return new Observable<T>((observer) => {
+      let completed = false;
+
       const resultSub = this.notificationService.aiResult$.subscribe((result: T) => {
-        observer.next(result);
-        observer.complete();
+        if (!completed) {
+          completed = true;
+          observer.next(result);
+          observer.complete();
+        }
       });
+
       const errorSub = this.notificationService.aiError$.subscribe((error: string) => {
-        observer.error(error);
+        if (!completed) {
+          completed = true;
+          observer.error(error);
+        }
       });
-      const requestSub = this.http.post(url, formData, { params }).subscribe({
-        error: (error) => observer.error(error),
+
+      const requestSub = this.http.post<T>(url, formData, { params }).subscribe({
+        next: (responseBody) => {
+          // Direct 200 OK payload handling
+          if (responseBody && typeof responseBody === 'object' && Object.keys(responseBody).length > 0 && !completed) {
+            completed = true;
+            observer.next(responseBody);
+            observer.complete();
+          }
+        },
+        error: (error) => {
+          if (!completed) {
+            observer.error(error);
+          }
+        },
       });
 
       return () => {

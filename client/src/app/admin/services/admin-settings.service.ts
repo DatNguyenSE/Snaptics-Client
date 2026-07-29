@@ -1,8 +1,9 @@
-import { Injectable, signal } from '@angular/core';
-import { of, delay } from 'rxjs';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { of, delay, Observable, catchError, tap } from 'rxjs';
 import { SystemSettings } from '../models/admin.models';
 import { AuditLogService } from './audit-log.service';
-import { inject } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
   ai: {
@@ -45,12 +46,59 @@ const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
 
 @Injectable({ providedIn: 'root' })
 export class AdminSettingsService {
+  private readonly http = inject(HttpClient);
   private readonly auditLog = inject(AuditLogService);
+  private readonly baseUrl = `${environment.apiUrl.replace(/\/$/, '')}/api/admin/system/maintenance`;
+
   private readonly _settings = signal<SystemSettings>(structuredClone(DEFAULT_SYSTEM_SETTINGS));
   private readonly _saving = signal<boolean>(false);
 
   readonly settings = this._settings.asReadonly();
   readonly saving = this._saving.asReadonly();
+
+  getMaintenanceStatus(): Observable<any> {
+    return this.http.get<any>(this.baseUrl, { withCredentials: true }).pipe(
+      tap((res) => {
+        if (res && res.maintenanceMode !== undefined) {
+          this._settings.update((s) => ({
+            ...s,
+            maintenance: {
+              ...s.maintenance,
+              maintenanceMode: res.maintenanceMode,
+              maintenanceMessage: res.maintenanceMessage || s.maintenance.maintenanceMessage,
+            },
+          }));
+        }
+      }),
+      catchError(() => of({ maintenanceMode: this._settings().maintenance.maintenanceMode }))
+    );
+  }
+
+  toggleMaintenanceMode(enabled: boolean, message?: string): Observable<any> {
+    return this.http.post<any>(this.baseUrl, { enabled, message }, { withCredentials: true }).pipe(
+      tap(() => {
+        this._settings.update((s) => ({
+          ...s,
+          maintenance: {
+            ...s.maintenance,
+            maintenanceMode: enabled,
+            maintenanceMessage: message || s.maintenance.maintenanceMessage,
+          },
+        }));
+      }),
+      catchError((err) => {
+        // Fallback update local state if backend API is offline
+        this._settings.update((s) => ({
+          ...s,
+          maintenance: {
+            ...s.maintenance,
+            maintenanceMode: enabled,
+          },
+        }));
+        return of({ success: true });
+      })
+    );
+  }
 
   getSettings() {
     return of(structuredClone(this._settings())).pipe(delay(300));
@@ -65,6 +113,11 @@ export class AdminSettingsService {
       ...s,
       [section]: { ...s[section], ...changes },
     }));
+
+    const maintenanceChanges = changes as any;
+    if (section === 'maintenance' && maintenanceChanges.maintenanceMode !== undefined) {
+      this.toggleMaintenanceMode(maintenanceChanges.maintenanceMode as boolean, maintenanceChanges.maintenanceMessage).subscribe();
+    }
 
     this.auditLog.addLog({
       action: 'Change System Setting',

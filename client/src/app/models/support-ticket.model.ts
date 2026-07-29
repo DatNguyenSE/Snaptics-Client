@@ -27,13 +27,32 @@ export enum SupportTicketCategory {
 
 // Request & Response DTOs matching Backend API
 export interface CreateSupportTicketDto {
-  subject: string;
-  description: string;
+  title?: string;
+  subject?: string;
+  description?: string;
+  content?: string;
   category: number;
+  priority?: number;
+  attachments?: string[];
+}
+
+export interface UserTicketQueryDto {
+  page?: number;
+  size?: number;
+  search?: string;
+  status?: number;
+  category?: number;
+  priority?: number;
+}
+
+export interface AdminTicketQueryDto extends UserTicketQueryDto {
+  assignedToId?: string;
+  userId?: string;
 }
 
 export interface SendMessageDto {
   content: string;
+  attachments?: string[];
 }
 
 export interface SupportAttachmentDto {
@@ -61,6 +80,7 @@ export interface SupportTicketDto {
   userId: string;
   userName: string;
   userEmail: string;
+  title?: string;
   subject: string;
   description: string;
   status: SupportTicketStatus;

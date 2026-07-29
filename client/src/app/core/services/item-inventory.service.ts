@@ -11,15 +11,21 @@ export interface ItemInventoryDto {
   transactionDetailId: number;
   itemName?: string;
   amount?: number;
+  quantity?: number;
+  unit?: string;
   purchaseDate?: string;
   categoryName?: string;
+  categoryIcon?: string;
+  categoryColor?: string;
   manufactureDate?: string;
   expiryDate?: string;
+  estimatedExpiryDays?: number;
   usageFeedback?: string;
   isReviewed: boolean;
   lastReviewDate?: string;
   usageStatus: UsageStatusType;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface ItemInventoryReviewDto {

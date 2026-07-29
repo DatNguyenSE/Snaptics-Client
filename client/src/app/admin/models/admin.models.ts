@@ -29,6 +29,26 @@ export interface AdminUser {
   activeSessions: number;
 }
 
+export interface AdminUserDto {
+  id: string;
+  email: string;
+  fullName?: string;
+  userName?: string;
+  phoneNumber?: string;
+  roles: string[];
+  isLocked?: boolean;
+  lockoutEnd?: string;
+  createdAt?: string;
+}
+
+export interface AdminUserQueryDto {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  isLocked?: boolean;
+  role?: string;
+}
+
 // ─── Admin Dashboard Stats ────────────────────────────────────────────────────
 
 export interface KpiCard {

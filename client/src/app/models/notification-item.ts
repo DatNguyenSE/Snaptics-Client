@@ -35,6 +35,7 @@ export interface NotificationMetadata {
   userComment?: string;
   itemInventoryId?: number | null;
   transactionDetailId?: number | null;
+  relatedId?: number | string | null;
   rawType?: any;
   [key: string]: any;
 }
@@ -49,7 +50,7 @@ export interface NotificationItem {
   isRead: boolean;
   createdAt?: string;
   relatedEntityId?: string;
-  relatedEntityType?: 'wallet' | 'transaction' | 'product' | 'system';
+  relatedEntityType?: 'wallet' | 'transaction' | 'product' | 'ticket' | 'system';
   senderId?: string;
   senderName?: string;
   senderAvatar?: string;
@@ -67,7 +68,7 @@ export interface NotificationRecord {
   isRead: boolean;
   createdAt?: string;
   relatedEntityId?: string;
-  relatedEntityType?: 'wallet' | 'transaction' | 'product' | 'system';
+  relatedEntityType?: 'wallet' | 'transaction' | 'product' | 'ticket' | 'system';
   senderId?: string;
   senderName?: string;
   senderAvatar?: string;

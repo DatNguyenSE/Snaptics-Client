@@ -197,8 +197,8 @@ export class Notification {
   // Actions: Wallet Invitation
   acceptInvitation(item: NotificationItem, event: MouseEvent): void {
     event.stopPropagation();
-    const invitationId = item.metadata?.['relatedId'];
-    if (invitationId) {
+    const invitationId = Number(item.metadata?.['relatedId']);
+    if (invitationId && !isNaN(invitationId)) {
       this.budgetMemberService.respondToInvitation(invitationId, { status: 1 }).subscribe({
         next: () => {
           this.notificationService.respondToInvitation(item.id, true);
@@ -226,8 +226,8 @@ export class Notification {
 
   rejectInvitation(item: NotificationItem, event: MouseEvent): void {
     event.stopPropagation();
-    const invitationId = item.metadata?.['relatedId'];
-    if (invitationId) {
+    const invitationId = Number(item.metadata?.['relatedId']);
+    if (invitationId && !isNaN(invitationId)) {
       this.budgetMemberService.respondToInvitation(invitationId, { status: 2 }).subscribe({
         next: () => {
           this.notificationService.respondToInvitation(item.id, false);

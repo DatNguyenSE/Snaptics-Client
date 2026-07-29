@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../environments/environment.development';
-import { CategoryDto } from '../../models/category.dto';
+import { CategoryDto, UserCategorySettingDto } from '../../models/category.dto';
 
 export interface CategoryTrackingResponse {
   categoryId: number;
@@ -54,6 +54,24 @@ export class CategoryService {
       `${this.apiUrl}/${id}/inventory-tracking`,
       isTrackableInventory
     ).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  /**
+   * [GET] /api/Category/{id}/user-setting - Lấy cài đặt cá nhân cho Category
+   */
+  getUserCategorySetting(categoryId: number): Observable<UserCategorySettingDto> {
+    return this.http.get<UserCategorySettingDto>(`${this.apiUrl}/${categoryId}/user-setting`).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  /**
+   * [PUT] /api/Category/{id}/user-setting - Lưu cài đặt cá nhân cho Category
+   */
+  saveUserCategorySetting(categoryId: number, setting: Partial<UserCategorySettingDto>): Observable<UserCategorySettingDto> {
+    return this.http.put<UserCategorySettingDto>(`${this.apiUrl}/${categoryId}/user-setting`, setting).pipe(
       catchError(err => throwError(() => err))
     );
   }
