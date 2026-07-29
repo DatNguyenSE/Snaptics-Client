@@ -27,6 +27,7 @@ export interface CreateBudgetRequest {
   isActive?: boolean;
   autoRenew?: boolean;
   isAutoRenew?: boolean;
+  budgetIncomeSources?: any[]; // Added for income sources
 }
 
 export interface BudgetDto {
@@ -40,6 +41,7 @@ export interface BudgetDto {
   categoryId?: number | null;
   note?: string;
   userId?: string;
+  isActive?: boolean;
   type: number;
   autoRenew?: boolean;
   isAutoRenew?: boolean;
@@ -52,6 +54,21 @@ export interface BudgetDto {
   description?: string | null;
   currency?: string;
   icon?: string | null;
+}
+
+export interface DepositBudgetDto {
+  amount: number;
+  incomeSourceId?: number | null;
+  note?: string;
+}
+
+export interface IncomeHistoryDto {
+  id: number;
+  budgetId: number;
+  incomeSourceId?: number | null;
+  amount: number;
+  receivedDate: string;
+  note?: string;
 }
 
 @Injectable({
@@ -125,6 +142,18 @@ export class BudgetService {
 
   triggerRollover(): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/trigger-rollover`, {}).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  depositBudget(id: number, dto: DepositBudgetDto): Observable<BudgetDto> {
+    return this.http.post<BudgetDto>(`${this.apiUrl}/${id}/deposit`, dto).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  getIncomeHistory(id: number): Observable<IncomeHistoryDto[]> {
+    return this.http.get<IncomeHistoryDto[]>(`${this.apiUrl}/${id}/income-history`).pipe(
       catchError(err => throwError(() => err))
     );
   }

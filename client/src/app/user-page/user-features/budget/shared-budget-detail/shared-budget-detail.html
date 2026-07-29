@@ -33,10 +33,17 @@
         <div class="budget-hero__top">
           <div class="budget-hero__title-area">
             <div class="budget-hero__badges">
-              <span class="wallet-badge wallet-badge--shared">
-                <span class="material-symbols-outlined">group</span>
-                Ví dùng chung
-              </span>
+              @if (isSharedBudget) {
+                <span class="wallet-badge wallet-badge--shared">
+                  <span class="material-symbols-outlined">group</span>
+                  Ví dùng chung
+                </span>
+              } @else {
+                <span class="wallet-badge wallet-badge--personal">
+                  <span class="material-symbols-outlined">account_balance_wallet</span>
+                  Ví cá nhân
+                </span>
+              }
               <span class="wallet-badge" [class.wallet-badge--owner]="isOwner" [class.wallet-badge--member]="!isOwner">
                 {{ isOwner ? 'Chủ ví' : 'Thành viên' }}
               </span>
@@ -45,10 +52,15 @@
             @if (budget.description) {
               <p class="budget-hero__desc">{{ budget.description }}</p>
             }
+            <span class="budget-hero__duration">
+              <span class="material-symbols-outlined">schedule</span>
+              Thời hạn {{ getBudgetDurationLabel(budget.startDate, budget.endDate) }}
+            </span>
           </div>
 
           <div class="budget-hero__actions">
-            <button
+            @if (isSharedBudget) {
+              <button
               class="btn-members"
               (click)="openMemberModal()"
               id="btn-open-member-modal"
@@ -71,7 +83,8 @@
                 }
               </div>
               <span class="btn-members__label">{{ budget.members.length || budget.memberCount || 0 }} thành viên</span>
-            </button>
+              </button>
+            }
 
             @if (isOwner) {
               <button
@@ -79,7 +92,7 @@
                 (click)="openDeleteConfirm()"
                 title="Xóa ví"
                 id="btn-delete-wallet"
-                aria-label="Xóa ví dùng chung"
+                 [attr.aria-label]="isSharedBudget ? 'Xóa ví dùng chung' : 'Xóa ví cá nhân'"
               >
                 <span class="material-symbols-outlined">delete</span>
               </button>
@@ -152,7 +165,9 @@
           <div class="state-container">
             <span class="material-symbols-outlined state-icon">receipt_long</span>
             <p>Ví chưa có giao dịch nào.</p>
-            <p class="state-hint">Thêm giao dịch đầu tiên để bắt đầu theo dõi chi tiêu cùng nhau.</p>
+           <p class="state-hint">
+             {{ isSharedBudget ? 'Thêm giao dịch đầu tiên để bắt đầu theo dõi chi tiêu cùng nhau.' : 'Thêm giao dịch đầu tiên để bắt đầu theo dõi chi tiêu.' }}
+           </p>
           </div>
         } @else {
           <div class="transaction-list">
@@ -212,8 +227,8 @@
       <div class="confirm-modal__icon">
         <span class="material-symbols-outlined">warning</span>
       </div>
-      <h3>Xóa ví dùng chung?</h3>
-      <p>Hành động này sẽ xóa vĩnh viễn ví <strong>{{ budget?.name }}</strong> và tất cả dữ liệu liên quan. Không thể hoàn tác.</p>
+       <h3>{{ isSharedBudget ? 'Xóa ví dùng chung?' : 'Xóa ví cá nhân?' }}</h3>
+       <p>Hành động này sẽ xóa vĩnh viễn ví <strong>{{ budget?.name }}</strong> và tất cả dữ liệu liên quan. Không thể hoàn tác.</p>
       <div class="confirm-modal__actions">
         <button class="btn-ghost" (click)="closeDeleteConfirm()" [disabled]="isDeleting" id="btn-cancel-delete">
           Hủy

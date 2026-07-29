@@ -174,6 +174,12 @@
   border-color: #ddd6fe;
 }
 
+.wallet-badge--personal {
+  background: #f3e8ff;
+  color: #7c3aed;
+  border-color: #ddd6fe;
+}
+
 .wallet-badge--owner {
   background: linear-gradient(135deg, #fef3c7, #fde68a);
   color: #92400e;
@@ -199,6 +205,23 @@
   font-size: 0.875rem;
   color: var(--sw-muted-foreground, #64748b);
   margin: 0;
+}
+
+.budget-hero__duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f3e8ff;
+  color: #7c3aed;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.budget-hero__duration .material-symbols-outlined {
+  font-size: 1rem;
 }
 
 .budget-hero__actions {

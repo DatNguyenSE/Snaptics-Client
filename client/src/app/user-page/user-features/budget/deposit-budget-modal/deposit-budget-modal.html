@@ -1,0 +1,65 @@
+@if (isOpen) {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content glass-effect" (click)="stopPropagation($event)">
+    <div class="modal-header">
+      <div class="modal-icon text-success">
+        <span class="material-symbols-outlined">payments</span>
+      </div>
+      <div class="modal-titles">
+        <h3>Nạp tiền vào ví</h3>
+        <p>Bơm thêm ngân sách cho "{{ budget.name }}"</p>
+      </div>
+      <button class="btn-close" (click)="closeModal()" aria-label="Close">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <form [formGroup]="depositForm" (ngSubmit)="onSubmit()" class="modal-form">
+      
+      <div class="form-group">
+        <label>Số tiền nạp (VND)</label>
+        <div class="input-with-icon">
+          <span class="material-symbols-outlined input-icon">attach_money</span>
+          <input type="text" [value]="displayAmount" (input)="onAmountChange($event)" placeholder="0" class="form-control amount-input"
+                 [class.is-invalid]="depositForm.get('amount')?.invalid && depositForm.get('amount')?.touched" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Nguồn thu nhập (Tùy chọn)</label>
+        <div class="input-with-icon">
+          <span class="material-symbols-outlined input-icon">account_balance</span>
+          <select formControlName="incomeSourceId" class="form-control with-icon">
+            <option [ngValue]="null">-- Tự nhập thủ công (Không chọn nguồn) --</option>
+            @for (source of incomeSources; track source.id) {
+              <option [value]="source.id">{{ source.name }}</option>
+            }
+          </select>
+        </div>
+        <small class="form-text">Chọn nguồn để theo dõi luồng tiền đổ về.</small>
+      </div>
+
+      <div class="form-group">
+        <label>Ghi chú (Tùy chọn)</label>
+        <div class="input-with-icon">
+          <span class="material-symbols-outlined input-icon">edit_note</span>
+          <input type="text" formControlName="note" placeholder="VD: Nạp thêm giữa tháng..." class="form-control with-icon" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary-modal" (click)="closeModal()" [disabled]="isSubmitting">Hủy</button>
+        <button type="submit" class="btn-primary-modal btn-success-gradient" [disabled]="depositForm.invalid || isSubmitting">
+          @if (isSubmitting) {
+            <span class="material-symbols-outlined spin">progress_activity</span>
+            Đang xử lý...
+          } @else {
+            <span class="material-symbols-outlined">add_circle</span>
+            Nạp tiền
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}

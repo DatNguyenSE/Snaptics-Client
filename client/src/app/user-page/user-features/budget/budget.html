@@ -79,7 +79,7 @@
           <div class="budget-grid">
             @for (budget of budgets; track budget.id) {
               <article
-                class="budget-card"
+                class="budget-card budget-card--personal"
                 [class.budget-card--saving]="budget.type === 1"
                 (click)="navigateToBudget(budget)"
                 role="button"
@@ -99,6 +99,13 @@
                       <span class="budget-period">
                         {{ budget.startDate | date:'dd/MM' }} - {{ budget.endDate | date:'dd/MM' }}
                       </span>
+                      <span class="budget-duration">
+                        <span class="material-symbols-outlined">schedule</span>
+                        Thời hạn {{ getBudgetDurationLabel(budget.startDate, budget.endDate) }}
+                      </span>
+                      <span class="budget-card-kind">
+                        {{ budget.type === 1 ? 'Tiết kiệm mục tiêu' : 'Ví cá nhân' }}
+                      </span>
                     </div>
                   </div>
 
@@ -113,35 +120,25 @@
                     </button>
                     
                     <div class="dropdown-menu" [class.dropdown-menu--active]="activeDropdownId === budget.id" (click)="stopPropagation($event)">
+                      <button class="dropdown-item" (click)="openDepositModal(budget, $event); activeDropdownId = null">
+                        <span class="material-symbols-outlined text-success">add_circle</span>
+                        Nạp tiền
+                      </button>
+                      <button class="dropdown-item" (click)="openHistoryModal(budget, $event); activeDropdownId = null">
+                        <span class="material-symbols-outlined text-primary">history</span>
+                        Lịch sử nạp
+                      </button>
                       <button class="dropdown-item" (click)="openModal(budget); activeDropdownId = null">
                         <span class="material-symbols-outlined">edit</span>
                         Chỉnh sửa
                       </button>
-                      <button class="dropdown-item dropdown-item--danger" (click)="deleteBudget(budget.id); activeDropdownId = null">
+                      <button class="dropdown-item dropdown-item--danger" (click)="deleteBudget(budget.id, $event); activeDropdownId = null">
                         <span class="material-symbols-outlined">delete</span>
                         Xóa ví
                       </button>
                     </div>
                   </div>
                 </div>
-
-                <!-- Member chips for personal budget if members exist -->
-                @if (budget.members && budget.members.length > 0) {
-                  <div class="member-chips mt-2">
-                    @for (member of getDisplayedMembers(budget); track (member.memberId || member.userId || member.id); let i = $index) {
-                      <div class="member-chip" [style.z-index]="10 - i" [title]="member.memberName || member.displayName || member.memberEmail || member.email || 'Thành viên'">
-                        @if (member.imageUrl) {
-                          <img [src]="member.imageUrl" [alt]="member.memberName || member.displayName || 'Avatar'" />
-                        } @else {
-                          <span>{{ getInitials(member.memberName || member.displayName || member.memberEmail || member.email || 'TV') }}</span>
-                        }
-                      </div>
-                    }
-                    @if (getAcceptedMemberCount(budget) > 3) {
-                      <div class="member-chip member-chip--more">+{{ getAcceptedMemberCount(budget) - 3 }}</div>
-                    }
-                  </div>
-                }
 
                 <div class="budget-card__body">
                   <div class="budget-amounts">
@@ -239,6 +236,10 @@
                       <span class="budget-period">
                         {{ budget.startDate | date:'dd/MM' }} - {{ budget.endDate | date:'dd/MM' }}
                       </span>
+                      <span class="budget-duration budget-duration--shared">
+                        <span class="material-symbols-outlined">schedule</span>
+                        Thời hạn {{ getBudgetDurationLabel(budget.startDate, budget.endDate) }}
+                      </span>
                     </div>
                   </div>
 
@@ -323,31 +324,93 @@
             [class.is-invalid]="budgetForm.get('name')?.invalid && budgetForm.get('name')?.touched" />
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Loại ngân sách</label>
-            <select formControlName="type" class="form-control">
-              <option [value]="0">Chi tiêu hàng ngày</option>
-              <option [value]="1">Tiết kiệm mục tiêu</option>
-            </select>
+        <div class="form-group">
+          <label>Loại ngân sách</label>
+          <div class="budget-type-options" role="group" aria-label="Loại ngân sách">
+            <button
+              type="button"
+              class="budget-type-option"
+              [class.budget-type-option--active]="budgetForm.get('type')?.value == 0"
+              [attr.aria-pressed]="budgetForm.get('type')?.value == 0"
+              (click)="selectBudgetType(0)"
+            >
+              <span class="budget-type-option__icon">
+                <span class="material-symbols-outlined">account_balance_wallet</span>
+              </span>
+              <span class="budget-type-option__copy">
+                <span class="budget-type-option__title">Chi tiêu hàng ngày</span>
+                <span class="budget-type-option__hint">Theo dõi các khoản chi</span>
+              </span>
+              <span class="material-symbols-outlined budget-type-option__check">check_circle</span>
+            </button>
+            <button
+              type="button"
+              class="budget-type-option budget-type-option--saving"
+              [class.budget-type-option--active]="budgetForm.get('type')?.value == 1"
+              [attr.aria-pressed]="budgetForm.get('type')?.value == 1"
+              (click)="selectBudgetType(1)"
+            >
+              <span class="budget-type-option__icon">
+                <span class="material-symbols-outlined">savings</span>
+              </span>
+              <span class="budget-type-option__copy">
+                <span class="budget-type-option__title">Tiết kiệm mục tiêu</span>
+                <span class="budget-type-option__hint">Tích lũy cho mục tiêu</span>
+              </span>
+              <span class="material-symbols-outlined budget-type-option__check">check_circle</span>
+            </button>
           </div>
-          <div class="form-group">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group form-group--full">
             <label>{{ budgetForm.get('type')?.value == 1 ? 'Số tiền mục tiêu (VND)' : 'Số tiền (VND)' }}</label>
             <input type="text" [value]="displayAmount" (input)="onAmountChange($event)" placeholder="0" class="form-control"
               [class.is-invalid]="budgetForm.get('amount')?.invalid && budgetForm.get('amount')?.touched" />
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group" style="grid-column: span 2;">
-            <label>Chu kỳ</label>
-            <select class="form-control" (change)="onCycleChange($event)" [value]="currentCycle">
-              <option value="0">Tùy chỉnh</option>
-              <option value="7">1 Tuần</option>
-              <option value="30">1 Tháng</option>
-              <option value="365">1 Năm</option>
-              <option value="36500">Vĩnh viễn</option>
+        @if (modalMode === 'ADD') {
+          <div class="form-group">
+            <label>Nguồn thu nhập ban đầu (Tùy chọn)</label>
+            <select formControlName="incomeSourceId" class="form-control">
+              <option [ngValue]="null">-- Tự nhập thủ công (Không chọn nguồn) --</option>
+              @for (source of incomeSources; track source.id) {
+                <option [value]="source.id">{{ source.name }}</option>
+              }
             </select>
+            <small class="form-text text-muted" style="font-size: 0.8rem; color: #6c757d; display: block; margin-top: 4px;">
+              Hệ thống sẽ ghi nhận lịch sử nạp tiền vào ví dựa trên nguồn thu bạn chọn.
+            </small>
+          </div>
+        }
+
+        <div class="form-group">
+          <div class="form-section-heading">
+            <label>Chu kỳ</label>
+            <span class="form-section-heading__hint">Chọn nhanh ngày kết thúc</span>
+          </div>
+          <div class="cycle-options" role="group" aria-label="Chu kỳ ngân sách">
+            <button type="button" class="cycle-option" [class.cycle-option--active]="currentCycle === 7" (click)="selectCycle(7)">
+              <strong>1 tuần</strong>
+              <span>7 ngày</span>
+            </button>
+            <button type="button" class="cycle-option" [class.cycle-option--active]="currentCycle === 30" (click)="selectCycle(30)">
+              <strong>1 tháng</strong>
+              <span>30 ngày</span>
+            </button>
+            <button type="button" class="cycle-option" [class.cycle-option--active]="currentCycle === 365" (click)="selectCycle(365)">
+              <strong>1 năm</strong>
+              <span>365 ngày</span>
+            </button>
+            <button type="button" class="cycle-option" [class.cycle-option--active]="currentCycle === 36500" (click)="selectCycle(36500)">
+              <strong>Vĩnh viễn</strong>
+              <span>Không giới hạn</span>
+            </button>
+            <button type="button" class="cycle-option cycle-option--custom" [class.cycle-option--active]="currentCycle === 0" (click)="selectCycle(0)">
+              <strong>Tùy chỉnh</strong>
+              <span>Tự chọn ngày</span>
+            </button>
           </div>
         </div>
 
@@ -386,8 +449,25 @@
           </button>
         </div>
       </form>
-    </div>
   </div>
+</div>
+}
+
+@if (isDepositModalOpen) {
+  <app-deposit-budget-modal
+    [budget]="selectedBudgetForDeposit"
+    [isOpen]="isDepositModalOpen"
+    (close)="closeDepositModal()"
+    (success)="onDepositSuccess()">
+  </app-deposit-budget-modal>
+}
+
+@if (isHistoryModalOpen) {
+  <app-income-history-modal
+    [budget]="selectedBudgetForHistory"
+    [isOpen]="isHistoryModalOpen"
+    (close)="closeHistoryModal()">
+  </app-income-history-modal>
 }
 
 <!-- ── Shared Budget Modal ── -->

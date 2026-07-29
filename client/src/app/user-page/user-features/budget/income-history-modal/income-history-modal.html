@@ -1,0 +1,64 @@
+@if (isOpen) {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content glass-effect modal-lg" (click)="stopPropagation($event)">
+    <div class="modal-header">
+      <div class="modal-icon text-primary">
+        <span class="material-symbols-outlined">history</span>
+      </div>
+      <div class="modal-titles">
+        <h3>Lịch sử nạp tiền</h3>
+        <p>Chi tiết dòng tiền của "{{ budget.name }}"</p>
+      </div>
+      <button class="btn-close" (click)="closeModal()" aria-label="Close">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body history-container">
+      @if (isLoading) {
+        <div class="state-container">
+          <span class="material-symbols-outlined spin state-icon">progress_activity</span>
+          <p>Đang tải dữ liệu...</p>
+        </div>
+      } @else if (hasError) {
+        <div class="state-container state-container--error">
+          <span class="material-symbols-outlined state-icon">error_outline</span>
+          <p>Không thể tải dữ liệu. Vui lòng thử lại.</p>
+        </div>
+      } @else if (history.length === 0) {
+        <div class="state-container">
+          <span class="material-symbols-outlined state-icon">receipt_long</span>
+          <p>Chưa có lịch sử nạp tiền nào.</p>
+        </div>
+      } @else {
+        <div class="timeline">
+          @for (item of history; track item.id) {
+            <div class="timeline-item">
+              <div class="timeline-marker" [class.marker-manual]="!item.incomeSourceId">
+                <span class="material-symbols-outlined">
+                  {{ item.incomeSourceId ? 'account_balance' : 'payments' }}
+                </span>
+              </div>
+              <div class="timeline-content">
+                <div class="timeline-header">
+                  <span class="timeline-amount text-success">+{{ formatCurrency(item.amount) }}</span>
+                  <span class="timeline-date">{{ item.receivedDate | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+                <div class="timeline-details">
+                  <span class="timeline-source">
+                    <span class="material-symbols-outlined icon-sm">account_balance_wallet</span>
+                    {{ getSourceName(item.incomeSourceId) }}
+                  </span>
+                  @if (item.note) {
+                    <p class="timeline-note">"{{ item.note }}"</p>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+}

@@ -52,6 +52,10 @@ export class SharedBudgetDetail implements OnInit {
     return this.budget?.currentUserRole === 'OWNER';
   }
 
+  get isSharedBudget(): boolean {
+    return this.budget?.isShared === true || this.budget?.walletType === 'SHARED';
+  }
+
   get spentAmount(): number {
     if (!this.budget) return 0;
     const current = this.budget.currentAmount ?? this.budget.amount;
@@ -114,27 +118,32 @@ export class SharedBudgetDetail implements OnInit {
     }).subscribe({
       next: ({ budget, members }) => {
         const memberList = members && members.length > 0 ? members : (budget.members || []);
+        const hasOtherMembers = memberList.some(
+          (member) => (member.memberId || member.userId) !== this.currentUserId
+        );
+        const isShared = budget.isShared === true || budget.walletType === 'SHARED' || hasOtherMembers;
         const currentMember = memberList.find(
           (m) => (m.memberId || m.userId) === this.currentUserId
         );
 
-        let userRole: 'OWNER' | 'MEMBER' = budget.currentUserRole || 'MEMBER';
+        let userRole: 'OWNER' | 'MEMBER' = isShared
+          ? (budget.currentUserRole || 'MEMBER')
+          : 'OWNER';
         
         // Ví gọi từ /Budget/user thường sẽ có isShared = false, hoặc ta xét dựa trên API members.
         // Đối với ví chia sẻ, bắt buộc phân biệt qua API members.
-        if (currentMember) {
+        if (isShared && currentMember) {
           if (currentMember.isOwner === true || currentMember.role === 0 || currentMember.role === 'OWNER') {
             userRole = 'OWNER';
           } else {
             userRole = 'MEMBER';
           }
-        } else if (!budget.isShared) {
-          // Nếu không có thành viên (hoặc chưa kịp tải) mà là ví cá nhân thì mặc định là Chủ ví
-          userRole = 'OWNER';
         }
 
         this.budget = {
           ...budget,
+          isShared,
+          walletType: isShared ? 'SHARED' : 'PERSONAL',
           currentUserRole: userRole,
           members: memberList
         };
@@ -173,6 +182,7 @@ export class SharedBudgetDetail implements OnInit {
   }
 
   openMemberModal(): void {
+    if (!this.isSharedBudget) return;
     this.isMemberModalOpen = true;
   }
 
@@ -215,6 +225,20 @@ export class SharedBudgetDetail implements OnInit {
   formatCurrency(value: number | undefined): string {
     if (value === null || value === undefined || isNaN(value)) return '0đ';
     return `${new Intl.NumberFormat(this.language.locale()).format(value)}đ`;
+  }
+
+  getBudgetDurationLabel(startDate?: string | null, endDate?: string | null): string {
+    if (!endDate) return 'Vĩnh viễn';
+
+    const start = new Date(startDate ?? '');
+    const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return 'Chưa xác định';
+
+    const days = Math.max(0, Math.ceil((end.getTime() - start.getTime()) / 86400000));
+    const months = Math.floor(days / 30);
+    if (months >= 12) return `${Math.floor(months / 12)} năm`;
+    if (months >= 1) return `${months} tháng`;
+    return `${days} ngày`;
   }
 
   getTransactionIcon(t: TransactionDto): string {

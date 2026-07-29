@@ -11,12 +11,16 @@ import { LanguageService } from '../../../core/services/language-service';
 import { ToastService } from '../../../core/services/toast-service';
 import { AccountService } from '../../../core/services/account-service';
 import { SharedBudgetDto, BudgetMemberDto } from '../../../models/shared-budget.dto';
+import { IncomeSourceService } from '../../../core/services/income-source.service';
+import { IncomeSourceDto } from '../../../models/income-source.dto';
 import { CreateSharedBudgetModal } from './create-shared-budget-modal/create-shared-budget-modal';
+import { DepositBudgetModal } from './deposit-budget-modal/deposit-budget-modal';
+import { IncomeHistoryModal } from './income-history-modal/income-history-modal';
 
 @Component({
   selector: 'app-budget',
   standalone: true,
-  imports: [CommonModule, UserHeader, ReactiveFormsModule, CreateSharedBudgetModal],
+  imports: [CommonModule, UserHeader, ReactiveFormsModule, CreateSharedBudgetModal, DepositBudgetModal, IncomeHistoryModal],
   templateUrl: './budget.html',
   styleUrl: './budget.css',
 })
@@ -28,6 +32,10 @@ export class Budget implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly accountService = inject(AccountService);
+  private readonly incomeSourceService = inject(IncomeSourceService);
+
+  // ─── Data ───────────────────────────────────────────────────────────────────
+  incomeSources: IncomeSourceDto[] = [];
 
   // ─── Personal budgets ──────────────────────────────────────────────────────
   budgets: BudgetDto[] = [];
@@ -71,13 +79,33 @@ export class Budget implements OnInit {
   confirmBtnClass = 'btn-primary-modal';
   confirmBtnText = 'Xác nhận';
 
+  // ─── Deposit Modal ─────────────────────────────────────────────────────────
+  isDepositModalOpen = false;
+  selectedBudgetForDeposit!: BudgetDto;
+
+  // ─── History Modal ─────────────────────────────────────────────────────────
+  isHistoryModalOpen = false;
+  selectedBudgetForHistory!: BudgetDto;
+
   // ─── Dropdown State ────────────────────────────────────────────────────────
   activeDropdownId: number | null = null;
 
   ngOnInit(): void {
     this.initForm();
+    this.loadIncomeSources();
     this.loadBudgets();
     this.loadSharedBudgets();
+  }
+
+  loadIncomeSources(): void {
+    this.incomeSourceService.getIncomeSources().subscribe({
+      next: (data) => {
+        this.incomeSources = data || [];
+      },
+      error: () => {
+        console.error('Failed to load income sources');
+      }
+    });
   }
 
   setTab(tab: 'personal' | 'shared'): void {
@@ -91,11 +119,22 @@ export class Budget implements OnInit {
     this.budgetForm = this.fb.group({
       name: ['', Validators.required],
       amount: [0, [Validators.required, Validators.min(1)]],
+      incomeSourceId: [null], // null means 'Tự nhập thủ công'
       type: [0, Validators.required],
       startDate: [today, Validators.required],
       endDate: [''],
       isDefault: [false],
       isAutoRenew: [false],
+    });
+
+    // Tự động điền số tiền từ nguồn thu
+    this.budgetForm.get('incomeSourceId')?.valueChanges.subscribe(sourceId => {
+      if (sourceId) {
+        const source = this.incomeSources.find(s => s.id === Number(sourceId));
+        if (source) {
+          this.budgetForm.patchValue({ amount: source.amount });
+        }
+      }
     });
   }
 
@@ -129,6 +168,15 @@ export class Budget implements OnInit {
     const select = event.target as HTMLSelectElement;
     this.currentCycle = parseInt(select.value, 10);
     this.updateEndDate();
+  }
+
+  selectCycle(cycle: number): void {
+    this.currentCycle = cycle;
+    this.updateEndDate();
+  }
+
+  selectBudgetType(type: number): void {
+    this.budgetForm.patchValue({ type });
   }
 
   onStartDateChange(): void {
@@ -169,7 +217,7 @@ export class Budget implements OnInit {
     this.budgetService.getBudgets().subscribe({
       next: (data) => {
         const sortedBudgets = data
-          .filter((b) => !b.isShared && b.walletType !== 'SHARED')
+          .filter((b) => !b.isShared && b.walletType !== 'SHARED' && b.isActive !== false)
           .sort((a, b) => {
             const aDefault = a.isDefault ? 1 : 0;
             const bDefault = b.isDefault ? 1 : 0;
@@ -242,6 +290,8 @@ export class Budget implements OnInit {
 
         // 1. Filter active memberships (status === 1) or items with active members
         const activeItems = data.filter((item: any) => {
+          if (item.isActive === false) return false;
+          
           if (item.status !== undefined && item.status !== null) {
             return Number(item.status) === 1;
           }
@@ -408,6 +458,33 @@ export class Budget implements OnInit {
     this.activeDropdownId = null;
   }
 
+  // ─── Modals Logic ─────────────────────────────────────────────────────────
+  openDepositModal(budget: BudgetDto, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.selectedBudgetForDeposit = budget;
+    this.isDepositModalOpen = true;
+    this.activeDropdownId = null;
+  }
+
+  closeDepositModal(): void {
+    this.isDepositModalOpen = false;
+  }
+
+  onDepositSuccess(): void {
+    this.loadBudgets(); // Refresh personal budgets to show updated amount
+  }
+
+  openHistoryModal(budget: BudgetDto, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.selectedBudgetForHistory = budget;
+    this.isHistoryModalOpen = true;
+    this.activeDropdownId = null;
+  }
+
+  closeHistoryModal(): void {
+    this.isHistoryModalOpen = false;
+  }
+
   toggleDropdown(event: Event, budgetId: number): void {
     event.stopPropagation();
     this.activeDropdownId = this.activeDropdownId === budgetId ? null : budgetId;
@@ -452,6 +529,23 @@ export class Budget implements OnInit {
       isActive: true,
     };
 
+    if (this.modalMode === 'ADD' && formVal.incomeSourceId) {
+      const selectedSource = this.incomeSources.find(s => s.id === Number(formVal.incomeSourceId));
+      if (selectedSource) {
+        const amountToTake = Math.min(formVal.amount, selectedSource.amount);
+        payload.budgetIncomeSources = [
+          {
+            incomeSourceId: selectedSource.id,
+            amount: amountToTake
+          }
+        ];
+      } else {
+        payload.budgetIncomeSources = [];
+      }
+    } else {
+      payload.budgetIncomeSources = [];
+    }
+
     if (this.modalMode === 'EDIT' && this.editingBudget) {
       const difference = formVal.amount - this.editingBudget.amount;
       const originalCurrentAmount = this.editingBudget.currentAmount !== undefined ? this.editingBudget.currentAmount : this.editingBudget.amount;
@@ -492,7 +586,11 @@ export class Budget implements OnInit {
     }
   }
 
-  deleteBudget(id: number): void {
+  deleteBudget(id: number, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
     this.confirmModalTitle = 'Xác nhận xóa';
     this.confirmModalMessage = 'Bạn có chắc chắn muốn xóa ngân sách này không? Hành động này không thể hoàn tác.';
     this.confirmBtnClass = 'btn-primary-modal';
@@ -568,6 +666,20 @@ export class Budget implements OnInit {
   formatCurrency(value: number | undefined): string {
     if (value === null || value === undefined || isNaN(value)) return '0đ';
     return `${new Intl.NumberFormat(this.language.locale()).format(value)}đ`;
+  }
+
+  getBudgetDurationLabel(startDate?: string | null, endDate?: string | null): string {
+    if (!endDate) return 'Vĩnh viễn';
+
+    const start = new Date(startDate ?? '');
+    const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return 'Chưa xác định';
+
+    const days = Math.max(0, Math.ceil((end.getTime() - start.getTime()) / 86400000));
+    const months = Math.floor(days / 30);
+    if (months >= 12) return `${Math.floor(months / 12)} năm`;
+    if (months >= 1) return `${months} tháng`;
+    return `${days} ngày`;
   }
 
   getBudgetSpentPercent(budget: BudgetDto): number {
