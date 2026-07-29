@@ -213,7 +213,14 @@
                           [class]="getMediaClass(transaction)"
                           [style.background-color]="getCategoryColor(transaction)"
                           [style.color]="getCategoryColor(transaction) ? '#ffffff' : null">
-                          <i class="ti {{ getIcon(transaction) }}" style="font-size: 1.5rem;"></i>
+                          @if (getImageUrl(transaction); as imageUrl) {
+                            <img
+                              class="t-card-image"
+                              [src]="imageUrl"
+                              [alt]="transaction.name || 'Ảnh giao dịch'" />
+                          } @else {
+                            <i class="ti {{ getIcon(transaction) }}" style="font-size: 1.5rem;"></i>
+                          }
                         </div>
 
                         <div class="t-card-body">
@@ -264,6 +271,8 @@
 @if (selectedTransaction) {
   <app-transaction-detail-modal
     [transaction]="selectedTransaction"
+    [categories]="categories"
+    [budgets]="budgets"
     (closeModal)="closeTransactionDetail()">
   </app-transaction-detail-modal>
 }

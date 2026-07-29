@@ -24,7 +24,7 @@ export class ToastService {
       const container = document.createElement('div');
       container.id = 'toast-container';
       container.className = `
-        fixed bottom-6 right-6 flex flex-col gap-3 z-[9999]
+         fixed top-6 right-6 flex flex-col gap-3 z-[9999]
         font-sans text-sm text-gray-800
       `;
       document.body.appendChild(container);

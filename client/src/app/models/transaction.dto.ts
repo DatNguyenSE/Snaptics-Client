@@ -8,6 +8,7 @@ export interface TransactionDetailDto {
   quantity: number;
   unit?: string | null;
   estimatedCalories: number | null;
+  isDeleted?: boolean;
 }
 
 export interface TransactionCreatorDto {
@@ -36,6 +37,7 @@ export interface TransactionDto {
   budgetId?: number | null;
   createdByUserId?: string | null;
   createdByUser?: TransactionCreatorDto | null;
+  isDeleted?: boolean;
 }
 
 export interface UpdateItemPriceDto {

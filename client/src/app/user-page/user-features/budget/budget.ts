@@ -93,8 +93,9 @@ export class Budget implements OnInit {
       amount: [0, [Validators.required, Validators.min(1)]],
       type: [0, Validators.required],
       startDate: [today, Validators.required],
-      endDate: [today, Validators.required],
+      endDate: [''],
       isDefault: [false],
+      isAutoRenew: [false],
     });
   }
 
@@ -147,7 +148,7 @@ export class Budget implements OnInit {
       endDateControl?.disable();
     } else {
       endDateControl?.enable();
-      endDateControl?.setValidators([Validators.required]);
+      endDateControl?.clearValidators();
       if (this.currentCycle > 0) {
         const start = this.budgetForm.get('startDate')?.value;
         if (start) {
@@ -301,7 +302,7 @@ export class Budget implements OnInit {
                 amount: item.amount || 0,
                 currentAmount: item.currentAmount || 0,
                 startDate: item.startDate || item.createdAt || new Date().toISOString(),
-                endDate: item.endDate || new Date().toISOString(),
+                endDate: item.endDate || '',
                 type: item.type || 0,
                 walletType: 'SHARED',
                 currentUserRole: userRole,
@@ -338,7 +339,7 @@ export class Budget implements OnInit {
     
     // Reset control states before patching
     this.budgetForm.get('endDate')?.enable();
-    this.budgetForm.get('endDate')?.setValidators([Validators.required]);
+    this.budgetForm.get('endDate')?.clearValidators();
     this.budgetForm.get('endDate')?.updateValueAndValidity();
 
     if (budget) {
@@ -368,6 +369,7 @@ export class Budget implements OnInit {
         startDate: start,
         endDate: end,
         isDefault: budget.isDefault || false,
+        isAutoRenew: budget.isAutoRenew ?? budget.autoRenew ?? false,
       });
     } else {
       this.modalMode = 'ADD';
@@ -378,8 +380,9 @@ export class Budget implements OnInit {
         amount: 0,
         type: 0,
         startDate: new Date().toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0],
+        endDate: '',
         isDefault: false,
+        isAutoRenew: false,
       });
     }
   }
@@ -445,6 +448,7 @@ export class Budget implements OnInit {
       categoryId: null,
       note: '',
       isDefault: formVal.isDefault || false,
+      isAutoRenew: formVal.isAutoRenew || false,
       isActive: true,
     };
 

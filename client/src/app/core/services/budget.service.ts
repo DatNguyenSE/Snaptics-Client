@@ -26,6 +26,7 @@ export interface CreateBudgetRequest {
   isDefault?: boolean;
   isActive?: boolean;
   autoRenew?: boolean;
+  isAutoRenew?: boolean;
 }
 
 export interface BudgetDto {
@@ -41,6 +42,7 @@ export interface BudgetDto {
   userId?: string;
   type: number;
   autoRenew?: boolean;
+  isAutoRenew?: boolean;
   walletType?: BudgetWalletType;
   currentUserRole?: UserBudgetRole;
   memberCount?: number;
@@ -71,6 +73,12 @@ export class BudgetService {
 
   getBudgets(): Observable<BudgetDto[]> {
     return this.getUserBudgets();
+  }
+
+  getAllAccessibleBudgets(): Observable<BudgetDto[]> {
+    return this.http.get<BudgetDto[]>(`${this.apiUrl}/all-accessible`).pipe(
+      catchError((err: any) => throwError(() => err))
+    );
   }
 
   getBudgetById(id: number): Observable<SharedBudgetDto> {

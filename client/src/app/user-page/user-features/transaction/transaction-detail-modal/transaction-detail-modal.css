@@ -7,7 +7,7 @@
   background-color: rgba(15, 23, 42, 0.4); /* Lighter backdrop for light theme */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  z-index: 1000;
+  z-index: 1200;
   display: flex;
   align-items: flex-end; 
   justify-content: center;
@@ -63,6 +63,53 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.transaction-info-grid {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.transaction-info-chip,
+.transaction-record-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.transaction-info-chip .material-symbols-outlined,
+.transaction-record-meta .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.transaction-info-chip--direction {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.transaction-info-chip--ai {
+  background: #fdf4ff;
+  color: #a21caf;
+}
+
+.transaction-record-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #64748b;
+}
+
+.transaction-record-meta > span {
+  min-height: auto;
+  padding: 0;
+  font-weight: 600;
 }
 
 /* Custom scrollbar for Light Theme */
@@ -320,6 +367,36 @@
   letter-spacing: 1.5px;
 }
 
+.detail-section__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.detail-section__heading h3 {
+  margin: 4px 0 0;
+  color: #1e293b;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+  text-transform: none;
+}
+
+.detail-section__eyebrow {
+  color: #94a3b8;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.detail-section__total {
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
 .item-list {
   list-style: none;
   padding: 0;
@@ -355,6 +432,12 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.item-unit-price {
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 600;
 }
 
 .item-name {
@@ -600,3 +683,277 @@
 .modal-status-badge--pending   { background: #fef9c3; color: #854d0e; }
 .modal-status-badge--failed    { background: #fee2e2; color: #b91c1c; }
 .modal-status-badge--cancelled { background: #f1f5f9; color: #475569; }
+
+/* ─── EDIT FORM ─────────────────────────────────────────────── */
+.transaction-edit-form {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+
+.edit-form__heading,
+.edit-details-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.edit-form__heading h2 {
+  margin: 4px 0 0;
+  color: #0f172a;
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+}
+
+.edit-form__icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 14px;
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.edit-form__grid,
+.edit-detail-card__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.edit-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edit-field--wide { grid-column: 1 / -1; }
+
+.edit-field > span,
+.edit-details-heading span {
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.edit-field input,
+.edit-field select,
+.edit-field textarea,
+.edit-detail-card__name {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #dbe2ea;
+  border-radius: 11px;
+  outline: none;
+  background: #f8fafc;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.edit-field input,
+.edit-field select,
+.edit-detail-card__name {
+  min-height: 42px;
+  padding: 0 11px;
+}
+
+.edit-field textarea {
+  min-height: 70px;
+  padding: 10px 11px;
+  resize: vertical;
+}
+
+.edit-field input:focus,
+.edit-field select:focus,
+.edit-field textarea:focus,
+.edit-detail-card__name:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.edit-details-heading {
+  padding-top: 4px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.edit-details-heading h3 {
+  margin: 16px 0 0;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.edit-details-heading span { margin-top: 16px; }
+
+.edit-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-detail-card {
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.edit-detail-card__top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.edit-detail-card__index {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  place-items: center;
+  border-radius: 8px;
+  background: #e0e7ff;
+  color: #4338ca;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.edit-detail-card__name { background: #fff; }
+
+.edit-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.edit-cancel-btn,
+.edit-save-btn {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.edit-cancel-btn { background: #eef2f7; color: #475569; }
+.edit-save-btn { background: #4f46e5; color: #fff; box-shadow: 0 8px 18px rgba(79, 70, 229, 0.2); }
+.edit-save-btn:disabled { cursor: not-allowed; opacity: 0.55; }
+
+@media (max-width: 639px) {
+  .edit-form__grid,
+  .edit-detail-card__fields {
+    grid-template-columns: 1fr;
+    gap: 11px;
+  }
+
+  .edit-form__actions { padding-bottom: env(safe-area-inset-bottom); }
+  .edit-cancel-btn,
+  .edit-save-btn { flex: 1; }
+}
+
+:host-context(html.dark-theme) .edit-form__heading h2,
+:host-context(html.dark-theme) .edit-details-heading h3 {
+  color: #f8fafc;
+}
+
+:host-context(html.dark-theme) .edit-form__icon {
+  background: rgba(99, 102, 241, 0.18);
+  color: #a5b4fc;
+}
+
+:host-context(html.dark-theme) .edit-details-heading {
+  border-color: #475569;
+}
+
+:host-context(html.dark-theme) .edit-field input,
+:host-context(html.dark-theme) .edit-field select,
+:host-context(html.dark-theme) .edit-field textarea,
+:host-context(html.dark-theme) .edit-detail-card__name,
+:host-context(html.dark-theme) .edit-detail-card {
+  border-color: #475569;
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+:host-context(html.dark-theme) .edit-cancel-btn {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+/* ─── DARK THEME ────────────────────────────────────────────── */
+:host-context(html.dark-theme) .modal-content {
+  background: #111827;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+:host-context(html.dark-theme) .modal-right-panel,
+:host-context(html.dark-theme) .detail-section {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:host-context(html.dark-theme) .modal-header__info h2 {
+  background: linear-gradient(135deg, #f8fafc, #cbd5e1);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+:host-context(html.dark-theme) .header-actions {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:host-context(html.dark-theme) .action-btn { color: #94a3b8; }
+:host-context(html.dark-theme) .action-divider { background: #475569; }
+
+:host-context(html.dark-theme) .transaction-note,
+:host-context(html.dark-theme) .item-qty {
+  background: #0f172a;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+:host-context(html.dark-theme) .transaction-meta-chip {
+  background: rgba(99, 102, 241, 0.18);
+  color: #c4b5fd;
+}
+
+:host-context(html.dark-theme) .transaction-info-chip--direction {
+  background: rgba(14, 165, 233, 0.16);
+  color: #7dd3fc;
+}
+
+:host-context(html.dark-theme) .transaction-info-chip--ai {
+  background: rgba(192, 38, 211, 0.16);
+  color: #f0abfc;
+}
+
+:host-context(html.dark-theme) .detail-section__heading h3,
+:host-context(html.dark-theme) .detail-section__total,
+:host-context(html.dark-theme) .item-name,
+:host-context(html.dark-theme) .item-price {
+  color: #f8fafc;
+}
+
+:host-context(html.dark-theme) .item-row { border-color: #475569; }
+:host-context(html.dark-theme) .item-category { background: rgba(99, 102, 241, 0.18); color: #a5b4fc; }
+:host-context(html.dark-theme) .item-calories { background: rgba(234, 88, 12, 0.18); color: #fdba74; }
+:host-context(html.dark-theme) .modal-status-badge--cancelled { background: #334155; color: #cbd5e1; }

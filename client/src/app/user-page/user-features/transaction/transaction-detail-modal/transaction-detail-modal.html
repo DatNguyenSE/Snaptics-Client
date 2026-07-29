@@ -3,7 +3,7 @@
     <div class="modal-decorative-glow"></div>
 
     <div class="header-actions">
-      <button class="action-btn edit-btn" (click)="onEdit()" [attr.aria-label]="language.t('transaction.edit') || 'Edit'">
+      <button class="action-btn edit-btn" (click)="onEdit()" [attr.aria-label]="language.t('transaction.edit') || 'Edit'" [disabled]="isEditing">
         <span class="material-symbols-outlined">edit</span>
       </button>
       <button class="action-btn delete-btn" (click)="onDelete()" [attr.aria-label]="language.t('transaction.delete') || 'Delete'">
@@ -15,12 +15,96 @@
       </button>
     </div>
     
+    @if (isEditing && draftTransaction) {
+      <div class="transaction-edit-form">
+        <div class="edit-form__heading">
+          <div>
+            <span class="detail-section__eyebrow">CHỈNH SỬA</span>
+            <h2>Thông tin giao dịch</h2>
+          </div>
+          <span class="material-symbols-outlined edit-form__icon">edit_note</span>
+        </div>
+
+        <div class="edit-form__grid">
+          <label class="edit-field edit-field--wide">
+            <span>Tên giao dịch</span>
+            <input type="text" [(ngModel)]="draftTransaction.name" />
+          </label>
+          <label class="edit-field">
+            <span>Tổng tiền</span>
+            <input type="number" min="0" [(ngModel)]="draftTransaction.totalAmount" [readonly]="draftTransaction.transactionDetails.length > 0" [title]="draftTransaction.transactionDetails.length > 0 ? 'Tổng tiền được tính tự động từ chi tiết mặt hàng' : ''" [class.readonly-input]="draftTransaction.transactionDetails.length > 0" />
+          </label>
+          <label class="edit-field">
+            <span>Ví</span>
+            <select [(ngModel)]="draftTransaction.budgetId">
+              <option [ngValue]="null">Ví cá nhân</option>
+              @for (budget of budgets; track budget.id) {
+                <option [ngValue]="budget.id">{{ budget.name }}</option>
+              }
+            </select>
+          </label>
+          <label class="edit-field edit-field--wide">
+            <span>Ghi chú</span>
+            <textarea rows="2" [(ngModel)]="draftTransaction.note"></textarea>
+          </label>
+        </div>
+
+        <div class="edit-details-heading">
+          <h3>Chi tiết mặt hàng</h3>
+          <span>{{ draftTransaction.transactionDetails.length }} mục</span>
+        </div>
+
+        <div class="edit-details-list">
+          @for (item of draftTransaction.transactionDetails; track item.id) {
+            <div class="edit-detail-card">
+              <div class="edit-detail-card__top">
+                <span class="edit-detail-card__index">{{ $index + 1 }}</span>
+                <input class="edit-detail-card__name" type="text" [(ngModel)]="item.itemName" placeholder="Tên mặt hàng" />
+              </div>
+              <div class="edit-detail-card__fields">
+                <label class="edit-field">
+                  <span>Category</span>
+                  <select [(ngModel)]="item.categoryId">
+                    @for (category of categories; track category.id) {
+                      <option [ngValue]="category.id">{{ category.name }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="edit-field">
+                  <span>Giá</span>
+                  <input type="number" min="0" [(ngModel)]="item.price" (ngModelChange)="recalculateTotal()" />
+                </label>
+                <label class="edit-field">
+                  <span>Số lượng</span>
+                  <input type="number" min="1" [(ngModel)]="item.quantity" (ngModelChange)="recalculateTotal()" />
+                </label>
+                <label class="edit-field">
+                  <span>Đơn vị</span>
+                  <input type="text" [(ngModel)]="item.unit" placeholder="cái" />
+                </label>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="edit-form__actions">
+          <button type="button" class="edit-cancel-btn" (click)="cancelEdit()">Hủy</button>
+          <button type="button" class="edit-save-btn" (click)="saveEdit()" [disabled]="isSaving || !draftTransaction.name?.trim()">
+            <span class="material-symbols-outlined">{{ isSaving ? 'progress_activity' : 'check' }}</span>
+            {{ isSaving ? 'Đang lưu...' : 'Lưu thay đổi' }}
+          </button>
+        </div>
+      </div>
+    } @else {
     <div class="modal-split-layout">
       <!-- Left side -->
       <div class="modal-left-panel">
         <header class="modal-header">
           <div class="modal-header__info">
-            <span class="modal-date">{{ formatDate(transaction.transactionDate) }}</span>
+            <div class="transaction-record-meta">
+              <span><span class="material-symbols-outlined">calendar_today</span>{{ formatDate(transaction.createdAt) }}</span>
+              <span><span class="material-symbols-outlined">account_balance_wallet</span>{{ getBudgetName(transaction.budgetId) }}</span>
+            </div>
             <h2>{{ transaction.name || language.t('dashboard.category.bill') }}</h2>
             
             <div class="header-total-amount-row">
@@ -29,8 +113,8 @@
           </div>
         </header>
 
-        <div class="modal-metadata">
-          @if (transaction.note) {
+          <div class="modal-metadata">
+            @if (transaction.note) {
             <p class="transaction-note">
               <span class="material-symbols-outlined">notes</span>
               {{ transaction.note }}
@@ -73,25 +157,23 @@
       <!-- Right side -->
       <div class="modal-right-panel">
         <div class="detail-section">
+          <div class="detail-section__heading">
+            <div>
+              <span class="detail-section__eyebrow">CHI TIẾT GIAO DỊCH</span>
+              <h3>{{ transaction.transactionDetails.length }} {{ transaction.transactionDetails.length === 1 ? 'mặt hàng' : 'mặt hàng' }}</h3>
+            </div>
+            <span class="detail-section__total">{{ formatCurrency(transaction.totalAmount) }}</span>
+          </div>
           <ul class="item-list">
             @for (item of transaction.transactionDetails; track item.id) {
               <li class="item-row">
                 <div class="item-info">
                   <span class="item-name">{{ item.itemName }}</span>
-                  @if (item.categoryName) {
-                    <span class="item-category">{{ getCategoryLabel(item.categoryName) }}</span>
-                  }
-                  @if (item.estimatedCalories) {
-                    <span class="item-calories">{{ item.estimatedCalories }} kcal</span>
-                  }
+                  <span class="item-category">{{ getCategoryLabelForItem(item.categoryId, item.categoryName) }}</span>
                 </div>
                 <div class="item-price-qty">
                   <span class="item-price">{{ formatCurrency(item.price * item.quantity) }}</span>
-                  @if (transaction.transactionDetails.length > 1 && item.unit) {
-                    <span class="item-qty">{{ item.quantity }} {{ item.unit }}</span>
-                  } @else {
-                    <span class="item-qty">x{{ item.quantity }}</span>
-                  }
+                  <span class="item-qty">{{ item.quantity }}{{ item.unit ? ' ' + item.unit : ' sản phẩm' }}</span>
                 </div>
               </li>
             }
@@ -99,5 +181,6 @@
         </div>
       </div>
     </div>
+    }
   </div>
 </div>

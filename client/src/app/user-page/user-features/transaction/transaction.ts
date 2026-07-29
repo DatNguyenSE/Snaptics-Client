@@ -88,7 +88,7 @@ export class Transaction implements OnInit {
   }
 
   private loadBudgets(): void {
-    this.budgetService.getBudgets().subscribe({
+    this.budgetService.getAllAccessibleBudgets().subscribe({
       next: (data) => {
         this.budgets = data;
       },

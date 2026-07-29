@@ -362,6 +362,17 @@
           </div>
         </div>
 
+        <label class="auto-renew-option">
+          <input type="checkbox" formControlName="isAutoRenew" />
+          <span class="auto-renew-option__box" aria-hidden="true"></span>
+          <span class="auto-renew-option__content">
+            <span class="auto-renew-option__title">Tự động gia hạn ví</span>
+            <span class="auto-renew-option__description">
+              Khi bật, đến ngày kết thúc hệ thống sẽ tự động tạo một ví mới với các thiết lập của ví hiện tại và nhận tiền từ những nguồn thu bạn đã cài đặt, chẳng hạn như lương. Ví dụ: vào đầu tháng mới, ví sẽ được tạo tự động và nạp tiền từ nguồn lương của bạn.
+            </span>
+          </span>
+        </label>
+
 
         <div class="modal-actions">
           <button type="button" class="btn-ghost" (click)="closeModal()" [disabled]="isSubmitting">Hủy</button>

@@ -237,7 +237,7 @@ export class Scan implements OnInit, OnDestroy {
       this.categories = categories;
     });
 
-    this.budgetService.getBudgets().subscribe({
+    this.budgetService.getAllAccessibleBudgets().subscribe({
       next: (budgets) => {
         this.budgets = budgets;
         const defaultBudget = budgets.find(b => b.isDefault) || budgets[0];

@@ -63,7 +63,7 @@ export class ManualEntry implements OnInit {
         this.categories = categories;
       });
 
-    this.budgetService.getBudgets().subscribe({
+    this.budgetService.getAllAccessibleBudgets().subscribe({
       next: (budgets) => {
         this.budgets = [...budgets].sort((a, b) => (a.isDefault === b.isDefault ? 0 : a.isDefault ? -1 : 1));
         if (this.budgets.length > 0) {
