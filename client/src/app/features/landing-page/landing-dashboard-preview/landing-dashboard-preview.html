@@ -45,13 +45,15 @@
     <header class="demo-header">
       <div class="demo-header__mascot">
         <video 
+          #avatarVideo
           src="/Roni_AI/Roni_hi_video.mp4" 
           [autoplay]="true" 
           [loop]="true" 
           [muted]="true" 
           playsinline 
-          class="demo-header__mascot-video"
+          class="demo-header__mascot-video-source"
         ></video>
+        <canvas #avatarCanvas class="demo-header__mascot-video" aria-hidden="true"></canvas>
       </div>
 
       <div class="demo-header__greeting">

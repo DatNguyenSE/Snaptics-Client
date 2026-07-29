@@ -1,0 +1,143 @@
+<div class="settings-tab-content">
+  <div class="settings-grid settings-grid--2col">
+
+    <!-- Card A: Currency Settings Form -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-teal">payments</span>
+          Cấu hình định dạng tiền tệ (Currency formatting)
+        </h2>
+      </div>
+      <div class="settings-card__body">
+
+        <div class="preset-buttons">
+          <span class="preset-buttons__label">Mẫu nhanh phổ biến:</span>
+          @for (preset of presetCurrencies; track preset.code) {
+            <button
+              type="button"
+              class="btn btn--sm"
+              [class.btn--primary]="currency.defaultCurrency === preset.code"
+              [class.btn--outline]="currency.defaultCurrency !== preset.code"
+              (click)="applyPreset(preset)"
+            >
+              {{ preset.code }} ({{ preset.symbol }})
+            </button>
+          }
+        </div>
+
+        <form (ngSubmit)="saveCurrencySettings()">
+          <div class="form-grid form-grid--2col">
+            
+            <div class="form-group">
+              <label class="form-label" for="defaultCurrency">Mã tiền tệ mặc định (Code) *</label>
+              <input
+                id="defaultCurrency"
+                type="text"
+                name="defaultCurrency"
+                class="form-control"
+                [(ngModel)]="currency.defaultCurrency"
+                placeholder="VND"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="currencySymbol">Ký hiệu tiền tệ (Symbol) *</label>
+              <input
+                id="currencySymbol"
+                type="text"
+                name="currencySymbol"
+                class="form-control"
+                [(ngModel)]="currency.currencySymbol"
+                placeholder="₫"
+                required
+              />
+            </div>
+
+            <div class="form-group form-group--full">
+              <label class="form-label" for="currencyName">Tên loại tiền tệ (Currency name)</label>
+              <input
+                id="currencyName"
+                type="text"
+                name="currencyName"
+                class="form-control"
+                [(ngModel)]="currency.currencyName"
+                placeholder="Việt Nam Đồng"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="thousandSeparator">Dấu phân cách hàng ngàn</label>
+              <select id="thousandSeparator" name="thousandSeparator" class="form-control" [(ngModel)]="currency.thousandSeparator">
+                <option value=".">Dấu chấm (.) - 1.000.000</option>
+                <option value=",">Dấu phẩy (,) - 1,000,000</option>
+                <option value=" ">Khoảng trống ( ) - 1 000 000</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="decimalSeparator">Dấu phân cách thập phân</label>
+              <select id="decimalSeparator" name="decimalSeparator" class="form-control" [(ngModel)]="currency.decimalSeparator">
+                <option value=",">Dấu phẩy (,) - 0,00</option>
+                <option value=".">Dấu chấm (.) - 0.00</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="decimalPlaces">Số chữ số lẻ (Decimals)</label>
+              <select id="decimalPlaces" name="decimalPlaces" class="form-control" [(ngModel)]="currency.decimalPlaces">
+                <option [ngValue]="0">0 chữ số lẻ (Ví dụ: 1.000.000 ₫)</option>
+                <option [ngValue]="2">2 chữ số lẻ (Ví dụ: $1,000.00)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="symbolPosition">Vị trí ký hiệu tiền tệ</label>
+              <select id="symbolPosition" name="symbolPosition" class="form-control" [(ngModel)]="currency.symbolPosition">
+                <option value="after">Phía sau số tiền (1.000.000 ₫)</option>
+                <option value="before">Phía trước số tiền (₫1.000.000)</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="settings-card__footer">
+            <button type="submit" class="btn btn--primary" [disabled]="isSaving">
+              <span class="material-symbols-outlined">save</span>
+              {{ isSaving ? 'Đang lưu...' : 'Lưu cấu hình tiền tệ' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Card B: Live Preview Box -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-purple">visibility</span>
+          Xem trước hiển thị (Live preview)
+        </h2>
+      </div>
+      <div class="settings-card__body">
+        <p class="settings-card__description">
+          Xem trước hiển thị số tiền thực tế với các cấu hình định dạng bạn vừa thay đổi:
+        </p>
+
+        <div class="currency-preview-box">
+          <span class="currency-preview-box__label">Mẫu hiển thị 1 triệu đồng:</span>
+          <div class="currency-preview-box__value">{{ livePreview }}</div>
+
+          <div class="currency-preview-specs">
+            <div class="spec-tag">Mã: <strong>{{ currency.defaultCurrency }}</strong></div>
+            <div class="spec-tag">Ký hiệu: <strong>{{ currency.currencySymbol }}</strong></div>
+            <div class="spec-tag">Vị trí: <strong>{{ currency.symbolPosition === 'before' ? 'Phía trước' : 'Phía sau' }}</strong></div>
+            <div class="spec-tag">Số lẻ: <strong>{{ currency.decimalPlaces }}</strong></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>

@@ -1,0 +1,235 @@
+<div class="settings-tab-content">
+  <div class="settings-grid settings-grid--stacked">
+
+    <!-- Card A: Password Security -->
+    <section class="settings-card">
+      <div class="settings-card__header settings-card__header--flex">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-red">lock</span>
+          Mật khẩu tài khoản (Password)
+        </h2>
+        <button type="button" class="btn btn--outline btn--sm" (click)="goToTab('profile')">
+          <span class="material-symbols-outlined">edit</span>
+          Đổi mật khẩu
+        </button>
+      </div>
+      <div class="settings-card__body">
+        <div class="info-list">
+          <div class="info-item">
+            <span class="info-item__label">Lần thay đổi mật khẩu gần nhất:</span>
+            <span class="info-item__value">
+              {{ profile?.updatedAt ? (profile?.updatedAt | date:'mediumDate') : '30 ngày trước' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-item__label">Đánh giá độ mạnh mật khẩu:</span>
+            <span class="info-item__value">
+              <span class="badge badge--success">Mạnh (Strong)</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Card B: Two-Factor Authentication (2FA) -->
+    <section class="settings-card">
+      <div class="settings-card__header settings-card__header--flex">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-blue">security</span>
+          Xác thực hai yếu tố (Two-factor authentication - 2FA)
+        </h2>
+        <span class="badge" [class.badge--success]="profile?.twoFactorEnabled" [class.badge--neutral]="!profile?.twoFactorEnabled">
+          {{ profile?.twoFactorEnabled ? 'Đã bật' : 'Đã tắt' }}
+        </span>
+      </div>
+      <div class="settings-card__body">
+        <p class="settings-card__description">
+          Xác thực hai yếu tố giúp tăng cường bảo mật cho tài khoản Snaptics AI của bạn bằng cách yêu cầu mã OTP được tạo từ ứng dụng Google Authenticator hoặc Microsoft Authenticator mỗi khi đăng nhập.
+        </p>
+
+        <div class="twofa-action-row">
+          @if (profile?.twoFactorEnabled) {
+            <button type="button" class="btn btn--danger-ghost" (click)="toggle2FA()">
+              <span class="material-symbols-outlined">gpp_bad</span>
+              Tắt 2FA (Disable 2FA)
+            </button>
+          } @else {
+            <button type="button" class="btn btn--primary" (click)="toggle2FA()">
+              <span class="material-symbols-outlined">verified_user</span>
+              Bật 2FA (Enable 2FA)
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Card C: Login Alerts -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-amber">add_alert</span>
+          Cảnh báo đăng nhập (Login alerts)
+        </h2>
+      </div>
+      <div class="settings-card__body">
+        <form (ngSubmit)="saveLoginAlerts()">
+          <div class="switch-list">
+            <div class="switch-item">
+              <div class="switch-item__text">
+                <span class="switch-item__title">Thông báo khi có đăng nhập mới (Notify on new login)</span>
+                <span class="switch-item__desc">Gửi thông báo email mỗi khi tài khoản của bạn được đăng nhập từ bất kỳ thiết bị nào</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" name="newLogin" [(ngModel)]="loginAlerts.newLogin" />
+                <span class="toggle-switch__slider"></span>
+              </label>
+            </div>
+
+            <div class="switch-item">
+              <div class="switch-item__text">
+                <span class="switch-item__title">Cảnh báo khi phát hiện thiết bị lạ (Unrecognized device alert)</span>
+                <span class="switch-item__desc">Cảnh báo tức thì nếu phát hiện đăng nhập từ trình duyệt hoặc thiết bị chưa từng dùng trước đây</span>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" name="unrecognizedDevice" [(ngModel)]="loginAlerts.unrecognizedDevice" />
+                <span class="toggle-switch__slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-card__footer">
+            <button type="submit" class="btn btn--primary" [disabled]="isSavingAlerts">
+              <span class="material-symbols-outlined">save</span>
+              {{ isSavingAlerts ? 'Đang lưu...' : 'Lưu cảnh báo đăng nhập' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Card D: Email Verification -->
+    <section class="settings-card">
+      <div class="settings-card__header settings-card__header--flex">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-teal">mail</span>
+          Xác thực Email (Email verification)
+        </h2>
+        <span class="badge" [class.badge--success]="profile?.emailConfirmed" [class.badge--warning]="!profile?.emailConfirmed">
+          {{ profile?.emailConfirmed ? 'Đã xác thực' : 'Chưa xác thực' }}
+        </span>
+      </div>
+      <div class="settings-card__body">
+        <div class="info-list">
+          <div class="info-item">
+            <span class="info-item__label">Email hiện tại:</span>
+            <span class="info-item__value">{{ profile?.email || 'N/A' }}</span>
+          </div>
+        </div>
+
+        @if (!profile?.emailConfirmed) {
+          <div class="email-verify-box">
+            <p>Địa chỉ email của bạn chưa được xác thực. Hãy nhấn nút bên dưới để nhận mã xác thực mới qua email.</p>
+            <button type="button" class="btn btn--outline" [disabled]="isResendingVerification" (click)="resendEmailVerification()">
+              <span class="material-symbols-outlined">send</span>
+              {{ isResendingVerification ? 'Đang gửi...' : 'Gửi lại email xác thực' }}
+            </button>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Card E: Security Activity Log -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-purple">history</span>
+          Nhật ký hoạt động bảo mật (Security activity)
+        </h2>
+      </div>
+      <div class="settings-card__body">
+        <div class="activity-table-wrapper">
+          <table class="activity-table">
+            <thead>
+              <tr>
+                <th>Hoạt động</th>
+                <th>Thiết bị / Trình duyệt</th>
+                <th>Địa chỉ IP & Vị trí</th>
+                <th>Thời gian</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (log of activityLogs; track log.id) {
+                <tr>
+                  <td class="activity-action">
+                    <span class="material-symbols-outlined icon-muted">info</span>
+                    {{ log.action }}
+                  </td>
+                  <td>{{ log.device }}</td>
+                  <td class="activity-ip">{{ log.ipLocation }}</td>
+                  <td class="activity-time">{{ log.timestamp }}</td>
+                  <td>
+                    <span class="badge badge--success">Thành công</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- 2FA Setup Modal -->
+  @if (is2faModalOpen) {
+    <div class="modal-backdrop" (click)="close2faModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-card__header">
+          <h3>
+            <span class="material-symbols-outlined icon-blue">verified_user</span>
+            Kích hoạt xác thực 2FA
+          </h3>
+          <button type="button" class="modal-card__close" (click)="close2faModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="modal-card__body">
+          <ol class="twofa-steps">
+            <li>
+              <strong>Bước 1:</strong> Mở ứng dụng Authenticator (Google Authenticator, Authy, Microsoft Authenticator) trên điện thoại của bạn.
+            </li>
+            <li>
+              <strong>Bước 2:</strong> Quét mã QR bên dưới hoặc nhập thủ công khóa bảo mật:
+              <div class="qr-code-box">
+                <img [src]="qrCodeMock" alt="2FA QR Code" />
+                <code class="secret-code">JBSW Y3DP EHPK 3PXP</code>
+              </div>
+            </li>
+            <li>
+              <strong>Bước 3:</strong> Nhập mã xác thực 6 chữ số từ ứng dụng để hoàn tất:
+              <div class="form-group" style="margin-top: 0.75rem;">
+                <input
+                  type="text"
+                  maxlength="6"
+                  class="form-control text-center text-lg"
+                  [(ngModel)]="otpCode"
+                  placeholder="123456"
+                />
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="modal-card__footer">
+          <button type="button" class="btn btn--outline" (click)="close2faModal()">Hủy</button>
+          <button type="button" class="btn btn--primary" [disabled]="isSubmitting2fa" (click)="confirmEnable2FA()">
+            <span class="material-symbols-outlined">check_circle</span>
+            {{ isSubmitting2fa ? 'Đang xác nhận...' : 'Xác nhận kích hoạt' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

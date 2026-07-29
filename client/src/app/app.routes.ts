@@ -155,6 +155,11 @@ export const routes: Routes = [
           import('./user-page/user-features/support/support').then((m) => m.Support),
       },
       {
+        path: 'settings',
+        loadComponent: () =>
+          import('./settings-page/settings-page').then((m) => m.SettingsPage),
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',
@@ -168,9 +173,8 @@ export const routes: Routes = [
   },
   {
     path: 'settings',
-    component: SettingsPage,
-    runGuardsAndResolvers: 'always',
-    canActivate: [maintenanceGuard, authGuard],
+    redirectTo: 'user/settings',
+    pathMatch: 'full',
   },
   { path: 'login', component: Login },
   { path: 'register', component: Register },

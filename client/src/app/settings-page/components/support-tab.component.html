@@ -1,0 +1,301 @@
+<div class="settings-tab-content">
+  <div class="settings-grid settings-grid--stacked">
+
+    <!-- Card A: Support Overview -->
+    <section class="settings-card">
+      <div class="settings-card__header settings-card__header--flex">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-blue">headset_mic</span>
+          Tổng quan trung tâm hỗ trợ (Support overview)
+        </h2>
+        <button type="button" class="btn btn--primary" (click)="openCreateModal()">
+          <span class="material-symbols-outlined">add_comment</span>
+          Tạo ticket hỗ trợ
+        </button>
+      </div>
+      <div class="settings-card__body">
+        <p class="settings-card__description">
+          Chào mừng bạn đến với Trung tâm hỗ trợ Snaptics AI. Đội ngũ chuyên viên của chúng tôi luôn sẵn sàng lắng nghe và giải đáp mọi thắc mắc của bạn 24/7.
+        </p>
+
+        <div class="support-faq-grid">
+          <div class="faq-card">
+            <span class="material-symbols-outlined faq-card__icon icon-blue">help_center</span>
+            <h4>Trung tâm trợ giúp & FAQ</h4>
+            <p>Tra cứu các câu hỏi thường gặp và tài liệu hướng dẫn chi tiết các tính năng.</p>
+            <a href="javascript:void(0)" class="faq-card__link">Xem tài liệu trợ giúp &rarr;</a>
+          </div>
+
+          <div class="faq-card">
+            <span class="material-symbols-outlined faq-card__icon icon-teal">forum</span>
+            <h4>Trợ lý trí tuệ nhân tạo Snaptics AI</h4>
+            <p>Trò chuyện trực tiếp với AI để nhận trợ giúp tài chính và giải đáp nhanh.</p>
+            <a href="/user/snaptics-ai" class="faq-card__link">Trò chuyện với AI &rarr;</a>
+          </div>
+
+          <div class="faq-card">
+            <span class="material-symbols-outlined faq-card__icon icon-purple">mark_email_unread</span>
+            <h4>Gửi Ticket hỗ trợ kỹ thuật</h4>
+            <p>Tạo yêu cầu hỗ trợ mới để nhận phản hồi từ đội ngũ hỗ trợ khách hàng.</p>
+            <a href="javascript:void(0)" class="faq-card__link" (click)="openCreateModal()">Tạo ticket mới &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Card B: Support Tickets List -->
+    <section class="settings-card">
+      <div class="settings-card__header">
+        <h2 class="settings-card__title">
+          <span class="material-symbols-outlined icon-purple">confirmation_number</span>
+          Danh sách Ticket hỗ trợ (Support tickets)
+        </h2>
+      </div>
+      <div class="settings-card__body">
+
+        <div class="tickets-filter-bar">
+          <div class="search-box">
+            <span class="material-symbols-outlined search-box__icon">search</span>
+            <input
+              type="text"
+              class="search-box__input"
+              placeholder="Tìm kiếm ticket theo mã hoặc tiêu đề..."
+              [(ngModel)]="search"
+              (keyup.enter)="onFilterChange()"
+            />
+          </div>
+
+          <div class="filter-group">
+            <select class="form-control form-control--sm" [(ngModel)]="selectedStatus" (change)="onFilterChange()">
+              @for (st of statusOptions; track st.value) {
+                <option [value]="st.value">{{ st.label }}</option>
+              }
+            </select>
+
+            <select class="form-control form-control--sm" [(ngModel)]="selectedCategory" (change)="onFilterChange()">
+              @for (cat of categoryOptions; track cat.value) {
+                <option [value]="cat.value">{{ cat.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        @if (isLoading) {
+          <div class="tickets-table-wrapper">
+            <div class="skeleton-line skeleton-line--title"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+          </div>
+        } @else if (tickets.length === 0) {
+          <div class="empty-state-box">
+            <span class="material-symbols-outlined empty-state-box__icon">confirmation_number</span>
+            <h3>Chưa có yêu cầu hỗ trợ nào</h3>
+            <p>Bạn chưa gửi ticket hỗ trợ nào hoặc không tìm thấy kết quả phù hợp với bộ lọc.</p>
+            <button type="button" class="btn btn--primary" (click)="openCreateModal()">
+              <span class="material-symbols-outlined">add</span>
+              Tạo ticket hỗ trợ mới
+            </button>
+          </div>
+        } @else {
+          <div class="tickets-table-wrapper">
+            <table class="tickets-table">
+              <thead>
+                <tr>
+                  <th>Mã Ticket</th>
+                  <th>Tiêu đề (Subject)</th>
+                  <th>Danh mục</th>
+                  <th>Độ ưu tiên</th>
+                  <th>Trạng thái</th>
+                  <th>Ngày tạo</th>
+                  <th>Cập nhật cuối</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (ticket of tickets; track ticket.id) {
+                  <tr class="ticket-row" (click)="selectTicket(ticket)">
+                    <td class="ticket-code">{{ getTicketCode(ticket) }}</td>
+                    <td class="ticket-subject">
+                      <span class="ticket-subject__title">{{ ticket.subject }}</span>
+                      <span class="ticket-subject__msg-count">
+                        <span class="material-symbols-outlined">chat</span>
+                        {{ ticket.messageCount || 1 }}
+                      </span>
+                    </td>
+                    <td>{{ getCategoryLabel(ticket.category) }}</td>
+                    <td>
+                      <span class="badge badge--sm" [class.badge--warning]="ticket.priority >= 2" [class.badge--neutral]="ticket.priority < 2">
+                        {{ getPriorityBadge(ticket.priority).label }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge badge--sm" [class.badge--success]="ticket.status === 3" [class.badge--info]="ticket.status === 1" [class.badge--warning]="ticket.status === 0" [class.badge--neutral]="ticket.status === 4">
+                        {{ getStatusBadge(ticket.status).label }}
+                      </span>
+                    </td>
+                    <td class="ticket-date">{{ ticket.createdAt | date:'shortDate' }}</td>
+                    <td class="ticket-date">{{ ticket.updatedAt ? (ticket.updatedAt | date:'short') : (ticket.createdAt | date:'short') }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Create Ticket Modal -->
+  @if (isCreateModalOpen) {
+    <div class="modal-backdrop" (click)="closeCreateModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-card__header">
+          <h3>
+            <span class="material-symbols-outlined icon-blue">add_comment</span>
+            Tạo ticket hỗ trợ mới
+          </h3>
+          <button type="button" class="modal-card__close" (click)="closeCreateModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <form (ngSubmit)="submitTicket()">
+          <div class="modal-card__body">
+            <div class="form-group">
+              <label class="form-label" for="ticketSubject">Tiêu đề yêu cầu (Subject) *</label>
+              <input
+                id="ticketSubject"
+                type="text"
+                name="subject"
+                class="form-control"
+                [(ngModel)]="createForm.subject"
+                placeholder="Tóm tắt ngắn gọn vấn đề bạn gặp phải..."
+                required
+              />
+            </div>
+
+            <div class="form-grid form-grid--2col">
+              <div class="form-group">
+                <label class="form-label" for="ticketCategory">Danh mục sự cố (Category)</label>
+                <select id="ticketCategory" name="category" class="form-control" [(ngModel)]="createForm.category">
+                  @for (cat of categoryOptions.slice(1); track cat.value) {
+                    <option [value]="cat.value">{{ cat.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="ticketPriority">Độ ưu tiên (Priority)</label>
+                <select id="ticketPriority" name="priority" class="form-control" [(ngModel)]="createForm.priority">
+                  @for (pr of priorityOptions; track pr.value) {
+                    <option [value]="pr.value">{{ pr.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="ticketDescription">Nội dung chi tiết (Description) *</label>
+              <textarea
+                id="ticketDescription"
+                name="description"
+                class="form-control form-control--textarea"
+                rows="4"
+                [(ngModel)]="createForm.description"
+                placeholder="Mô tả chi tiết sự cố hoặc thắc mắc của bạn..."
+                required
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="modal-card__footer">
+            <button type="button" class="btn btn--outline" (click)="closeCreateModal()">Hủy</button>
+            <button type="submit" class="btn btn--primary" [disabled]="isSubmitting">
+              <span class="material-symbols-outlined">send</span>
+              {{ isSubmitting ? 'Đang gửi...' : 'Gửi Ticket' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Ticket Detail Drawer / Modal -->
+  @if (selectedTicket) {
+    <div class="drawer-backdrop" (click)="closeDetailDrawer()">
+      <div class="drawer-panel" (click)="$event.stopPropagation()">
+        <div class="drawer-panel__header">
+          <div>
+            <span class="drawer-code">{{ getTicketCode(selectedTicket) }}</span>
+            <h3 class="drawer-title">{{ selectedTicket.subject }}</h3>
+          </div>
+          <button type="button" class="drawer-close" (click)="closeDetailDrawer()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="drawer-panel__body">
+          <div class="drawer-info-bar">
+            <div>
+              <span class="drawer-label">Danh mục:</span>
+              <strong>{{ getCategoryLabel(selectedTicket.category) }}</strong>
+            </div>
+            <div>
+              <span class="drawer-label">Trạng thái:</span>
+              <span class="badge badge--sm" [class.badge--success]="selectedTicket.status === 3" [class.badge--info]="selectedTicket.status === 1" [class.badge--warning]="selectedTicket.status === 0">
+                {{ getStatusBadge(selectedTicket.status).label }}
+              </span>
+            </div>
+          </div>
+
+          <div class="messages-list">
+            <!-- Ticket Original Description -->
+            <div class="message-bubble message-bubble--user">
+              <div class="message-bubble__header">
+                <strong>{{ selectedTicket.userName }}</strong>
+                <span class="message-bubble__time">{{ selectedTicket.createdAt | date:'short' }}</span>
+              </div>
+              <div class="message-bubble__content">{{ selectedTicket.description }}</div>
+            </div>
+
+            <!-- Message Replies -->
+            @for (msg of selectedTicket.messages; track msg.id) {
+              <div class="message-bubble" [class.message-bubble--admin]="msg.isFromAdmin" [class.message-bubble--user]="!msg.isFromAdmin">
+                <div class="message-bubble__header">
+                  <strong>{{ msg.senderName || (msg.isFromAdmin ? 'Chuyên viên Hỗ trợ' : 'Bạn') }}</strong>
+                  <span class="message-bubble__time">{{ msg.createdAt | date:'short' }}</span>
+                </div>
+                <div class="message-bubble__content">{{ msg.content }}</div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="drawer-panel__footer">
+          @if (selectedTicket.status !== 4) {
+            <form (ngSubmit)="sendReply()" class="reply-form">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Nhập nội dung phản hồi..."
+                [(ngModel)]="replyContent"
+                name="reply"
+              />
+              <button type="submit" class="btn btn--primary" [disabled]="!replyContent.trim() || isSendingReply">
+                <span class="material-symbols-outlined">send</span>
+              </button>
+            </form>
+
+            <button type="button" class="btn btn--danger-ghost btn--sm mt-2" (click)="closeTicket()">
+              <span class="material-symbols-outlined">lock</span>
+              Đóng Ticket
+            </button>
+          } @else {
+            <p class="text-muted text-center py-2">Ticket này đã được đóng.</p>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

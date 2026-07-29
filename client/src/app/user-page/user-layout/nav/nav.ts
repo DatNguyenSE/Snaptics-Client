@@ -153,7 +153,7 @@ export class Nav {
 
   openSettings(): void {
     this.closeMenus();
-    void this.router.navigateByUrl('/settings');
+    void this.router.navigateByUrl('/user/settings');
   }
 
   handleMobileAccountClick(event: MouseEvent): void {

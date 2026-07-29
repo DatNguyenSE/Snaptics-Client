@@ -1,17 +1,36 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError } from 'rxjs';
 import { ToastService } from '../services/toast-service';
+import { SystemStatusService } from '../services/system-status.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const toast = inject(ToastService);
+  const router = inject(Router);
+  const systemStatusService = inject(SystemStatusService);
 
   return next(req).pipe(
     catchError(error => {
       if (error) {
+        // Intercept Maintenance Mode (503 Service Unavailable or 423 Locked or payload flag)
+        if (
+          error.status === 503 ||
+          error.status === 423 ||
+          (error.error && (error.error.isMaintenance || error.error.maintenanceMode))
+        ) {
+          systemStatusService.status.set({
+            maintenanceMode: true,
+            title: error.error?.title || 'Hệ thống đang được bảo trì',
+            message: error.error?.message || 'Hệ thống đang trong quá trình bảo trì nâng cấp. Vui lòng quay lại sau.',
+            showSupportButton: true,
+          });
+          void router.navigateByUrl('/maintenance');
+          throw error;
+        }
+
         switch (error.status) {
          case 400:
-            // XỬ LÝ LỖI IDENTITY TẠI ĐÂY
             if (error.error.errors) {
               const modelStateErrors = [];
               for (const key in error.error.errors) {
@@ -19,35 +38,23 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
                   modelStateErrors.push(error.error.errors[key]);
                 }
               }
-              // Nối các lỗi lại và hiện Toast
-              // flat() dùng để làm phẳng mảng nếu lỗi lồng nhau
               const errorMessage = modelStateErrors.flat().join('\n'); 
-              // toast.error(errorMessage);
-                console.log('Model state errors:', errorMessage);
-              
-              // Vẫn ném lỗi về component để component biết mà dừng loading
+              console.log('Model state errors:', errorMessage);
               throw modelStateErrors.flat(); 
             } else if (typeof(error.error) === 'object') {
-              //  toast.error(error.error.message || "Bad Request", error.status.toString());
                console.log('Error object from server:', error.error);
             } else {
-               // Lỗi trả về dạng chuỗi đơn giản (return BadRequest("..."))
-              //  toast.error(error.error, error.status.toString());
                 console.log('Error string from server:', error.error);
             }
             break;
           case 401:
             console.log('Unauthorized - ', error.error);
-            // toast.error('Unauthorized - '+ error.error+'');
             break;
           case 404:
             console.log('Resource not found:', req.urlWithParams);
             break;
           case 500:
             console.log('Internal Server Error: ', error.error);
-            if (toast) {
-                // toast.error('Lỗi hệ thống từ máy chủ (500)'); 
-            }
             break;
           default:
            console.log('Lỗi hệ thống - Vui lòng thử lại sau');
@@ -57,5 +64,5 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
       throw error;
     })
-  )
+  );
 };

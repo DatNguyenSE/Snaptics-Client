@@ -14,7 +14,7 @@ export interface NotificationDto {
   isRead: boolean;
   createdAt: string;
   itemInventoryId?: number | null;
-  relatedId?: number | null;
+  relatedId?: number | string | null;
   type: number | string;
   transactionDetailId?: number | null;
 }
@@ -111,8 +111,8 @@ export class NotificationService {
     let feType: NotificationType = 'system';
     let titleVi = 'Hệ thống';
     let titleEn = 'System';
-    let relatedEntityId: string | undefined;
-    let relatedEntityType: 'wallet' | 'transaction' | 'product' | 'system' = 'system';
+    let relatedEntityId: string | undefined = dto.relatedId?.toString();
+    let relatedEntityType: 'wallet' | 'transaction' | 'product' | 'ticket' | 'system' = 'system';
     
     // Parse encoded status from message
     let actionStatus: 'pending' | 'accepted' | 'rejected' | 'reviewed' | undefined;
@@ -137,41 +137,56 @@ export class NotificationService {
     const typeNum = typeof dto.type === 'number' ? dto.type : parseInt(dto.type as any, 10);
     const typeStr = typeof dto.type === 'string' ? dto.type : '';
 
-    if (typeNum === 4 || typeStr === 'BudgetInvitation') {
+    if (typeNum === 4 || typeStr === 'BudgetInvitation' || typeStr === 'Budget') {
       feType = 'wallet_invitation';
-      titleVi = 'Lời mời tham gia ngân sách';
-      titleEn = 'Budget Invitation';
+      titleVi = 'Lời mời / Hoạt động Ngân sách';
+      titleEn = 'Budget Invitation / Activity';
       relatedEntityType = 'wallet';
-    } else if (typeNum === 2 || typeStr === 'UsageReview') {
+      if (dto.relatedId) relatedEntityId = dto.relatedId.toString();
+    } else if (typeNum === 2 || typeStr === 'UsageReview' || typeStr === 'ItemReviewJob') {
       feType = 'product_review';
-      titleVi = 'Đánh giá sản phẩm/chi tiêu';
-      titleEn = 'Usage Review';
+      titleVi = 'Kiểm duyệt / Đánh giá sản phẩm';
+      titleEn = 'Item Review Completed';
       relatedEntityType = 'product';
       if (dto.itemInventoryId) {
         relatedEntityId = dto.itemInventoryId.toString();
+      } else if (dto.relatedId) {
+        relatedEntityId = dto.relatedId.toString();
       }
+    } else if (typeNum === 5 || typeStr === 'SupportTicket' || typeStr === 'Ticket') {
+      feType = 'system';
+      titleVi = 'Cập nhật Yêu cầu Hỗ trợ';
+      titleEn = 'Support Ticket Update';
+      relatedEntityType = 'ticket';
+      if (dto.relatedId) relatedEntityId = dto.relatedId.toString();
     } else if (typeNum === 1 || typeStr === 'MissingInfo') {
       feType = 'manual-entry';
       titleVi = 'Cần bổ sung thông tin';
       titleEn = 'Missing Information Needed';
+      relatedEntityType = 'transaction';
       if (dto.transactionDetailId) {
-        relatedEntityType = 'transaction';
         relatedEntityId = dto.transactionDetailId.toString();
+      } else if (dto.relatedId) {
+        relatedEntityId = dto.relatedId.toString();
       }
-    } else if (dto.transactionDetailId) {
+    } else if (dto.transactionDetailId || typeStr === 'Transaction') {
       feType = 'wallet_activity';
       titleVi = 'Hoạt động giao dịch';
       titleEn = 'Transaction Activity';
       relatedEntityType = 'transaction';
-      relatedEntityId = dto.transactionDetailId.toString();
+      relatedEntityId = dto.transactionDetailId?.toString() || dto.relatedId?.toString();
     }
 
+    // Format date explicitly in UTC+7 (Asia/Ho_Chi_Minh)
     const cleanDateString = dto.createdAt?.replace(/(Z|[+-]\d{2}:\d{2})$/, '') || '';
     const date = new Date(cleanDateString);
-    const timeString = isNaN(date.getTime()) ? dto.createdAt : date.toLocaleString('vi-VN', { 
-      year: 'numeric', month: '2-digit', day: '2-digit', 
-      hour: '2-digit', minute: '2-digit' 
-    });
+    const timeString = isNaN(date.getTime())
+      ? dto.createdAt
+      : date.toLocaleString('vi-VN', { 
+          timeZone: 'Asia/Ho_Chi_Minh',
+          year: 'numeric', month: '2-digit', day: '2-digit', 
+          hour: '2-digit', minute: '2-digit' 
+        });
 
     return {
       id: dto.id.toString(),
@@ -229,6 +244,25 @@ export class NotificationService {
         console.error('[NotificationService] SignalR ReceiveAiError:', errorMsg);
       }
       this.aiError$.next(errorMsg);
+    });
+
+    this.hubConnection.on('ReceiveItemReviewCompleted', (data: any) => {
+      if (!environment.production) {
+        console.log('[NotificationService] SignalR ItemReviewJob Completed:', data);
+      }
+      if (data && typeof data === 'object') {
+        const notif: NotificationDto = {
+          id: data.id || Date.now(),
+          userId: data.userId || '',
+          message: data.message || `Mặt hàng "${data.itemName || 'Sản phẩm'}" đã hoàn thành kiểm duyệt.`,
+          isRead: false,
+          createdAt: new Date().toISOString(),
+          itemInventoryId: data.itemInventoryId || data.relatedId,
+          relatedId: data.relatedId || data.itemInventoryId,
+          type: 'ItemReviewJob'
+        };
+        this.addNotification(this.mapDtoToRecord(notif));
+      }
     });
 
     this.hubConnection.on('ReceiveNotification', (notificationDto: NotificationDto) => {

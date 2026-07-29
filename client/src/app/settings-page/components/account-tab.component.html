@@ -1,0 +1,178 @@
+<div class="settings-tab-content">
+  @if (isLoading) {
+    <div class="settings-grid settings-grid--2col">
+      <div class="settings-card settings-card--skeleton">
+        <div class="skeleton-line skeleton-line--title"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+      </div>
+      <div class="settings-card settings-card--skeleton">
+        <div class="skeleton-line skeleton-line--title"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+      </div>
+    </div>
+  } @else {
+    <div class="settings-grid settings-grid--2col">
+      <!-- Card A: Account Overview -->
+      <section class="settings-card">
+        <div class="settings-card__header">
+          <h2 class="settings-card__title">
+            <span class="material-symbols-outlined icon-blue">manage_accounts</span>
+            Tổng quan tài khoản
+          </h2>
+        </div>
+        <div class="settings-card__body">
+          <div class="account-overview-row">
+            <div class="account-overview-avatar">
+              @if (profile?.avatarUrl) {
+                <img [src]="profile?.avatarUrl" [alt]="profile?.fullName || 'Avatar'" />
+              } @else {
+                <span>{{ userInitials }}</span>
+              }
+            </div>
+            <div class="account-overview-info">
+              <h3 class="account-overview-welcome">Xin chào, {{ profile?.fullName || currentUser?.displayName || 'Người dùng' }}!</h3>
+              <p class="account-overview-email">{{ profile?.email || currentUser?.email || 'N/A' }}</p>
+              
+              <div class="badge-list">
+                @if (profile?.emailConfirmed) {
+                  <span class="badge badge--success">
+                    <span class="material-symbols-outlined badge__icon">check_circle</span>
+                    Đã xác thực
+                  </span>
+                } @else {
+                  <span class="badge badge--warning">
+                    <span class="material-symbols-outlined badge__icon">warning</span>
+                    Chưa xác thực
+                  </span>
+                }
+
+                @if (profile?.twoFactorEnabled) {
+                  <span class="badge badge--info">
+                    <span class="material-symbols-outlined badge__icon">verified_user</span>
+                    Đã bật 2FA
+                  </span>
+                } @else {
+                  <span class="badge badge--neutral">
+                    <span class="material-symbols-outlined badge__icon">gpp_maybe</span>
+                    Chưa bật 2FA
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="account-overview-actions">
+            @if (!profile?.emailConfirmed) {
+              <button 
+                type="button" 
+                class="btn btn--outline" 
+                [disabled]="isResendingEmail" 
+                (click)="resendVerificationEmail()"
+              >
+                <span class="material-symbols-outlined">mark_email_unread</span>
+                {{ isResendingEmail ? 'Đang gửi...' : 'Gửi lại email xác thực' }}
+              </button>
+            }
+
+            <button type="button" class="btn btn--primary" (click)="goToTab('security')">
+              <span class="material-symbols-outlined">security</span>
+              Cấu hình bảo mật
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card B: Account Status -->
+      <section class="settings-card">
+        <div class="settings-card__header">
+          <h2 class="settings-card__title">
+            <span class="material-symbols-outlined icon-teal">verified</span>
+            Trạng thái tài khoản
+          </h2>
+        </div>
+        <div class="settings-card__body">
+          <div class="info-list">
+            <div class="info-item">
+              <span class="info-item__label">Trạng thái:</span>
+              <span class="info-item__value">
+                <span class="badge badge--success">Đang hoạt động (Active)</span>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Quyền hạn:</span>
+              <span class="info-item__value">
+                <span class="badge" [class.badge--primary]="userRole === 'ADMIN'" [class.badge--neutral]="userRole === 'USER'">
+                  {{ userRole }}
+                </span>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Ngày tham gia:</span>
+              <span class="info-item__value">{{ profile?.createdAt ? (profile?.createdAt | date:'mediumDate') : 'Chưa có thông tin' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Đăng nhập gần nhất:</span>
+              <span class="info-item__value">{{ profile?.updatedAt ? (profile?.updatedAt | date:'medium') : 'Gần đây' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Xác thực Email:</span>
+              <span class="info-item__value">{{ profile?.emailConfirmed ? 'Đã xác thực' : 'Chưa xác thực' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-item__label">Xác thực hai yếu tố (2FA):</span>
+              <span class="info-item__value">{{ profile?.twoFactorEnabled ? 'Đã bật' : 'Chưa bật' }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card C: Account Information -->
+      <section class="settings-card settings-card--full-width">
+        <div class="settings-card__header settings-card__header--flex">
+          <h2 class="settings-card__title">
+            <span class="material-symbols-outlined icon-purple">badge</span>
+            Thông tin chi tiết tài khoản
+          </h2>
+          <button type="button" class="btn btn--outline btn--sm" (click)="goToTab('profile')">
+            <span class="material-symbols-outlined">edit</span>
+            Chỉnh sửa hồ sơ
+          </button>
+        </div>
+        <div class="settings-card__body">
+          <div class="info-grid">
+            <div class="info-grid__item">
+              <span class="info-grid__label">MÃ NGƯỜI DÙNG (USER ID)</span>
+              <span class="info-grid__value info-grid__value--code">{{ profile?.id || currentUser?.id || 'N/A' }}</span>
+            </div>
+            <div class="info-grid__item">
+              <span class="info-grid__label">HỌ VÀ TÊN</span>
+              <span class="info-grid__value">{{ profile?.fullName || currentUser?.displayName || 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="info-grid__item">
+              <span class="info-grid__label">ĐỊA CHỈ EMAIL</span>
+              <span class="info-grid__value">{{ profile?.email || currentUser?.email || 'N/A' }}</span>
+            </div>
+            <div class="info-grid__item">
+              <span class="info-grid__label">SỐ ĐIỆN THOẠI</span>
+              <span class="info-grid__value">{{ profile?.phoneNumber || 'Chưa cập nhật' }}</span>
+            </div>
+            <div class="info-grid__item">
+              <span class="info-grid__label">QUỐC GIA</span>
+              <span class="info-grid__value">Việt Nam</span>
+            </div>
+            <div class="info-grid__item">
+              <span class="info-grid__label">NGÀY THAM GIA</span>
+              <span class="info-grid__value">{{ profile?.createdAt ? (profile?.createdAt | date:'mediumDate') : 'N/A' }}</span>
+            </div>
+            <div class="info-grid__item">
+              <span class="info-grid__label">LOẠI TÀI KHOẢN</span>
+              <span class="info-grid__value">{{ userRole === 'ADMIN' ? 'Quản trị viên (ADMIN)' : 'Người dùng (USER)' }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  }
+</div>

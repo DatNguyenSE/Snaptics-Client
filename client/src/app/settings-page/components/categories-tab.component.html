@@ -1,0 +1,231 @@
+<div class="settings-tab-content">
+  <div class="categories-header-bar">
+    <div class="categories-search-filter">
+      <div class="search-box">
+        <span class="material-symbols-outlined search-box__icon">search</span>
+        <input
+          type="text"
+          class="search-box__input"
+          placeholder="Tìm kiếm danh mục..."
+          [(ngModel)]="searchQuery"
+        />
+      </div>
+
+      <div class="filter-tabs">
+        <button
+          type="button"
+          class="filter-tab"
+          [class.filter-tab--active]="typeFilter === 'ALL'"
+          (click)="typeFilter = 'ALL'"
+        >Tất cả</button>
+        <button
+          type="button"
+          class="filter-tab"
+          [class.filter-tab--active]="typeFilter === 'EXPENSE'"
+          (click)="typeFilter = 'EXPENSE'"
+        >Khoản chi (Expense)</button>
+        <button
+          type="button"
+          class="filter-tab"
+          [class.filter-tab--active]="typeFilter === 'INCOME'"
+          (click)="typeFilter = 'INCOME'"
+        >Khoản thu (Income)</button>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn--primary" (click)="openAddModal()">
+      <span class="material-symbols-outlined">add</span>
+      Tạo danh mục mới (Create category)
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="categories-grid">
+      @for (item of [1,2,3,4,5,6]; track item) {
+        <div class="category-card category-card--skeleton">
+          <div class="skeleton-avatar"></div>
+          <div class="skeleton-line"></div>
+        </div>
+      }
+    </div>
+  } @else if (filteredCategories.length === 0) {
+    <div class="empty-state-box">
+      <span class="material-symbols-outlined empty-state-box__icon">category</span>
+      <h3>Không tìm thấy danh mục nào</h3>
+      <p>Thử tìm kiếm với từ khóa khác hoặc bấm nút "Tạo danh mục mới" để thêm mới.</p>
+      <button type="button" class="btn btn--primary" (click)="openAddModal()">
+        <span class="material-symbols-outlined">add</span>
+        Tạo danh mục mới
+      </button>
+    </div>
+  } @else {
+    <div class="categories-grid">
+      @for (cat of filteredCategories; track cat.id) {
+        <div class="category-card" [class.category-card--inactive]="cat.status === 'INACTIVE'">
+          <div class="category-card__main">
+            <div class="category-icon-badge" [style.backgroundColor]="cat.color || '#3B82F6'">
+              <span class="material-symbols-outlined">{{ cat.icon || 'category' }}</span>
+            </div>
+            
+            <div class="category-card__info">
+              <h4 class="category-card__name">{{ cat.name }}</h4>
+              <div class="category-card__tags">
+                <span class="badge badge--sm" [class.badge--success]="cat.status !== 'INACTIVE'" [class.badge--neutral]="cat.status === 'INACTIVE'">
+                  {{ cat.status === 'INACTIVE' ? 'Tắt (Inactive)' : 'Đang bật (Active)' }}
+                </span>
+
+                @if (cat.isDefault) {
+                  <span class="badge badge--sm badge--info">Mặc định hệ thống</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="category-card__actions">
+            <!-- Toggle Active / Inactive Switch -->
+            <label class="toggle-switch toggle-switch--sm" title="Bật / Tắt trạng thái">
+              <input
+                type="checkbox"
+                [checked]="cat.status !== 'INACTIVE'"
+                (change)="toggleCategoryStatus(cat)"
+              />
+              <span class="toggle-switch__slider"></span>
+            </label>
+
+            <button type="button" class="icon-action-btn" title="Chỉnh sửa danh mục" (click)="openEditModal(cat)">
+              <span class="material-symbols-outlined">edit</span>
+            </button>
+
+            <button
+              type="button"
+              class="icon-action-btn icon-action-btn--danger"
+              [disabled]="cat.isDefault"
+              title="Xóa danh mục"
+              (click)="openDeleteModal(cat, $event)"
+            >
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Add / Edit Category Modal -->
+  @if (isModalOpen) {
+    <div class="modal-backdrop" (click)="closeModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-card__header">
+          <h3>
+            <span class="material-symbols-outlined icon-blue">{{ isEditMode ? 'edit_note' : 'post_add' }}</span>
+            {{ isEditMode ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}
+          </h3>
+          <button type="button" class="modal-card__close" (click)="closeModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <form (ngSubmit)="saveCategory()">
+          <div class="modal-card__body">
+            <div class="form-group">
+              <label class="form-label" for="catName">Tên danh mục (Category name) *</label>
+              <input
+                id="catName"
+                type="text"
+                name="name"
+                class="form-control"
+                [(ngModel)]="categoryForm.name"
+                placeholder="Ví dụ: Ăn uống, Tiền điện, Lương..."
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="catType">Phân loại (Type)</label>
+              <select id="catType" name="type" class="form-control" [(ngModel)]="categoryForm.type">
+                <option value="EXPENSE">Expense (Khoản chi)</option>
+                <option value="INCOME">Income (Khoản thu)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Biểu tượng (Icon)</label>
+              <div class="icon-picker">
+                @for (iconItem of availableIcons; track iconItem) {
+                  <button
+                    type="button"
+                    class="icon-picker__item"
+                    [class.icon-picker__item--selected]="categoryForm.icon === iconItem"
+                    (click)="categoryForm.icon = iconItem"
+                  >
+                    <span class="material-symbols-outlined">{{ iconItem }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Màu sắc (Color)</label>
+              <div class="color-picker">
+                @for (colorItem of availableColors; track colorItem) {
+                  <button
+                    type="button"
+                    class="color-picker__item"
+                    [style.backgroundColor]="colorItem"
+                    [class.color-picker__item--selected]="categoryForm.color === colorItem"
+                    (click)="categoryForm.color = colorItem"
+                  ></button>
+                }
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="catStatus">Trạng thái (Status)</label>
+              <select id="catStatus" name="status" class="form-control" [(ngModel)]="categoryForm.status">
+                <option value="ACTIVE">Hoạt động (Active)</option>
+                <option value="INACTIVE">Vô hiệu hóa (Inactive)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-card__footer">
+            <button type="button" class="btn btn--outline" (click)="closeModal()">Hủy</button>
+            <button type="submit" class="btn btn--primary" [disabled]="isSaving">
+              <span class="material-symbols-outlined">save</span>
+              {{ isSaving ? 'Đang lưu...' : (isEditMode ? 'Lưu thay đổi' : 'Tạo danh mục') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Confirm Delete Modal -->
+  @if (isDeleteModalOpen) {
+    <div class="modal-backdrop" (click)="closeDeleteModal()">
+      <div class="modal-card modal-card--sm" (click)="$event.stopPropagation()">
+        <div class="modal-card__header">
+          <h3 class="text-danger">
+            <span class="material-symbols-outlined icon-red">warning</span>
+            Xác nhận xóa danh mục
+          </h3>
+          <button type="button" class="modal-card__close" (click)="closeDeleteModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="modal-card__body">
+          <p>Bạn có chắc chắn muốn xóa danh mục <strong>"{{ categoryToDelete?.name }}"</strong> không? Thao tác này không thể hoàn tác.</p>
+        </div>
+
+        <div class="modal-card__footer">
+          <button type="button" class="btn btn--outline" (click)="closeDeleteModal()">Hủy</button>
+          <button type="button" class="btn btn--danger" [disabled]="isDeleting" (click)="confirmDeleteCategory()">
+            <span class="material-symbols-outlined">delete</span>
+            {{ isDeleting ? 'Đang xóa...' : 'Xác nhận xóa' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
