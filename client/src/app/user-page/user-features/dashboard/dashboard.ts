@@ -14,7 +14,7 @@ import { DashboardService } from '../../../core/services/dashboard.service';
 import { CategorySummaryModal } from './category-summary-modal/category-summary-modal';
 import { TrendSummaryModal } from './trend-summary-modal/trend-summary-modal';
 import { AiService } from '../../../core/services/ai.service';
-import { SpendingComparisonResponseDto, SpendingPeriodDto } from '../../../models/dashboard.dto';
+import { ActiveHourDto, SpendingComparisonResponseDto, SpendingPeriodDto } from '../../../models/dashboard.dto';
 import type {
   ApexNonAxisChartSeries,
   ApexChart,
@@ -90,7 +90,10 @@ export class Dashboard implements OnInit, OnDestroy {
   totalBudget = 0;
   isCategorySummaryModalOpen = false;
   isTrendSummaryModalOpen = false;
+  isActiveHoursModalOpen = false;
   topCategoryName = '—';
+  activeHours: ActiveHourDto[] = [];
+  selectedActiveHour: ActiveHourDto | null = null;
 
   allBudgets: BudgetDto[] = [];
   activeBudget: BudgetDto | null = null;
@@ -159,6 +162,65 @@ export class Dashboard implements OnInit, OnDestroy {
     return this.currentMonthTransactions.length;
   }
 
+  private get activeWalletExpenses(): TransactionDto[] {
+    if (!this.activeBudget) return [];
+
+    const start = new Date(this.activeBudget.startDate);
+    start.setHours(0, 0, 0, 0);
+    const now = new Date();
+    now.setHours(23, 59, 59, 999);
+
+    return this.allTransactions.filter(t => {
+      const date = new Date(t.transactionDate);
+      return t.isExpense
+        && !t.isDeleted
+        && t.budgetId === this.activeBudget?.id
+        && date >= start
+        && date <= now;
+    });
+  }
+
+  private get activeWalletElapsedDays(): number {
+    if (!this.activeBudget) return 0;
+
+    const start = new Date(this.activeBudget.startDate);
+    start.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.max(1, Math.floor((today.getTime() - start.getTime()) / 86_400_000) + 1);
+  }
+
+  get activeWalletAverageDailySpend(): number {
+    if (!this.activeBudget || this.activeBudget.type === 1) return 0;
+    const spent = this.activeWalletExpenses.reduce((sum, t) => sum + t.totalAmount, 0);
+    return spent / this.activeWalletElapsedDays;
+  }
+
+  get activeWalletAverageComparisonLabel(): string {
+    if (!this.activeBudget || this.activeWalletElapsedDays <= 0) return 'Chưa đủ dữ liệu';
+
+    const currentStart = new Date(this.activeBudget.startDate);
+    currentStart.setHours(0, 0, 0, 0);
+    const previousStart = new Date(currentStart);
+    previousStart.setDate(previousStart.getDate() - this.activeWalletElapsedDays);
+    const previousSpent = this.allTransactions
+      .filter(t => {
+        const date = new Date(t.transactionDate);
+        return t.isExpense
+          && !t.isDeleted
+          && t.budgetId === this.activeBudget?.id
+          && date >= previousStart
+          && date < currentStart;
+      })
+      .reduce((sum, t) => sum + t.totalAmount, 0);
+    const previousAverage = previousSpent / this.activeWalletElapsedDays;
+    const currentAverage = this.activeWalletAverageDailySpend;
+
+    if (previousAverage <= 0) return 'Chưa có kỳ trước để so sánh';
+    const change = Math.round(((currentAverage - previousAverage) / previousAverage) * 100);
+    return `${change >= 0 ? 'Tăng' : 'Giảm'} ${Math.abs(change)}% so với kỳ trước`;
+  }
+
   formatPercentageChange(value: number | null | undefined): string {
     if (typeof value !== 'number' || !Number.isFinite(value)) return '-';
     return `${value >= 0 ? 'Tăng' : 'Giảm'} ${Math.abs(value)}%`;
@@ -167,9 +229,9 @@ export class Dashboard implements OnInit, OnDestroy {
   get kpiCards(): KpiCard[] {
     return [
       { id: 'total-spent', label: 'Tổng chi tiêu', value: this.formatCurrency(this.totalSpent), icon: 'payments', colorClass: 'kpi-card--violet', subLabel: 'Tháng này', clickable: true },
-      { id: 'transactions', label: 'Giao dịch', value: String(this.totalTransactions), icon: 'receipt_long', colorClass: 'kpi-card--blue', subLabel: 'Tháng này' },
+      { id: 'average-daily-spend', label: 'Chi tiêu TB/ngày', value: this.formatCurrency(this.activeWalletAverageDailySpend), icon: 'speed', colorClass: 'kpi-card--blue', subLabel: this.activeWalletAverageComparisonLabel, clickable: true },
       { id: 'top-category', label: 'Top danh mục', value: this.topCategoryName, icon: 'category', colorClass: 'kpi-card--amber', subLabel: 'Chi nhiều nhất', clickable: true },
-      { id: 'budget', label: 'Ngân sách', value: this.spentPercentageLabel, icon: 'donut_large', colorClass: this.spentPercentage >= 90 ? 'kpi-card--red' : 'kpi-card--emerald', subLabel: 'Đã sử dụng' },
+      { id: 'active-hours', label: 'Khung giờ sôi động', value: this.activeHours[0]?.label || '-', icon: 'schedule', colorClass: 'kpi-card--emerald', subLabel: this.activeHours[0] ? `${this.activeHours[0].transactionCount} giao dịch` : 'Chưa có dữ liệu', clickable: true },
     ];
   }
 
@@ -189,11 +251,21 @@ export class Dashboard implements OnInit, OnDestroy {
     this.isTrendSummaryModalOpen = false;
   }
 
+  openActiveHoursModal(): void {
+    this.isActiveHoursModalOpen = true;
+  }
+
+  closeActiveHoursModal(): void {
+    this.isActiveHoursModalOpen = false;
+  }
+
   onKpiCardClick(card: KpiCard): void {
     if (card.id === 'top-category') {
       this.openCategorySummaryModal();
     } else if (card.id === 'total-spent') {
       this.openTrendSummaryModal();
+    } else if (card.id === 'average-daily-spend' || card.id === 'active-hours') {
+      this.openActiveHoursModal();
     }
   }
 
@@ -240,7 +312,7 @@ export class Dashboard implements OnInit, OnDestroy {
   readonly quickActions: QuickAction[] = [
     { id: 'resources', labelKey: 'dashboard.quickAction.resources', icon: 'payments', iconClass: 'quick-action__icon--blue', route: '/user/in-come-source' },
     { id: 'my-category', labelKey: 'dashboard.quickAction.myCategory', icon: 'category', iconClass: 'quick-action__icon--rose', route: '/user/category' },
-    { id: 'review', labelKey: 'dashboard.quickAction.review', icon: 'edit_square', iconClass: 'quick-action__icon--amber', route: '/user/frequency' },
+    { id: 'review', labelKey: 'dashboard.quickAction.review', icon: 'speed', iconClass: 'quick-action__icon--amber', route: '/user/frequency' },
     { id: 'create-budget', labelKey: 'dashboard.quickAction.createBudget', icon: 'account_balance_wallet', iconClass: 'quick-action__icon--emerald', route: '/user/budget' },
     { id: 'analysis', labelKey: 'dashboard.quickAction.capture', icon: 'analytics', iconClass: 'quick-action__icon--violet', route: '/user/analysis' },
     { id: 'manual-entry', labelKey: 'dashboard.quickAction.quickEntry', icon: 'post_add', iconClass: 'quick-action__icon--cyan', route: '/user/manual-entry' },
@@ -276,6 +348,7 @@ export class Dashboard implements OnInit, OnDestroy {
     this.initAiSuggestions();
     this.loadTransactions();
     this.loadSpendingComparison();
+    this.loadActiveHours();
     this.loadActiveBudget();
   }
 
@@ -409,6 +482,24 @@ export class Dashboard implements OnInit, OnDestroy {
         this.spendingComparison = null;
       },
     });
+  }
+
+  private loadActiveHours(): void {
+    const now = new Date();
+    this.dashboardService.getActiveHours(now.getMonth() + 1, now.getFullYear()).subscribe({
+      next: (data) => {
+        this.activeHours = data || [];
+        this.selectedActiveHour = this.activeHours[0] || null;
+      },
+      error: () => {
+        this.activeHours = [];
+        this.selectedActiveHour = null;
+      },
+    });
+  }
+
+  selectActiveHour(activeHour: ActiveHourDto): void {
+    this.selectedActiveHour = activeHour;
   }
 
   private loadTopCategory(): void {

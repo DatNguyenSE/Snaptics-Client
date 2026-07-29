@@ -1006,6 +1006,146 @@
 .kpi-card--red .kpi-card__value { color: #7f1d1d; }
 .kpi-card--red .kpi-card__sub { color: #dc2626; }
 
+/* Wallet forecast modal */
+.wallet-forecast-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(4px);
+}
+
+.wallet-forecast-modal {
+  width: min(560px, 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+}
+
+.wallet-forecast-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 24px 18px;
+}
+
+.wallet-forecast-modal__eyebrow {
+  margin: 0 0 5px;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.wallet-forecast-modal h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.35rem;
+}
+
+.wallet-forecast-modal__close {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.wallet-forecast-modal__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0 24px 18px;
+}
+
+.wallet-forecast-metric {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid;
+  border-radius: 16px;
+}
+
+.wallet-forecast-metric--blue { border-color: #bfdbfe; background: #eff6ff; color: #1d4ed8; }
+.wallet-forecast-metric--green { border-color: #a7f3d0; background: #ecfdf5; color: #047857; }
+.wallet-forecast-metric .material-symbols-outlined { font-size: 1.25rem; }
+.wallet-forecast-metric small { display: block; margin-top: 10px; font-weight: 700; }
+.wallet-forecast-metric strong { display: block; margin-top: 7px; color: #0f172a; font-size: 1.1rem; }
+.wallet-forecast-metric p { margin: 6px 0 0; color: #64748b; font-size: 0.75rem; line-height: 1.4; }
+
+.wallet-forecast-modal__explanation {
+  display: flex;
+  gap: 9px;
+  margin: 0 24px 24px;
+  padding: 13px 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.wallet-forecast-modal__explanation .material-symbols-outlined { flex: 0 0 auto; font-size: 1.1rem; color: #64748b; }
+.wallet-forecast-modal__explanation p { margin: 0; }
+
+.wallet-forecast-modal__list {
+  margin: 0 24px 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.wallet-forecast-modal__list-title {
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.wallet-forecast-modal__expense-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  background: transparent;
+  color: #334155;
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wallet-forecast-modal__expense-row:last-child { border-bottom: 0; }
+.wallet-forecast-modal__expense-row:hover,
+.wallet-forecast-modal__expense-row--active { background: #f8fafc; }
+.wallet-forecast-modal__rank { color: #94a3b8; font-weight: 800; }
+.wallet-forecast-modal__expense-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wallet-forecast-modal__expense-meta { display: grid; gap: 2px; justify-items: end; }
+.wallet-forecast-modal__expense-row strong { color: #0f172a; }
+.wallet-forecast-modal__expense-meta small { color: #64748b; font-size: 0.72rem; }
+.wallet-forecast-modal__empty { margin: 0; color: #64748b; font-size: 0.8rem; }
+
+@media (max-width: 520px) {
+  .wallet-forecast-modal__metrics { grid-template-columns: 1fr; }
+  .wallet-forecast-modal__header { padding: 20px 18px 16px; }
+  .wallet-forecast-modal__metrics { padding: 0 18px 16px; }
+  .wallet-forecast-modal__explanation { margin: 0 18px 18px; }
+  .wallet-forecast-modal__list { margin: 0 18px 18px; }
+}
+
 /* ─── Charts Row ────────────────────────────────────────────────────────── */
 .charts-row {
   display: grid;

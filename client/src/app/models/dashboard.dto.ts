@@ -36,3 +36,10 @@ export interface DashboardSummaryDto {
   filterType?: string;
 }
 
+export interface ActiveHourDto {
+  hour: number;
+  label: string;
+  transactionCount: number;
+  totalAmount: number;
+}
+

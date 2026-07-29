@@ -62,6 +62,12 @@ export class Nav {
       route: '/user/transactions',
     },
     {
+      id: 'category',
+      labelKey: 'nav.category',
+      icon: 'category',
+      route: '/user/category',
+    },
+    {
       id: 'analysis',
       labelKey: 'nav.analysis',
       icon: 'analytics',
@@ -83,14 +89,8 @@ export class Nav {
     {
       id: 'frequency',
       labelKey: 'nav.frequency',
-      icon: 'monitoring',
+      icon: 'speed',
       route: '/user/frequency',
-    },
-    {
-      id: 'category',
-      labelKey: 'nav.category',
-      icon: 'category',
-      route: '/user/category',
     },
     {
       id: 'support',

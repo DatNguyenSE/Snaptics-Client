@@ -33,6 +33,9 @@
           <label class="edit-field">
             <span>Tổng tiền</span>
             <input type="number" min="0" [(ngModel)]="draftTransaction.totalAmount" [readonly]="draftTransaction.transactionDetails.length > 0" [title]="draftTransaction.transactionDetails.length > 0 ? 'Tổng tiền được tính tự động từ chi tiết mặt hàng' : ''" [class.readonly-input]="draftTransaction.transactionDetails.length > 0" />
+            @if (draftTransaction.transactionDetails.length > 0) {
+              <div class="field-hint">Thay đổi giá mặt hàng bên dưới để tính lại tổng tiền.</div>
+            }
           </label>
           <label class="edit-field">
             <span>Ví</span>
@@ -42,6 +45,10 @@
                 <option [ngValue]="budget.id">{{ budget.name }}</option>
               }
             </select>
+          </label>
+          <label class="edit-field">
+            <span>Ngày giờ</span>
+            <input type="datetime-local" [ngModel]="getDatetimeLocal(draftTransaction.transactionDate)" (ngModelChange)="onDatetimeChange($event)" />
           </label>
           <label class="edit-field edit-field--wide">
             <span>Ghi chú</span>

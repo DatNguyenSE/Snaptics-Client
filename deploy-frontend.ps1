@@ -32,6 +32,11 @@ if ($LASTEXITCODE -ne 0) {
     Remove-Item $policyFile
 }
 
+# Angular uses client-side routing. Keep the S3 website fallback configured even
+# when the bucket already exists; CloudFront must also forward 404s to index.html.
+Write-Host "`nCau hinh SPA fallback cho Angular..." -ForegroundColor Yellow
+aws s3 website "s3://$bucketName" --index-document index.html --error-document index.html
+
 # 3. Sync to S3
 Write-Host "`n[3/3] Dang day file tinh len AWS S3..." -ForegroundColor Yellow
 $distPath = "dist\client\browser"

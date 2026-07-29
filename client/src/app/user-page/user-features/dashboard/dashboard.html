@@ -268,4 +268,56 @@
     [isOpen]="isTrendSummaryModalOpen"
     (close)="closeTrendSummaryModal()"
   ></app-trend-summary-modal>
+
+  @if (isActiveHoursModalOpen) {
+    <div class="wallet-forecast-overlay" (click)="closeActiveHoursModal()">
+      <div class="wallet-forecast-modal" (click)="$event.stopPropagation()">
+        <div class="wallet-forecast-modal__header">
+          <div>
+            <p class="wallet-forecast-modal__eyebrow">Phân tích thời gian tạo giao dịch</p>
+            <h2>Khung giờ sôi động trong tháng</h2>
+          </div>
+          <button type="button" class="wallet-forecast-modal__close" (click)="closeActiveHoursModal()" aria-label="Đóng">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="wallet-forecast-modal__metrics">
+          <div class="wallet-forecast-metric wallet-forecast-metric--blue">
+            <span class="material-symbols-outlined">schedule</span>
+            <small>Top 1</small>
+            <strong>{{ activeHours[0]?.label || '-' }}</strong>
+            <p>{{ activeHours[0]?.transactionCount || 0 }} giao dịch</p>
+          </div>
+          <div class="wallet-forecast-metric wallet-forecast-metric--green">
+            <span class="material-symbols-outlined">payments</span>
+            <small>Đã chi trong khung giờ</small>
+            <strong>{{ selectedActiveHour ? formatCurrency(selectedActiveHour.totalAmount) : '-' }}</strong>
+            <p>{{ selectedActiveHour?.label || 'Chọn một khung giờ bên dưới' }}</p>
+          </div>
+        </div>
+
+        <div class="wallet-forecast-modal__list">
+          <div class="wallet-forecast-modal__list-title">Top 5 khung giờ · Bấm để xem chi tiết</div>
+          @for (activeHour of activeHours; track activeHour.hour; let index = $index) {
+            <button
+              type="button"
+              class="wallet-forecast-modal__expense-row"
+              [class.wallet-forecast-modal__expense-row--active]="selectedActiveHour?.hour === activeHour.hour"
+              (click)="selectActiveHour(activeHour)"
+            >
+              <span class="wallet-forecast-modal__rank">{{ index + 1 }}</span>
+              <span class="wallet-forecast-modal__expense-name">{{ activeHour.label }}</span>
+              <span class="wallet-forecast-modal__expense-meta">
+                <strong>{{ activeHour.transactionCount }} giao dịch</strong>
+                <small>{{ formatCurrency(activeHour.totalAmount) }}</small>
+              </span>
+            </button>
+          } @empty {
+            <p class="wallet-forecast-modal__empty">Chưa có giao dịch nào trong tháng này.</p>
+          }
+        </div>
+      </div>
+    </div>
+  }
 </section>

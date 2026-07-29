@@ -1,23 +1,106 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { of, delay } from 'rxjs';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { of, delay, map, finalize } from 'rxjs';
 import { AdminUser, AdminUserStatus, AdminRole, PaginatedResult, UserFilter } from '../models/admin.models';
 import { AuditLogService } from './audit-log.service';
-import { inject } from '@angular/core';
+import { environment } from '../../environments/environment';
+
+interface AdminUsersApiResponse {
+  stats: {
+    totalUsers: number;
+    activeUsers: number;
+    lockedUsers: number;
+    unverifiedUsers: number;
+  };
+  users: {
+    items: AdminUserApiDto[];
+    totalCount: number;
+    page: number;
+    size: number;
+  };
+}
+
+interface AdminUserApiDto {
+  id: string;
+  email?: string;
+  displayName?: string;
+  status?: string;
+  isEmailConfirmed: boolean;
+  isLockedOut: boolean;
+  roles: string[];
+  createdAt: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AdminUserService {
+  private readonly http = inject(HttpClient);
   private readonly auditLog = inject(AuditLogService);
+  private readonly baseUrl = `${environment.apiUrl.replace(/\/$/, '')}/api/admin/users`;
   private readonly _users = signal<AdminUser[]>([]);
   private readonly _loading = signal<boolean>(false);
+  private readonly _stats = signal({ totalUsers: 0, activeUsers: 0, lockedUsers: 0, unverifiedUsers: 0 });
 
   readonly loading = this._loading.asReadonly();
 
-  readonly totalUsers = computed(() => this._users().length);
-  readonly activeUsers = computed(() => this._users().filter((u) => u.status === 'active').length);
-  readonly lockedUsers = computed(() => this._users().filter((u) => u.status === 'locked').length);
-  readonly unverifiedUsers = computed(() =>
-    this._users().filter((u) => u.verification !== 'verified').length
-  );
+  readonly totalUsers = computed(() => this._stats().totalUsers);
+  readonly activeUsers = computed(() => this._stats().activeUsers);
+  readonly lockedUsers = computed(() => this._stats().lockedUsers);
+  readonly unverifiedUsers = computed(() => this._stats().unverifiedUsers);
+
+  getUsersFromApi(filter: Partial<UserFilter> = {}, page = 1, pageSize = 10) {
+    let params = new HttpParams().set('page', page).set('size', pageSize);
+    if (filter.search) params = params.set('search', filter.search);
+    if (filter.status) params = params.set('status', filter.status);
+    if (filter.verification) params = params.set('isEmailConfirmed', filter.verification === 'verified');
+    if (filter.role) params = params.set('role', filter.role);
+
+    this._loading.set(true);
+    return this.http.get<AdminUsersApiResponse>(this.baseUrl, { params, withCredentials: true }).pipe(
+      map((response) => {
+        const data = response.users.items.map((user) => this.mapUser(user));
+        this._users.set(data);
+        this._stats.set(response.stats);
+        return {
+          data,
+          total: response.users.totalCount,
+          page: response.users.page,
+          pageSize: response.users.size,
+          totalPages: Math.ceil(response.users.totalCount / response.users.size),
+        } satisfies PaginatedResult<AdminUser>;
+      }),
+      finalize(() => this._loading.set(false)),
+    );
+  }
+
+  private mapUser(user: AdminUserApiDto): AdminUser {
+    const displayName = user.displayName?.trim() || user.email || user.id;
+    const status: AdminUserStatus = user.isLockedOut
+      ? 'locked'
+      : user.status?.toLowerCase() === 'deleted'
+        ? 'deleted'
+        : 'active';
+    const role = (user.roles[0]?.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USER') as AdminRole;
+
+    return {
+      id: user.id,
+      displayName,
+      email: user.email || '',
+      role,
+      status,
+      verification: user.isEmailConfirmed ? 'verified' : 'unverified',
+      totalTransactions: 0,
+      totalBudgets: 0,
+      totalScans: 0,
+      aiRequests: 0,
+      lastLogin: '',
+      createdAt: user.createdAt,
+      currency: '',
+      language: '',
+      timezone: '',
+      failedLoginAttempts: 0,
+      activeSessions: 0,
+    };
+  }
 
   getUsers(filter?: Partial<UserFilter>, page = 1, pageSize = 10): PaginatedResult<AdminUser> {
     let data = this._users();

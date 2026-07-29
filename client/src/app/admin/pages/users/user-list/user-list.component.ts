@@ -52,7 +52,6 @@ export class UserListComponent implements OnInit {
       { value: '', label: this.language.t('admin.users.allStatus') },
       { value: 'active', label: this.language.t('admin.users.active') },
       { value: 'locked', label: this.language.t('admin.users.locked') },
-      { value: 'deleted', label: this.language.t('admin.users.deleted') },
     ];
   }
 
@@ -69,7 +68,6 @@ export class UserListComponent implements OnInit {
       { value: '', label: this.language.t('admin.users.allVerification') },
       { value: 'verified', label: this.language.t('admin.users.verified') },
       { value: 'unverified', label: this.language.t('admin.users.unverified') },
-      { value: 'pending', label: this.language.t('admin.users.pending') },
     ];
   }
 
@@ -83,14 +81,21 @@ export class UserListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    setTimeout(() => {
-      this.loadUsers();
-      this.loading = false;
-    }, 400);
+    this.loadUsers();
   }
 
   loadUsers(): void {
-    this.result = this.userService.getUsers(this.filter, this.currentPage, this.pageSize);
+    this.loading = true;
+    this.userService.getUsersFromApi(this.filter, this.currentPage, this.pageSize).subscribe({
+      next: (result) => {
+        this.result = result;
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.toast.error('Không thể tải danh sách người dùng.');
+      },
+    });
   }
 
   onSearchChange(): void {
@@ -226,7 +231,7 @@ export class UserListComponent implements OnInit {
   }
 
   formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('vi-VN');
+    return iso ? new Date(iso).toLocaleDateString('vi-VN') : '-';
   }
 
   trackById(_: number, item: AdminUser): string {

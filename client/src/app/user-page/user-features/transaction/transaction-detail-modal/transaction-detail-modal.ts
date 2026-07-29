@@ -217,4 +217,26 @@ export class TransactionDetailModal implements OnChanges {
     if (status === 3) return 'modal-status-badge--cancelled';
     return 'modal-status-badge--completed';
   }
+
+  getDatetimeLocal(isoDate?: string | null): string {
+    if (!isoDate) return '';
+    const date = new Date(isoDate);
+    if (isNaN(date.getTime())) return '';
+    // Format to YYYY-MM-DDThh:mm
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
+  onDatetimeChange(localString: string): void {
+    if (!this.draftTransaction) return;
+    if (!localString) return;
+    const date = new Date(localString);
+    if (!isNaN(date.getTime())) {
+      this.draftTransaction.transactionDate = date.toISOString();
+    }
+  }
 }

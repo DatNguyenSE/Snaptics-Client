@@ -352,6 +352,7 @@ export class Notification {
       next: () => {
         this.isSubmittingReview.set(false);
         const statusLabels: Record<UsageStatusType, { vi: string; en: string }> = {
+          NotEvaluated: { vi: 'Chưa đánh giá',     en: 'Not Evaluated' },
           Frequent:     { vi: 'Dùng thường xuyên', en: 'Frequent' },
           Occasionally: { vi: 'Dùng thỉnh thoảng', en: 'Occasionally' },
           Seldom:       { vi: 'Ít dùng',           en: 'Seldom' },

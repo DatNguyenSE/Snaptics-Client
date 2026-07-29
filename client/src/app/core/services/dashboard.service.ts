@@ -6,7 +6,8 @@ import {
   CategorySummaryResponseDto,
   BarChartDto,
   SpendingComparisonResponseDto,
-  DashboardSummaryDto
+  DashboardSummaryDto,
+  ActiveHourDto
 } from '../../models/dashboard.dto';
 
 export type DashboardFilterType = 'day' | 'week' | 'month' | 'year';
@@ -71,6 +72,16 @@ export class DashboardService {
   getSpendingComparison(): Observable<SpendingComparisonResponseDto> {
     const params = new HttpParams().set('_t', Date.now().toString());
     return this.http.get<SpendingComparisonResponseDto>(`${this.apiUrl}/spending-comparison`, { params }).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  getActiveHours(month?: number, year?: number): Observable<ActiveHourDto[]> {
+    let params = new HttpParams().set('_t', Date.now().toString());
+    if (month !== undefined) params = params.set('month', month.toString());
+    if (year !== undefined) params = params.set('year', year.toString());
+
+    return this.http.get<ActiveHourDto[]>(`${this.apiUrl}/active-hours`, { params }).pipe(
       catchError(err => throwError(() => err))
     );
   }

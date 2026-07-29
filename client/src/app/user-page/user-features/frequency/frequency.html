@@ -89,6 +89,59 @@
         </div>
       } @else {
         
+        <!-- Not Evaluated Section -->
+        @if (notEvaluatedItems().length > 0) {
+          <div class="not-evaluated-section">
+            <div class="not-evaluated-header">
+              <div class="ne-title-wrapper">
+                <span class="material-symbols-outlined icon-pulse">notifications_active</span>
+                <h2>{{ language.currentLang() === 'vi' ? 'Cần đánh giá' : 'To Evaluate' }}</h2>
+                <span class="ne-badge">{{ notEvaluatedItems().length }}</span>
+              </div>
+              <p class="ne-subtitle">{{ language.currentLang() === 'vi' ? 'Đánh giá mức độ sử dụng để tiếp tục theo dõi' : 'Evaluate usage to continue tracking' }}</p>
+            </div>
+            
+            <div class="not-evaluated-list">
+              @for (item of notEvaluatedItems(); track item.id) {
+                <div class="not-evaluated-card">
+                  <div class="ne-card-main">
+                    <div class="ne-card-icon">
+                      <span class="material-symbols-outlined">category</span>
+                    </div>
+                    <div class="ne-card-info">
+                      <span class="ne-item-name" [title]="item.itemName || 'Unknown'">
+                        {{ item.itemName || (language.currentLang() === 'vi' ? 'Không rõ tên' : 'Unknown') }}
+                      </span>
+                      <span class="ne-item-meta">
+                        {{ item.categoryName || (language.currentLang() === 'vi' ? 'Khác' : 'Other') }} &bull; {{ formatDate(item.purchaseDate) }}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div class="ne-card-actions">
+                    <button class="btn-eval btn-eval--frequent" (click)="evaluateItem(item, 'Frequent')" [title]="language.currentLang() === 'vi' ? 'Dùng thường xuyên' : 'Frequent'">
+                      <span class="material-symbols-outlined">rocket_launch</span>
+                      <span class="btn-text">Thường xuyên</span>
+                    </button>
+                    <button class="btn-eval btn-eval--occasionally" (click)="evaluateItem(item, 'Occasionally')" [title]="language.currentLang() === 'vi' ? 'Dùng thỉnh thoảng' : 'Occasionally'">
+                      <span class="material-symbols-outlined">refresh</span>
+                      <span class="btn-text">Thỉnh thoảng</span>
+                    </button>
+                    <button class="btn-eval btn-eval--seldom" (click)="evaluateItem(item, 'Seldom')" [title]="language.currentLang() === 'vi' ? 'Ít dùng' : 'Seldom'">
+                      <span class="material-symbols-outlined">schedule</span>
+                      <span class="btn-text">Ít dùng</span>
+                    </button>
+                    <button class="btn-eval btn-eval--unused" (click)="evaluateItem(item, 'Unused')" [title]="language.currentLang() === 'vi' ? 'Không dùng nữa' : 'Unused'">
+                      <span class="material-symbols-outlined">block</span>
+                      <span class="btn-text">Không dùng</span>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
         <!-- Percentage Bar -->
         <div class="usage-progress-bar">
           @for (group of groups(); track group.status) {

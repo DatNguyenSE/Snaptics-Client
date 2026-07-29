@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-export type UsageStatusType = 'Frequent' | 'Occasionally' | 'Seldom' | 'Unused';
+export type UsageStatusType = 'NotEvaluated' | 'Frequent' | 'Occasionally' | 'Seldom' | 'Unused';
 
 export interface ItemInventoryDto {
   id: number;
