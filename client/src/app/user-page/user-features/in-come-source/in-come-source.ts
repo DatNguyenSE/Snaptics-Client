@@ -2,7 +2,6 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IncomeSourceService } from '../../../core/services/income-source.service';
-import { BudgetService, BudgetDto } from '../../../core/services/budget.service';
 import { IncomeSourceDto } from '../../../models/income-source.dto';
 
 @Component({
@@ -14,10 +13,8 @@ import { IncomeSourceDto } from '../../../models/income-source.dto';
 })
 export class InComeSource implements OnInit {
   private readonly incomeService = inject(IncomeSourceService);
-  private readonly budgetService = inject(BudgetService);
 
   incomeSources: IncomeSourceDto[] = [];
-  budgets: BudgetDto[] = [];
   
   isModalOpen = false;
   editingId: number | null = null;
@@ -26,13 +23,11 @@ export class InComeSource implements OnInit {
     name: '',
     amount: 0,
     isRecurring: false,
-    budgetId: 0,
     isActive: true
   };
 
   ngOnInit(): void {
     this.loadIncomeSources();
-    this.loadBudgets();
   }
 
   loadIncomeSources(): void {
@@ -44,22 +39,12 @@ export class InComeSource implements OnInit {
     });
   }
 
-  loadBudgets(): void {
-    this.budgetService.getBudgets().subscribe({
-      next: (data) => {
-        this.budgets = data;
-      },
-      error: (err: any) => console.error('Error loading budgets', err)
-    });
-  }
-
   openAddModal(): void {
     this.editingId = null;
     this.formData = {
       name: '',
       amount: 0,
       isRecurring: false,
-      budgetId: this.budgets.length > 0 ? this.budgets[0].id : 0,
       isActive: true
     };
     this.isModalOpen = true;
@@ -76,8 +61,10 @@ export class InComeSource implements OnInit {
   }
 
   saveIncomeSource(): void {
+    const { budgetId: _budgetId, ...incomeSourceData } = this.formData;
+
     if (this.editingId) {
-      this.incomeService.updateIncomeSource(this.editingId, this.formData).subscribe({
+      this.incomeService.updateIncomeSource(this.editingId, incomeSourceData).subscribe({
         next: () => {
           this.loadIncomeSources();
           this.closeModal();
@@ -85,7 +72,7 @@ export class InComeSource implements OnInit {
         error: (err: any) => console.error('Error updating income source', err)
       });
     } else {
-      this.incomeService.createIncomeSource(this.formData).subscribe({
+      this.incomeService.createIncomeSource(incomeSourceData).subscribe({
         next: () => {
           this.loadIncomeSources();
           this.closeModal();
@@ -104,10 +91,5 @@ export class InComeSource implements OnInit {
         error: (err: any) => console.error('Error deleting income source', err)
       });
     }
-  }
-  
-  getBudgetName(budgetId: number): string {
-    const budget = this.budgets.find(b => b.id === budgetId);
-    return budget ? budget.name : 'Chưa liên kết ví';
   }
 }
