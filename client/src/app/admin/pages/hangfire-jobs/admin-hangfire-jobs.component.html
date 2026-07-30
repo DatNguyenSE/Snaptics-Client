@@ -1,0 +1,142 @@
+<div class="hangfire-page">
+
+  <!-- ── Page Header ────────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header__info">
+      <div class="page-header__icon">
+        <span class="material-symbols-outlined">manufacturing</span>
+      </div>
+      <div>
+        <h1 class="page-title">Hangfire Jobs</h1>
+        <p class="page-subtitle">Quản lý, kích hoạt và cấu hình lịch chạy của các tác vụ nền.</p>
+      </div>
+    </div>
+    <div class="page-header__actions">
+      <button
+        type="button"
+        class="btn btn--ghost"
+        (click)="loadJobs()"
+        [disabled]="pageState === 'loading'"
+        id="hangfire-refresh-btn"
+        aria-label="Tải lại danh sách jobs"
+      >
+        <span class="material-symbols-outlined" [class.btn__icon--spinning]="pageState === 'loading'">refresh</span>
+        Tải lại
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Summary Bar ────────────────────────────────────────────────────────── -->
+  @if (pageState === 'loaded') {
+    <app-hangfire-summary [summary]="summary" />
+  }
+
+  <!-- ── Loading State ─────────────────────────────────────────────────────── -->
+  @if (pageState === 'loading') {
+    <div class="hangfire-skeleton">
+      <!-- Summary skeleton -->
+      <div class="skeleton-summary-row">
+        @for (n of [1,2,3,4]; track n) {
+          <div class="skeleton-summary-card"></div>
+        }
+      </div>
+      <!-- Job card skeletons -->
+      <div class="hangfire-grid">
+        @for (n of skeletonRows; track n) {
+          <div class="skeleton-job-card">
+            <div class="skeleton-job-card__header">
+              <div class="skeleton skeleton--line skeleton--lg"></div>
+              <div class="skeleton skeleton--toggle"></div>
+            </div>
+            <div class="skeleton-job-card__body">
+              <app-loading-skeleton [count]="2" [showAvatar]="false" [showAction]="false" />
+            </div>
+            <div class="skeleton-job-card__footer">
+              <div class="skeleton skeleton--btn"></div>
+              <div class="skeleton skeleton--btn"></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ── Error State ────────────────────────────────────────────────────────── -->
+  @if (pageState === 'error') {
+    <div class="card hangfire-error-state">
+      <app-empty-state
+        icon="cloud_off"
+        title="Không thể tải dữ liệu"
+        [description]="errorMessage || 'Đã có lỗi xảy ra khi kết nối đến máy chủ. Vui lòng thử lại.'"
+      >
+        <button
+          type="button"
+          class="btn btn--primary hangfire-error-state__retry"
+          (click)="loadJobs()"
+          id="hangfire-retry-btn"
+        >
+          <span class="material-symbols-outlined">refresh</span>
+          Thử lại
+        </button>
+      </app-empty-state>
+    </div>
+  }
+
+  <!-- ── Empty State ────────────────────────────────────────────────────────── -->
+  @if (pageState === 'empty') {
+    <div class="card hangfire-empty-state">
+      <app-empty-state
+        icon="timer_off"
+        title="Chưa có Hangfire Job nào"
+        description="Không tìm thấy job nào được cấu hình trong hệ thống."
+      />
+    </div>
+  }
+
+  <!-- ── Job List ──────────────────────────────────────────────────────────── -->
+  @if (pageState === 'loaded') {
+    <div class="hangfire-grid">
+      @for (job of jobs; track trackByJobKey($index, job)) {
+        <app-hangfire-job-card
+          [job]="job"
+          [triggerLoading]="isJobTriggerLoading(job.jobKey)"
+          [statusLoading]="isJobStatusLoading(job.jobKey)"
+          (triggerJob)="onTriggerJob($event)"
+          (openSchedule)="onOpenSchedule($event)"
+          (toggleStatus)="onToggleStatus($event)"
+        />
+      }
+    </div>
+  }
+
+</div>
+
+<!-- ── Trigger Confirm Modal ─────────────────────────────────────────────────── -->
+@if (triggerConfirm) {
+  <app-confirmation-modal
+    [config]="triggerConfirm.config"
+    [loading]="triggerConfirm.loading"
+    (confirmed)="onTriggerConfirmed()"
+    (cancelled)="onTriggerCancelled()"
+  />
+}
+
+<!-- ── Toggle Confirm Modal ──────────────────────────────────────────────────── -->
+@if (toggleConfirm) {
+  <app-confirmation-modal
+    [config]="toggleConfirm.config"
+    [loading]="toggleConfirm.loading"
+    (confirmed)="onToggleConfirmed()"
+    (cancelled)="onToggleCancelled()"
+  />
+}
+
+<!-- ── Schedule Modal ────────────────────────────────────────────────────────── -->
+@if (scheduleJob) {
+  <app-hangfire-schedule-modal
+    [job]="scheduleJob"
+    [saving]="scheduleSaving"
+    (save)="onSaveSchedule($event)"
+    (cancel)="onCancelSchedule()"
+  />
+}

@@ -1,0 +1,100 @@
+<div class="hf-modal-backdrop" (click)="onBackdropClick($event)" role="dialog" aria-modal="true" aria-labelledby="hf-modal-title">
+  <div class="hf-modal">
+    <!-- Header -->
+    <div class="hf-modal__header">
+      <div class="hf-modal__header-icon">
+        <span class="material-symbols-outlined">schedule</span>
+      </div>
+      <div class="hf-modal__header-info">
+        <h2 class="hf-modal__title" id="hf-modal-title">Cài đặt thời gian</h2>
+        <p class="hf-modal__subtitle">{{ job.jobName }}</p>
+      </div>
+      <button type="button" class="hf-modal__close" (click)="onCancel()" aria-label="Đóng modal" [disabled]="saving">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="hf-modal__body">
+
+      <!-- Toggle enable -->
+      <div class="hf-modal__field">
+        <div class="hf-modal__toggle-row">
+          <div class="hf-modal__toggle-info">
+            <span class="hf-modal__field-label">Chạy tự động</span>
+            <span class="hf-modal__field-hint">Bật để kích hoạt lịch chạy định kỳ cho job này.</span>
+          </div>
+          <label class="hf-toggle" [class.hf-toggle--disabled]="saving" aria-label="Bật / Tắt chạy tự động">
+            <input
+              id="schedule-modal-enabled"
+              type="checkbox"
+              class="hf-toggle__input"
+              [(ngModel)]="isEnabled"
+              [disabled]="saving"
+            />
+            <span class="hf-toggle__track">
+              <span class="hf-toggle__thumb"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Time picker -->
+      <div class="hf-modal__field" [class.hf-modal__field--disabled]="!isEnabled">
+        <label class="hf-modal__field-label" for="schedule-modal-time">
+          Giờ chạy hằng ngày
+        </label>
+        <div class="hf-modal__time-wrap">
+          <span class="material-symbols-outlined hf-modal__time-icon">schedule</span>
+          <input
+            id="schedule-modal-time"
+            type="time"
+            class="hf-modal__time-input"
+            [(ngModel)]="runTime"
+            [disabled]="!isEnabled || saving"
+            required
+          />
+        </div>
+        <p class="hf-modal__field-hint hf-modal__field-hint--sm">
+          Múi giờ: {{ defaultTimeZone }}
+        </p>
+      </div>
+
+      <!-- Preview -->
+      <div class="hf-modal__preview" [class.hf-modal__preview--disabled]="!isEnabled">
+        <span class="material-symbols-outlined hf-modal__preview-icon">
+          {{ isEnabled ? 'info' : 'pause_circle' }}
+        </span>
+        <p class="hf-modal__preview-text">{{ previewText }}</p>
+      </div>
+
+      <!-- Cron expression info -->
+      @if (isEnabled && isFormValid) {
+        <div class="hf-modal__cron">
+          <span class="hf-modal__cron-label">Cron Expression</span>
+          <code class="hf-modal__cron-value">{{ cronExpression }}</code>
+        </div>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="hf-modal__footer">
+      <button type="button" class="hf-modal__btn hf-modal__btn--cancel" (click)="onCancel()" [disabled]="saving">
+        Hủy
+      </button>
+      <button
+        type="button"
+        class="hf-modal__btn hf-modal__btn--save"
+        [disabled]="!isFormValid || saving"
+        (click)="onSave()"
+      >
+        @if (saving) {
+          <span class="hf-modal__spinner"></span>
+        } @else {
+          <span class="material-symbols-outlined">save</span>
+        }
+        Lưu thay đổi
+      </button>
+    </div>
+  </div>
+</div>

@@ -694,6 +694,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         auditLogs: 'Nhật ký hệ thống',
         notifications: 'Thông báo',
         systemSettings: 'Cài đặt hệ thống',
+        hangfireJobs: 'Hangfire Jobs',
       },
       header: {
         searchPlaceholder: 'Tìm kiếm người dùng, yêu cầu hoặc nhật ký...',
@@ -1561,6 +1562,7 @@ const TRANSLATIONS: Record<AppLanguage, TranslationNode> = {
         auditLogs: 'Audit Logs',
         notifications: 'Notifications',
         systemSettings: 'System Settings',
+        hangfireJobs: 'Hangfire Jobs',
       },
       header: {
         searchPlaceholder: 'Search users, requests or logs...',

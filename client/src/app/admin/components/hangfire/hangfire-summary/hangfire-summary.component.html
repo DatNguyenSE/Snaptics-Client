@@ -1,0 +1,13 @@
+<div class="hf-summary">
+  @for (stat of stats; track stat.key) {
+    <div class="hf-summary__card hf-summary__card--{{ stat.colorClass }}">
+      <div class="hf-summary__icon">
+        <span class="material-symbols-outlined">{{ stat.icon }}</span>
+      </div>
+      <div class="hf-summary__info">
+        <span class="hf-summary__value">{{ summary[stat.key] }}</span>
+        <span class="hf-summary__label">{{ stat.label }}</span>
+      </div>
+    </div>
+  }
+</div>

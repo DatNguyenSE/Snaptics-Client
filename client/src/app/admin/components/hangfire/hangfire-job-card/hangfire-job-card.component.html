@@ -1,0 +1,142 @@
+<article class="job-card" [class.job-card--inactive]="!job.isEnabled">
+  <!-- Card header -->
+  <div class="job-card__header">
+    <div class="job-card__title-block">
+      <div class="job-card__name-row">
+        <h3 class="job-card__name">{{ job.jobName }}</h3>
+        <!-- Job enabled/disabled badge -->
+        @if (job.isEnabled) {
+          <span class="job-card__enabled-badge job-card__enabled-badge--on">Đang bật</span>
+        } @else {
+          <span class="job-card__enabled-badge job-card__enabled-badge--off">Đang tắt</span>
+        }
+      </div>
+      @if (job.description) {
+        <p class="job-card__desc">{{ job.description }}</p>
+      }
+      <code class="job-card__key">{{ job.jobKey }}</code>
+    </div>
+
+    <!-- Toggle switch -->
+    <div class="job-card__toggle-wrap">
+      <span class="job-card__toggle-label">{{ job.isEnabled ? 'Bật' : 'Tắt' }}</span>
+      <label class="hf-toggle" [class.hf-toggle--loading]="statusLoading" [attr.aria-label]="'Bật tắt lịch chạy: ' + job.jobName">
+        @if (statusLoading) {
+          <span class="hf-toggle__spinner"></span>
+        } @else {
+          <input
+            type="checkbox"
+            class="hf-toggle__input"
+            [checked]="job.isEnabled"
+            (change)="onToggle()"
+            [attr.aria-label]="'Bật tắt ' + job.jobName"
+          />
+          <span class="hf-toggle__track">
+            <span class="hf-toggle__thumb"></span>
+          </span>
+        }
+      </label>
+    </div>
+  </div>
+
+  <!-- Card meta info -->
+  <div class="job-card__meta">
+    <!-- Run time -->
+    <div class="job-card__meta-item">
+      <span class="material-symbols-outlined job-card__meta-icon">schedule</span>
+      <div class="job-card__meta-info">
+        <span class="job-card__meta-label">Thời gian chạy</span>
+        <span class="job-card__meta-value">
+          @if (job.runTime) {
+            {{ job.runTime }} mỗi ngày
+          } @else {
+            <span class="job-card__meta-empty">Chưa cài đặt</span>
+          }
+        </span>
+      </div>
+    </div>
+
+    <!-- Last run status -->
+    <div class="job-card__meta-item">
+      <span class="material-symbols-outlined job-card__meta-icon">history</span>
+      <div class="job-card__meta-info">
+        <span class="job-card__meta-label">Lần chạy gần nhất</span>
+        <span class="job-card__meta-value">
+          @if (job.lastRunStatus) {
+            <app-hangfire-status-badge [status]="job.lastRunStatus" />
+          } @else {
+            <span class="job-card__meta-empty">Chưa chạy</span>
+          }
+        </span>
+      </div>
+    </div>
+
+    <!-- Last run at -->
+    <div class="job-card__meta-item">
+      <span class="material-symbols-outlined job-card__meta-icon">event</span>
+      <div class="job-card__meta-info">
+        <span class="job-card__meta-label">Thời điểm chạy gần nhất</span>
+        <span class="job-card__meta-value">{{ formatDate(job.lastRunAt) }}</span>
+      </div>
+    </div>
+
+    <!-- Next run at -->
+    <div class="job-card__meta-item">
+      <span class="material-symbols-outlined job-card__meta-icon">event_upcoming</span>
+      <div class="job-card__meta-info">
+        <span class="job-card__meta-label">Lần chạy tiếp theo</span>
+        <span class="job-card__meta-value">
+          @if (job.isEnabled && job.nextRunAt) {
+            {{ formatDate(job.nextRunAt) }}
+          } @else {
+            <span class="job-card__meta-empty">—</span>
+          }
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  @if (job.lastError) {
+    <div class="job-card__error">
+      <span class="material-symbols-outlined job-card__error-icon">bug_report</span>
+      <div class="job-card__error-content">
+        <span class="job-card__error-label">Lỗi gần nhất</span>
+        <p class="job-card__error-msg">{{ job.lastError }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Actions -->
+  <div class="job-card__actions">
+    <!-- Trigger now (primary) -->
+    <button
+      type="button"
+      class="job-card__btn job-card__btn--primary"
+      [disabled]="triggerLoading"
+      (click)="onTrigger()"
+      [attr.aria-label]="'Chạy ngay ' + job.jobName"
+      id="trigger-btn-{{ job.jobKey }}"
+    >
+      @if (triggerLoading) {
+        <span class="job-card__btn-spinner"></span>
+        Đang chạy...
+      } @else {
+        <span class="material-symbols-outlined">play_arrow</span>
+        Chạy ngay
+      }
+    </button>
+
+    <!-- Schedule (secondary) -->
+    <button
+      type="button"
+      class="job-card__btn job-card__btn--secondary"
+      (click)="onOpenSchedule()"
+      [attr.aria-label]="'Cài đặt thời gian cho ' + job.jobName"
+      id="schedule-btn-{{ job.jobKey }}"
+    >
+      <span class="material-symbols-outlined">tune</span>
+      Cài đặt thời gian
+    </button>
+  </div>
+</article>

@@ -5,4 +5,5 @@ export const environment = {
     // Mock flags luôn tắt trên production
     useMockAuth: false,
     useMockTransactions: false,
+    useHangfireDemoData: false,
 };

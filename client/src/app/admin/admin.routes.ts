@@ -66,6 +66,12 @@ export const adminRoutes: Routes = [
           import('./pages/system-config/system-config.component').then((m) => m.SystemConfigComponent),
       },
       {
+        path: 'hangfire',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/hangfire-jobs/admin-hangfire-jobs.component').then((m) => m.AdminHangfireJobsComponent),
+      },
+      {
         path: '**',
         loadComponent: () =>
           import('../features/not-found/not-found.component').then((m) => m.NotFoundComponent),

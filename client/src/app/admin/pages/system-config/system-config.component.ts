@@ -1,8 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminHangfireService, UpdateHangfireScheduleRequest } from '../../services/admin-hangfire.service';
+import { AdminHangfireService } from '../../services/admin-hangfire.service';
 import { ToastService } from '../../../core/services/toast-service';
+import { convertTimeToCron } from '../../utils/cron.util';
+
+interface LegacyScheduleRequest {
+  hour: number;
+  minute: number;
+}
 
 @Component({
   selector: 'app-admin-system-config',
@@ -16,9 +22,9 @@ export class SystemConfigComponent {
   private readonly toast = inject(ToastService);
 
   // Time states
-  rolloverTime: UpdateHangfireScheduleRequest = { hour: 0, minute: 0 };
-  reviewTime: UpdateHangfireScheduleRequest = { hour: 20, minute: 0 };
-  cleanupTime: UpdateHangfireScheduleRequest = { hour: 3, minute: 0 };
+  rolloverTime: LegacyScheduleRequest = { hour: 0, minute: 0 };
+  reviewTime: LegacyScheduleRequest = { hour: 20, minute: 0 };
+  cleanupTime: LegacyScheduleRequest = { hour: 3, minute: 0 };
 
   isSavingRollover = false;
   isSavingReview = false;
@@ -28,11 +34,21 @@ export class SystemConfigComponent {
   isTriggeringReview = false;
   isTriggeringCleanup = false;
 
+  private buildPayload(req: LegacyScheduleRequest) {
+    const time = `${String(req.hour).padStart(2, '0')}:${String(req.minute).padStart(2, '0')}`;
+    return {
+      isEnabled: true,
+      runTime: time,
+      cronExpression: convertTimeToCron(time),
+      timeZone: 'Asia/Ho_Chi_Minh',
+    };
+  }
+
   // 1. Periodic Rollover
   saveRolloverSchedule() {
     this.isSavingRollover = true;
-    this.hangfireService.updatePeriodicRolloverSchedule(this.rolloverTime).subscribe({
-      next: (res) => {
+    this.hangfireService.updateHangfireSchedule('periodic-rollover', this.buildPayload(this.rolloverTime)).subscribe({
+      next: () => {
         this.toast.success('Cập nhật cấu hình gia hạn ví định kỳ thành công.');
         this.isSavingRollover = false;
       },
@@ -45,7 +61,7 @@ export class SystemConfigComponent {
 
   triggerRollover() {
     this.isTriggeringRollover = true;
-    this.hangfireService.triggerPeriodicRollover().subscribe({
+    this.hangfireService.triggerHangfireJob('periodic-rollover').subscribe({
       next: (res) => {
         this.toast.success(res.message || 'Gia hạn ví đã được kích hoạt thành công.');
         this.isTriggeringRollover = false;
@@ -60,8 +76,8 @@ export class SystemConfigComponent {
   // 2. Item Review
   saveReviewSchedule() {
     this.isSavingReview = true;
-    this.hangfireService.updateItemReviewSchedule(this.reviewTime).subscribe({
-      next: (res) => {
+    this.hangfireService.updateHangfireSchedule('item-review', this.buildPayload(this.reviewTime)).subscribe({
+      next: () => {
         this.toast.success('Cập nhật cấu hình nhắc nhở đánh giá thành công.');
         this.isSavingReview = false;
       },
@@ -74,7 +90,7 @@ export class SystemConfigComponent {
 
   triggerReview() {
     this.isTriggeringReview = true;
-    this.hangfireService.triggerItemReview().subscribe({
+    this.hangfireService.triggerHangfireJob('item-review').subscribe({
       next: (res) => {
         this.toast.success(res.message || 'Nhắc nhở đánh giá đã được kích hoạt.');
         this.isTriggeringReview = false;
@@ -89,8 +105,8 @@ export class SystemConfigComponent {
   // 3. Cleanup Notifications
   saveCleanupSchedule() {
     this.isSavingCleanup = true;
-    this.hangfireService.updateCleanupSchedule(this.cleanupTime).subscribe({
-      next: (res) => {
+    this.hangfireService.updateHangfireSchedule('cleanup-notifications', this.buildPayload(this.cleanupTime)).subscribe({
+      next: () => {
         this.toast.success('Cập nhật cấu hình dọn dẹp hệ thống thành công.');
         this.isSavingCleanup = false;
       },
@@ -103,7 +119,7 @@ export class SystemConfigComponent {
 
   triggerCleanup() {
     this.isTriggeringCleanup = true;
-    this.hangfireService.triggerCleanup().subscribe({
+    this.hangfireService.triggerHangfireJob('cleanup-notifications').subscribe({
       next: (res) => {
         this.toast.success(res.message || 'Dọn dẹp hệ thống đã được kích hoạt.');
         this.isTriggeringCleanup = false;

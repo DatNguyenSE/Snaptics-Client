@@ -33,6 +33,7 @@ export class AdminHeaderComponent {
     if (url.includes('/ai-operations')) return this.language.t('admin.nav.aiOperations');
     if (url.includes('/audit-logs')) return this.language.t('admin.nav.auditLogs');
     if (url.includes('/notifications')) return this.language.t('admin.nav.notifications');
+    if (url.includes('/hangfire')) return this.language.t('admin.nav.hangfireJobs');
     if (url.includes('/settings')) return this.language.t('admin.nav.systemSettings');
     return 'Admin';
   }
