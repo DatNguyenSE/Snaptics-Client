@@ -74,10 +74,16 @@ export class AiService {
       const requestSub = this.http.post<T>(url, formData, { params }).subscribe({
         next: (responseBody) => {
           // Direct 200 OK payload handling
-          if (responseBody && typeof responseBody === 'object' && Object.keys(responseBody).length > 0 && !completed) {
-            completed = true;
-            observer.next(responseBody);
-            observer.complete();
+          if (responseBody && typeof responseBody === 'object' && !completed) {
+            const keys = Object.keys(responseBody);
+            // If the response is just a generic acknowledgement like { message: "Task started" }, wait for SignalR.
+            const isBackgroundTaskAck = keys.includes('message') && !keys.includes('items') && !keys.includes('itemName') && !keys.includes('totalAmount') && !keys.includes('merchantName');
+            
+            if (keys.length > 0 && !isBackgroundTaskAck) {
+              completed = true;
+              observer.next(responseBody);
+              observer.complete();
+            }
           }
         },
         error: (error) => {

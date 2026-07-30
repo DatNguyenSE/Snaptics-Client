@@ -137,7 +137,6 @@ export class TransactionService {
       formData.append('image', file);
     }
 
-    formData.append('billDto', JSON.stringify(data));
 
     return this.http.post<TransactionDto>(`${this.apiUrl}/from-bill`, formData).pipe(
       tap((transaction) => {
