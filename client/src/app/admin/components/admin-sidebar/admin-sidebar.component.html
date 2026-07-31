@@ -110,43 +110,6 @@
                 </div>
               </div>
 
-              <!-- Giao diện / Theme -->
-              <div class="account-dropdown__language-row">
-                <span class="account-dropdown__language-label">{{ language.currentLang() === 'vi' ? 'Giao diện' : 'Theme' }}</span>
-                <div class="theme-segmented-control" role="group">
-                  <button
-                    type="button"
-                    class="theme-segmented-btn"
-                    [class.theme-segmented-btn--active]="theme.currentTheme() === 'system'"
-                    (click)="theme.setTheme('system')"
-                    aria-label="System Theme"
-                    title="System"
-                  >
-                    <span class="material-symbols-outlined">desktop_windows</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="theme-segmented-btn"
-                    [class.theme-segmented-btn--active]="theme.currentTheme() === 'light'"
-                    (click)="theme.setTheme('light')"
-                    aria-label="Light Theme"
-                    title="Light"
-                  >
-                    <span class="material-symbols-outlined">light_mode</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="theme-segmented-btn"
-                    [class.theme-segmented-btn--active]="theme.currentTheme() === 'dark'"
-                    (click)="theme.setTheme('dark')"
-                    aria-label="Dark Theme"
-                    title="Dark"
-                  >
-                    <span class="material-symbols-outlined">dark_mode</span>
-                  </button>
-                </div>
-              </div>
-
               <!-- Giao diện người dùng / User App -->
               <button class="account-dropdown__item" type="button" (click)="openUserApp()">
                 <span class="account-dropdown__item-main">
