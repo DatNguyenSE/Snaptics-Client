@@ -25,21 +25,32 @@
 
     <!-- Horizontal Tab Bar (Scrollable on Mobile) -->
     <div class="settings-tabs-wrapper">
-      <div class="settings-tabs" role="tablist" aria-label="Settings categories">
-        @for (tab of tabs; track tab.id) {
-          <button
-            type="button"
-            role="tab"
-            class="settings-tab-btn"
-            [class.settings-tab-btn--active]="activeTab === tab.id"
-            [attr.aria-selected]="activeTab === tab.id"
-            (click)="selectTab(tab.id)"
-          >
-            <span class="material-symbols-outlined settings-tab-btn__icon">{{ tab.icon }}</span>
-            <span class="settings-tab-btn__label">{{ tab.label }}</span>
-          </button>
-        }
+      <!-- Scroll viewport: handles touch-scroll, hides scrollbar -->
+      <div class="settings-tabs" #tabsEl (scroll)="onTabsScroll($event)">
+        <!-- Track: can be wider than viewport, holds all tab buttons -->
+        <div class="settings-tabs__track" role="tablist" aria-label="Settings categories">
+          @for (tab of tabs; track tab.id) {
+            <button
+              type="button"
+              role="tab"
+              class="settings-tab-btn"
+              [class.settings-tab-btn--active]="activeTab === tab.id"
+              [attr.aria-selected]="activeTab === tab.id"
+              [id]="'settings-tab-' + tab.id"
+              (click)="selectTab(tab.id)"
+            >
+              <span class="material-symbols-outlined settings-tab-btn__icon">{{ tab.icon }}</span>
+              <span class="settings-tab-btn__label">{{ tab.label }}</span>
+            </button>
+          }
+        </div>
       </div>
+      <!-- Gradient fade: scroll hint, pointer-events:none so it doesn't block touch -->
+      <div
+        class="settings-tabs-fade"
+        [class.settings-tabs-fade--hidden]="!showTabFade"
+        aria-hidden="true"
+      ></div>
     </div>
 
     <!-- Tab Content Area -->

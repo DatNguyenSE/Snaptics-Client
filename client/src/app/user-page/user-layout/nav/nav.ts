@@ -158,15 +158,8 @@ export class Nav {
 
   handleMobileAccountClick(event: MouseEvent): void {
     event.stopPropagation();
-
-    // On very small screens the account item is a direct shortcut to settings.
-    // Wider responsive layouts keep the account menu so its options remain available.
-    if (window.innerWidth < 640) {
-      this.closeMenus();
-      void this.router.navigateByUrl('/settings');
-      return;
-    }
-
+    // Account button now opens the account menu (language, theme, logout)
+    // Navigation to settings is handled by the dedicated settings link
     this.toggleAccountMenu(event);
   }
 

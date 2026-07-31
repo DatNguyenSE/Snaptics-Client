@@ -47,6 +47,8 @@ export class SettingsPage implements OnInit {
   activeTab: SettingsTabId = 'account';
   profile: UserProfileDto | null = null;
   isLoadingProfile = false;
+  /** Controls whether the right-edge gradient scroll hint is visible */
+  showTabFade = true;
 
   get tabs(): TabItem[] {
     const isVi = this.language.currentLang() === 'vi';
@@ -60,12 +62,12 @@ export class SettingsPage implements OnInit {
   }
 
   ngOnInit(): void {
-    // Listen to query params for tab sync
     this.route.queryParams.subscribe((params) => {
       const tabParam = params['tab']?.toLowerCase() as SettingsTabId;
       const isValidTab = this.tabs.some((t) => t.id === tabParam);
       if (isValidTab) {
         this.activeTab = tabParam;
+        this.scrollActiveTabIntoView(tabParam);
       } else {
         this.activeTab = 'account';
       }
@@ -89,11 +91,29 @@ export class SettingsPage implements OnInit {
 
   selectTab(tabId: SettingsTabId): void {
     this.activeTab = tabId;
+    this.scrollActiveTabIntoView(tabId);
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { tab: tabId },
       queryParamsHandling: 'merge',
     });
+  }
+
+  /** Called by (scroll) event on .settings-tabs viewport — hides fade gradient when at end */
+  onTabsScroll(event: Event): void {
+    const el = event.target as HTMLElement;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
+    this.showTabFade = !atEnd;
+  }
+
+  private scrollActiveTabIntoView(tabId: SettingsTabId): void {
+    // Delay so Angular renders the active class before scrolling
+    setTimeout(() => {
+      const btn = document.getElementById(`settings-tab-${tabId}`);
+      if (btn) {
+        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }, 60);
   }
 
   onProfileUpdated(updated: UserProfileDto): void {

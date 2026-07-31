@@ -26,15 +26,13 @@
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: flex-start;
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  gap: 4px;
+  gap: 0;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 8px 8px calc(20px + env(safe-area-inset-bottom));
+  padding: 6px 4px calc(8px + env(safe-area-inset-bottom, 0px));
 }
 
 .bottom-nav__inner::-webkit-scrollbar {
@@ -47,7 +45,8 @@
   background: transparent;
   color: var(--sw-muted-foreground);
   text-decoration: none;
-  min-width: 74px;
+  min-width: 60px;
+  min-height: 44px;
   padding: 6px 8px;
   display: flex;
   flex: 0 0 auto;
@@ -58,6 +57,10 @@
   transition:
     color 0.2s ease,
     background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  position: relative;
+  z-index: 1;
 }
 
 .bottom-nav__item:hover {
@@ -721,44 +724,67 @@
     display: none;
   }
 
-  .bottom-nav__item--budget,
-  .bottom-nav__item--analysis,
-  .bottom-nav__item--frequency,
-  .bottom-nav__item--support,
-  .bottom-nav__item--category {
-    display: none !important;
-  }
-
+  /* manual-entry is not a nav item — keep it hidden */
   .bottom-nav__item--manual-entry {
     display: none !important;
   }
 }
 
-@media (max-width: 639px) {
+@media (max-width: 1023px) {
+  /* Bottom nav: scrollable flex bar with all sidebar items */
+  .bottom-nav {
+    overflow: hidden;
+  }
+
   .bottom-nav__inner {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    max-width: 420px;
-    gap: 2px;
-    padding-inline: 8px;
-  }
-
-  .bottom-nav__item,
-  .bottom-nav__item-wrapper,
-  .account-dropdown--mobile {
-    min-width: 0;
-    width: 100%;
-    flex: none;
     display: flex;
-    justify-content: center;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: flex-start; /* left-aligned so all items accessible by scrolling */
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    max-width: 100%;
+    gap: 0;
+    padding: 4px 0 calc(6px + env(safe-area-inset-bottom, 0px));
   }
 
+  .bottom-nav__inner::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Each item: fixed size so it's tappable and labels are readable */
   .bottom-nav__item {
-    padding-inline: 4px;
+    flex: 0 0 auto;
+    min-width: 68px;
+    padding: 4px 6px;
+  }
+
+  /* Account button wrapper follows same sizing */
+  .account-dropdown--mobile {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .bottom-nav__item--account {
+    min-width: 68px;
   }
 
   .bottom-nav__label {
     font-size: 0.5625rem;
+    white-space: nowrap;
+  }
+
+  /* Mobile account dropdown panel anchors from right */
+  .account-dropdown__panel--mobile {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 78px);
+    right: 8px;
+    width: min(290px, calc(100vw - 16px));
   }
 
   .account-dropdown__language-row {
@@ -769,12 +795,6 @@
   .language-switch--panel .language-switch__button {
     min-width: 36px;
     padding-inline: 9px;
-  }
-
-  .account-dropdown__panel--mobile {
-    position: fixed;
-    bottom: calc(env(safe-area-inset-bottom) + 84px);
-    width: min(280px, calc(100vw - 24px));
   }
 }
 

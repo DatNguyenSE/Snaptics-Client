@@ -173,12 +173,14 @@
       </a>
     }
 
+    <!-- Account menu trigger -->
     <div class="account-dropdown account-dropdown--mobile">
       <button
         class="bottom-nav__item bottom-nav__item--account"
         type="button"
         (click)="handleMobileAccountClick($event)"
-        aria-label="{{ language.t('nav.account') }}"
+        [attr.aria-label]="language.t('nav.account')"
+        [attr.aria-expanded]="isAccountMenuOpen"
       >
         <span class="bottom-nav__account-avatar">{{ account.initials }}</span>
         <span class="bottom-nav__label">{{ language.t('nav.account') }}</span>

@@ -52,9 +52,7 @@ html.dark-theme .snaptics-shell {
 
 @media (max-width: 1023px) {
   .snaptics-shell {
-    height: 100dvh;
-    height: 100vh; /* fallback */
-    overflow: hidden;
+    overflow-x: hidden;
   }
   
   .user-main {
@@ -62,6 +60,7 @@ html.dark-theme .snaptics-shell {
     height: calc(100vh - 80px); /* fallback */
     min-height: auto;
     overflow-y: auto;
+    overflow-x: hidden;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
   }
