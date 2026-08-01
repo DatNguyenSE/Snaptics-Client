@@ -72,16 +72,6 @@
             (profileUpdated)="onProfileUpdated($event)"
           ></app-profile-tab>
         }
-        @case ('security') {
-          <app-security-tab
-            [profile]="profile"
-            (navigateTab)="selectTab($any($event))"
-            (profileUpdated)="onProfileUpdated($event)"
-          ></app-security-tab>
-        }
-        @case ('currencies') {
-          <app-currencies-tab></app-currencies-tab>
-        }
       }
     </div>
 

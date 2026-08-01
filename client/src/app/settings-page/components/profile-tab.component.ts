@@ -6,6 +6,7 @@ import { UserProfileService } from '../../core/services/user-profile.service';
 import { ToastService } from '../../core/services/toast-service';
 import { S3Service } from '../../core/services/s3.service';
 
+
 @Component({
   selector: 'app-profile-tab',
   standalone: true,
@@ -29,12 +30,7 @@ export class ProfileTabComponent implements OnInit {
 
   // Personal Info Form State
   personalForm = {
-    fullName: '',
     displayName: '',
-    phoneNumber: '',
-    dateOfBirth: '',
-    gender: 'other',
-    bio: '',
   };
   isSavingPersonal = false;
 
@@ -42,8 +38,7 @@ export class ProfileTabComponent implements OnInit {
   addressForm = {
     address: '',
     city: '',
-    province: '',
-    postalCode: '',
+    postCode: '',
     country: 'Vietnam',
   };
   isSavingAddress = false;
@@ -74,23 +69,21 @@ export class ProfileTabComponent implements OnInit {
   }
 
   private populateForms(profile: UserProfileDto): void {
-    this.previewAvatarUrl = profile.avatarUrl || null;
+    if (profile.imageUrl && !profile.imageUrl.startsWith('http') && !profile.imageUrl.startsWith('data:')) {
+      this.previewAvatarUrl = this.s3Service.getDirectImageUrl(profile.imageUrl);
+    } else {
+      this.previewAvatarUrl = profile.imageUrl || null;
+    }
 
     this.personalForm = {
-      fullName: profile.fullName || '',
-      displayName: profile.fullName || '',
-      phoneNumber: profile.phoneNumber || '',
-      dateOfBirth: profile.dateOfBirth ? profile.dateOfBirth.split('T')[0] : '',
-      gender: profile.gender || 'other',
-      bio: profile.bio || '',
+      displayName: profile.displayName || '',
     };
 
     this.addressForm = {
       address: profile.address || '',
-      city: 'Ho Chi Minh',
-      province: 'Ho Chi Minh',
-      postalCode: '700000',
-      country: 'Vietnam',
+      city: profile.city || '',
+      postCode: profile.postCode || '',
+      country: profile.country || 'Vietnam',
     };
 
     this.emailForm.currentEmail = profile.email || '';
@@ -105,9 +98,9 @@ export class ProfileTabComponent implements OnInit {
     const file = input.files[0];
     this.avatarError = '';
 
-    // Validate size <= 2MB
-    if (file.size > 2 * 1024 * 1024) {
-      this.avatarError = 'Dung lượng file vượt quá 2MB. Vui lòng chọn ảnh nhỏ hơn.';
+    // Validate size <= 20MB
+    if (file.size > 20 * 1024 * 1024) {
+      this.avatarError = 'Dung lượng file vượt quá 20MB. Vui lòng chọn ảnh nhỏ hơn.';
       this.toast.error(this.avatarError);
       return;
     }
@@ -137,23 +130,15 @@ export class ProfileTabComponent implements OnInit {
     }
 
     this.isUploadingAvatar = true;
-    this.s3Service.uploadFile(this.selectedAvatarFile).subscribe({
+    this.userProfileService.uploadAvatar(this.selectedAvatarFile).subscribe({
       next: (res) => {
-        const avatarUrl = res.url || this.s3Service.getDirectImageUrl(res.key);
-        this.userProfileService.updateProfile({ avatarUrl }).subscribe({
-          next: (updatedProfile) => {
-            this.isUploadingAvatar = false;
-            this.selectedAvatarFile = null;
-            this.profileUpdated.emit(updatedProfile);
-            this.toast.success('Đã cập nhật ảnh đại diện thành công!');
-          },
-          error: (err) => {
-            this.isUploadingAvatar = false;
-            this.toast.error(err.message || 'Không thể cập nhật hồ sơ cá nhân.');
-          },
-        });
+        const imageUrl = res.imageUrl;
+        this.isUploadingAvatar = false;
+        this.selectedAvatarFile = null;
+        this.profileUpdated.emit({ ...this.profile!, imageUrl });
+        this.toast.success('Đã cập nhật ảnh đại diện thành công!');
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isUploadingAvatar = false;
         this.toast.error(err.message || 'Tải ảnh lên máy chủ thất bại.');
       },
@@ -165,41 +150,31 @@ export class ProfileTabComponent implements OnInit {
     this.selectedAvatarFile = null;
     this.avatarError = '';
 
-    this.userProfileService.updateProfile({ avatarUrl: '' }).subscribe({
-      next: (updatedProfile) => {
-        this.profileUpdated.emit(updatedProfile);
-        this.toast.success('Đã xóa ảnh đại diện.');
-      },
-      error: (err) => {
-        this.toast.error(err.message || 'Không thể xóa ảnh đại diện.');
-      },
-    });
+    // If the API doesn't have a remove avatar endpoint, we could update profile with an empty imageUrl?
+    // Wait, the API doesn't support updating ImageUrl through updateProfile (only Avatar upload).
+    // For now we'll just ignore this or do nothing.
+    this.toast.info('Tính năng xóa ảnh đại diện đang được phát triển.');
   }
 
   // ─── Save Personal Info ─────────────────────────────────────────────────────
 
   savePersonal(): void {
-    if (!this.personalForm.fullName.trim()) {
-      this.toast.error('Họ và tên không được để trống.');
-      return;
-    }
-
     this.isSavingPersonal = true;
     this.userProfileService
       .updateProfile({
-        fullName: this.personalForm.fullName.trim(),
-        phoneNumber: this.personalForm.phoneNumber.trim(),
-        dateOfBirth: this.personalForm.dateOfBirth,
-        gender: this.personalForm.gender,
-        bio: this.personalForm.bio.trim(),
+        displayName: this.personalForm.displayName.trim(),
+        address: this.addressForm.address,
+        city: this.addressForm.city,
+        postCode: this.addressForm.postCode,
+        country: this.addressForm.country,
       })
       .subscribe({
-        next: (updatedProfile) => {
+        next: () => {
           this.isSavingPersonal = false;
-          this.profileUpdated.emit(updatedProfile);
+          this.profileUpdated.emit({ ...this.profile!, displayName: this.personalForm.displayName.trim() });
           this.toast.success('Đã cập nhật thông tin cá nhân thành công!');
         },
-        error: (err) => {
+        error: (err: any) => {
           this.isSavingPersonal = false;
           this.toast.error(err.message || 'Cập nhật thất bại.');
         },
@@ -212,15 +187,25 @@ export class ProfileTabComponent implements OnInit {
     this.isSavingAddress = true;
     this.userProfileService
       .updateProfile({
-        address: `${this.addressForm.address}, ${this.addressForm.city}`,
+        displayName: this.personalForm.displayName,
+        address: this.addressForm.address,
+        city: this.addressForm.city,
+        postCode: this.addressForm.postCode,
+        country: this.addressForm.country,
       })
       .subscribe({
-        next: (updatedProfile) => {
+        next: () => {
           this.isSavingAddress = false;
-          this.profileUpdated.emit(updatedProfile);
+          this.profileUpdated.emit({ 
+            ...this.profile!, 
+            address: this.addressForm.address, 
+            city: this.addressForm.city,
+            postCode: this.addressForm.postCode,
+            country: this.addressForm.country
+          });
           this.toast.success('Đã cập nhật địa chỉ liên hệ thành công!');
         },
-        error: (err) => {
+        error: (err: any) => {
           this.isSavingAddress = false;
           this.toast.error(err.message || 'Cập nhật địa chỉ thất bại.');
         },
@@ -252,14 +237,18 @@ export class ProfileTabComponent implements OnInit {
     }
 
     this.isSavingEmail = true;
-    setTimeout(() => {
-      this.isSavingEmail = false;
-      this.toast.success(
-        'Đã gửi yêu cầu đổi email. Vui lòng kiểm tra hộp thư email mới để xác thực!'
-      );
-      this.emailForm.newEmail = '';
-      this.emailForm.confirmNewEmail = '';
-    }, 800);
+    this.userProfileService.changeEmail({ newEmail: this.emailForm.newEmail.trim() }).subscribe({
+      next: () => {
+        this.isSavingEmail = false;
+        this.toast.success('Đã gửi yêu cầu đổi email. Vui lòng kiểm tra hộp thư mới để xác thực!');
+        this.emailForm.newEmail = '';
+        this.emailForm.confirmNewEmail = '';
+      },
+      error: (err: any) => {
+        this.isSavingEmail = false;
+        this.toast.error(err.message || 'Thay đổi email thất bại.');
+      }
+    });
   }
 
   // ─── Change Password Handler ────────────────────────────────────────────────
@@ -290,10 +279,9 @@ export class ProfileTabComponent implements OnInit {
 
     this.isSavingPassword = true;
     this.userProfileService
-      .changeSecurity({
+      .changePassword({
         currentPassword: this.passwordForm.currentPassword,
         newPassword: this.passwordForm.newPassword,
-        confirmPassword: this.passwordForm.confirmPassword,
       })
       .subscribe({
         next: () => {
@@ -301,7 +289,7 @@ export class ProfileTabComponent implements OnInit {
           this.passwordForm = { currentPassword: '', newPassword: '', confirmPassword: '' };
           this.toast.success('Đã đổi mật khẩu thành công!');
         },
-        error: (err) => {
+        error: (err: any) => {
           this.isSavingPassword = false;
           this.toast.error(err.message || 'Mật khẩu hiện tại không chính xác hoặc có lỗi xảy ra.');
         },

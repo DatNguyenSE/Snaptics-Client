@@ -4,6 +4,8 @@ import { AccountService } from '../../core/services/account-service';
 import { UserProfileDto } from '../../models/user-profile.dto';
 import { LanguageService } from '../../core/services/language-service';
 import { ToastService } from '../../core/services/toast-service';
+import { S3Service } from '../../core/services/s3.service';
+
 
 @Component({
   selector: 'app-account-tab',
@@ -21,8 +23,7 @@ export class AccountTabComponent {
   private readonly accountService = inject(AccountService);
   private readonly toast = inject(ToastService);
   protected readonly language = inject(LanguageService);
-
-  isResendingEmail = false;
+  private readonly s3Service = inject(S3Service);
 
   get currentUser() {
     return this.accountService.currentUser();
@@ -37,30 +38,17 @@ export class AccountTabComponent {
   }
 
   get userInitials(): string {
-    const name = this.profile?.fullName || this.currentUser?.displayName || 'User';
+    const name = this.profile?.displayName || this.currentUser?.displayName || 'User';
     const parts = name.trim().split(/\s+/).filter(Boolean);
     if (parts.length === 0) return 'U';
-    return parts.slice(0, 2).map((p) => p[0].toUpperCase()).join('');
+    return parts.slice(0, 2).map((p: string) => p[0].toUpperCase()).join('');
   }
 
-  resendVerificationEmail(): void {
-    const email = this.profile?.email || this.currentUser?.email;
-    if (!email) {
-      this.toast.error('Email không hợp lệ.');
-      return;
-    }
-
-    this.isResendingEmail = true;
-    this.accountService.resendOtp(email).subscribe({
-      next: () => {
-        this.isResendingEmail = false;
-        this.toast.success('Đã gửi email xác thực thành công. Vui lòng kiểm tra hộp thư!');
-      },
-      error: (err) => {
-        this.isResendingEmail = false;
-        this.toast.error(err.message || 'Không thể gửi email xác thực. Vui lòng thử lại sau.');
-      },
-    });
+  get fullImageUrl(): string | null {
+    const imgUrl = this.profile?.imageUrl;
+    if (!imgUrl) return null;
+    if (imgUrl.startsWith('http') || imgUrl.startsWith('data:')) return imgUrl;
+    return this.s3Service.getDirectImageUrl(imgUrl);
   }
 
   goToTab(tabName: string): void {

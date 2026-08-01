@@ -45,7 +45,11 @@
           [attr.aria-expanded]="isAccountMenuOpen"
           (click)="toggleAccountMenu($event)"
         >
-          <span class="account-dropdown__avatar">{{ account.initials }}</span>
+          @if (account.avatarUrl) {
+            <img [src]="account.avatarUrl" [alt]="account.fullName" class="account-dropdown__avatar" />
+          } @else {
+            <span class="account-dropdown__avatar">{{ account.initials }}</span>
+          }
           <div class="sidebar__account-copy">
             <p class="sidebar__account-name">{{ account.fullName }}</p>
             <span class="sidebar__account-username">@{{ account.username }}</span>

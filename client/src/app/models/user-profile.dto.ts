@@ -1,38 +1,29 @@
 export interface UserProfileDto {
   id: string;
-  email: string;
-  fullName?: string;
-  phoneNumber?: string;
-  avatarUrl?: string;
-  bio?: string;
-  dateOfBirth?: string;
-  gender?: string;
+  email?: string;
+  displayName?: string;
+  imageUrl?: string;
   address?: string;
-  preferredCurrency?: string;
-  preferredLanguage?: string;
-  twoFactorEnabled?: boolean;
-  emailConfirmed?: boolean;
-  phoneNumberConfirmed?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
+  city?: string;
+  postCode?: string;
+  country?: string;
+  trackCalories?: boolean;
+  defaultReminderTime?: string; // TimeSpan from C# translates to string format "hh:mm:ss" in JSON
 }
 
 export interface UpdateProfileDto {
-  fullName?: string;
-  phoneNumber?: string;
-  avatarUrl?: string;
-  bio?: string;
-  dateOfBirth?: string;
-  gender?: string;
+  displayName?: string;
   address?: string;
-  preferredCurrency?: string;
-  preferredLanguage?: string;
+  city?: string;
+  postCode?: string;
+  country?: string;
 }
 
-export interface ChangeSecurityDto {
+export interface ChangePasswordDto {
   currentPassword?: string;
   newPassword?: string;
-  confirmPassword?: string;
-  enableTwoFactor?: boolean;
-  twoFactorCode?: string;
+}
+
+export interface ChangeEmailDto {
+  newEmail?: string;
 }

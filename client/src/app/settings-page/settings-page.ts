@@ -8,8 +8,6 @@ import { UserProfileDto } from '../models/user-profile.dto';
 import { AccountTabComponent } from './components/account-tab.component';
 import { GeneralTabComponent } from './components/general-tab.component';
 import { ProfileTabComponent } from './components/profile-tab.component';
-import { SecurityTabComponent } from './components/security-tab.component';
-import { CurrenciesTabComponent } from './components/currencies-tab.component';
 
 export type SettingsTabId =
   | 'account'
@@ -32,8 +30,6 @@ interface TabItem {
     AccountTabComponent,
     GeneralTabComponent,
     ProfileTabComponent,
-    SecurityTabComponent,
-    CurrenciesTabComponent,
   ],
   templateUrl: './settings-page.html',
   styleUrl: './settings-page.css',
@@ -56,8 +52,6 @@ export class SettingsPage implements OnInit {
       { id: 'account', label: isVi ? 'Tài khoản' : 'Account', icon: 'manage_accounts' },
       { id: 'general', label: isVi ? 'Cài đặt chung' : 'General', icon: 'settings' },
       { id: 'profile', label: isVi ? 'Hồ sơ cá nhân' : 'Profile', icon: 'person' },
-      { id: 'security', label: isVi ? 'Bảo mật' : 'Security', icon: 'security' },
-      { id: 'currencies', label: isVi ? 'Tiền tệ' : 'Currencies', icon: 'payments' },
     ];
   }
 

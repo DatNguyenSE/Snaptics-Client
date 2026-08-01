@@ -362,15 +362,17 @@
           </div>
         </div>
 
-        <div class="form-row">
+        <!-- Số tiền / Số tiền mục tiêu input hidden per user request -->
+        <!-- <div class="form-row">
           <div class="form-group form-group--full">
             <label>{{ budgetForm.get('type')?.value == 1 ? 'Số tiền mục tiêu (VND)' : 'Số tiền (VND)' }}</label>
             <input type="text" [value]="displayAmount" (input)="onAmountChange($event)" placeholder="0" class="form-control"
               [class.is-invalid]="budgetForm.get('amount')?.invalid && budgetForm.get('amount')?.touched" />
           </div>
-        </div>
+        </div> -->
 
-        @if (modalMode === 'ADD') {
+        <!-- Nguồn thu nhập ban đầu dropdown hidden per user request -->
+        <!-- @if (modalMode === 'ADD') {
           <div class="form-group">
             <label>Nguồn thu nhập ban đầu (Tùy chọn)</label>
             <select formControlName="incomeSourceId" class="form-control">
@@ -383,7 +385,7 @@
               Hệ thống sẽ ghi nhận lịch sử nạp tiền vào ví dựa trên nguồn thu bạn chọn.
             </small>
           </div>
-        }
+        } -->
 
         <div class="form-group">
           <div class="form-section-heading">

@@ -118,7 +118,7 @@ export class Budget implements OnInit {
     const today = new Date().toISOString().split('T')[0];
     this.budgetForm = this.fb.group({
       name: ['', Validators.required],
-      amount: [0, [Validators.required, Validators.min(1)]],
+      amount: [0],
       incomeSourceId: [null], // null means 'Tự nhập thủ công'
       type: [0, Validators.required],
       startDate: [today, Validators.required],

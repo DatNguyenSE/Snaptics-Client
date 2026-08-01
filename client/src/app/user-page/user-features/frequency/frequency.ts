@@ -184,27 +184,17 @@ export class Frequency implements OnInit {
     this.isLoading = true;
     this.hasError = false;
 
-    // Define mock data fallback
-    const MOCK_DATA: ItemInventoryDto[] = [
-      { id: 1, userId: 'u1', transactionDetailId: 101, itemName: 'Máy xay sinh tố', categoryName: 'Đồ gia dụng', purchaseDate: '2023-01-15T00:00:00Z', amount: 850000, usageStatus: 'Frequent', isReviewed: true, createdAt: '2023-01-15T00:00:00Z' },
-      { id: 2, userId: 'u1', transactionDetailId: 102, itemName: 'Chuột không dây Logitech', categoryName: 'Điện tử', purchaseDate: '2023-05-20T00:00:00Z', amount: 450000, usageStatus: 'Frequent', isReviewed: true, createdAt: '2023-05-20T00:00:00Z' },
-      { id: 3, userId: 'u1', transactionDetailId: 103, itemName: 'Bàn phím cơ', categoryName: 'Điện tử', purchaseDate: '2023-11-10T00:00:00Z', amount: 1200000, usageStatus: 'Occasionally', isReviewed: true, createdAt: '2023-11-10T00:00:00Z' },
-      { id: 4, userId: 'u1', transactionDetailId: 104, itemName: 'Sách "Atomic Habits"', categoryName: 'Giáo dục', purchaseDate: '2024-02-05T00:00:00Z', amount: 150000, usageStatus: 'Occasionally', isReviewed: false, createdAt: '2024-02-05T00:00:00Z' },
-      { id: 5, userId: 'u1', transactionDetailId: 105, itemName: 'Máy massage cầm tay', categoryName: 'Sức khỏe', purchaseDate: '2023-08-12T00:00:00Z', amount: 990000, usageStatus: 'Seldom', isReviewed: true, createdAt: '2023-08-12T00:00:00Z' },
-      { id: 6, userId: 'u1', transactionDetailId: 106, itemName: 'Giày chạy bộ', categoryName: 'Thể thao', purchaseDate: '2022-12-01T00:00:00Z', amount: 1500000, usageStatus: 'Unused', isReviewed: true, createdAt: '2022-12-01T00:00:00Z' },
-    ];
-
     this.itemInventoryService
       .getUserItemInventories()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (items) => {
-          this.allItems.set(items && items.length > 0 ? items : MOCK_DATA);
+          this.allItems.set(items || []);
           this.isLoading = false;
         },
         error: () => {
           this.hasError = true;
-          this.allItems.set(MOCK_DATA); // Use mock data to display the UI even if the API errors
+          this.allItems.set([]);
           this.isLoading = false;
         },
       });

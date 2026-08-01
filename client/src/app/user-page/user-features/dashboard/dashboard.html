@@ -320,4 +320,86 @@
       </div>
     </div>
   }
+
+  @if (isAverageDailySpendModalOpen) {
+    <div class="wallet-forecast-overlay" (click)="closeAverageDailySpendModal()">
+      <div class="wallet-forecast-modal wallet-forecast-modal--daily" role="dialog" aria-modal="true" aria-labelledby="daily-spend-title" (click)="$event.stopPropagation()">
+        <div class="wallet-forecast-modal__header">
+          <div class="daily-spend-heading">
+            <div class="daily-spend-heading__icon">
+              <span class="material-symbols-outlined">speed</span>
+            </div>
+            <div>
+              <p class="wallet-forecast-modal__eyebrow">Phân tích chi tiêu hàng ngày</p>
+              <h2 id="daily-spend-title">Trung bình mỗi ngày</h2>
+              <p class="daily-spend-heading__description">
+                Theo dõi nhịp chi tiêu để giữ ngân sách trong tầm kiểm soát.
+              </p>
+            </div>
+          </div>
+          <button type="button" class="wallet-forecast-modal__close" (click)="closeAverageDailySpendModal()" aria-label="Đóng">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="wallet-forecast-modal__insight-banner" [class]="'insight-banner--' + averageDailySpendInsight.status">
+          <span class="material-symbols-outlined insight-banner__icon">
+            {{ averageDailySpendInsight.status === 'good' ? 'check_circle' : averageDailySpendInsight.status === 'warning' ? 'warning' : 'error' }}
+          </span>
+          <div>
+            <strong>{{ averageDailySpendInsight.status === 'good' ? 'Tình hình ổn định' : averageDailySpendInsight.status === 'warning' ? 'Cần theo dõi thêm' : 'Ngân sách đang gặp rủi ro' }}</strong>
+            <p>{{ averageDailySpendInsight.text }}</p>
+          </div>
+        </div>
+
+        <div class="wallet-forecast-modal__metrics-grid">
+          <div class="wallet-forecast-metric wallet-forecast-metric--blue">
+            <span class="material-symbols-outlined">speed</span>
+            <small>Đang tiêu trung bình</small>
+            <strong>{{ formatCurrency(activeWalletAverageDailySpend) }} / ngày</strong>
+            <p>{{ activeWalletAverageComparisonLabel }}</p>
+          </div>
+          <div class="wallet-forecast-metric wallet-forecast-metric--green">
+            <span class="material-symbols-outlined">verified_user</span>
+            <small>Mức an toàn (còn lại)</small>
+            <strong>{{ formatCurrency(activeWalletSafeDailyBudget) }} / ngày</strong>
+            <p>Để không bị âm ngân sách</p>
+          </div>
+        </div>
+
+        <div class="wallet-forecast-modal__metrics-full">
+          <div class="wallet-forecast-metric wallet-forecast-metric--amber daily-spend-forecast">
+            <div class="daily-spend-forecast__topline">
+              <span class="daily-spend-forecast__icon material-symbols-outlined">analytics</span>
+              <small>Dự báo cuối kỳ</small>
+              <span class="daily-spend-forecast__caption">{{ activeWalletRemainingDays }} ngày còn lại</span>
+            </div>
+            <strong [class.text-danger]="activeWalletForecastSpend > (activeBudget?.amount || 0)">{{ formatCurrency(activeWalletForecastSpend) }}</strong>
+            <p>Dựa trên tốc độ chi tiêu hiện tại của bạn</p>
+          </div>
+        </div>
+
+        <div class="wallet-forecast-modal__list">
+          <div class="wallet-forecast-modal__list-heading">
+            <div>
+              <div class="wallet-forecast-modal__list-title">Ngày chi tiêu cao nhất</div>
+              <p>Những ngày có tổng chi lớn nhất trong kỳ</p>
+            </div>
+            <span class="material-symbols-outlined">calendar_month</span>
+          </div>
+          @for (day of topSpendingDays; track day.date; let index = $index) {
+            <div class="wallet-forecast-modal__expense-row">
+              <span class="wallet-forecast-modal__rank" [class.wallet-forecast-modal__rank--top]="index === 0">{{ index + 1 }}</span>
+              <span class="wallet-forecast-modal__expense-name">{{ day.date }}</span>
+              <span class="wallet-forecast-modal__expense-meta">
+                <strong>{{ formatCurrency(day.amount) }}</strong>
+              </span>
+            </div>
+          } @empty {
+            <p class="wallet-forecast-modal__empty">Chưa có đủ dữ liệu để thống kê.</p>
+          }
+        </div>
+      </div>
+    </div>
+  }
 </section>

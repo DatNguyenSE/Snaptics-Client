@@ -91,6 +91,7 @@ export class Dashboard implements OnInit, OnDestroy {
   isCategorySummaryModalOpen = false;
   isTrendSummaryModalOpen = false;
   isActiveHoursModalOpen = false;
+  isAverageDailySpendModalOpen = false;
   topCategoryName = '—';
   activeHours: ActiveHourDto[] = [];
   selectedActiveHour: ActiveHourDto | null = null;
@@ -116,6 +117,7 @@ export class Dashboard implements OnInit, OnDestroy {
   currentAiResponse: { title: string, subtitle: string } | null = null;
   isListening = false;
   voiceError = '';
+
   private speechRecognition?: SpeechRecognitionLike;
   
   resetAiResponse(): void {
@@ -137,6 +139,11 @@ export class Dashboard implements OnInit, OnDestroy {
 
   get remainingBudget(): number {
     if (this.activeBudget) {
+      if (this.activeBudget.type === 1) {
+        return this.activeBudget.currentAmount !== undefined
+          ? this.activeBudget.currentAmount
+          : this.getBudgetSpent(this.activeBudget);
+      }
       const spent = this.activeBudget.currentAmount !== undefined
         ? this.activeBudget.amount - this.activeBudget.currentAmount
         : this.getBudgetSpent(this.activeBudget);
@@ -226,6 +233,50 @@ export class Dashboard implements OnInit, OnDestroy {
     return `${value >= 0 ? 'Tăng' : 'Giảm'} ${Math.abs(value)}%`;
   }
 
+  get activeWalletRemainingDays(): number {
+    if (!this.activeBudget) return 0;
+    const end = new Date(this.activeBudget.endDate);
+    end.setHours(23, 59, 59, 999);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (today > end) return 0;
+    return Math.max(1, Math.floor((end.getTime() - today.getTime()) / 86_400_000));
+  }
+
+  get activeWalletSafeDailyBudget(): number {
+    if (!this.activeBudget) return 0;
+    const remaining = this.remainingBudget;
+    const daysLeft = this.activeWalletRemainingDays;
+    if (daysLeft <= 0) return 0;
+    return remaining / daysLeft;
+  }
+
+  get activeWalletForecastSpend(): number {
+    if (!this.activeBudget) return 0;
+    const currentSpent = this.activeBudget.amount - this.remainingBudget;
+    const forecastedRemaining = this.activeWalletAverageDailySpend * this.activeWalletRemainingDays;
+    return currentSpent + forecastedRemaining;
+  }
+
+  get averageDailySpendInsight(): { text: string; status: 'good' | 'warning' | 'danger' } {
+    const avg = this.activeWalletAverageDailySpend;
+    const safe = this.activeWalletSafeDailyBudget;
+    if (!this.activeBudget) return { text: 'Chưa có thông tin ngân sách.', status: 'warning' };
+    if (this.remainingBudget <= 0) return { text: 'Bạn đã dùng hết ngân sách!', status: 'danger' };
+    
+    if (avg === 0) return { text: 'Bạn chưa phát sinh giao dịch nào.', status: 'good' };
+    
+    if (avg <= safe * 0.8) {
+      return { text: 'Tuyệt vời! Bạn đang tiêu dưới mức an toàn rất nhiều.', status: 'good' };
+    } else if (avg <= safe) {
+      return { text: 'Khá ổn định! Tốc độ chi tiêu đang nằm trong mức an toàn.', status: 'good' };
+    } else if (avg <= safe * 1.2) {
+      return { text: 'Chú ý! Bạn đang tiêu nhanh hơn dự kiến một chút.', status: 'warning' };
+    } else {
+      return { text: 'Cảnh báo! Nếu giữ tốc độ này, bạn sẽ âm ngân sách.', status: 'danger' };
+    }
+  }
+
   get kpiCards(): KpiCard[] {
     return [
       { id: 'total-spent', label: 'Tổng chi tiêu', value: this.formatCurrency(this.totalSpent), icon: 'payments', colorClass: 'kpi-card--violet', subLabel: 'Tháng này', clickable: true },
@@ -259,16 +310,38 @@ export class Dashboard implements OnInit, OnDestroy {
     this.isActiveHoursModalOpen = false;
   }
 
+  openAverageDailySpendModal(): void {
+    this.isAverageDailySpendModalOpen = true;
+  }
+
+  closeAverageDailySpendModal(): void {
+    this.isAverageDailySpendModalOpen = false;
+  }
+
+  get topSpendingDays(): { date: string; amount: number }[] {
+    const expenses = this.activeWalletExpenses;
+    const dailyMap = new Map<string, number>();
+    for (const t of expenses) {
+      const dateStr = new Date(t.transactionDate).toLocaleDateString('vi-VN');
+      dailyMap.set(dateStr, (dailyMap.get(dateStr) || 0) + t.totalAmount);
+    }
+    return Array.from(dailyMap.entries())
+      .map(([date, amount]) => ({ date, amount }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 5);
+  }
+
   onKpiCardClick(card: KpiCard): void {
     if (card.id === 'top-category') {
       this.openCategorySummaryModal();
     } else if (card.id === 'total-spent') {
       this.openTrendSummaryModal();
-    } else if (card.id === 'average-daily-spend' || card.id === 'active-hours') {
+    } else if (card.id === 'average-daily-spend') {
+      this.openAverageDailySpendModal();
+    } else if (card.id === 'active-hours') {
       this.openActiveHoursModal();
     }
   }
-
   // ─── AI Message ──────────────────────────────────────────────────────────
   get aiMessage(): string {
     if (this.isLoading) return 'Đang tải dữ liệu tài chính của bạn...';
@@ -624,28 +697,39 @@ export class Dashboard implements OnInit, OnDestroy {
       const width = container.clientWidth;
       container.scrollTo({
         left: index * width,
+
         behavior: 'smooth'
       });
     }
   }
 
   getDisplayAmount(budget: BudgetDto): number {
-    const spent = budget.currentAmount !== undefined 
-      ? budget.amount - budget.currentAmount 
-      : this.getBudgetSpent(budget);
+    if (budget.currentAmount !== undefined) {
+      return budget.currentAmount;
+    }
     
     if (budget.type === 1) {
-      return spent;
+      return this.getBudgetSpent(budget);
     }
-    return budget.amount - spent;
+    
+    return budget.amount - this.getBudgetSpent(budget);
   }
 
   getBudgetSpentPercent(budget: BudgetDto): number {
     if (!Number.isFinite(budget.amount) || budget.amount <= 0) return 0;
-    const spent = budget.currentAmount !== undefined 
-      ? budget.amount - budget.currentAmount 
-      : this.getBudgetSpent(budget);
-    return Math.min(100, Math.max(0, Math.round((spent / budget.amount) * 100)));
+    
+    let progressAmount = 0;
+    if (budget.type === 1) {
+      progressAmount = budget.currentAmount !== undefined 
+        ? budget.currentAmount 
+        : this.getBudgetSpent(budget);
+    } else {
+      progressAmount = budget.currentAmount !== undefined 
+        ? budget.amount - budget.currentAmount 
+        : this.getBudgetSpent(budget);
+    }
+    
+    return Math.min(100, Math.max(0, Math.round((progressAmount / budget.amount) * 100)));
   }
 
   getBudgetSpentPercentLabel(budget: BudgetDto): string {

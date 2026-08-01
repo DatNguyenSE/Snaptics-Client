@@ -12,5 +12,10 @@
     "secure": false,
     "ws": true,
     "changeOrigin": true
+  },
+  "/avatars": {
+    "target": "http://54.179.181.67:8080",
+    "secure": false,
+    "changeOrigin": true
   }
 }

@@ -101,26 +101,7 @@ export class SecurityTabComponent implements OnInit {
   }
 
   toggle2FA(): void {
-    const targetState = !this.profile?.twoFactorEnabled;
-
-    if (targetState) {
-      // Step: Open OTP verification modal to confirm enabling
-      this.open2faModal();
-    } else {
-      // Disabling 2FA
-      this.userProfileService.changeSecurity({ enableTwoFactor: false }).subscribe({
-        next: () => {
-          if (this.profile) {
-            const updated = { ...this.profile, twoFactorEnabled: false };
-            this.profileUpdated.emit(updated);
-          }
-          this.toast.success('Đã tắt xác thực hai yếu tố (2FA).');
-        },
-        error: (err) => {
-          this.toast.error(err.message || 'Không thể tắt 2FA.');
-        },
-      });
-    }
+    this.toast.info('Tính năng 2FA đang tạm đóng.');
   }
 
   confirmEnable2FA(): void {
@@ -130,23 +111,11 @@ export class SecurityTabComponent implements OnInit {
     }
 
     this.isSubmitting2fa = true;
-    this.userProfileService
-      .changeSecurity({ enableTwoFactor: true, twoFactorCode: this.otpCode.trim() })
-      .subscribe({
-        next: () => {
-          this.isSubmitting2fa = false;
-          this.close2faModal();
-          if (this.profile) {
-            const updated = { ...this.profile, twoFactorEnabled: true };
-            this.profileUpdated.emit(updated);
-          }
-          this.toast.success('Kích hoạt xác thực hai yếu tố (2FA) thành công!');
-        },
-        error: (err) => {
-          this.isSubmitting2fa = false;
-          this.toast.error(err.message || 'Mã OTP không đúng hoặc đã hết hạn.');
-        },
-      });
+    setTimeout(() => {
+        this.isSubmitting2fa = false;
+        this.close2faModal();
+        this.toast.info('Tính năng 2FA đang tạm đóng.');
+    }, 500);
   }
 
   // ─── Login Alerts Handler ──────────────────────────────────────────────────
@@ -175,7 +144,7 @@ export class SecurityTabComponent implements OnInit {
         this.isResendingVerification = false;
         this.toast.success('Đã gửi email xác thực thành công!');
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isResendingVerification = false;
         this.toast.error(err.message || 'Không thể gửi email xác thực.');
       },

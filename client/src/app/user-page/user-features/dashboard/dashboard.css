@@ -2015,3 +2015,440 @@
   font-size: 0.9rem;
   font-weight: 800;
 }
+
+/* ─── DARK MODE OVERRIDES: Wallet Forecast Modal ────────────────────── */
+:host-context(html.dark-theme) .wallet-forecast-modal {
+  background: #1e293b;
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__header {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__eyebrow {
+  color: #38bdf8;
+}
+:host-context(html.dark-theme) .wallet-forecast-modal h2 {
+  color: #f1f5f9;
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__close {
+  background: #334155;
+  color: #cbd5e1;
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__close:hover {
+  background: #475569;
+  color: #f1f5f9;
+}
+:host-context(html.dark-theme) .wallet-forecast-metric--blue {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+:host-context(html.dark-theme) .wallet-forecast-metric--green {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+:host-context(html.dark-theme) .wallet-forecast-metric strong {
+  color: #f1f5f9;
+}
+:host-context(html.dark-theme) .wallet-forecast-metric p {
+  color: #94a3b8;
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__explanation {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__explanation p {
+  color: #cbd5e1;
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__list-title {
+  color: #94a3b8;
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__expense-row {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__expense-row:hover,
+:host-context(html.dark-theme) .wallet-forecast-modal__expense-row--active {
+  background: rgba(255, 255, 255, 0.05);
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__expense-row strong {
+  color: #f1f5f9;
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__expense-name {
+  color: #e2e8f0;
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__empty {
+  color: #94a3b8;
+}
+
+/* Average Daily Spend Modal Specific Styles */
+.wallet-forecast-modal__insight-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.wallet-forecast-modal__insight-banner.insight-banner--good {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+.wallet-forecast-modal__insight-banner.insight-banner--warning {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+.wallet-forecast-modal__insight-banner.insight-banner--danger {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+.insight-banner__icon {
+  font-size: 1.25rem;
+  margin-top: 2px;
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__insight-banner.insight-banner--good {
+  background: rgba(16, 185, 129, 0.1);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__insight-banner.insight-banner--warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.2);
+}
+:host-context(html.dark-theme) .wallet-forecast-modal__insight-banner.insight-banner--danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.wallet-forecast-modal__metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.wallet-forecast-modal__metrics-full {
+  margin-bottom: 24px;
+}
+.text-danger {
+  color: #ef4444 !important;
+}
+:host-context(html.dark-theme) .text-danger {
+  color: #f87171 !important;
+}
+
+/* ─── Daily spending modal ──────────────────────────────────────────────── */
+.wallet-forecast-modal--daily {
+  max-height: min(720px, calc(100dvh - 32px));
+  overflow-y: auto;
+  scrollbar-width: thin;
+  animation: daily-modal-in 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wallet-forecast-modal--daily::-webkit-scrollbar {
+  width: 4px;
+}
+
+@keyframes daily-modal-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__header {
+  padding: 22px 24px 20px;
+  border-bottom: 1px solid #eef2ff;
+}
+
+.daily-spend-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.daily-spend-heading__icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #ede9fe, #e0e7ff);
+  color: #6d28d9;
+}
+
+.daily-spend-heading__icon .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__eyebrow {
+  margin-bottom: 4px;
+  color: #7c3aed;
+}
+
+.wallet-forecast-modal--daily h2 {
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
+}
+
+.daily-spend-heading__description {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__close {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__close:hover {
+  background: #ede9fe;
+  color: #6d28d9;
+  transform: rotate(4deg);
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__insight-banner {
+  align-items: flex-start;
+  margin: 18px 24px 16px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__insight-banner strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__insight-banner p {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__metrics-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 24px 10px;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-metric {
+  min-height: 137px;
+  padding: 14px;
+  border-radius: 16px;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-metric small {
+  margin-top: 9px;
+  font-size: 0.68rem;
+  letter-spacing: 0.01em;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-metric strong {
+  font-size: 1rem;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-metric p {
+  font-size: 0.7rem;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__metrics-full {
+  margin: 0 24px;
+}
+
+.daily-spend-forecast {
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border-color: #fde68a;
+}
+
+.daily-spend-forecast__topline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.daily-spend-forecast__topline small {
+  flex: 1;
+  margin: 0 !important;
+}
+
+.daily-spend-forecast__icon {
+  font-size: 1.2rem;
+}
+
+.daily-spend-forecast__caption {
+  color: #a16207;
+  font-size: 0.64rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__list {
+  margin: 20px 24px 24px;
+  padding-top: 17px;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__list-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__list-heading > .material-symbols-outlined {
+  color: #a78bfa;
+  font-size: 1.1rem;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__list-title {
+  margin-bottom: 3px;
+  color: #1e293b;
+  font-size: 0.85rem;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__list-heading p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.7rem;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__expense-row {
+  gap: 11px;
+  padding: 11px 8px;
+  border-bottom-color: #f1f5f9;
+  border-radius: 10px;
+  transition: background 0.16s ease, transform 0.16s ease;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__expense-row:hover {
+  transform: translateX(2px);
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__rank {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.7rem;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__rank--top {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__expense-name {
+  color: #475569;
+  font-weight: 600;
+}
+
+.wallet-forecast-modal--daily .wallet-forecast-modal__expense-meta strong {
+  color: #1e293b;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 520px) {
+  .wallet-forecast-modal--daily {
+    max-height: calc(100dvh - 20px);
+    border-radius: 22px;
+  }
+
+  .wallet-forecast-modal--daily .wallet-forecast-modal__header {
+    padding: 18px 18px 16px;
+  }
+
+  .wallet-forecast-modal--daily .wallet-forecast-modal__insight-banner,
+  .wallet-forecast-modal--daily .wallet-forecast-modal__metrics-full,
+  .wallet-forecast-modal--daily .wallet-forecast-modal__list {
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+
+  .wallet-forecast-modal--daily .wallet-forecast-modal__metrics-grid {
+    grid-template-columns: 1fr;
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+
+  .wallet-forecast-modal--daily .wallet-forecast-metric {
+    min-height: 0;
+  }
+
+  .daily-spend-heading__description {
+    max-width: 220px;
+  }
+}
+
+:host-context(html.dark-theme) .wallet-forecast-modal--daily .wallet-forecast-modal__header {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+:host-context(html.dark-theme) .daily-spend-heading__icon {
+  background: rgba(139, 92, 246, 0.16);
+  color: #c4b5fd;
+}
+
+:host-context(html.dark-theme) .daily-spend-heading__description,
+:host-context(html.dark-theme) .wallet-forecast-modal--daily .wallet-forecast-modal__list-heading p {
+  color: #94a3b8;
+}
+
+:host-context(html.dark-theme) .wallet-forecast-modal--daily .wallet-forecast-modal__close {
+  border-color: #475569;
+  background: #334155;
+}
+
+:host-context(html.dark-theme) .wallet-forecast-modal--daily .wallet-forecast-modal__list-title,
+:host-context(html.dark-theme) .wallet-forecast-modal--daily .wallet-forecast-modal__expense-meta strong {
+  color: #f1f5f9;
+}
+
+:host-context(html.dark-theme) .wallet-forecast-modal--daily .wallet-forecast-modal__expense-name {
+  color: #cbd5e1;
+}
+
+:host-context(html.dark-theme) .wallet-forecast-modal--daily .wallet-forecast-modal__rank {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+:host-context(html.dark-theme) .wallet-forecast-modal--daily .wallet-forecast-modal__rank--top {
+  background: rgba(239, 68, 68, 0.18);
+  color: #fca5a5;
+}
+
+:host-context(html.dark-theme) .daily-spend-forecast {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.24);
+}
+
+:host-context(html.dark-theme) .daily-spend-forecast__caption {
+  color: #fbbf24;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallet-forecast-modal--daily,
+  .wallet-forecast-modal--daily .wallet-forecast-modal__close,
+  .wallet-forecast-modal--daily .wallet-forecast-modal__expense-row {
+    animation: none;
+    transition: none;
+  }
+}

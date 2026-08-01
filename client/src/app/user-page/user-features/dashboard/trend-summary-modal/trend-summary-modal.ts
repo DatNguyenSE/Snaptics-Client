@@ -60,6 +60,24 @@ export class TrendSummaryModal implements OnInit, OnChanges {
     return this.trendData.reduce((max, item) => Math.max(max, item.expense), 0) || 1;
   }
 
+  formatLabel(label: string): string {
+    if (this.activeFilter === 'week' && label) {
+      const parts = label.split('/');
+      if (parts.length >= 2) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10);
+        if (!isNaN(day) && !isNaN(month)) {
+          const year = new Date().getFullYear();
+          const date = new Date(year, month - 1, day);
+          const dayOfWeek = date.getDay();
+          const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+          return `${dayNames[dayOfWeek]} - ${label}`;
+        }
+      }
+    }
+    return label;
+  }
+
   getExpensePercentage(expense: number | null | undefined): string {
     if (typeof expense !== 'number' || !Number.isFinite(expense) || !this.totalExpense) return '-';
     return `${Math.round((expense / this.totalExpense) * 100)}%`;

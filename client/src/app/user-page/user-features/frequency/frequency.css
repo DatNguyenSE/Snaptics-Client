@@ -651,3 +651,63 @@
     width: 100%;
   }
 }
+
+/* ─── DARK MODE OVERRIDES ────────────────────────────────────────────── */
+:host-context(html.dark-theme) .freq-hero {
+  background: radial-gradient(circle at 88% 10%, rgba(129, 140, 248, 0.15), transparent 35%), linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+:host-context(html.dark-theme) .section-eyebrow { color: #818cf8; }
+:host-context(html.dark-theme) .freq-hero__title { color: #f1f5f9; }
+:host-context(html.dark-theme) .freq-hero__subtitle { color: #cbd5e1; }
+:host-context(html.dark-theme) .freq-hero__figure-wrap { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
+:host-context(html.dark-theme) .freq-hero__figure-icon { color: #818cf8; }
+:host-context(html.dark-theme) .freq-stat-box { background: rgba(0, 0, 0, 0.2); }
+:host-context(html.dark-theme) .stat-box-label { color: #94a3b8; }
+:host-context(html.dark-theme) .stat-box-value { color: #f1f5f9; }
+:host-context(html.dark-theme) .insight-grid { background: rgba(255, 255, 255, 0.02); border-color: rgba(255, 255, 255, 0.05); }
+:host-context(html.dark-theme) .insight-card { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.05); }
+:host-context(html.dark-theme) .insight-card__title { color: #cbd5e1; }
+:host-context(html.dark-theme) .insight-card__value { color: #f1f5f9; }
+:host-context(html.dark-theme) .insight-card__desc { color: #94a3b8; }
+:host-context(html.dark-theme) .insight-card__icon { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); color: #cbd5e1; }
+:host-context(html.dark-theme) .usage-col { background: #1e293b; border-color: rgba(255, 255, 255, 0.05); }
+:host-context(html.dark-theme) .usage-col__title { color: #f1f5f9; }
+:host-context(html.dark-theme) .usage-col__count { background: #334155; color: #cbd5e1; }
+:host-context(html.dark-theme) .usage-item { background: #0f172a; border-color: rgba(255, 255, 255, 0.05); }
+:host-context(html.dark-theme) .usage-item:hover { background: #1e293b; border-color: rgba(255, 255, 255, 0.1); }
+:host-context(html.dark-theme) .usage-item__name { color: #e2e8f0; }
+:host-context(html.dark-theme) .usage-item__meta span { color: #94a3b8; }
+:host-context(html.dark-theme) .expense-row { border-bottom-color: rgba(255, 255, 255, 0.05); }
+:host-context(html.dark-theme) .expense-row:hover { background: rgba(255, 255, 255, 0.02); }
+:host-context(html.dark-theme) .expense-row__title { color: #e2e8f0; }
+:host-context(html.dark-theme) .expense-row__subtitle { color: #94a3b8; }
+:host-context(html.dark-theme) .expense-row__amount { color: #f1f5f9; }
+:host-context(html.dark-theme) .usage-detail-overlay { background: rgba(0, 0, 0, 0.6); }
+:host-context(html.dark-theme) .usage-detail-modal { background: #1e293b; border-color: rgba(255, 255, 255, 0.1); }
+:host-context(html.dark-theme) .detail-header { border-bottom-color: rgba(255, 255, 255, 0.05); }
+:host-context(html.dark-theme) .detail-header__eyebrow { color: #818cf8; }
+:host-context(html.dark-theme) .detail-header h3 { color: #f1f5f9; }
+:host-context(html.dark-theme) .detail-close { background: rgba(255, 255, 255, 0.05); color: #cbd5e1; }
+:host-context(html.dark-theme) .detail-close:hover { background: rgba(255, 255, 255, 0.1); color: #f1f5f9; }
+:host-context(html.dark-theme) .detail-stat-box { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.05); }
+:host-context(html.dark-theme) .detail-stat-box small { color: #94a3b8; }
+:host-context(html.dark-theme) .detail-stat-box strong { color: #f1f5f9; }
+:host-context(html.dark-theme) .detail-insight { background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.2); }
+:host-context(html.dark-theme) .detail-insight p { color: #a5b4fc; }
+:host-context(html.dark-theme) .freq-search { background: #1e293b; border-color: rgba(255, 255, 255, 0.05); }
+:host-context(html.dark-theme) .freq-search__icon { color: #94a3b8; }
+:host-context(html.dark-theme) .freq-search__input { color: #f1f5f9; background: transparent; }
+:host-context(html.dark-theme) .freq-search__input::placeholder { color: #64748b; }
+:host-context(html.dark-theme) .empty-state-card { background: #1e293b; border-color: rgba(255, 255, 255, 0.05); }
+:host-context(html.dark-theme) .empty-state-icon { background: rgba(255, 255, 255, 0.05); color: #94a3b8; }
+:host-context(html.dark-theme) .empty-state-title { color: #f1f5f9; }
+:host-context(html.dark-theme) .empty-state-desc { color: #94a3b8; }
+:host-context(html.dark-theme) .btn-eval--frequent { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+:host-context(html.dark-theme) .btn-eval--frequent:hover { background: rgba(16, 185, 129, 0.25); }
+:host-context(html.dark-theme) .btn-eval--occasionally { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+:host-context(html.dark-theme) .btn-eval--occasionally:hover { background: rgba(59, 130, 246, 0.25); }
+:host-context(html.dark-theme) .btn-eval--seldom { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+:host-context(html.dark-theme) .btn-eval--seldom:hover { background: rgba(245, 158, 11, 0.25); }
+:host-context(html.dark-theme) .btn-eval--unused { background: rgba(244, 63, 94, 0.15); color: #fb7185; }
+:host-context(html.dark-theme) .btn-eval--unused:hover { background: rgba(244, 63, 94, 0.25); }

@@ -40,7 +40,7 @@
           </div>
           <div class="trend-highlight__copy">
             <span class="trend-highlight__eyebrow">Chi nhiều nhất · {{ filterLabel }}</span>
-            <strong>{{ highest.label }}</strong>
+            <strong>{{ formatLabel(highest.label) }}</strong>
             <span>{{ highest.expense | number }}đ</span>
           </div>
            <span class="trend-highlight__percent">{{ getExpensePercentage(highest.expense) }}</span>
@@ -60,7 +60,7 @@
           <div class="trend-item__rank" [class.trend-item__rank--top]="i === 0">{{ i + 1 }}</div>
           <div class="trend-item__body">
             <div class="trend-item__heading">
-              <span class="trend-item__label">{{ item.label }}</span>
+              <span class="trend-item__label">{{ formatLabel(item.label) }}</span>
               <strong>{{ item.expense | number }}đ</strong>
             </div>
             <div class="trend-item__meta">

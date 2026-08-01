@@ -20,7 +20,7 @@
           </div>
 
           <div class="avatar-uploader__content">
-            <h3 class="avatar-uploader__name">{{ personalForm.fullName || profile?.fullName || 'Người dùng' }}</h3>
+            <h3 class="avatar-uploader__name">{{ personalForm.displayName || profile?.displayName || 'Người dùng' }}</h3>
             <p class="avatar-uploader__hint">Định dạng hỗ trợ: JPG, JPEG, PNG hoặc WEBP. Dung lượng tối đa 2 MB.</p>
             
             @if (avatarError) {
@@ -71,19 +71,6 @@
         <form (ngSubmit)="savePersonal()">
           <div class="form-grid form-grid--2col">
             <div class="form-group">
-              <label class="form-label" for="fullName">Họ và tên *</label>
-              <input
-                id="fullName"
-                type="text"
-                name="fullName"
-                class="form-control"
-                [(ngModel)]="personalForm.fullName"
-                placeholder="Nhập họ và tên đầy đủ"
-                required
-              />
-            </div>
-
-            <div class="form-group">
               <label class="form-label" for="displayName">Tên hiển thị (Display name)</label>
               <input
                 id="displayName"
@@ -93,50 +80,6 @@
                 [(ngModel)]="personalForm.displayName"
                 placeholder="Nhập tên hiển thị mong muốn"
               />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="phoneNumber">Số điện thoại</label>
-              <input
-                id="phoneNumber"
-                type="tel"
-                name="phoneNumber"
-                class="form-control"
-                [(ngModel)]="personalForm.phoneNumber"
-                placeholder="+84 901 234 567"
-              />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="dateOfBirth">Ngày sinh</label>
-              <input
-                id="dateOfBirth"
-                type="date"
-                name="dateOfBirth"
-                class="form-control"
-                [(ngModel)]="personalForm.dateOfBirth"
-              />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="gender">Giới tính</label>
-              <select id="gender" name="gender" class="form-control" [(ngModel)]="personalForm.gender">
-                <option value="male">Nam (Male)</option>
-                <option value="female">Nữ (Female)</option>
-                <option value="other">Khác (Other)</option>
-              </select>
-            </div>
-
-            <div class="form-group form-group--full">
-              <label class="form-label" for="bio">Tiểu sử / Ghi chú ngắn</label>
-              <textarea
-                id="bio"
-                name="bio"
-                class="form-control form-control--textarea"
-                rows="3"
-                [(ngModel)]="personalForm.bio"
-                placeholder="Viết một đoạn giới thiệu ngắn về bản thân..."
-              ></textarea>
             </div>
           </div>
 
@@ -186,25 +129,13 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="province">Tỉnh / Thành</label>
+              <label class="form-label" for="postCode">Mã bưu chính (Postal code)</label>
               <input
-                id="province"
+                id="postCode"
                 type="text"
-                name="province"
+                name="postCode"
                 class="form-control"
-                [(ngModel)]="addressForm.province"
-                placeholder="Ví dụ: Hồ Chí Minh"
-              />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="postalCode">Mã bưu chính (Postal code)</label>
-              <input
-                id="postalCode"
-                type="text"
-                name="postalCode"
-                class="form-control"
-                [(ngModel)]="addressForm.postalCode"
+                [(ngModel)]="addressForm.postCode"
                 placeholder="700000"
               />
             </div>
@@ -308,6 +239,8 @@
       </div>
       <div class="settings-card__body">
         <form (ngSubmit)="savePassword()">
+          <!-- Hidden username field for accessibility/autocomplete -->
+          <input type="text" name="username" [value]="profile?.email" autocomplete="username" class="sr-only" style="display:none" aria-hidden="true" />
           <div class="form-grid form-grid--stacked">
             
             <div class="form-group">
@@ -320,6 +253,7 @@
                   class="form-control"
                   [(ngModel)]="passwordForm.currentPassword"
                   placeholder="••••••••••••"
+                  autocomplete="current-password"
                   required
                 />
                 <button
@@ -342,6 +276,7 @@
                   class="form-control"
                   [(ngModel)]="passwordForm.newPassword"
                   placeholder="••••••••••••"
+                  autocomplete="new-password"
                   required
                 />
                 <button
@@ -389,6 +324,7 @@
                   class="form-control"
                   [(ngModel)]="passwordForm.confirmPassword"
                   placeholder="••••••••••••"
+                  autocomplete="new-password"
                   required
                 />
                 <button

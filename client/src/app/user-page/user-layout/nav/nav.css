@@ -178,6 +178,7 @@
   font-weight: 800;
   flex-shrink: 0;
   box-shadow: 0 10px 24px rgba(91, 123, 250, 0.18);
+  object-fit: cover;
 }
 
 .account-dropdown__avatar--large {

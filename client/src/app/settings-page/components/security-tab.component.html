@@ -18,7 +18,7 @@
           <div class="info-item">
             <span class="info-item__label">Lần thay đổi mật khẩu gần nhất:</span>
             <span class="info-item__value">
-              {{ profile?.updatedAt ? (profile?.updatedAt | date:'mediumDate') : '30 ngày trước' }}
+              30 ngày trước
             </span>
           </div>
           <div class="info-item">
@@ -38,8 +38,8 @@
           <span class="material-symbols-outlined icon-blue">security</span>
           Xác thực hai yếu tố (Two-factor authentication - 2FA)
         </h2>
-        <span class="badge" [class.badge--success]="profile?.twoFactorEnabled" [class.badge--neutral]="!profile?.twoFactorEnabled">
-          {{ profile?.twoFactorEnabled ? 'Đã bật' : 'Đã tắt' }}
+        <span class="badge badge--neutral">
+          Đã tắt
         </span>
       </div>
       <div class="settings-card__body">
@@ -48,17 +48,10 @@
         </p>
 
         <div class="twofa-action-row">
-          @if (profile?.twoFactorEnabled) {
-            <button type="button" class="btn btn--danger-ghost" (click)="toggle2FA()">
-              <span class="material-symbols-outlined">gpp_bad</span>
-              Tắt 2FA (Disable 2FA)
-            </button>
-          } @else {
-            <button type="button" class="btn btn--primary" (click)="toggle2FA()">
-              <span class="material-symbols-outlined">verified_user</span>
-              Bật 2FA (Enable 2FA)
-            </button>
-          }
+          <button type="button" class="btn btn--primary" (click)="toggle2FA()">
+            <span class="material-symbols-outlined">verified_user</span>
+            Bật 2FA (Enable 2FA)
+          </button>
         </div>
       </div>
     </section>
@@ -114,8 +107,8 @@
           <span class="material-symbols-outlined icon-teal">mail</span>
           Xác thực Email (Email verification)
         </h2>
-        <span class="badge" [class.badge--success]="profile?.emailConfirmed" [class.badge--warning]="!profile?.emailConfirmed">
-          {{ profile?.emailConfirmed ? 'Đã xác thực' : 'Chưa xác thực' }}
+        <span class="badge badge--success">
+          Đã xác thực
         </span>
       </div>
       <div class="settings-card__body">
@@ -126,7 +119,7 @@
           </div>
         </div>
 
-        @if (!profile?.emailConfirmed) {
+        @if (false) {
           <div class="email-verify-box">
             <p>Địa chỉ email của bạn chưa được xác thực. Hãy nhấn nút bên dưới để nhận mã xác thực mới qua email.</p>
             <button type="button" class="btn btn--outline" [disabled]="isResendingVerification" (click)="resendEmailVerification()">

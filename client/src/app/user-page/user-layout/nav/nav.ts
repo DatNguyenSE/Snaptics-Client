@@ -1,9 +1,11 @@
-import { Component, ElementRef, HostListener, inject } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AccountService } from '../../../core/services/account-service';
 import { AppLanguage, LanguageService } from '../../../core/services/language-service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { NotificationService } from '../../../core/services/notification-service';
+import { S3Service } from '../../../core/services/s3.service';
+import { UserProfileService } from '../../../core/services/user-profile.service';
 
 interface AppNavItem {
   id: string;
@@ -17,6 +19,7 @@ interface AccountSummary {
   fullName: string;
   username: string;
   initials: string;
+  avatarUrl?: string | null;
 }
 
 interface LanguageOption {
@@ -31,16 +34,31 @@ interface LanguageOption {
   templateUrl: './nav.html',
   styleUrl: './nav.css',
 })
-export class Nav {
+export class Nav implements OnInit {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly router = inject(Router);
   private readonly accountService = inject(AccountService);
   private readonly notificationService = inject(NotificationService);
+  private readonly s3Service = inject(S3Service);
+  private readonly userProfileService = inject(UserProfileService);
+  private readonly userProfileImageUrl = signal<string | null>(null);
+
+  ngOnInit(): void {
+    if (this.accountService.currentUser()) {
+      this.userProfileService.getProfile().subscribe({
+        next: (profile) => {
+          if (profile && profile.imageUrl) {
+            this.userProfileImageUrl.set(profile.imageUrl);
+          }
+        },
+        error: (err) => console.error('Error fetching profile in nav:', err)
+      });
+    }
+  }
 
   protected readonly language = inject(LanguageService);
   protected readonly theme = inject(ThemeService);
   protected readonly unreadNotificationCount = this.notificationService.unreadCount;
-
 
   readonly navItems: AppNavItem[] = [
     {
@@ -109,10 +127,10 @@ export class Nav {
       route: '/user/dashboard',
     },
     {
-      id: 'budget',
-      labelKey: 'nav.budget',
-      icon: 'account_balance_wallet',
-      route: '/user/budget',
+      id: 'transactions',
+      labelKey: 'nav.transactions',
+      icon: 'receipt_long',
+      route: '/user/transactions',
     },
     {
       id: 'scan',
@@ -144,11 +162,17 @@ export class Nav {
     const currentUser = this.accountService.currentUser();
     const fullName = currentUser?.displayName?.trim() || 'Người dùng mới';
     const email = currentUser?.email?.trim() || 'nguoidungmoi@gmail.com';
+    let avatarUrl = this.userProfileImageUrl() || currentUser?.imageUrl || null;
+    
+    if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('data:')) {
+      avatarUrl = this.s3Service.getDirectImageUrl(avatarUrl);
+    }
 
     return {
       fullName,
       username: this.extractUsername(email, fullName),
       initials: this.buildInitials(fullName),
+      avatarUrl
     };
   }
 
