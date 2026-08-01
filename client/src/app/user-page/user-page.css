@@ -15,7 +15,7 @@
   --sw-shadow-sm: 0 14px 32px rgba(91, 123, 250, 0.08);
   min-height: 100vh;
   width: 100%;
-  max-width: 100vw;
+  max-width: 100%;              /* was 100vw which can include scrollbar & cause 1-2px overflow */
   overflow-x: hidden;
   background: var(--sw-background);
   color: var(--sw-foreground);
@@ -61,6 +61,7 @@ html.dark-theme .snaptics-shell {
     min-height: auto;
     overflow-y: auto;
     overflow-x: hidden;
+    overscroll-behavior-x: none;  /* prevent horizontal over-scroll from propagating */
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
   }

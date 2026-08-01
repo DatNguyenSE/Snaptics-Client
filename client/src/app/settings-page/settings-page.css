@@ -2,10 +2,15 @@
    SETTINGS PAGE MASTER STYLES - SNAPTICS AI
    ───────────────────────────────────────────────────────────────────────────── */
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   Containment: ensure the settings host never causes horizontal overflow
+   ───────────────────────────────────────────────────────────────────────────── */
 :host {
   display: block;
   width: 100%;
+  max-width: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
   background-color: var(--bg-main, #f8fafc);
   color: var(--text-main, #0f172a);
 }
@@ -21,8 +26,10 @@
   max-width: 1280px;
   margin: 0 auto;
   width: 100%;
+  max-width: min(1280px, 100%);
   box-sizing: border-box;
   min-width: 0;
+  overflow-x: hidden;
 }
 
 .settings-page__content {
@@ -31,6 +38,7 @@
   gap: 1.5rem;
   min-width: 0;
   width: 100%;
+  overflow-x: hidden;
 }
 
 /* ─── Header & Breadcrumb ─────────────────────────────────────────────────── */
@@ -91,45 +99,56 @@
 /* ─── Tabs Navigation Bar ───────────────────────────────────────────────── */
 
 /* Outer wrapper: provides border-bottom, bg, radius, shadow
-   position: relative is needed for the gradient fade overlay */
+   position: relative is needed for the gradient fade overlay
+   overflow: hidden ensures nothing leaks outside on mobile */
 .settings-tabs-wrapper {
   position: relative;
   width: 100%;
+  max-width: 100%;
+  overflow: hidden;                       /* ← clamp any child overflow */
   border-bottom: 2px solid var(--border-color, #e2e8f0);
   background-color: var(--card-bg, #ffffff);
   border-radius: 0.75rem 0.75rem 0 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* Scroll viewport: constrains to screen width, allows horizontal scrolling */
+/* Scroll viewport: ONLY this element scrolls horizontally.
+   overscroll-behavior-x: contain prevents the scroll from bubbling
+   up to the page on iOS/Android when the user over-swipes. */
 .settings-tabs {
   width: 100%;
+  max-width: 100%;                        /* ← never wider than parent */
   overflow-x: auto;
-  overflow-y: visible;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  overflow-y: hidden;                     /* ← was "visible" which can cause bleed */
+  overscroll-behavior-x: contain;         /* ← KEY: stops over-swipe from moving page */
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  touch-action: pan-x;                    /* ← tell browser only horizontal pan here */
 }
 
 .settings-tabs::-webkit-scrollbar {
   display: none;
 }
 
-/* Flex track: can be wider than viewport — this is key to prevent tab clipping */
+/* Flex track: width: max-content makes it as wide as all tabs combined.
+   This ONLY applies inside the scroll viewport — it does NOT affect
+   the outer page layout because .settings-tabs clips it. */
 .settings-tabs__track {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  width: max-content;
-  min-width: 100%;
+  flex-wrap: nowrap;                      /* ← never wrap to second line */
+  width: max-content;                     /* ← flex children determine width */
+  min-width: 100%;                        /* ← at minimum fill the scroll viewport */
   padding: 0 0.5rem;
 }
 
 /* Tab button */
 .settings-tab-btn {
   display: inline-flex;
-  flex: 0 0 auto;
+  flex: 0 0 auto;                         /* ← never shrink, never grow */
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1.25rem;
@@ -140,7 +159,7 @@
   border: none;
   border-bottom: 3px solid transparent;
   cursor: pointer;
-  white-space: nowrap;
+  white-space: nowrap;                    /* ← label stays on one line */
   transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
   outline: none;
   margin-bottom: -2px;
@@ -150,6 +169,7 @@
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   text-decoration: none;
+  touch-action: manipulation;             /* ← reduce 300ms tap delay */
 }
 
 .settings-tab-btn__icon {
@@ -1594,11 +1614,18 @@
 }
 
 @media (max-width: 1023px) {
-  /* Tab bar stays visible when scrolling down on mobile */
+  /* Tab bar stays visible when scrolling down on mobile.
+     max-width + overflow: hidden ensures sticky wrapper never causes page overflow. */
   .settings-tabs-wrapper {
     position: sticky;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 10;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    /* overflow: hidden already set on .settings-tabs-wrapper base rule */
   }
 
   /* Enough padding so content isn't hidden behind fixed bottom nav (with safe area) */
