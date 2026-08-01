@@ -132,13 +132,12 @@
 
 <nav class="bottom-nav" aria-label="Bottom navigation">
   <div class="bottom-nav__inner">
-    @for (item of navItems; track item.id) {
+    @for (item of mobileNavItems; track item.id) {
       <a
         class="bottom-nav__item bottom-nav__item--{{ item.id }}"
         [routerLink]="item.route"
         routerLinkActive="bottom-nav__item--active"
-        #rla="routerLinkActive"
-        [routerLinkActiveOptions]="{ exact: true }"
+        [routerLinkActiveOptions]="{ exact: item.id !== 'settings' }"
       >
         <span class="bottom-nav__icon-wrap" [class.bottom-nav__icon-wrap--scan]="item.isScanItem">
           @if (item.isScanItem) {
@@ -159,88 +158,5 @@
         <span class="bottom-nav__label">{{ language.t(item.labelKey) }}</span>
       </a>
     }
-
-    <!-- Account menu trigger -->
-    <div class="account-dropdown account-dropdown--mobile">
-      <button
-        class="bottom-nav__item bottom-nav__item--account"
-        type="button"
-        (click)="handleMobileAccountClick($event)"
-        [attr.aria-label]="language.t('nav.account')"
-        [attr.aria-expanded]="isAccountMenuOpen"
-      >
-        <span class="bottom-nav__account-avatar">{{ account.initials }}</span>
-        <span class="bottom-nav__label">{{ language.t('nav.account') }}</span>
-      </button>
-
-      @if (isAccountMenuOpen) {
-        <div
-          class="account-dropdown__panel account-dropdown__panel--mobile"
-          role="menu"
-          [style.right.px]="accountMenuRight"
-          (click)="$event.stopPropagation()"
-        >
-          <div class="account-dropdown__actions account-dropdown__actions--compact">
-            <div class="account-dropdown__language-row account-dropdown__language-row--compact">
-              <span class="account-dropdown__language-label">{{ language.t('common.language') }}</span>
-              <div
-                class="language-switch language-switch--panel"
-                aria-label="Language switch"
-                role="group"
-              >
-                @for (option of languages; track option.code) {
-                  <button
-                    class="language-switch__button"
-                    type="button"
-                    [class.language-switch__button--active]="language.currentLang() === option.code"
-                    (click)="setLanguage(option.code)"
-                  >
-                    {{ option.label }}
-                  </button>
-                }
-              </div>
-            </div>
-
-
-
-            @if (isAdmin) {
-              <button class="account-dropdown__item account-dropdown__item--admin" type="button" (click)="openAdminConsole()">
-                <span class="account-dropdown__item-main">
-                  <span class="material-symbols-outlined">shield</span>
-                  <span>{{ language.currentLang() === 'vi' ? 'Trang quản trị' : 'Admin Console' }}</span>
-                </span>
-                <span class="material-symbols-outlined account-dropdown__item-arrow">
-                  chevron_right
-                </span>
-              </button>
-            }
-
-            <button class="account-dropdown__item" type="button" (click)="openSettings()">
-              <span class="account-dropdown__item-main">
-                <span class="material-symbols-outlined">settings</span>
-                <span>{{ language.t('nav.settings') }}</span>
-              </span>
-              <span class="material-symbols-outlined account-dropdown__item-arrow">
-                chevron_right
-              </span>
-            </button>
-
-            <button
-              class="account-dropdown__item account-dropdown__item--danger"
-              type="button"
-              (click)="logout()"
-            >
-              <span class="account-dropdown__item-main">
-                <span class="material-symbols-outlined">logout</span>
-                <span>{{ language.t('nav.logout') }}</span>
-              </span>
-              <span class="material-symbols-outlined account-dropdown__item-arrow">
-                chevron_right
-              </span>
-            </button>
-          </div>
-        </div>
-      }
-    </div>
   </div>
 </nav>

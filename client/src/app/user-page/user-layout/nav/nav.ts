@@ -100,6 +100,41 @@ export class Nav {
     },
   ];
 
+  // Mobile bottom navigation: chỉ 5 mục, không cuộn ngang
+  readonly mobileNavItems: AppNavItem[] = [
+    {
+      id: 'dashboard',
+      labelKey: 'nav.dashboard',
+      icon: 'dashboard',
+      route: '/user/dashboard',
+    },
+    {
+      id: 'budget',
+      labelKey: 'nav.budget',
+      icon: 'account_balance_wallet',
+      route: '/user/budget',
+    },
+    {
+      id: 'scan',
+      labelKey: 'nav.scan',
+      icon: 'qr_code_scanner',
+      route: '/user/scan',
+      isScanItem: true,
+    },
+    {
+      id: 'notification',
+      labelKey: 'nav.notifications',
+      icon: 'notifications',
+      route: '/user/notification',
+    },
+    {
+      id: 'settings',
+      labelKey: 'nav.account',
+      icon: 'account_circle',
+      route: '/user/settings',
+    },
+  ];
+
   readonly languages: LanguageOption[] = [
     { code: 'vi', label: 'VI' },
     { code: 'en', label: 'EN' },
