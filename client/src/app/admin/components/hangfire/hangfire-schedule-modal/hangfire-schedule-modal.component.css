@@ -238,7 +238,18 @@
   font-family: inherit;
   transition: border-color 0.16s, box-shadow 0.16s;
   outline: none;
-  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.hf-modal__time-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0.7;
+  transition: opacity 0.16s;
+}
+
+.hf-modal__time-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 
 .hf-modal__time-input:focus {
