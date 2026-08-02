@@ -11,6 +11,8 @@ import { BudgetMemberService } from '../../../core/services/budgetMember.service
 import { ItemInventoryService, UsageStatusType } from '../../../core/services/item-inventory.service';
 import { take } from 'rxjs';
 import { TransactionService } from '../../../core/services/transaction.service';
+import { AiService } from '../../../core/services/ai.service';
+import { environment } from '../../../environments/environment';
 
 export type NotificationFilterTab =
   | 'all'
@@ -37,6 +39,8 @@ export class Notification {
   private readonly budgetMemberService = inject(BudgetMemberService);
   private readonly itemInventoryService = inject(ItemInventoryService);
   private readonly transactionService = inject(TransactionService);
+  private readonly aiService = inject(AiService);
+  private _insightPending = false;
 
   // States
   readonly activeTab = signal<NotificationFilterTab>('unread');
@@ -367,8 +371,27 @@ export class Notification {
             : `Review submitted: ${label.en}`,
         );
         this.itemToReview.set(null);
+
+        // Fire-and-forget: gọi AI insight sau khi lưu đánh giá thành công.
+        // Không await, không chặn UI, không hiển thị toast lỗi cho người dùng.
+        // Dùng guard để tránh gọi trùng khi double-click hoặc re-render.
+        if (!this._insightPending) {
+          this._insightPending = true;
+          void this.aiService
+            .generateInsights()
+            .pipe(take(1))
+            .toPromise()
+            .catch((error: unknown) => {
+              if (!environment.production) {
+                console.warn('[Notification] Generate AI insight failed after review:', error);
+              }
+            })
+            .finally(() => {
+              this._insightPending = false;
+            });
+        }
       },
-      error: (err) => {
+      error: () => {
         this.isSubmittingReview.set(false);
         this.toast.error(
           this.language.currentLang() === 'vi'

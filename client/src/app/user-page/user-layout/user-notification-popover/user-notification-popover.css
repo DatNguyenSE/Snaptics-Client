@@ -28,6 +28,23 @@
 .notification-popover__empty{margin-top:14px;border:1px dashed rgba(148,163,184,.4);border-radius:20px;background:#fff;padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
 .notification-popover__empty .material-symbols-outlined{font-size:1.5rem;color:#94a3b8}
 .notification-popover__empty p{font-size:.875rem;color:var(--sw-muted-foreground)}
+
+/* ── Loading & Error states ─────────────────────────────────────── */
+.notification-popover__state{margin-top:14px;border-radius:20px;padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.notification-popover__loading{border:1px dashed rgba(99,102,241,.25);background:rgba(238,240,255,.45)}
+.notification-popover__loading p{font-size:.875rem;color:var(--sw-muted-foreground)}
+
+/* CSS spinner — no extra library needed */
+.notification-popover__spinner{width:28px;height:28px;border:3px solid rgba(99,102,241,.18);border-top-color:#6366f1;border-radius:50%;animation:notif-spin .75s linear infinite}
+@keyframes notif-spin{to{transform:rotate(360deg)}}
+
+.notification-popover__error{border:1px dashed rgba(239,68,68,.25);background:rgba(255,241,242,.45)}
+.notification-popover__error .notification-popover__state-icon{font-size:1.5rem;color:#ef4444}
+.notification-popover__error p{font-size:.875rem;color:var(--sw-muted-foreground);margin:0}
+.notification-popover__retry-btn{display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:6px 14px;border:1px solid rgba(239,68,68,.35);border-radius:999px;background:transparent;color:#ef4444;font:inherit;font-size:.8125rem;font-weight:700;cursor:pointer;transition:background .18s ease,color .18s ease}
+.notification-popover__retry-btn:hover{background:rgba(239,68,68,.08)}
+.notification-popover__retry-btn .material-symbols-outlined{font-size:1rem}
+
 :host-context(html.dark-theme) .notification-popover {
   background: rgba(15, 23, 42, 0.95);
   border-color: rgba(255, 255, 255, 0.1);
@@ -52,4 +69,15 @@
   border-color: rgba(255, 255, 255, 0.15);
 }
 
+:host-context(html.dark-theme) .notification-popover__loading {
+  background: rgba(30, 41, 59, 0.5);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+:host-context(html.dark-theme) .notification-popover__error {
+  background: rgba(30, 41, 59, 0.5);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
 @media (max-width:639px){:host{width:min(22rem,calc(100vw - 24px))}.notification-popover{padding:14px}}
+
