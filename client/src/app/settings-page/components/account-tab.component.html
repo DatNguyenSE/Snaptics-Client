@@ -36,6 +36,12 @@
               <p class="account-overview-email">{{ profile?.email || currentUser?.email || 'N/A' }}</p>
             </div>
           </div>
+          <div class="account-overview-actions">
+            <button type="button" class="btn btn--danger-ghost btn--sm" (click)="logout()">
+              <span class="material-symbols-outlined">logout</span>
+              {{ language.currentLang() === 'vi' ? 'Đăng xuất' : 'Logout' }}
+            </button>
+          </div>
         </div>
       </section>
 

@@ -54,4 +54,8 @@ export class AccountTabComponent {
   goToTab(tabName: string): void {
     this.navigateTab.emit(tabName);
   }
+
+  logout(): void {
+    this.accountService.logout();
+  }
 }

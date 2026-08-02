@@ -282,40 +282,42 @@
           </button>
         </div>
 
-        <div class="wallet-forecast-modal__metrics">
-          <div class="wallet-forecast-metric wallet-forecast-metric--blue">
-            <span class="material-symbols-outlined">schedule</span>
-            <small>Top 1</small>
-            <strong>{{ activeHours[0]?.label || '-' }}</strong>
-            <p>{{ activeHours[0]?.transactionCount || 0 }} giao dịch</p>
+        <div class="wallet-forecast-modal__body">
+          <div class="wallet-forecast-modal__metrics">
+            <div class="wallet-forecast-metric wallet-forecast-metric--blue">
+              <span class="material-symbols-outlined">schedule</span>
+              <small>Top 1</small>
+              <strong>{{ activeHours[0]?.label || '-' }}</strong>
+              <p>{{ activeHours[0]?.transactionCount || 0 }} giao dịch</p>
+            </div>
+            <div class="wallet-forecast-metric wallet-forecast-metric--green">
+              <span class="material-symbols-outlined">payments</span>
+              <small>Đã chi trong khung giờ</small>
+              <strong>{{ selectedActiveHour ? formatCurrency(selectedActiveHour.totalAmount) : '-' }}</strong>
+              <p>{{ selectedActiveHour?.label || 'Chọn một khung giờ bên dưới' }}</p>
+            </div>
           </div>
-          <div class="wallet-forecast-metric wallet-forecast-metric--green">
-            <span class="material-symbols-outlined">payments</span>
-            <small>Đã chi trong khung giờ</small>
-            <strong>{{ selectedActiveHour ? formatCurrency(selectedActiveHour.totalAmount) : '-' }}</strong>
-            <p>{{ selectedActiveHour?.label || 'Chọn một khung giờ bên dưới' }}</p>
-          </div>
-        </div>
 
-        <div class="wallet-forecast-modal__list">
-          <div class="wallet-forecast-modal__list-title">Top 5 khung giờ · Bấm để xem chi tiết</div>
-          @for (activeHour of activeHours; track activeHour.hour; let index = $index) {
-            <button
-              type="button"
-              class="wallet-forecast-modal__expense-row"
-              [class.wallet-forecast-modal__expense-row--active]="selectedActiveHour?.hour === activeHour.hour"
-              (click)="selectActiveHour(activeHour)"
-            >
-              <span class="wallet-forecast-modal__rank">{{ index + 1 }}</span>
-              <span class="wallet-forecast-modal__expense-name">{{ activeHour.label }}</span>
-              <span class="wallet-forecast-modal__expense-meta">
-                <strong>{{ activeHour.transactionCount }} giao dịch</strong>
-                <small>{{ formatCurrency(activeHour.totalAmount) }}</small>
-              </span>
-            </button>
-          } @empty {
-            <p class="wallet-forecast-modal__empty">Chưa có giao dịch nào trong tháng này.</p>
-          }
+          <div class="wallet-forecast-modal__list">
+            <div class="wallet-forecast-modal__list-title">Top 5 khung giờ · Bấm để xem chi tiết</div>
+            @for (activeHour of activeHours; track activeHour.hour; let index = $index) {
+              <button
+                type="button"
+                class="wallet-forecast-modal__expense-row"
+                [class.wallet-forecast-modal__expense-row--active]="selectedActiveHour?.hour === activeHour.hour"
+                (click)="selectActiveHour(activeHour)"
+              >
+                <span class="wallet-forecast-modal__rank">{{ index + 1 }}</span>
+                <span class="wallet-forecast-modal__expense-name">{{ activeHour.label }}</span>
+                <span class="wallet-forecast-modal__expense-meta">
+                  <strong>{{ activeHour.transactionCount }} giao dịch</strong>
+                  <small>{{ formatCurrency(activeHour.totalAmount) }}</small>
+                </span>
+              </button>
+            } @empty {
+              <p class="wallet-forecast-modal__empty">Chưa có giao dịch nào trong tháng này.</p>
+            }
+          </div>
         </div>
       </div>
     </div>
@@ -342,62 +344,64 @@
           </button>
         </div>
 
-        <div class="wallet-forecast-modal__insight-banner" [class]="'insight-banner--' + averageDailySpendInsight.status">
-          <span class="material-symbols-outlined insight-banner__icon">
-            {{ averageDailySpendInsight.status === 'good' ? 'check_circle' : averageDailySpendInsight.status === 'warning' ? 'warning' : 'error' }}
-          </span>
-          <div>
-            <strong>{{ averageDailySpendInsight.status === 'good' ? 'Tình hình ổn định' : averageDailySpendInsight.status === 'warning' ? 'Cần theo dõi thêm' : 'Ngân sách đang gặp rủi ro' }}</strong>
-            <p>{{ averageDailySpendInsight.text }}</p>
-          </div>
-        </div>
-
-        <div class="wallet-forecast-modal__metrics-grid">
-          <div class="wallet-forecast-metric wallet-forecast-metric--blue">
-            <span class="material-symbols-outlined">speed</span>
-            <small>Đang tiêu trung bình</small>
-            <strong>{{ formatCurrency(activeWalletAverageDailySpend) }} / ngày</strong>
-            <p>{{ activeWalletAverageComparisonLabel }}</p>
-          </div>
-          <div class="wallet-forecast-metric wallet-forecast-metric--green">
-            <span class="material-symbols-outlined">verified_user</span>
-            <small>Mức an toàn (còn lại)</small>
-            <strong>{{ formatCurrency(activeWalletSafeDailyBudget) }} / ngày</strong>
-            <p>Để không bị âm ngân sách</p>
-          </div>
-        </div>
-
-        <div class="wallet-forecast-modal__metrics-full">
-          <div class="wallet-forecast-metric wallet-forecast-metric--amber daily-spend-forecast">
-            <div class="daily-spend-forecast__topline">
-              <span class="daily-spend-forecast__icon material-symbols-outlined">analytics</span>
-              <small>Dự báo cuối kỳ</small>
-              <span class="daily-spend-forecast__caption">{{ activeWalletRemainingDays }} ngày còn lại</span>
-            </div>
-            <strong [class.text-danger]="activeWalletForecastSpend > (activeBudget?.amount || 0)">{{ formatCurrency(activeWalletForecastSpend) }}</strong>
-            <p>Dựa trên tốc độ chi tiêu hiện tại của bạn</p>
-          </div>
-        </div>
-
-        <div class="wallet-forecast-modal__list">
-          <div class="wallet-forecast-modal__list-heading">
+        <div class="wallet-forecast-modal__body">
+          <div class="wallet-forecast-modal__insight-banner" [class]="'insight-banner--' + averageDailySpendInsight.status">
+            <span class="material-symbols-outlined insight-banner__icon">
+              {{ averageDailySpendInsight.status === 'good' ? 'check_circle' : averageDailySpendInsight.status === 'warning' ? 'warning' : 'error' }}
+            </span>
             <div>
-              <div class="wallet-forecast-modal__list-title">Ngày chi tiêu cao nhất</div>
-              <p>Những ngày có tổng chi lớn nhất trong kỳ</p>
+              <strong>{{ averageDailySpendInsight.status === 'good' ? 'Tình hình ổn định' : averageDailySpendInsight.status === 'warning' ? 'Cần theo dõi thêm' : 'Ngân sách đang gặp rủi ro' }}</strong>
+              <p>{{ averageDailySpendInsight.text }}</p>
             </div>
-            <span class="material-symbols-outlined">calendar_month</span>
           </div>
-          @for (day of topSpendingDays; track day.date; let index = $index) {
-            <div class="wallet-forecast-modal__expense-row">
-              <span class="wallet-forecast-modal__rank" [class.wallet-forecast-modal__rank--top]="index === 0">{{ index + 1 }}</span>
-              <span class="wallet-forecast-modal__expense-name">{{ day.date }}</span>
-              <span class="wallet-forecast-modal__expense-meta">
-                <strong>{{ formatCurrency(day.amount) }}</strong>
-              </span>
+
+          <div class="wallet-forecast-modal__metrics-grid">
+            <div class="wallet-forecast-metric wallet-forecast-metric--blue">
+              <span class="material-symbols-outlined">speed</span>
+              <small>Đang tiêu trung bình</small>
+              <strong>{{ formatCurrency(activeWalletAverageDailySpend) }} / ngày</strong>
+              <p>{{ activeWalletAverageComparisonLabel }}</p>
             </div>
-          } @empty {
-            <p class="wallet-forecast-modal__empty">Chưa có đủ dữ liệu để thống kê.</p>
-          }
+            <div class="wallet-forecast-metric wallet-forecast-metric--green">
+              <span class="material-symbols-outlined">verified_user</span>
+              <small>Mức an toàn (còn lại)</small>
+              <strong>{{ formatCurrency(activeWalletSafeDailyBudget) }} / ngày</strong>
+              <p>Để không bị âm ngân sách</p>
+            </div>
+          </div>
+
+          <div class="wallet-forecast-modal__metrics-full">
+            <div class="wallet-forecast-metric wallet-forecast-metric--amber daily-spend-forecast">
+              <div class="daily-spend-forecast__topline">
+                <span class="daily-spend-forecast__icon material-symbols-outlined">analytics</span>
+                <small>Dự báo cuối kỳ</small>
+                <span class="daily-spend-forecast__caption">{{ activeWalletRemainingDays }} ngày còn lại</span>
+              </div>
+              <strong [class.text-danger]="activeWalletForecastSpend > (activeBudget?.amount || 0)">{{ formatCurrency(activeWalletForecastSpend) }}</strong>
+              <p>Dựa trên tốc độ chi tiêu hiện tại của bạn</p>
+            </div>
+          </div>
+
+          <div class="wallet-forecast-modal__list">
+            <div class="wallet-forecast-modal__list-heading">
+              <div>
+                <div class="wallet-forecast-modal__list-title">Ngày chi tiêu cao nhất</div>
+                <p>Những ngày có tổng chi lớn nhất trong kỳ</p>
+              </div>
+              <span class="material-symbols-outlined">calendar_month</span>
+            </div>
+            @for (day of topSpendingDays; track day.date; let index = $index) {
+              <div class="wallet-forecast-modal__expense-row">
+                <span class="wallet-forecast-modal__rank" [class.wallet-forecast-modal__rank--top]="index === 0">{{ index + 1 }}</span>
+                <span class="wallet-forecast-modal__expense-name">{{ day.date }}</span>
+                <span class="wallet-forecast-modal__expense-meta">
+                  <strong>{{ formatCurrency(day.amount) }}</strong>
+                </span>
+              </div>
+            } @empty {
+              <p class="wallet-forecast-modal__empty">Chưa có đủ dữ liệu để thống kê.</p>
+            }
+          </div>
         </div>
       </div>
     </div>
