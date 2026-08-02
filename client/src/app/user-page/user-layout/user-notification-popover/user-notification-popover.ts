@@ -1,5 +1,6 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { AppLanguage, LanguageService } from '../../../core/services/language-service';
+import { NotificationService } from '../../../core/services/notification-service';
 import {
   LocalizedText,
   NotificationItem,
@@ -53,9 +54,9 @@ const NOTIFICATION_META: Record<
     label: { vi: 'Nhập tay', en: 'Manual entry' },
   },
   insight: {
-    icon: 'trending_up',
+    icon: 'auto_awesome',
     tone: 'violet',
-    label: { vi: 'Xu hướng', en: 'Insight' },
+    label: { vi: 'Lời khuyên AI', en: 'AI Insight' },
   },
   budget: {
     icon: 'account_balance_wallet',
@@ -81,6 +82,9 @@ const POPOVER_COPY: Record<
     subtitle: string;
     markAllRead: string;
     empty: string;
+    loading: string;
+    error: string;
+    retry: string;
   }
 > = {
   vi: {
@@ -88,12 +92,18 @@ const POPOVER_COPY: Record<
     subtitle: 'Cập nhật từ quét hóa đơn, giao dịch và ngân sách',
     markAllRead: 'Đánh dấu đã xem',
     empty: 'Chưa có hoạt động gần đây.',
+    loading: 'Đang tải thông báo...',
+    error: 'Không thể tải thông báo. Vui lòng thử lại.',
+    retry: 'Thử lại',
   },
   en: {
     title: 'Recent Activity',
     subtitle: 'Updates from receipts, transactions, and budgets',
     markAllRead: 'Mark all as read',
     empty: 'No recent activity yet.',
+    loading: 'Loading notifications...',
+    error: 'Could not load notifications. Please try again.',
+    retry: 'Retry',
   },
 };
 
@@ -105,8 +115,15 @@ const POPOVER_COPY: Record<
 })
 export class UserNotificationPopover {
   protected readonly language = inject(LanguageService);
+  protected readonly notificationService = inject(NotificationService);
   protected readonly notificationMeta = NOTIFICATION_META;
   protected readonly copy = computed(() => POPOVER_COPY[this.language.currentLang()]);
+
+  /** Trạng thái loading từ service — hiển thị spinner khi tải */
+  protected readonly isLoading = this.notificationService.isLoading;
+  /** Trạng thái lỗi từ service — hiển thị error state với nút Retry */
+  protected readonly hasError = this.notificationService.hasError;
+
   readonly isOpen = input(false);
   readonly notifications = input<readonly NotificationItem[]>([]);
   readonly notificationRead = output<string>();
@@ -126,7 +143,12 @@ export class UserNotificationPopover {
     this.markAllRead.emit();
   }
 
+  protected handleRetry(): void {
+    this.notificationService.loadNotifications();
+  }
+
   protected labelForType(type: NotificationType): string {
     return this.notificationMeta[type].label[this.language.currentLang()];
   }
 }
+

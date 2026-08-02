@@ -12,7 +12,7 @@
       <p>{{ copy().subtitle }}</p>
     </div>
 
-    @if (unreadCount() > 0) {
+    @if (unreadCount() > 0 && !isLoading() && !hasError()) {
       <button
         class="notification-popover__mark-all"
         type="button"
@@ -23,7 +23,30 @@
     }
   </div>
 
-  @if (notifications().length > 0) {
+  @if (isLoading()) {
+    <!-- Loading State -->
+    <div class="notification-popover__state notification-popover__loading" aria-live="polite" aria-busy="true">
+      <span class="notification-popover__spinner" aria-hidden="true"></span>
+      <p>{{ copy().loading }}</p>
+    </div>
+  } @else if (hasError()) {
+    <!-- Error State -->
+    <div class="notification-popover__state notification-popover__error" aria-live="polite">
+      <span class="material-symbols-outlined notification-popover__state-icon" aria-hidden="true">
+        wifi_off
+      </span>
+      <p>{{ copy().error }}</p>
+      <button
+        class="notification-popover__retry-btn"
+        type="button"
+        (click)="handleRetry()"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+        {{ copy().retry }}
+      </button>
+    </div>
+  } @else if (notifications().length > 0) {
+    <!-- Notification List -->
     <div class="notification-popover__list custom-scrollbar">
       @for (notification of notifications(); track notification.id) {
         <button
@@ -65,6 +88,7 @@
       }
     </div>
   } @else {
+    <!-- Empty State -->
     <div class="notification-popover__empty">
       <span class="material-symbols-outlined" aria-hidden="true">notifications_off</span>
       <p>{{ copy().empty }}</p>

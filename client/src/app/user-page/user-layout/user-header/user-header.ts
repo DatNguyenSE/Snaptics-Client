@@ -220,7 +220,13 @@ export class UserHeader implements AfterViewInit, OnDestroy {
   }
 
   protected toggleNotifications(): void {
+    const wasOpen = this.isNotificationOpen();
     this.isNotificationOpen.update((isOpen) => !isOpen);
+    // Khi mở chuông, refresh để lấy thông báo mới nhất (bao gồm AI insight vừa tạo).
+    // SignalR đã xử lý push realtime; đây là fallback đảm bảo dữ liệu đồng bộ.
+    if (!wasOpen) {
+      this.notificationService.loadNotifications();
+    }
   }
 
   protected closeNotifications(): void {

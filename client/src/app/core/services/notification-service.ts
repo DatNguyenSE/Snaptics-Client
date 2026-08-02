@@ -169,6 +169,13 @@ export class NotificationService {
       } else if (dto.relatedId) {
         relatedEntityId = dto.relatedId.toString();
       }
+    } else if (typeNum === 6 || typeStr === 'AiInsight' || typeStr === 'Insight' || typeStr === 'AIInsight' || typeStr === 'AI_Insight') {
+      // Thông báo lời khuyên AI — Backend tạo sau khi xử lý /AiAssistant/insight
+      feType = 'insight';
+      titleVi = 'Lời khuyên AI';
+      titleEn = 'AI Insight';
+      relatedEntityType = 'system';
+      if (dto.relatedId) relatedEntityId = dto.relatedId.toString();
     } else if (dto.transactionDetailId || typeStr === 'Transaction') {
       feType = 'wallet_activity';
       titleVi = 'Hoạt động giao dịch';
