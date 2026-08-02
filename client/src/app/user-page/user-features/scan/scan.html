@@ -373,7 +373,7 @@
                     @if (item.isEditing) {
                       <div class="receipt-item__edit-form" style="width: 100%; display: flex; flex-direction: column; gap: 12px; padding: 12px 20px; background: rgba(0,0,0,0.02); border-bottom: 1px solid var(--sw-border);">
                         <label class="form-label">
-                          <span>Tên món</span>
+                          <span>{{ lang.currentLang() === 'vi' ? 'Tên' : 'Name' }}</span>
                           <input type="text" [value]="item.name" (input)="updateItemName(item.id, $event)" class="form-input" />
                         </label>
                         <div style="display: flex; gap: 12px;">

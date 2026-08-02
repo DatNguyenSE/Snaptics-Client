@@ -92,10 +92,7 @@ export class ManualEntry implements OnInit {
       return;
     }
 
-    if (!this.selectedImage) {
-      this.toast.error(this.language.currentLang() === 'vi' ? 'Vui lòng đính kèm ảnh (*Bắt buộc)' : 'Please attach an image (*Required)');
-      return;
-    }
+
 
     this.isSaving = true;
 

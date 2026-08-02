@@ -34,7 +34,7 @@ export function parseSnapItemAnalysis(
     nestedItem?.['price'],
   ]);
 
-  if (!itemName || estimatedAmount <= 0) {
+  if (!itemName) {
     return null;
   }
 

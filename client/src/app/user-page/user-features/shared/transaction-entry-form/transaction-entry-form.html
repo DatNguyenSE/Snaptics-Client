@@ -151,7 +151,7 @@
     <!-- ── Image Upload Field ── -->
     @if (showImageUpload) {
       <div class="entry-field entry-field--full">
-        <span class="entry-field__label" style="color: #ff4d4f;">{{ language.currentLang() === 'vi' ? 'Đính kèm ảnh (*Bắt buộc)' : 'Attach Image (*Required)' }}</span>
+        <span class="entry-field__label">{{ language.currentLang() === 'vi' ? 'Đính kèm ảnh (Tùy chọn)' : 'Attach Image (Optional)' }}</span>
         
         @if (previewUrl) {
           <div class="entry-form__image-preview-wrap">
