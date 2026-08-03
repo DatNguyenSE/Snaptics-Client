@@ -115,6 +115,22 @@
   font-size: 20px;
 }
 
+.deposit-source-group--saving {
+  padding: 13px;
+  border: 1px solid #e7d7a4;
+  border-radius: 14px;
+  background: #fffaf0;
+}
+
+.deposit-source-group--saving label {
+  color: #795d17;
+  font-weight: 700;
+}
+
+.deposit-source-group--saving .input-icon {
+  color: #b4871e;
+}
+
 .form-control {
   width: 100%;
   padding: 10px 12px;
@@ -236,6 +252,15 @@
   background-color: #0f172a;
   border-color: rgba(255, 255, 255, 0.12);
   color: #f8fafc;
+}
+
+:host-context(html.dark-theme) .deposit-source-group--saving {
+  border-color: #695729;
+  background: #2b2619;
+}
+
+:host-context(html.dark-theme) .deposit-source-group--saving label {
+  color: #e8ca73;
 }
 
 :host-context(html.dark-theme) .btn-secondary-modal {

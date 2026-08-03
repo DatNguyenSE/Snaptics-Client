@@ -29,7 +29,7 @@
 
     @else if (budget) {
       <!-- ── Budget Header Card ─────────────────────────────── -->
-      <div class="budget-hero" [class.budget-hero--over]="isOverBudget" [class.budget-hero--near]="isNearLimit">
+      <div class="budget-hero" [class.budget-hero--saving]="isSavingBudget" [class.budget-hero--over]="isOverBudget" [class.budget-hero--near]="isNearLimit">
         <div class="budget-hero__top">
           <div class="budget-hero__title-area">
             <div class="budget-hero__badges">
@@ -39,9 +39,9 @@
                   Ví dùng chung
                 </span>
               } @else {
-                <span class="wallet-badge wallet-badge--personal">
-                  <span class="material-symbols-outlined">account_balance_wallet</span>
-                  Ví cá nhân
+                  <span class="wallet-badge wallet-badge--personal" [class.wallet-badge--saving]="isSavingBudget">
+                   <span class="material-symbols-outlined">{{ isSavingBudget ? 'savings' : 'account_balance_wallet' }}</span>
+                   {{ isSavingBudget ? 'Mục tiêu tiết kiệm' : 'Ví cá nhân' }}
                 </span>
               }
               <span class="wallet-badge" [class.wallet-badge--owner]="isOwner" [class.wallet-badge--member]="!isOwner">
@@ -103,15 +103,15 @@
         <!-- Stats row -->
         <div class="budget-stats">
           <div class="stat-card">
-            <span class="stat-label">Ngân sách tháng</span>
-            <p class="stat-value">{{ formatCurrency(budget.amount) }}</p>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Đã chi</span>
-            <p class="stat-value stat-value--spent">{{ formatCurrency(spentAmount) }}</p>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Còn lại</span>
+             <span class="stat-label">{{ isSavingBudget ? 'Mục tiêu' : 'Ngân sách tháng' }}</span>
+             <p class="stat-value">{{ formatCurrency(budget.amount) }}</p>
+           </div>
+           <div class="stat-card">
+             <span class="stat-label">{{ isSavingBudget ? 'Đã tiết kiệm được' : 'Đã chi' }}</span>
+             <p class="stat-value stat-value--spent" [class.stat-value--saving]="isSavingBudget">{{ formatCurrency(spentAmount) }}</p>
+           </div>
+           <div class="stat-card">
+             <span class="stat-label">{{ isSavingBudget ? 'Còn thiếu' : 'Còn lại' }}</span>
             <p class="stat-value" [class.stat-value--danger]="isOverBudget" [class.stat-value--warn]="isNearLimit && !isOverBudget">
               {{ formatCurrency(remainingAmount) }}
             </p>
@@ -129,7 +129,7 @@
             ></div>
           </div>
           <div class="progress-footer">
-            <span class="progress-pct">{{ spentPercent }}% đã dùng</span>
+             <span class="progress-pct">{{ spentPercent }}% {{ isSavingBudget ? 'đã tiết kiệm' : 'đã dùng' }}</span>
             @if (isOverBudget) {
               <span class="progress-alert progress-alert--danger">
                 <span class="material-symbols-outlined">warning</span>

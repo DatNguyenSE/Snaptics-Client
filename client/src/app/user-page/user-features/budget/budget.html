@@ -80,7 +80,7 @@
             @for (budget of budgets; track budget.id) {
               <article
                 class="budget-card budget-card--personal"
-                [class.budget-card--saving]="budget.type === 1"
+                [class.budget-card--saving]="isSavingBudget(budget)"
                 (click)="navigateToBudget(budget)"
                 role="button"
                 tabindex="0"
@@ -89,9 +89,9 @@
               >
                 <div class="budget-card__header">
                   <div class="budget-card__title-wrap">
-                    <div class="budget-icon-wrap" [class.budget-icon-wrap--saving]="budget.type === 1">
+                    <div class="budget-icon-wrap" [class.budget-icon-wrap--saving]="isSavingBudget(budget)">
                       <span class="material-symbols-outlined">
-                        {{ budget.type === 1 ? 'savings' : 'account_balance_wallet' }}
+                        {{ isSavingBudget(budget) ? 'savings' : 'account_balance_wallet' }}
                       </span>
                     </div>
                     <div class="budget-title-details">
@@ -104,7 +104,7 @@
                         Thời hạn {{ getBudgetDurationLabel(budget.startDate, budget.endDate) }}
                       </span>
                       <span class="budget-card-kind">
-                        {{ budget.type === 1 ? 'Tiết kiệm mục tiêu' : 'Ví cá nhân' }}
+                        {{ isSavingBudget(budget) ? 'Tiết kiệm mục tiêu' : 'Ví cá nhân' }}
                       </span>
                     </div>
                   </div>
@@ -143,9 +143,9 @@
                 <div class="budget-card__body">
                   <div class="budget-amounts">
                     <div class="amount-group">
-                      <span class="amount-label">{{ budget.type === 1 ? 'Đã tích lũy' : 'Đã sử dụng' }}</span>
+                      <span class="amount-label">{{ isSavingBudget(budget) ? 'Đã tích lũy' : 'Đã sử dụng' }}</span>
                       <p class="amount-value"
-                        [class.text-saving]="budget.type === 1 && getSpentAmount(budget) >= 0"
+                        [class.text-saving]="isSavingBudget(budget) && getSpentAmount(budget) >= 0"
                         [class.text-danger]="getSpentAmount(budget) < 0"
                       >
                         {{ formatCurrency(getSpentAmount(budget)) }}
@@ -158,12 +158,12 @@
                   </div>
 
                   <div class="budget-progress-container">
-                    <div class="progress-bar-bg" [class.bg-saving]="budget.type === 1">
+                    <div class="progress-bar-bg" [class.bg-saving]="isSavingBudget(budget)">
                       <div
                         class="progress-bar-fill"
                         [style.width.%]="getBudgetSpentPercent(budget)"
-                        [class.fill-saving]="budget.type === 1"
-                        [class.fill-danger]="budget.type !== 1 && getBudgetSpentPercent(budget) >= 90"
+                        [class.fill-saving]="isSavingBudget(budget)"
+                        [class.fill-danger]="!isSavingBudget(budget) && getBudgetSpentPercent(budget) >= 90"
                       ></div>
                     </div>
                     <div class="progress-footer">
@@ -305,7 +305,7 @@
       <div class="modal-header">
         <div class="modal-icon">
           <span class="material-symbols-outlined">
-            {{ budgetForm.get('type')?.value == 1 ? 'savings' : 'account_balance_wallet' }}
+            {{ budgetForm.get('type')?.value == 2 ? 'autorenew' : (budgetForm.get('type')?.value == 1 ? 'savings' : 'account_balance_wallet') }}
           </span>
         </div>
         <div class="modal-titles">
@@ -356,6 +356,22 @@
               <span class="budget-type-option__copy">
                 <span class="budget-type-option__title">Tiết kiệm mục tiêu</span>
                 <span class="budget-type-option__hint">Tích lũy cho mục tiêu</span>
+              </span>
+              <span class="material-symbols-outlined budget-type-option__check">check_circle</span>
+            </button>
+            <button
+              type="button"
+              class="budget-type-option budget-type-option--renew"
+              [class.budget-type-option--active]="budgetForm.get('type')?.value == 2"
+              [attr.aria-pressed]="budgetForm.get('type')?.value == 2"
+              (click)="selectBudgetType(2)"
+            >
+              <span class="budget-type-option__icon">
+                <span class="material-symbols-outlined">autorenew</span>
+              </span>
+              <span class="budget-type-option__copy">
+                <span class="budget-type-option__title">Tự động gia hạn ví</span>
+                <span class="budget-type-option__hint">Tự tạo ví cho chu kỳ mới</span>
               </span>
               <span class="material-symbols-outlined budget-type-option__check">check_circle</span>
             </button>
@@ -426,18 +442,6 @@
             <input type="date" formControlName="endDate" class="form-control" (input)="onEndDateChange()" />
           </div>
         </div>
-
-        <label class="auto-renew-option">
-          <input type="checkbox" formControlName="isAutoRenew" />
-          <span class="auto-renew-option__box" aria-hidden="true"></span>
-          <span class="auto-renew-option__content">
-            <span class="auto-renew-option__title">Tự động gia hạn ví</span>
-            <span class="auto-renew-option__description">
-              Khi bật, đến ngày kết thúc hệ thống sẽ tự động tạo một ví mới với các thiết lập của ví hiện tại và nhận tiền từ những nguồn thu bạn đã cài đặt, chẳng hạn như lương. Ví dụ: vào đầu tháng mới, ví sẽ được tạo tự động và nạp tiền từ nguồn lương của bạn.
-            </span>
-          </span>
-        </label>
-
 
         <div class="modal-actions">
           <button type="button" class="btn-ghost" (click)="closeModal()" [disabled]="isSubmitting">Hủy</button>

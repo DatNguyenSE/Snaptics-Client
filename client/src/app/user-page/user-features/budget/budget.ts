@@ -136,6 +136,7 @@ export class Budget implements OnInit {
         }
       }
     });
+
   }
 
   get displayAmount(): string {
@@ -176,7 +177,10 @@ export class Budget implements OnInit {
   }
 
   selectBudgetType(type: number): void {
-    this.budgetForm.patchValue({ type });
+    this.budgetForm.patchValue({
+      type,
+      isAutoRenew: type === 2,
+    });
   }
 
   onStartDateChange(): void {
@@ -398,13 +402,11 @@ export class Budget implements OnInit {
       this.editingBudget = budget;
       let start = '';
       if (budget.startDate) {
-        const d = new Date(budget.startDate);
-        if (!isNaN(d.getTime())) start = d.toISOString().split('T')[0];
+        start = this.toDateInputValue(budget.startDate);
       }
       let end = '';
       if (budget.endDate) {
-        const d = new Date(budget.endDate);
-        if (!isNaN(d.getTime())) end = d.toISOString().split('T')[0];
+        end = this.toDateInputValue(budget.endDate);
       } else {
         // If no end date, it is forever
         this.currentCycle = 36500;
@@ -419,7 +421,10 @@ export class Budget implements OnInit {
         startDate: start,
         endDate: end,
         isDefault: budget.isDefault || false,
-        isAutoRenew: budget.isAutoRenew ?? budget.autoRenew ?? false,
+        // Only the auto-renew budget type may restore the auto-renew toggle.
+        isAutoRenew: Number(budget.type) === 2
+          ? (budget.isAutoRenew ?? budget.autoRenew ?? true)
+          : false,
       });
     } else {
       this.modalMode = 'ADD';
@@ -525,7 +530,7 @@ export class Budget implements OnInit {
       categoryId: null,
       note: '',
       isDefault: formVal.isDefault || false,
-      isAutoRenew: formVal.isAutoRenew || false,
+      isAutoRenew: Number(formVal.type) === 2,
       isActive: true,
     };
 
@@ -684,17 +689,34 @@ export class Budget implements OnInit {
 
   getBudgetSpentPercent(budget: BudgetDto): number {
     if (budget.currentAmount !== undefined) {
+      if (this.isSavingBudget(budget)) {
+        return budget.amount > 0
+          ? Math.min(100, Math.max(0, Math.round((budget.currentAmount / budget.amount) * 100)))
+          : 0;
+      }
       const spent = budget.amount - budget.currentAmount;
       return Math.min(100, Math.max(0, Math.round((spent / budget.amount) * 100)));
     }
     return 0;
   }
 
+  private toDateInputValue(value: string): string {
+    const dateOnly = value.slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) return dateOnly;
+
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
+  }
+
   getSpentAmount(budget: BudgetDto): number {
-    if (budget.currentAmount !== undefined) {
-      return budget.amount - budget.currentAmount;
-    }
-    return 0;
+    if (budget.currentAmount === undefined) return 0;
+    return this.isSavingBudget(budget)
+      ? budget.currentAmount
+      : budget.amount - budget.currentAmount;
+  }
+
+  isSavingBudget(budget: BudgetDto): boolean {
+    return Number(budget.type) === 1 || Number(budget.type) === 2;
   }
 
   getSharedSpentPercent(budget: SharedBudgetDto): number {

@@ -25,10 +25,10 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Nguồn thu nhập (Tùy chọn)</label>
+      <div class="form-group deposit-source-group" [class.deposit-source-group--saving]="budget.type == 1">
+        <label>{{ budget.type == 1 ? 'Mục tiêu tiết kiệm' : 'Nguồn thu nhập (Tùy chọn)' }}</label>
         <div class="input-with-icon">
-          <span class="material-symbols-outlined input-icon">account_balance</span>
+          <span class="material-symbols-outlined input-icon">{{ budget.type == 1 ? 'savings' : 'account_balance' }}</span>
           <select formControlName="incomeSourceId" class="form-control with-icon">
             <option [ngValue]="null">-- Tự nhập thủ công (Không chọn nguồn) --</option>
             @for (source of incomeSources; track source.id) {
@@ -36,7 +36,9 @@
             }
           </select>
         </div>
-        <small class="form-text">Chọn nguồn để theo dõi luồng tiền đổ về.</small>
+        <small class="form-text">
+          {{ budget.type == 1 ? 'Chọn mục tiêu để ghi nhận khoản tiền tích lũy.' : 'Chọn nguồn để theo dõi luồng tiền đổ về.' }}
+        </small>
       </div>
 
       <div class="form-group">

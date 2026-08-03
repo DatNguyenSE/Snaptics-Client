@@ -126,6 +126,10 @@
   background: linear-gradient(90deg, #ef4444, #dc2626);
 }
 
+.budget-hero--saving::before {
+  background: linear-gradient(90deg, #d4a72c, #f2c94c);
+}
+
 /* ─── Hero Top ─── */
 .budget-hero__top {
   display: flex;
@@ -178,6 +182,12 @@
   background: #f3e8ff;
   color: #7c3aed;
   border-color: #ddd6fe;
+}
+
+.wallet-badge--saving {
+  background: #fff7d6;
+  color: #876615;
+  border-color: #ecd27a;
 }
 
 .wallet-badge--owner {
@@ -355,6 +365,10 @@
 
 .stat-value--spent {
   color: #f59e0b;
+}
+
+.stat-value--saving {
+  color: #3d936d;
 }
 
 .stat-value--danger {

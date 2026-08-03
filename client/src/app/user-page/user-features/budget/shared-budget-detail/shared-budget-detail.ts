@@ -56,18 +56,31 @@ export class SharedBudgetDetail implements OnInit {
     return this.budget?.isShared === true || this.budget?.walletType === 'SHARED';
   }
 
+  get isSavingBudget(): boolean {
+    const type = Number(this.budget?.type);
+    return type === 1 || type === 2;
+  }
+
   get spentAmount(): number {
     if (!this.budget) return 0;
+    if (this.isSavingBudget) return Math.max(0, this.budget.currentAmount ?? 0);
     const current = this.budget.currentAmount ?? this.budget.amount;
     return Math.max(0, this.budget.amount - current);
   }
 
   get remainingAmount(): number {
-    return Math.max(0, (this.budget?.currentAmount ?? 0));
+    if (!this.budget) return 0;
+    if (this.isSavingBudget) {
+      return Math.max(0, this.budget.amount - (this.budget.currentAmount ?? 0));
+    }
+    return Math.max(0, this.budget.currentAmount ?? 0);
   }
 
   get spentPercent(): number {
     if (!this.budget || this.budget.amount <= 0) return 0;
+    if (this.isSavingBudget) {
+      return Math.min(100, Math.round((this.spentAmount / this.budget.amount) * 100));
+    }
     return Math.min(100, Math.round((this.spentAmount / this.budget.amount) * 100));
   }
 
