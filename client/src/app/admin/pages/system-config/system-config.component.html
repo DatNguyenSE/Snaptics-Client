@@ -17,6 +17,15 @@
         <div>
           <h2 class="card__title">Gia hạn ví định kỳ</h2>
           <p class="card__desc">Tự động xử lý chuyển số dư sang kỳ mới cho các ngân sách có chu kỳ lặp lại.</p>
+          <div class="job-conditions">
+            <strong>Điều kiện áp dụng:</strong>
+            <ul>
+              <li>Ví ngân sách đang hoạt động (<code>IsActive = true</code>).</li>
+              <li>Loại ví là định kỳ (<code>Type = Periodic</code>).</li>
+              <li>Đã đến hoặc qua ngày kết thúc (<code>EndDate &lt;= Ngày hiện tại</code>).</li>
+              <li><em>Lưu ý: Chỉ ví có bật tự động gia hạn (<code>IsAutoRenew = true</code>) mới tạo chu kỳ mới.</em></li>
+            </ul>
+          </div>
         </div>
         <div class="super-badge" style="margin: 0;">Hàng ngày</div>
       </div>
@@ -52,6 +61,15 @@
         <div>
           <h2 class="card__title">Nhắc nhở đánh giá sản phẩm</h2>
           <p class="card__desc">Quét các món đồ mua sau 30 ngày và gửi thông báo nhắc người dùng đánh giá mức độ sử dụng.</p>
+          <div class="job-conditions">
+            <strong>Điều kiện áp dụng:</strong>
+            <ul>
+              <li>Giao dịch thực hiện <strong>quá 30 ngày</strong> (<code>TransactionDate &lt;= 30 ngày trước</code>).</li>
+              <li>Giao dịch chưa bị xoá (<code>IsDeleted = false</code>).</li>
+              <li>Danh mục của món đồ có bật <strong>Theo dõi tồn kho</strong>.</li>
+              <li>Chưa từng tạo thông báo nhắc nhở cho chi tiết giao dịch này.</li>
+            </ul>
+          </div>
         </div>
         <div class="super-badge" style="margin: 0; background: rgba(16, 185, 129, 0.1); color: #10b981;">Hàng ngày</div>
       </div>
@@ -87,6 +105,14 @@
         <div>
           <h2 class="card__title">Dọn dẹp hệ thống</h2>
           <p class="card__desc">Xóa bỏ các thông báo rác đã xem và dọn dẹp các dữ liệu tạm không cần thiết trên hệ thống.</p>
+          <div class="job-conditions">
+            <strong>Điều kiện áp dụng:</strong>
+            <ul>
+              <li>Chỉ áp dụng cho các thông báo <strong>đã đọc</strong> (<code>IsRead = true</code>).</li>
+              <li>Hệ thống sẽ giữ lại <strong>10 thông báo mới nhất</strong>.</li>
+              <li>Tất cả các thông báo đã đọc còn lại (cũ hơn) sẽ bị xoá vĩnh viễn khỏi Database.</li>
+            </ul>
+          </div>
         </div>
         <div class="super-badge" style="margin: 0; background: rgba(245, 158, 11, 0.1); color: #f59e0b;">Hàng ngày</div>
       </div>

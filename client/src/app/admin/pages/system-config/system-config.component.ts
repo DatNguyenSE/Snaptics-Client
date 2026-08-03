@@ -105,7 +105,7 @@ export class SystemConfigComponent {
   // 3. Cleanup Notifications
   saveCleanupSchedule() {
     this.isSavingCleanup = true;
-    this.hangfireService.updateHangfireSchedule('cleanup-notifications', this.buildPayload(this.cleanupTime)).subscribe({
+    this.hangfireService.updateHangfireSchedule('cleanup', this.buildPayload(this.cleanupTime)).subscribe({
       next: () => {
         this.toast.success('Cập nhật cấu hình dọn dẹp hệ thống thành công.');
         this.isSavingCleanup = false;
@@ -119,7 +119,7 @@ export class SystemConfigComponent {
 
   triggerCleanup() {
     this.isTriggeringCleanup = true;
-    this.hangfireService.triggerHangfireJob('cleanup-notifications').subscribe({
+    this.hangfireService.triggerHangfireJob('cleanup').subscribe({
       next: (res) => {
         this.toast.success(res.message || 'Dọn dẹp hệ thống đã được kích hoạt.');
         this.isTriggeringCleanup = false;

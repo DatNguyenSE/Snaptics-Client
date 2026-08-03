@@ -38,7 +38,7 @@ export class AdminHangfireService {
       return of({ message: `Job "${jobKey}" đã được kích hoạt thành công.` }).pipe(delay(800));
     }
     return this.http.post<{ message: string }>(
-      `${this.baseUrl}/${jobKey}/trigger`,
+      `${environment.apiUrl.replace(/\/$/, '')}/api/hangfire-config/trigger/${jobKey}`,
       null,
       { withCredentials: true }
     );
@@ -52,9 +52,14 @@ export class AdminHangfireService {
     if (environment.useHangfireDemoData) {
       return of({ message: `Lịch chạy của job "${jobKey}" đã được cập nhật.` }).pipe(delay(700));
     }
-    return this.http.put<{ message: string }>(
-      `${this.baseUrl}/${jobKey}/schedule`,
-      payload,
+    
+    // Parse runTime "HH:mm" to hour and minute for backend
+    const [hour, minute] = payload.runTime.split(':').map(Number);
+    const backendPayload = { hour, minute };
+
+    return this.http.post<{ message: string }>(
+      `${environment.apiUrl.replace(/\/$/, '')}/api/hangfire-config/${jobKey}`,
+      backendPayload,
       { withCredentials: true }
     );
   }
