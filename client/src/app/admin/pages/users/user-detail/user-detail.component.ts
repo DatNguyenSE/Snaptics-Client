@@ -10,13 +10,13 @@ import { ToastService } from '../../../../core/services/toast-service';
 
 type TabId = 'overview' | 'activity' | 'usage' | 'security' | 'history';
 
-const ACTIVITY_MOCK = [
-  { id: 'a1', event: 'Login successful', time: '2026-07-21T10:20:00Z', icon: 'login', variant: 'success' },
-  { id: 'a2', event: 'Profile updated', time: '2026-07-18T08:30:00Z', icon: 'edit', variant: 'success' },
-  { id: 'a3', event: 'Password changed', time: '2026-07-10T14:00:00Z', icon: 'lock_reset', variant: 'success' },
-  { id: 'a4', event: 'Login failed', time: '2026-07-08T22:12:00Z', icon: 'error', variant: 'failed' },
-  { id: 'a5', event: 'Verification completed', time: '2026-06-01T09:45:00Z', icon: 'verified', variant: 'success' },
-];
+export interface UserActivityItem {
+  id: string;
+  event: string;
+  time: string;
+  icon: string;
+  variant: 'success' | 'failed';
+}
 
 @Component({
   selector: 'app-user-detail',
@@ -34,9 +34,9 @@ export class UserDetailComponent implements OnInit {
 
   user: AdminUser | undefined;
   auditLogs: AuditLog[] = [];
+  userActivities: UserActivityItem[] = [];
   loading = true;
   activeTab: TabId = 'overview';
-  readonly activityMock = ACTIVITY_MOCK;
 
   confirmModal: { open: boolean; config: ConfirmModalConfig; action?: (reason: string) => void; loading: boolean } = {
     open: false,
@@ -54,15 +54,29 @@ export class UserDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
-    setTimeout(() => {
-      this.user = this.userService.getUserById(id);
-      this.auditLogs = this.auditService.getLogsForUser(id);
-      this.loading = false;
-      if (!this.user) {
+    this.userService.loadUser(id).subscribe({
+      next: (u: AdminUser | undefined) => {
+        this.user = u || this.userService.getUserById(id);
+        this.auditLogs = this.auditService.getLogsForUser(id);
+        this.userActivities = this.auditLogs.map((log) => ({
+          id: log.id,
+          event: `${log.action} - ${log.target}`,
+          time: log.timestamp,
+          icon: log.status === 'success' ? 'check_circle' : 'error',
+          variant: log.status === 'success' ? 'success' : 'failed',
+        }));
+        this.loading = false;
+        if (!this.user) {
+          this.toast.error('User not found.');
+          void this.router.navigateByUrl('/admin/users');
+        }
+      },
+      error: () => {
+        this.loading = false;
         this.toast.error('User not found.');
         void this.router.navigateByUrl('/admin/users');
-      }
-    }, 350);
+      },
+    });
   }
 
   goBack(): void {

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, catchError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { HangfireJob, UpdateHangfireScheduleRequest } from '../models/hangfire.models';
@@ -27,7 +27,9 @@ export class AdminHangfireService {
     if (environment.useHangfireDemoData) {
       return of([...HANGFIRE_DEMO_JOBS]).pipe(delay(600));
     }
-    return this.http.get<HangfireJob[]>(this.baseUrl, { withCredentials: true });
+    return this.http.get<HangfireJob[]>(this.baseUrl, { withCredentials: true }).pipe(
+      catchError(() => of([]))
+    );
   }
 
   // ─── Trigger a job immediately ────────────────────────────────────────────────
@@ -84,6 +86,8 @@ export class AdminHangfireService {
     return this.http.get<HangfireJobHistoryItem[]>(
       `${this.baseUrl}/${jobKey}/history`,
       { params: { page: page.toString(), pageSize: pageSize.toString() }, withCredentials: true }
+    ).pipe(
+      catchError(() => of([]))
     );
   }
 }

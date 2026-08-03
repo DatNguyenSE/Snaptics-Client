@@ -1,5 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { of, delay } from 'rxjs';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { of, Observable, catchError, tap, finalize } from 'rxjs';
 import {
   AdminDashboardStats,
   RecentAdminActivity,
@@ -7,9 +8,13 @@ import {
   SystemHealthItem,
   KpiCard,
 } from '../models/admin.models';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AdminDashboardService {
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiUrl.replace(/\/$/, '')}/api/admin/dashboard`;
+
   private readonly _kpis = signal<KpiCard[]>([]);
   private readonly _health = signal<SystemHealthItem[]>([]);
   private readonly _activity = signal<RecentAdminActivity[]>([]);
@@ -28,21 +33,33 @@ export class AdminDashboardService {
     return Math.round(list.reduce((sum, s) => sum + (s.responseTime ?? 0), 0) / list.length);
   });
 
-  getDashboardStats() {
+  getDashboardStats(): Observable<any> {
     this._loading.set(true);
-    return of({ kpis: this._kpis(), health: this._health() }).pipe(delay(200));
+    return this.http.get<any>(`${this.baseUrl}/stats`, { withCredentials: true }).pipe(
+      tap((res) => {
+        if (res?.kpis) this._kpis.set(res.kpis);
+        if (res?.health) this._health.set(res.health);
+        if (res?.activity) this._activity.set(res.activity);
+        if (res?.errors) this._errors.set(res.errors);
+      }),
+      catchError(() => of({ kpis: this._kpis(), health: this._health() })),
+      finalize(() => this._loading.set(false))
+    );
   }
 
-  getUserGrowthData() {
-    return of({ labels: [], newUsers: [], activeUsers: [] }).pipe(delay(200));
+  getUserGrowthData(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/user-growth`, { withCredentials: true }).pipe(
+      catchError(() => of({ labels: [], newUsers: [], activeUsers: [] }))
+    );
   }
 
-  getAiUsageData() {
-    return of({ labels: [], aiChat: [], receiptScan: [], productScan: [] }).pipe(delay(200));
+  getAiUsageData(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/ai-usage`, { withCredentials: true }).pipe(
+      catchError(() => of({ labels: [], aiChat: [], receiptScan: [], productScan: [] }))
+    );
   }
 
-  refresh() {
-    this._loading.set(true);
-    setTimeout(() => this._loading.set(false), 300);
+  refresh(): void {
+    this.getDashboardStats().subscribe();
   }
 }

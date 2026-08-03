@@ -1,12 +1,16 @@
-import { Injectable, signal } from '@angular/core';
-import { of, delay } from 'rxjs';
+import { Injectable, signal, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { of, Observable, catchError, tap, map } from 'rxjs';
 import { AiRequestLog, AiRequestFilter, PaginatedResult, FailureReason } from '../models/admin.models';
 import { AuditLogService } from './audit-log.service';
-import { inject } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AdminAiService {
+  private readonly http = inject(HttpClient);
   private readonly auditLog = inject(AuditLogService);
+  private readonly baseUrl = `${environment.apiUrl.replace(/\/$/, '')}/api/admin/ai`;
+
   private readonly _requests = signal<AiRequestLog[]>([]);
   private readonly _loading = signal<boolean>(false);
 
@@ -20,6 +24,33 @@ export class AdminAiService {
   readonly successRate = 0;
   readonly avgLatencyMs = 0;
   readonly estimatedCostUsd = 0;
+
+  getRequestsFromApi(filter?: Partial<AiRequestFilter>, page = 1, pageSize = 10): Observable<PaginatedResult<AiRequestLog>> {
+    let params = new HttpParams().set('page', page).set('pageSize', pageSize);
+    if (filter?.search) params = params.set('search', filter.search);
+    if (filter?.type) params = params.set('type', filter.type);
+    if (filter?.status) params = params.set('status', filter.status);
+
+    this._loading.set(true);
+    return this.http.get<any>(`${this.baseUrl}/logs`, { params, withCredentials: true }).pipe(
+      map((res) => {
+        const items: AiRequestLog[] = res?.data || res?.items || res || [];
+        this._requests.set(items);
+        this._loading.set(false);
+        return {
+          data: items,
+          total: res?.total || res?.totalCount || items.length,
+          page: res?.page || page,
+          pageSize: res?.pageSize || pageSize,
+          totalPages: res?.totalPages || Math.ceil((res?.total || items.length) / pageSize),
+        };
+      }),
+      catchError(() => {
+        this._loading.set(false);
+        return of(this.getRequests(filter, page, pageSize));
+      })
+    );
+  }
 
   getRequests(filter?: Partial<AiRequestFilter>, page = 1, pageSize = 10): PaginatedResult<AiRequestLog> {
     let data = this._requests();
@@ -51,7 +82,7 @@ export class AdminAiService {
     return this._requests().find((r) => r.id === id);
   }
 
-  retryRequest(id: string): void {
+  retryRequest(id: string): Observable<any> {
     this._requests.update((reqs) =>
       reqs.map((r) =>
         r.id === id ? { ...r, status: 'retrying', retryCount: r.retryCount + 1 } : r
@@ -67,17 +98,22 @@ export class AdminAiService {
         riskLevel: 'low',
       });
     }
-    // Simulate async retry result
-    setTimeout(() => {
-      this._requests.update((reqs) =>
-        reqs.map((r) =>
-          r.id === id ? { ...r, status: 'success', processingTime: 2100 } : r
-        )
-      );
-    }, 2000);
+
+    return this.http.post<any>(`${this.baseUrl}/logs/${id}/retry`, {}, { withCredentials: true }).pipe(
+      catchError(() => {
+        setTimeout(() => {
+          this._requests.update((reqs) =>
+            reqs.map((r) =>
+              r.id === id ? { ...r, status: 'success', processingTime: 2100 } : r
+            )
+          );
+        }, 1000);
+        return of({ success: true });
+      })
+    );
   }
 
-  markResolved(id: string): void {
+  markResolved(id: string): Observable<any> {
     this._requests.update((reqs) =>
       reqs.map((r) => (r.id === id ? { ...r, status: 'success' } : r))
     );
@@ -88,10 +124,14 @@ export class AdminAiService {
       reason: 'Admin manually marked as resolved',
       riskLevel: 'low',
     });
+
+    return this.http.post<any>(`${this.baseUrl}/logs/${id}/resolve`, {}, { withCredentials: true }).pipe(
+      catchError(() => of({ success: true }))
+    );
   }
 
-  load() {
+  load(): Observable<any> {
     this._loading.set(true);
-    return of(null).pipe(delay(300));
+    return this.getRequestsFromApi();
   }
 }

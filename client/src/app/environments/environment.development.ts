@@ -6,6 +6,6 @@ export const environment = {
     useMockAuth: false,
     // ─── Mock Transactions ───────────────────────────────────────────────────
     useMockTransactions: true,
-    // ─── Hangfire Demo Data (bật khi Backend chưa có API) ────────────────────
-    useHangfireDemoData: true,
+    // ─── Hangfire Demo Data (tắt để dùng Backend API thật) ────────────────────
+    useHangfireDemoData: false,
 };

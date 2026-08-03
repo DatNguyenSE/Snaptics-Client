@@ -112,7 +112,7 @@
       <!-- Account Activity Tab -->
       @if (activeTab === 'activity') {
         <div class="timeline">
-          @for (item of activityMock; track item.id) {
+          @for (item of userActivities; track item.id) {
             <div class="timeline-item">
               <div class="timeline-item__dot" [class.timeline-item__dot--success]="item.variant === 'success'" [class.timeline-item__dot--failed]="item.variant === 'failed'">
                 <span class="material-symbols-outlined">{{ item.icon }}</span>

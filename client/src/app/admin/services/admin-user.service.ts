@@ -1,6 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { of, delay, map, finalize } from 'rxjs';
+import { of, delay, map, finalize, catchError, Observable } from 'rxjs';
 import { AdminUser, AdminUserStatus, AdminRole, PaginatedResult, UserFilter } from '../models/admin.models';
 import { AuditLogService } from './audit-log.service';
 import { environment } from '../../environments/environment';
@@ -232,8 +232,18 @@ export class AdminUserService {
     }
   }
 
-  loadUser(id: string) {
+  loadUser(id: string): Observable<AdminUser | undefined> {
     this._loading.set(true);
-    return of(this.getUserById(id)).pipe(delay(300));
+    return this.http.get<AdminUserApiDto>(`${this.baseUrl}/${id}`, { withCredentials: true }).pipe(
+      map((res) => {
+        const mapped = this.mapUser(res);
+        this._loading.set(false);
+        return mapped;
+      }),
+      catchError(() => {
+        this._loading.set(false);
+        return of(this.getUserById(id));
+      })
+    );
   }
 }
