@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminHangfireService } from '../../services/admin-hangfire.service';
@@ -23,6 +24,7 @@ export class SystemConfigComponent {
   private readonly hangfireService = inject(AdminHangfireService);
   private readonly aiService = inject(AiService);
   private readonly toast = inject(ToastService);
+  private readonly http = inject(HttpClient);
 
   // Time states
   rolloverTime: LegacyScheduleRequest = { hour: 0, minute: 0 };
@@ -140,46 +142,28 @@ export class SystemConfigComponent {
   triggerInventoryInsight() {
     this.isTriggeringInventoryInsight = true;
     
-    // We use environment.apiUrl
     const apiUrl = environment.apiUrl.endsWith('/') ? environment.apiUrl.slice(0, -1) : environment.apiUrl;
     
     this.toast.success('Đang phân tích dữ liệu, vui lòng chờ...');
     
-    const tokenStr = localStorage.getItem('user'); 
-    let token = '';
-    if (tokenStr) {
-      try {
-        const authData = JSON.parse(tokenStr);
-        token = authData.token || '';
-      } catch (e) {}
-    }
-    
-    fetch(`${apiUrl}/AiAssistant/inventory-insight-export`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`
+    this.http.get(`${apiUrl}/AiAssistant/inventory-insight-export`, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'BaoCaoDoDac.csv';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.toast.success('Xuất file thành công.');
+        this.isTriggeringInventoryInsight = false;
+      },
+      error: (err) => {
+        console.error('Export Error:', err);
+        this.toast.error('Lỗi khi xuất file báo cáo.');
+        this.isTriggeringInventoryInsight = false;
       }
-    })
-    .then(response => {
-      if (!response.ok) throw new Error('Network response was not ok');
-      return response.blob();
-    })
-    .then(blob => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = 'BaoCaoDoDac.csv';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      this.toast.success('Xuất file thành công.');
-      this.isTriggeringInventoryInsight = false;
-    })
-    .catch(err => {
-      console.error('Export Error:', err);
-      this.toast.error('Lỗi khi xuất file báo cáo.');
-      this.isTriggeringInventoryInsight = false;
     });
   }
 
