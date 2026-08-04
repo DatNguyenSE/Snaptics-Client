@@ -52,6 +52,12 @@ export class AiService {
     );
   }
 
+  generateInventoryInsights(): Observable<any> {
+    return this.http.post<any>(`${this.aiAssistantUrl}/inventory-insight`, {}).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
   private requestAndWaitForAiResult<T>(url: string, formData: FormData, params?: HttpParams): Observable<T> {
     return new Observable<T>((observer) => {
       let completed = false;

@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminHangfireService } from '../../services/admin-hangfire.service';
+import { AiService } from '../../../core/services/ai.service';
 import { ToastService } from '../../../core/services/toast-service';
 import { convertTimeToCron } from '../../utils/cron.util';
 
@@ -19,6 +20,7 @@ interface LegacyScheduleRequest {
 })
 export class SystemConfigComponent {
   private readonly hangfireService = inject(AdminHangfireService);
+  private readonly aiService = inject(AiService);
   private readonly toast = inject(ToastService);
 
   // Time states
@@ -33,6 +35,8 @@ export class SystemConfigComponent {
   isTriggeringRollover = false;
   isTriggeringReview = false;
   isTriggeringCleanup = false;
+  isTriggeringInventoryInsight = false;
+  isTriggeringBudgetInsight = false;
 
   private buildPayload(req: LegacyScheduleRequest) {
     const time = `${String(req.hour).padStart(2, '0')}:${String(req.minute).padStart(2, '0')}`;
@@ -127,6 +131,38 @@ export class SystemConfigComponent {
       error: () => {
         this.toast.error('Lỗi khi kích hoạt dọn dẹp.');
         this.isTriggeringCleanup = false;
+      }
+    });
+  }
+
+  // 4. Inventory Insights
+  triggerInventoryInsight() {
+    this.isTriggeringInventoryInsight = true;
+    this.hangfireService.triggerHangfireJob('inventory-insight').subscribe({
+      next: (res) => {
+        this.toast.success(res?.message || 'Đã kích hoạt gợi ý sản phẩm thành công.');
+        this.isTriggeringInventoryInsight = false;
+      },
+      error: (err) => {
+        console.error('Inventory Insight Error:', err);
+        this.toast.error('Lỗi khi kích hoạt gợi ý sản phẩm.');
+        this.isTriggeringInventoryInsight = false;
+      }
+    });
+  }
+
+  // 5. Budget Insights
+  triggerBudgetInsight() {
+    this.isTriggeringBudgetInsight = true;
+    this.hangfireService.triggerHangfireJob('budget-insight').subscribe({
+      next: (res) => {
+        this.toast.success(res?.message || 'Đã kích hoạt phân tích thông báo thành công.');
+        this.isTriggeringBudgetInsight = false;
+      },
+      error: (err) => {
+        console.error('Budget Insight Error:', err);
+        this.toast.error('Lỗi khi kích hoạt thông báo ngân sách.');
+        this.isTriggeringBudgetInsight = false;
       }
     });
   }

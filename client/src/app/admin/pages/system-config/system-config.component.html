@@ -100,7 +100,7 @@
     </div>
 
     <!-- Card 3: Cleanup Notifications -->
-    <div class="card">
+    <div class="card" style="margin-bottom: 24px;">
       <div class="card__header card__header--flex">
         <div>
           <h2 class="card__title">Dọn dẹp hệ thống</h2>
@@ -138,6 +138,56 @@
           <span class="material-symbols-outlined" *ngIf="!isSavingCleanup">save</span>
           <span class="material-symbols-outlined animate-spin" *ngIf="isSavingCleanup">sync</span>
           Lưu lịch chạy
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 4: Inventory Insights -->
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card__header card__header--flex">
+        <div>
+          <h2 class="card__title">Gợi ý sản phẩm</h2>
+          <p class="card__desc">Gợi ý sản phẩm khi người dùng đánh giá dùng thường xuyên.</p>
+          <div class="job-conditions">
+            <strong>Điều kiện áp dụng:</strong>
+            <ul>
+              <li>Dựa trên dữ liệu đánh giá mức độ sử dụng của người dùng.</li>
+              <li>Sản phẩm được dùng thường xuyên sẽ được ưu tiên gợi ý.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="super-badge" style="margin: 0; background: rgba(59, 130, 246, 0.1); color: #3b82f6;">Mỗi 30 ngày</div>
+      </div>
+      <div class="card__footer" style="gap: 12px; justify-content: flex-end;">
+        <button class="btn btn--outline" (click)="triggerInventoryInsight()" [disabled]="isTriggeringInventoryInsight">
+          <span class="material-symbols-outlined" *ngIf="!isTriggeringInventoryInsight">play_arrow</span>
+          <span class="material-symbols-outlined animate-spin" *ngIf="isTriggeringInventoryInsight">sync</span>
+          Chạy ngay
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 5: Budget Insights -->
+    <div class="card">
+      <div class="card__header card__header--flex">
+        <div>
+          <h2 class="card__title">Thông báo vượt ngân sách</h2>
+          <p class="card__desc">Thông báo khi người dùng chi tiêu vượt quá ngân sách ví.</p>
+          <div class="job-conditions">
+            <strong>Điều kiện áp dụng:</strong>
+            <ul>
+              <li>Ví ngân sách đang hoạt động.</li>
+              <li>Tổng chi tiêu vượt quá giới hạn ngân sách đã thiết lập.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="super-badge" style="margin: 0; background: rgba(239, 68, 68, 0.1); color: #ef4444;">Mỗi 30 ngày</div>
+      </div>
+      <div class="card__footer" style="gap: 12px; justify-content: flex-end;">
+        <button class="btn btn--outline" (click)="triggerBudgetInsight()" [disabled]="isTriggeringBudgetInsight">
+          <span class="material-symbols-outlined" *ngIf="!isTriggeringBudgetInsight">play_arrow</span>
+          <span class="material-symbols-outlined animate-spin" *ngIf="isTriggeringBudgetInsight">sync</span>
+          Chạy ngay
         </button>
       </div>
     </div>
