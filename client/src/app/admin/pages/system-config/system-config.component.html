@@ -142,27 +142,28 @@
       </div>
     </div>
 
-    <!-- Card 4: Inventory Insights -->
+    <!-- Card 4: Inventory Insights Export -->
     <div class="card" style="margin-bottom: 24px;">
       <div class="card__header card__header--flex">
         <div>
-          <h2 class="card__title">Gợi ý sản phẩm</h2>
-          <p class="card__desc">Gợi ý sản phẩm khi người dùng đánh giá dùng thường xuyên.</p>
+          <h2 class="card__title">Xuất báo cáo đồ đạc</h2>
+          <p class="card__desc">Tổng hợp và gom nhóm các đồ đạc được người dùng sử dụng thường xuyên bằng AI.</p>
           <div class="job-conditions">
-            <strong>Điều kiện áp dụng:</strong>
+            <strong>Chức năng:</strong>
             <ul>
-              <li>Dựa trên dữ liệu đánh giá mức độ sử dụng của người dùng.</li>
-              <li>Sản phẩm được dùng thường xuyên sẽ được ưu tiên gợi ý.</li>
+              <li>Lấy tất cả các món đồ được đánh giá là dùng thường xuyên hoặc thỉnh thoảng của TẤT CẢ người dùng.</li>
+              <li>Sử dụng AI để tự động tìm tên chung cho các món đồ tương tự.</li>
+              <li>Tải về máy tính dưới định dạng tệp CSV.</li>
             </ul>
           </div>
         </div>
-        <div class="super-badge" style="margin: 0; background: rgba(59, 130, 246, 0.1); color: #3b82f6;">Mỗi 30 ngày</div>
+        <div class="super-badge" style="margin: 0; background: rgba(59, 130, 246, 0.1); color: #3b82f6;">Trực tiếp</div>
       </div>
       <div class="card__footer" style="gap: 12px; justify-content: flex-end;">
         <button class="btn btn--outline" (click)="triggerInventoryInsight()" [disabled]="isTriggeringInventoryInsight">
-          <span class="material-symbols-outlined" *ngIf="!isTriggeringInventoryInsight">play_arrow</span>
+          <span class="material-symbols-outlined" *ngIf="!isTriggeringInventoryInsight">download</span>
           <span class="material-symbols-outlined animate-spin" *ngIf="isTriggeringInventoryInsight">sync</span>
-          Chạy ngay
+          Tải báo cáo ngay
         </button>
       </div>
     </div>
