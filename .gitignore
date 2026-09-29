@@ -42,3 +42,22 @@ typings/
 Thumbs.db
 .tmp/ 
 .antigravityrules
+
+# Local development logs and TLS credentials
+*.log
+/client/ssl/*.pem
+/client/ssl/*.key
+/client/ssl/*.pfx
+/client/ssl/*.p12
+
+# One-off local repair script; not part of the application
+/fix.js
+
+# Empty root lockfile; the Angular package and real lockfile live in client/
+/package-lock.json
+
+# Local environment files (never store secrets in frontend source)
+.env
+.env.*
+!.env.example
+!.env.sample
